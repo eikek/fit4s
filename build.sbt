@@ -25,7 +25,8 @@ lazy val sharedSettings = Seq(
   },
   scalacOptions in (Compile, console) ~= (_ filterNot (Set("-Xfatal-warnings", "-Ywarn-unused-import").contains)),
   scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
-  crossScalaVersions := Seq("2.12.8", `scala-version`)
+  crossScalaVersions := Seq("2.12.8", `scala-version`),
+  testFrameworks += new TestFramework("minitest.runner.Framework")
 )
 
 lazy val coreDeps = Seq(log4s, `scodec-core`)

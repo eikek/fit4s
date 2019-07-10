@@ -4,41 +4,69 @@ import scodec.Codec
 import scodec.bits.BitVector
 import scodec.codecs._
 
-import RecordHeader._
+/** All records contain a 1 byte Record Header that indicates whether
+  * the Record Content is a definition message, a normal data message
+  * or a compressed timestamp data message.  The lengths of the
+  * records vary in size depending on the number and size of fields
+  * within them.
+  */
+trait RecordHeader {
 
-case class RecordHeader(headerType: HeaderType
-  , messageType: MessageType
-  , messageTypeSpecific: Boolean
-  , reserved: Boolean
-  , localMessageType: Int)
+  def messageType: MessageType
+
+  def localMessageType: Int
+}
 
 
 object RecordHeader {
 
-  sealed trait HeaderType
-  object HeaderType {
-    case object Normal extends HeaderType
-    case object CompressedTimestamp extends HeaderType
+  case class NormalHeader(messageType: MessageType
+    , messageTypeSpecific: Boolean
+    , reserved: Boolean
+    , localMessageType: Int) extends RecordHeader
+
+
+  object NormalHeader {
+    val codec: Codec[NormalHeader] = (bits(3) ~ uint4L).xmap(
+      { case (flags, lmt) =>
+        val mt = if (flags.get(0)) MessageType.DefinitionMessage else MessageType.DataMessage
+        NormalHeader(mt, flags.get(1), flags.get(2), lmt)
+      },
+      { rh =>
+        val flags = BitVector.bits(Seq(rh.messageType == MessageType.DefinitionMessage
+          , rh.messageTypeSpecific
+          , rh.reserved))
+        (flags, rh.localMessageType)
+      }
+    )
   }
 
-  sealed trait MessageType
-  object MessageType {
-    case object DefinitionMessage extends MessageType
-    case object DataMessage extends MessageType
+  case class CompressedTimestampHeader(
+    localMessageType: Int
+      , timeOffsetSeconds: Int) extends RecordHeader {
+
+    val messageType = MessageType.DataMessage
   }
 
-  val codec: Codec[RecordHeader] = (bits(4) ~ uint4L).xmap(
-    { case (flags, lmt) =>
-      val ht = if (flags.get(0)) HeaderType.Normal else HeaderType.CompressedTimestamp
-      val mt = if (flags.get(1)) MessageType.DefinitionMessage else MessageType.DataMessage
-      RecordHeader(ht, mt, flags.get(2), flags.get(3), lmt)
-    },
-    { rh =>
-      val flags = BitVector.bits(Seq(rh.headerType == HeaderType.Normal
-        , rh.messageType == MessageType.DefinitionMessage
-        , rh.messageTypeSpecific
-        , rh.reserved))
-      (flags, rh.localMessageType)
+  object CompressedTimestampHeader {
+
+    val codec: Codec[CompressedTimestampHeader] = (uint2 ~ uint(5)).xmap(
+      { case (lmt, ts) =>
+        CompressedTimestampHeader(lmt, ts)
+      },
+      { rh =>
+        (rh.localMessageType, rh.timeOffsetSeconds)
+      }
+    )
+  }
+
+
+  val codec: Codec[RecordHeader] = {
+    val nc: Codec[RecordHeader] = NormalHeader.codec.upcast[RecordHeader]
+    val cc: Codec[RecordHeader] = CompressedTimestampHeader.codec.upcast[RecordHeader]
+    bits(1).consume(bv => if (bv == BitVector.one) cc else nc) {
+      case _: NormalHeader => BitVector.zero
+      case _: CompressedTimestampHeader => BitVector.one
     }
-  )
+  }
 }

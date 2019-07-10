@@ -23,4 +23,4 @@ case class FileId(
     , manufacturer: Int
     , serialNumber: Long
     , created: Instant
-    , number: Int) extends FitMessage
+    , number: Int)

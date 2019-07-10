@@ -1,19 +1,23 @@
 package fit4s
 
-import fs2.{io, Task}
+import fs2._
+import cats.effect._
 import scodec.bits.ByteVector
-import org.scalatest._
+import minitest._
 
-class PlayingTest extends FlatSpec with Matchers {
+object PlayingTest extends SimpleTestSuite {
 
-  "codecs" should "encode and decode" in {
-    val fit = Task.delay(getClass.getResourceAsStream("/fit/activity/79AH0319.FIT"))
-    io.readInputStream(fit, 8192).
+  implicit val CS = IO.contextShift(scala.concurrent.ExecutionContext.global)
+  val blocker = Blocker.liftExecutionContext(scala.concurrent.ExecutionContext.global)
+
+  test("codecs should encode and decode") {
+    val fit = IO(getClass.getResourceAsStream("/fit/activity/79AH0319.FIT"))
+    io.readInputStream(fit, 8192, blocker).
       chunks.
       map(c => ByteVector(c.toArray).toBitVector).
-      map(bv => (FileHeader.codec ~ RecordHeader.codec).decode(bv)).
+      map(bv => (FileHeader.codec ~ Record.codec).decode(bv)).
       map(println).
-      run.
-      unsafeRun
+      compile.drain.
+      unsafeRunSync
   }
 }
