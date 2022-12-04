@@ -1,45 +1,97 @@
-import libs._
+import Dependencies.V
+import com.typesafe.sbt.SbtGit.GitKeys._
 
-val scalacOpts: Seq[String] = Seq(
-  "-encoding", "UTF-8",
-  "-Xfatal-warnings",
-  "-deprecation",
-  "-feature",
-  "-unchecked",
-  "-language:higherKinds",
-  "-Xlint",
-  "-Yno-adapted-args",
-  "-Ywarn-dead-code",
-  "-Ywarn-numeric-widen",
-  "-Ywarn-unused-import"
+val sharedSettings = Seq(
+  organization := "com.github.eikek",
+  scalaVersion := V.scala2,
+  scalacOptions ++=
+    Seq(
+      "-feature",
+      "-deprecation",
+      "-unchecked",
+      "-encoding",
+      "UTF-8",
+      "-language:higherKinds"
+    ) ++
+      (if (scalaBinaryVersion.value.startsWith("2.13"))
+        List("-Werror", "-Wdead-code", "-Wunused", "-Wvalue-discard")
+      else if (scalaBinaryVersion.value.startsWith("3"))
+        List(
+          "-explain",
+          "-explain-types",
+          "-indent",
+          "-print-lines",
+          "-Ykind-projector",
+          "-Xmigration",
+          "-Xfatal-warnings"
+        )
+      else
+        Nil),
+  crossScalaVersions := Seq(V.scala2, V.scala3),
+  Compile / console / scalacOptions := Seq(),
+  Test / console / scalacOptions := Seq(),
+  licenses := Seq("MIT" -> url("http://spdx.org/licenses/MIT")),
+  homepage := Some(url("https://github.com/eikek/emil")),
+  versionScheme := Some("early-semver")
+) ++ publishSettings
+
+lazy val publishSettings = Seq(
+  developers := List(
+    Developer(
+      id = "eikek",
+      name = "Eike Kettner",
+      url = url("https://github.com/eikek"),
+      email = ""
+    )
+  ),
+  Test / publishArtifact := false
 )
 
-lazy val sharedSettings = Seq(
-  scalaVersion := `scala-version`,
-  scalacOptions := {
-    if (scalaBinaryVersion.value.startsWith("2.13")) {
-      scalacOpts.filter(o => o != "-Yno-adapted-args" && o != "-Ywarn-unused-import")
-    } else {
-      scalacOpts
-    }
-  },
-  scalacOptions in (Compile, console) ~= (_ filterNot (Set("-Xfatal-warnings", "-Ywarn-unused-import").contains)),
-  scalacOptions in (Test, console) := (scalacOptions in (Compile, console)).value,
-  crossScalaVersions := Seq("2.12.8", `scala-version`),
-  testFrameworks += new TestFramework("minitest.runner.Framework")
+lazy val noPublish = Seq(
+  publish := {},
+  publishLocal := {},
+  publishArtifact := false
 )
 
-lazy val coreDeps = Seq(log4s, `scodec-core`)
-lazy val testDeps = Seq(minitest, scalacheck, `logback-classic`, `fs2-core`, `fs2-io`).map(_ % "test")
+val testSettings = Seq(
+  libraryDependencies ++= (Dependencies.munit ++ Dependencies.logback).map(_ % Test),
+  testFrameworks += TestFrameworks.MUnit
+)
 
-lazy val core = project.in(file("modules/core")).
-  settings(sharedSettings).
-  settings(
+val buildInfoSettings = Seq(
+  buildInfoKeys := Seq[BuildInfoKey](
+    name,
+    version,
+    scalaVersion,
+    sbtVersion,
+    gitHeadCommit,
+    gitHeadCommitDate,
+    gitUncommittedChanges,
+    gitDescribedVersion
+  ),
+  buildInfoOptions += BuildInfoOption.ToJson,
+  buildInfoOptions += BuildInfoOption.BuildTime,
+  buildInfoPackage := "emil"
+)
+
+val scalafixSettings = Seq(
+  semanticdbEnabled := true, // enable SemanticDB
+  semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
+  ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
+)
+
+
+lazy val core = project.in(file("modules/core"))
+  .settings(sharedSettings)
+  .settings(testSettings)
+  .settings(scalafixSettings)
+  .settings(
     name := "fit4s-core",
     description := "Library for reading and writing FIT format",
-    libraryDependencies ++= coreDeps ++ testDeps
+    libraryDependencies ++= Dependencies.scodecCore(
+      if (scalaVersion.value.startsWith("2.")) V.scodec1 else V.scodec2
+    )
   )
-
 
 lazy val root = project.in(file(".")).
   settings(sharedSettings).

@@ -1,4 +1,6 @@
-# fit4s - read/write ANT FIT files with Scala
+# fit4s - encode and decode ANT FIT files with Scala
+
+This is a library for Scala 2.13 and 3.
 
 ## Format Protocol
 
@@ -9,6 +11,9 @@ The protocol and file formats a specified in the following documents:
 
 The first contains the overview of the protocol and the latter defines
 known FIT file types.
+
+These files are contained in the FIT SDK zip archive which can be found 
+around [here](https://developer.garmin.com/fit/protocol/)
 
 ### Overview
 
