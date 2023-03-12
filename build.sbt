@@ -1,6 +1,13 @@
 import Dependencies.V
 import com.github.sbt.git.SbtGit.GitKeys._
 
+addCommandAlias("ci", "; lint; +test; readme/updateReadme; +publishLocal")
+addCommandAlias(
+  "lint",
+  "; scalafmtSbtCheck; scalafmtCheckAll; Compile/scalafix --check; Test/scalafix --check"
+)
+addCommandAlias("fix", "; Compile/scalafix; Test/scalafix; scalafmtSbt; scalafmtAll")
+
 val sharedSettings = Seq(
   organization := "com.github.eikek",
   scalaVersion := V.scala2,
@@ -14,19 +21,19 @@ val sharedSettings = Seq(
       "-language:higherKinds"
     ) ++
       (if (scalaBinaryVersion.value.startsWith("2.13"))
-        List("-Werror", "-Wdead-code", "-Wunused", "-Wvalue-discard")
-      else if (scalaBinaryVersion.value.startsWith("3"))
-        List(
-          "-explain",
-          "-explain-types",
-          "-indent",
-          "-print-lines",
-          "-Ykind-projector",
-          "-Xmigration",
-          "-Xfatal-warnings"
-        )
-      else
-        Nil),
+         List("-Werror", "-Wdead-code", "-Wunused", "-Wvalue-discard")
+       else if (scalaBinaryVersion.value.startsWith("3"))
+         List(
+           "-explain",
+           "-explain-types",
+           "-indent",
+           "-print-lines",
+           "-Ykind-projector",
+           "-Xmigration",
+           "-Xfatal-warnings"
+         )
+       else
+         Nil),
   crossScalaVersions := Seq(V.scala2, V.scala3),
   Compile / console / scalacOptions := Seq(),
   Test / console / scalacOptions := Seq(),
@@ -54,8 +61,15 @@ lazy val noPublish = Seq(
 )
 
 val testSettings = Seq(
-  libraryDependencies ++= (Dependencies.munit ++ Dependencies.logback).map(_ % Test),
+  libraryDependencies ++= (Dependencies.munit ++ Dependencies.logback ++ Dependencies.fs2 ++ Dependencies.fs2Io)
+    .map(_ % Test),
   testFrameworks += TestFrameworks.MUnit
+)
+
+val scalafixSettings = Seq(
+  semanticdbEnabled := true, // enable SemanticDB
+  semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
+  ThisBuild / scalafixDependencies ++= Dependencies.organizeImports
 )
 
 val buildInfoSettings = Seq(
@@ -74,14 +88,9 @@ val buildInfoSettings = Seq(
   buildInfoPackage := "emil"
 )
 
-val scalafixSettings = Seq(
-  semanticdbEnabled := true, // enable SemanticDB
-  semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
-  ThisBuild / scalafixDependencies += "com.github.liancheng" %% "organize-imports" % "0.5.0"
-)
-
-
-lazy val core = project.in(file("modules/core"))
+lazy val core = project
+  .in(file("modules/core"))
+  .enablePlugins(ProfileGeneratorPlugin)
   .settings(sharedSettings)
   .settings(testSettings)
   .settings(scalafixSettings)
@@ -90,12 +99,15 @@ lazy val core = project.in(file("modules/core"))
     description := "Library for reading and writing FIT format",
     libraryDependencies ++= Dependencies.scodecCore(
       if (scalaVersion.value.startsWith("2.")) V.scodec1 else V.scodec2
-    )
+    ),
+    profileFile := (LocalRootProject / baseDirectory).value / "project" / "profile" / "profile_21.105.00.xlsx",
+    Compile / sourceGenerators += generateProfile.taskValue
   )
 
-lazy val root = project.in(file(".")).
-  settings(sharedSettings).
-  settings(
-    name := "root"
-  ).
-  aggregate(core)
+lazy val root = project
+  .in(file("."))
+  .settings(sharedSettings)
+  .settings(
+    name := "fit4s-root"
+  )
+  .aggregate(core)

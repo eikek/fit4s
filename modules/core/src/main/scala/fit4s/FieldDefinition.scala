@@ -3,25 +3,33 @@ package fit4s
 import scodec._
 import scodec.codecs._
 
-case class FieldDefinition(
-  /** Uniquley identifies a spcific FIT field of the given FIT message. */
-  fieldDefNum: Int
+final case class FieldDefinition(
+    /** The Field Definition Number uniquely identifies a specific FIT field of the given
+      * FIT message. The field definition numbers for each global FIT message are provided
+      * in the SDK. 255 represents an invalid field number.
+      */
+    fieldDefNum: Int,
 
-  /** Size of the defined field in bytes */
-  , sizeBytes: Int
+    /** Size (in bytes) of the specified FIT message’s field.
+      *
+      * The Size indicates the size of the defined field in bytes. The size may be a
+      * multiple of the underlying FIT Base Type size indicating the field contains
+      * multiple elements represented as an array.
+      */
+    sizeBytes: Int,
 
-  /** Describes the FIT field as a specific type of FIT variable (uchar,
-    * uint, etc). This allows the FIT decoder to appropriately handle
-    * invalid or unknown data of this type.
-    */
-  , baseType: FieldDefinition.BaseType)
-
+    /** Base type of the specified FIT message’s field.
+      *
+      * Base Type describes the FIT field as a specific type of FIT variable (unsigned
+      * char, signed short, etc). This allows the FIT decoder to appropriately handle
+      * invalid or unknown data of this type.
+      */
+    baseType: FieldDefinition.BaseType
+)
 
 object FieldDefinition {
 
-  case class BaseType(endianAbility: Boolean
-    , reserved: Int
-    , baseTypeNum: Int)
+  case class BaseType(endianAbility: Boolean, reserved: Int, baseTypeNum: Int)
 
   object BaseType {
 
