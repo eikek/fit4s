@@ -1,5 +1,5 @@
 import Dependencies.V
-import com.typesafe.sbt.SbtGit.GitKeys._
+import com.github.sbt.git.SbtGit.GitKeys._
 
 val sharedSettings = Seq(
   organization := "com.github.eikek",

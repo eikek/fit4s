@@ -3,7 +3,7 @@ import sbt._
 object Dependencies {
 
   object V {
-    val scala2 = "2.13.0"
+    val scala2 = "2.13.10"
     val scala3 = "3.1.2"
 
     val munit = "0.7.29"
@@ -11,7 +11,7 @@ object Dependencies {
     val scodec1 = "1.11.10"
     val scodec2 = "2.2.0"
     val catsCore = "2.9.0"
-    val fs2 = "3.4.0"
+    val fs2 = "3.6.1"
     val scalaCheck = "1.17.0"
   }
 
