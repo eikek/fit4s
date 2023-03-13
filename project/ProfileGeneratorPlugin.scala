@@ -1,6 +1,6 @@
 import sbt._
 import sbt.Keys._
-import fit4s.build.ProfileReader
+import fit4s.build.{ProfileReader, TypesGenerator}
 
 object ProfileGeneratorPlugin extends AutoPlugin {
 
@@ -37,7 +37,12 @@ object ProfileGeneratorPlugin extends AutoPlugin {
 
     val (typeDefs, messageDefs) = ProfileReader.readFile(input)(logger).get
     logger.info(s"Got typedefs: ${typeDefs.map(_.toString).mkString("\n")}")
-    logger.info(s"Got typedefs: ${messageDefs.map(_.toString).mkString("\n")}")
+    // logger.info(s"Got typedefs: ${messageDefs.map(_.toString).mkString("\n")}")
+    val typeSource = TypesGenerator.generate(pkg, typeDefs)
+    val typeFile = target / "ProfileTypes.scala"
+    // IO.write(typeFile, typeSource)
+    // Seq(typeFile)
+
     Seq.empty
   }
 }

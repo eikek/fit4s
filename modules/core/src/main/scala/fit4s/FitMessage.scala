@@ -5,7 +5,9 @@ import scodec.codecs._
 import scodec.bits.{ByteOrdering, ByteVector}
 import fit4s.codecs._
 
-sealed trait FitMessage
+sealed trait FitMessage {
+  def lengthBytes: Long
+}
 
 object FitMessage {
 
@@ -15,7 +17,10 @@ object FitMessage {
       globalMessageNumber: Int,
       fieldCount: Int,
       fields: List[FieldDefinition]
-  ) extends FitMessage
+  ) extends FitMessage {
+    def totalLengthBytes: Int = fields.map(_.sizeBytes).sum
+    def lengthBytes = 0
+  }
 
   object DefinitionMessage {
     private val archCodec: Codec[ByteOrdering] =
@@ -32,17 +37,43 @@ object FitMessage {
       )).as[DefinitionMessage]
   }
 
-  final case class DataMessage(raw: ByteVector) extends FitMessage
-
-  object DataMessage {
-    def codec: Codec[DataMessage] = ???
+  final case class DataMessage(raw: ByteVector) extends FitMessage {
+    def lengthBytes = raw.length
   }
 
-  def codec(rh: RecordHeader): Codec[FitMessage] =
+  object DataMessage {
+    def decoder(prev: List[Record], header: RecordHeader): Decoder[DataMessage] = {
+      val allDm = prev.filter(_.header.messageType.isDefinitionMessage)
+      val dm = prev
+        .find(r =>
+          r.header.messageType.isDefinitionMessage && r.header.localMessageType == header.localMessageType
+        )
+        .map(_.content.asInstanceOf[FitMessage.DefinitionMessage])
+        .getOrElse(
+          sys.error(
+            s"no definition message for $header. Looked in ${allDm.size} previous records: $allDm"
+          )
+        )
+      bytes(dm.totalLengthBytes).xmap[DataMessage](DataMessage.apply, _.raw)
+    }
+
+    val encoder: Encoder[DataMessage] =
+      Encoder(dm => Attempt.successful(dm.raw.bits))
+  }
+
+  val encoder: Encoder[FitMessage] =
+    Encoder[FitMessage] { (m: FitMessage) =>
+      m match {
+        case dm: DefinitionMessage => DefinitionMessage.codec.encode(dm)
+        case dm: DataMessage       => DataMessage.encoder.encode(dm)
+      }
+    }
+
+  def decoder(prev: List[Record])(rh: RecordHeader): Decoder[FitMessage] =
     rh.messageType match {
       case MessageType.DefinitionMessage =>
         DefinitionMessage.codec.upcast[FitMessage]
       case MessageType.DataMessage =>
-        DataMessage.codec.upcast[FitMessage]
+        DataMessage.decoder(prev, rh)
     }
 }

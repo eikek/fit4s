@@ -38,7 +38,7 @@ object RecordHeader {
       { rh =>
         val flags = BitVector.bits(
           Seq(
-            rh.messageType == MessageType.DefinitionMessage,
+            rh.messageType.isDefinitionMessage,
             rh.messageTypeSpecific,
             rh.reserved
           )
