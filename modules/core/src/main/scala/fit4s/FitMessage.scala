@@ -5,9 +5,7 @@ import scodec.codecs._
 import scodec.bits.{ByteOrdering, ByteVector}
 import fit4s.codecs._
 
-sealed trait FitMessage {
-  def lengthBytes: Long
-}
+sealed trait FitMessage
 
 object FitMessage {
 
@@ -18,8 +16,7 @@ object FitMessage {
       fieldCount: Int,
       fields: List[FieldDefinition]
   ) extends FitMessage {
-    def totalLengthBytes: Int = fields.map(_.sizeBytes).sum
-    def lengthBytes = 0
+    def dataMessageLength: Int = fields.map(_.sizeBytes).sum
   }
 
   object DefinitionMessage {
@@ -42,19 +39,31 @@ object FitMessage {
   }
 
   object DataMessage {
-    def decoder(prev: List[Record], header: RecordHeader): Decoder[DataMessage] = {
-      val allDm = prev.filter(_.header.messageType.isDefinitionMessage)
-      val dm = prev
+    def decoder(prev: List[Record], header: RecordHeader): Decoder[DataMessage] =
+      lastDefinitionMessage(prev, header).flatMap(dm =>
+        bytes(dm.dataMessageLength).xmap[DataMessage](DataMessage.apply, _.raw)
+      )
+
+    private def lastDefinitionMessage(
+        prev: List[Record],
+        header: RecordHeader
+    ): Decoder[DefinitionMessage] = {
+      val defMsg = prev
         .find(r =>
           r.header.messageType.isDefinitionMessage && r.header.localMessageType == header.localMessageType
         )
         .map(_.content.asInstanceOf[FitMessage.DefinitionMessage])
-        .getOrElse(
-          sys.error(
-            s"no definition message for $header. Looked in ${allDm.size} previous records: $allDm"
+
+      Decoder.point(defMsg).flatMap {
+        case Some(v) => Decoder.point(v)
+        case None =>
+          val allDm = prev.filter(_.header.messageType.isDefinitionMessage)
+          fail(
+            Err(
+              s"No definition message for $header. Looked in ${allDm.size} previous records: $allDm"
+            )
           )
-        )
-      bytes(dm.totalLengthBytes).xmap[DataMessage](DataMessage.apply, _.raw)
+      }
     }
 
     val encoder: Encoder[DataMessage] =

@@ -29,9 +29,9 @@ object FieldDefinition {
   object BaseType {
 
     def codec: Codec[BaseType] =
-      (bool :: uint2 :: uintL(5)).as[BaseType]
+      (bool :: uint2L :: uintL(5)).as[BaseType]
   }
 
   def codec: Codec[FieldDefinition] =
-    (uint8 :: uint8 :: BaseType.codec).as[FieldDefinition]
+    (uint8L :: uint8L :: BaseType.codec).as[FieldDefinition]
 }
