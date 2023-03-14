@@ -4,6 +4,8 @@ import scodec._
 import scodec.codecs._
 import scodec.bits.{ByteOrdering, ByteVector}
 import fit4s.codecs._
+import fit4s.profile.{FitMessages, Msg}
+import fit4s.profile.basetypes.MesgNum
 
 sealed trait FitMessage
 
@@ -12,9 +14,10 @@ object FitMessage {
   final case class DefinitionMessage(
       reserved: Int,
       archType: ByteOrdering,
-      globalMessageNumber: Int,
+      globalMessageNumber: Either[Int, MesgNum],
       fieldCount: Int,
-      fields: List[FieldDefinition]
+      fields: List[FieldDefinition],
+      profileMsg: Option[Msg]
   ) extends FitMessage {
     def dataMessageLength: Int = fields.map(_.sizeBytes).sum
   }
@@ -28,9 +31,12 @@ object FitMessage {
 
     def codec: Codec[DefinitionMessage] =
       (uint8 :: archCodec.flatPrepend(bo =>
-        uintx(16, bo) :: uintx(8, bo).flatPrepend(fc =>
-          listOfN(provide(fc), FieldDefinition.codec).hlist
-        )
+        fallback(uintx(16, bo), MesgNum.codec(bo)).flatPrepend { eitherMsgNum =>
+          uintx(8, bo).flatPrepend { fc =>
+            val msg = eitherMsgNum.toOption.flatMap(FitMessages.findByMesgNum)
+            listOfN(provide(fc), FieldDefinition.codec) :: provide(msg)
+          }
+        }
       )).as[DefinitionMessage]
   }
 
@@ -40,9 +46,14 @@ object FitMessage {
 
   object DataMessage {
     def decoder(prev: List[Record], header: RecordHeader): Decoder[DataMessage] =
-      lastDefinitionMessage(prev, header).flatMap(dm =>
-        bytes(dm.dataMessageLength).xmap[DataMessage](DataMessage.apply, _.raw)
-      )
+      lastDefinitionMessage(prev, header).flatMap(dm => decodeDataMessage(header, dm))
+
+    @annotation.nowarn
+    def decodeDataMessage(
+        header: RecordHeader,
+        dm: DefinitionMessage
+    ): Decoder[DataMessage] =
+      bytes(dm.dataMessageLength).flatMap(bv => Decoder.point(DataMessage(bv)))
 
     private def lastDefinitionMessage(
         prev: List[Record],

@@ -96,7 +96,20 @@ object ProfileReader {
         case a :: m =>
           (a.getTypeName, a.getBaseType) match {
             case (Some(tn_), Some(bt_)) =>
-              go(tn_, bt_, m, result)
+              if (m.headOption.exists(_.getTypeName.isDefined))
+                go(
+                  tn_,
+                  bt_,
+                  m,
+                  TypeDesc(
+                    tn_,
+                    bt_,
+                    a.getValueName.getOrElse(""),
+                    a.getValueNumber.getOrElse(-1),
+                    a.getComment
+                  ) :: result
+                )
+              else go(tn_, bt_, m, result)
             case _ =>
               val vn = a.getValueName.getOrElse(
                 sys.error(s"No value name in row: ${a.self.getRowNum}")

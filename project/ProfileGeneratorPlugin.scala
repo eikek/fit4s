@@ -1,6 +1,7 @@
 import sbt._
 import sbt.Keys._
 import fit4s.build.{ProfileReader, TypesGenerator}
+import src.main.scala.fit4s.build.MessagesGenerator
 
 object ProfileGeneratorPlugin extends AutoPlugin {
 
@@ -40,8 +41,9 @@ object ProfileGeneratorPlugin extends AutoPlugin {
       s"Got messagesdefs: ${messageDefs.filter(_.fieldDefNumber.contains(140)).map(_.toString).mkString("\n")}"
     )
     val typeSources = TypesGenerator.generate(pkg, typeDefs)
+    val msgSources = MessagesGenerator.generate(pkg, messageDefs, typeDefs)
 
-    typeSources.map { src =>
+    (typeSources ++ msgSources).map { src =>
       val file = target / src.filename
 //      logger.info(s"Generating ${src.filename}…")
       IO.write(file, src.contents)

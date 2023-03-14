@@ -3,6 +3,18 @@ package fit4s.build
 import scala.util.Try
 
 object model {
+  def snakeCamelType(str: String): String = {
+    val digits = str.takeWhile(_.isDigit)
+    if (digits.isEmpty) str.split('_').map(_.capitalize).mkString
+    else snakeCamelType(str.drop(digits.length) + digits)
+  }
+
+  private val reserved = Set("type", "def", "val")
+  def snakeCamelIdent(str: String): String = {
+    val s = snakeCamelType(str)
+    val ident = s.charAt(0).toLower + s.drop(1)
+    if (reserved.contains(ident.toLowerCase)) s"`$ident`" else ident
+  }
 
   final case class TypeDesc(
       name: String,

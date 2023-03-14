@@ -8,5 +8,8 @@ package object fit4s {
 
     def uintx(bits: Int, bo: ByteOrdering): Codec[Int] =
       if (bo == ByteOrdering.BigEndian) uint(bits) else uintL(bits)
+
+    def ulongx(bits: Int, bo: ByteOrdering): Codec[Long] =
+      if (bo == ByteOrdering.BigEndian) ulong(bits) else ulongL(bits)
   }
 }
