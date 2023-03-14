@@ -1,5 +1,6 @@
 package fit4s
 
+import fit4s.profile.basetypes.FitBaseType
 import scodec._
 import scodec.codecs._
 
@@ -24,12 +25,29 @@ final case class FieldDefinition(
 
 object FieldDefinition {
 
-  case class BaseType(endianAbility: Boolean, reserved: Int, baseTypeNum: Int)
+  case class BaseType(
+      decoded: BaseType.Raw,
+      fitBaseType: FitBaseType
+  )
 
   object BaseType {
 
+    final case class Raw(endianAbility: Boolean, reserved: Int, baseTypeNum: Int)
+    object Raw {
+      def codec: Codec[Raw] =
+        (bool :: uint2L :: uintL(5)).as[Raw]
+    }
+
     def codec: Codec[BaseType] =
-      (bool :: uint2L :: uintL(5)).as[BaseType]
+      Raw.codec
+        .flatZip[FitBaseType] { raw =>
+          FitBaseType.byOrdinal(raw.baseTypeNum) match {
+            case Some(ft) => provide(ft)
+            case None     => fail(Err(s"Failed to lookup fit base type for: $raw"))
+          }
+        }
+        .flattenLeftPairs
+        .as[BaseType]
   }
 
   def codec: Codec[FieldDefinition] =

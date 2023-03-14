@@ -21,4 +21,7 @@ trait GenBaseTypeCompanion[A <: GenBaseType] {
 
   def byRawValue(n: Long): Option[A] =
     all.find(_.rawValue == n)
+
+  def byOrdinal(n: Int): Option[A] =
+    all.lift.apply(n)
 }

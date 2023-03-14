@@ -71,7 +71,7 @@ object ProfileReader {
           }
       }
 
-    go(initialMessageName, rows.tail.filterNot(_.isMessagesTitle), Nil)
+    go(initialMessageName, rows.tail.filterNot(_.isMessagesTitle), Nil).reverse
   }
 
   def readTypes(sheet: XSSFSheet): List[TypeDesc] = {
@@ -108,7 +108,7 @@ object ProfileReader {
           }
       }
 
-    go(initialTypeName, initialBaseType, rows.tail, Nil)
+    go(initialTypeName, initialBaseType, rows.tail, Nil).reverse
   }
 
   implicit private class RowOps(self: Row) {

@@ -36,12 +36,14 @@ object ProfileGeneratorPlugin extends AutoPlugin {
     logger.info(s"Generating profile sources to $target")
 
     val (typeDefs, messageDefs) = ProfileReader.readFile(input)(logger).get
-    // logger.info(s"Got typedefs: ${messageDefs.map(_.toString).mkString("\n")}")
+    logger.info(
+      s"Got messagesdefs: ${messageDefs.filter(_.fieldDefNumber.contains(140)).map(_.toString).mkString("\n")}"
+    )
     val typeSources = TypesGenerator.generate(pkg, typeDefs)
 
     typeSources.map { src =>
       val file = target / src.filename
-      logger.info(s"Generating ${src.filename}…")
+//      logger.info(s"Generating ${src.filename}…")
       IO.write(file, src.contents)
       file
     }
