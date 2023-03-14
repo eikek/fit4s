@@ -36,13 +36,14 @@ object ProfileGeneratorPlugin extends AutoPlugin {
     logger.info(s"Generating profile sources to $target")
 
     val (typeDefs, messageDefs) = ProfileReader.readFile(input)(logger).get
-    logger.info(s"Got typedefs: ${typeDefs.map(_.toString).mkString("\n")}")
     // logger.info(s"Got typedefs: ${messageDefs.map(_.toString).mkString("\n")}")
-    val typeSource = TypesGenerator.generate(pkg, typeDefs)
-    val typeFile = target / "ProfileTypes.scala"
-    // IO.write(typeFile, typeSource)
-    // Seq(typeFile)
+    val typeSources = TypesGenerator.generate(pkg, typeDefs)
 
-    Seq.empty
+    typeSources.map { src =>
+      val file = target / src.filename
+      logger.info(s"Generating ${src.filename}…")
+      IO.write(file, src.contents)
+      file
+    }
   }
 }
