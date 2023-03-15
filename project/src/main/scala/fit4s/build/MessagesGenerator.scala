@@ -46,10 +46,6 @@ object MessagesGenerator {
     val fieldDecl =
       dfs.map(makeFieldDecl(typeDefs)).mkString("  ", "\n  ", "  ")
 
-    val fieldIdents = dfs
-      .map(_.fieldName)
-      .map(snakeCamelIdent)
-      .mkString(", ")
     val contents =
       s"""package ${pkg}.msg
          |
@@ -60,9 +56,6 @@ object MessagesGenerator {
          |  val globalMessageNumber: MesgNum = MesgNum.${objName}
          |
          |  $fieldDecl
-         |
-         |  val allFields: List[Msg.Field[_]] =
-         |    List($fieldIdents)
          |
          |  override def toString(): String = "${objName}Msg"
          |}
@@ -84,18 +77,20 @@ object MessagesGenerator {
     s"""
        |/** ${fd.comment.getOrElse("")} */
        |val ${snakeCamelIdent(fd.fieldName)}: Msg.Field[$typeName] =
-       |  Msg.Field(
-       |    fieldDefinitionNumber = ${fd.fieldDefNumber.getOrElse(-1)},
-       |    fieldName = "${fd.fieldName}",
-       |    fieldTypeName = "${fd.fieldType}",
-       |    fieldBaseType = $baseType,
-       |    fieldCodec = ${scalaTypeCodec(fd.fieldType, baseTypeNames)},
-       |    isArray = Msg.ArrayDef.${fd.isArray},
-       |    components = ${fd.components.map(_.inQuotes)},
-       |    scale = ${fd.scale},
-       |    offset = ${fd.offset},
-       |    units = ${fd.units.map(_.inQuotes)},
-       |    bits = ${fd.bits}
+       |  add(
+       |    Msg.Field(
+       |      fieldDefinitionNumber = ${fd.fieldDefNumber.getOrElse(-1)},
+       |      fieldName = "${fd.fieldName}",
+       |      fieldTypeName = "${fd.fieldType}",
+       |      fieldBaseType = $baseType,
+       |      fieldCodec = ${scalaTypeCodec(fd.fieldType, baseTypeNames)},
+       |      isArray = Msg.ArrayDef.${fd.isArray},
+       |      components = ${fd.components.map(_.inQuotes)},
+       |      scale = ${fd.scale},
+       |      offset = ${fd.offset},
+       |      units = ${fd.units.map(_.inQuotes)},
+       |      bits = ${fd.bits}
+       |    )
        |  )
        |""".stripMargin
   }

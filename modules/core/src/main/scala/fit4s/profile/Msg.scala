@@ -4,13 +4,24 @@ import fit4s.profile.basetypes.{BaseTypeCodec, FitBaseType, MesgNum}
 import scodec.Codec
 import scodec.bits.ByteOrdering
 
-//import scala.util.Try
+import java.util.concurrent.atomic.AtomicReference
 
-trait Msg {
+abstract class Msg {
+  private[this] val fields: AtomicReference[Map[Int, Msg.Field[_ <: GenBaseType]]] =
+    new AtomicReference[Map[Int, Msg.Field[_ <: GenBaseType]]](Map.empty)
+
+  protected def add[A <: GenBaseType](field: Msg.Field[A]): Msg.Field[A] = {
+    fields.updateAndGet(_.updated(field.fieldDefinitionNumber, field))
+    field
+  }
 
   def globalMessageNumber: MesgNum
 
-  def allFields: List[Msg.Field[_]]
+  lazy val allFields: List[Msg.Field[_]] =
+    fields.get().values.toList
+
+  def findField(fieldDefNumber: Int): Option[Msg.Field[_ <: GenBaseType]] =
+    fields.get().get(fieldDefNumber)
 }
 
 object Msg {

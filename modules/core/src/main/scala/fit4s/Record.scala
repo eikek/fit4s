@@ -1,7 +1,6 @@
 package fit4s
 
 import scodec._
-import scodec.codecs._
 
 case class Record(header: RecordHeader, content: FitMessage)
 
@@ -15,12 +14,17 @@ object Record {
   def decoder(prev: List[Record]): Decoder[Record] =
     RecordHeader.codec.flatMap(rh => FitMessage.decoder(prev)(rh).map(m => Record(rh, m)))
 
-  private[fit4s] def dmCodec: Codec[Record] =
-    RecordHeader.codec
-      .flatPrepend(rh =>
-        if (rh.messageType.isDefinitionMessage)
-          FitMessage.DefinitionMessage.codec.upcast[FitMessage].hlist
-        else fail[FitMessage](Err("Expected a definition message in first record!")).hlist
-      )
-      .as[Record]
+  object DefinitionRecord {
+    def unapply(r: Record): Option[(RecordHeader, FitMessage.DefinitionMessage)] =
+      if (r.header.messageType.isDefinitionMessage)
+        Some(r.header -> r.content.asInstanceOf[FitMessage.DefinitionMessage])
+      else None
+  }
+
+  object DataRecord {
+    def unapply(r: Record): Option[(RecordHeader, FitMessage.DataMessage)] =
+      if (r.header.messageType.isDataMessage)
+        Some(r.header -> r.content.asInstanceOf[FitMessage.DataMessage])
+      else None
+  }
 }

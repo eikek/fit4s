@@ -21,6 +21,9 @@ object FitMessage {
   ) extends FitMessage {
     def dataMessageLength: Int = fields.map(_.sizeBytes).sum
 
+    def isMesgNum(n: MesgNum): Boolean =
+      globalMessageNumber.exists(_ == n)
+
     override def toString(): String =
       s"DefinitionMessage(mesgNum=${globalMessageNumber}, profileMsg=$profileMsg, fieldCount=$fieldCount)"
   }
