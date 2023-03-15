@@ -63,6 +63,8 @@ object MessagesGenerator {
          |
          |  val allFields: List[Msg.Field[_]] =
          |    List($fieldIdents)
+         |
+         |  override def toString(): String = "${objName}Msg"
          |}
          |
          |""".stripMargin
@@ -87,7 +89,13 @@ object MessagesGenerator {
        |    fieldName = "${fd.fieldName}",
        |    fieldTypeName = "${fd.fieldType}",
        |    fieldBaseType = $baseType,
-       |    fieldCodec = ${scalaTypeCodec(fd.fieldType, baseTypeNames)}
+       |    fieldCodec = ${scalaTypeCodec(fd.fieldType, baseTypeNames)},
+       |    isArray = Msg.ArrayDef.${fd.isArray},
+       |    components = ${fd.components.map(_.inQuotes)},
+       |    scale = ${fd.scale},
+       |    offset = ${fd.offset},
+       |    units = ${fd.units.map(_.inQuotes)},
+       |    bits = ${fd.bits}
        |  )
        |""".stripMargin
   }
@@ -100,5 +108,9 @@ object MessagesGenerator {
     val tn = snakeCamelType(name)
     if (baseTypes.contains(name) || name == "bool") s"FitBaseType.codec"
     else s"$tn.codec"
+  }
+
+  implicit class StringOps(self: String) {
+    def inQuotes = s""""$self""""
   }
 }

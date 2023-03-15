@@ -4,6 +4,8 @@ import fit4s.profile.basetypes.{BaseTypeCodec, FitBaseType, MesgNum}
 import scodec.Codec
 import scodec.bits.ByteOrdering
 
+//import scala.util.Try
+
 trait Msg {
 
   def globalMessageNumber: MesgNum
@@ -18,10 +20,28 @@ object Msg {
       fieldName: String,
       fieldTypeName: String,
       fieldBaseType: FitBaseType,
-      fieldCodec: ByteOrdering => Codec[A]
+      fieldCodec: ByteOrdering => Codec[A],
+      isArray: ArrayDef,
+      components: Option[String],
+      scale: List[Double],
+      offset: Option[Double],
+      units: Option[String],
+      bits: List[Int]
   ) {
     lazy val baseTypeLen: Int = BaseTypeCodec.length(fieldBaseType)
     lazy val baseTypeCodec: ByteOrdering => Codec[Long] =
       BaseTypeCodec.baseCodec(fieldBaseType)
+  }
+
+  sealed trait ArrayDef
+
+  object ArrayDef {
+    case object NoArray extends ArrayDef
+    case object DynamicSize extends ArrayDef
+    final case class Sized(n: Int) extends ArrayDef
+
+    val noArray: ArrayDef = NoArray
+    val dynamic: ArrayDef = DynamicSize
+    def sized(n: Int): ArrayDef = Sized(n)
   }
 }

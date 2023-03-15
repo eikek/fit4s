@@ -35,17 +35,15 @@ object ProfileGeneratorPlugin extends AutoPlugin {
   ): Seq[File] = {
 
     logger.info(s"Generating profile sources to $target")
+    IO.deleteFilesEmptyDirs(List(target))
 
     val (typeDefs, messageDefs) = ProfileReader.readFile(input)(logger).get
-    logger.info(
-      s"Got messagesdefs: ${messageDefs.filter(_.fieldDefNumber.contains(140)).map(_.toString).mkString("\n")}"
-    )
     val typeSources = TypesGenerator.generate(pkg, typeDefs)
     val msgSources = MessagesGenerator.generate(pkg, messageDefs, typeDefs)
 
+    logger.info(s"Generating ${typeSources.size + msgSources.size} files …")
     (typeSources ++ msgSources).map { src =>
       val file = target / src.filename
-//      logger.info(s"Generating ${src.filename}…")
       IO.write(file, src.contents)
       file
     }

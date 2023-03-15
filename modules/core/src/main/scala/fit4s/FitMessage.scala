@@ -20,6 +20,9 @@ object FitMessage {
       profileMsg: Option[Msg]
   ) extends FitMessage {
     def dataMessageLength: Int = fields.map(_.sizeBytes).sum
+
+    override def toString(): String =
+      s"DefinitionMessage(mesgNum=${globalMessageNumber}, profileMsg=$profileMsg, fieldCount=$fieldCount)"
   }
 
   object DefinitionMessage {
@@ -40,20 +43,19 @@ object FitMessage {
       )).as[DefinitionMessage]
   }
 
-  final case class DataMessage(raw: ByteVector) extends FitMessage {
-    def lengthBytes = raw.length
-  }
+  final case class DataMessage(definition: DefinitionMessage, raw: ByteVector)
+      extends FitMessage {}
 
   object DataMessage {
     def decoder(prev: List[Record], header: RecordHeader): Decoder[DataMessage] =
       lastDefinitionMessage(prev, header).flatMap(dm => decodeDataMessage(header, dm))
 
     @annotation.nowarn
-    def decodeDataMessage(
+    private def decodeDataMessage(
         header: RecordHeader,
         dm: DefinitionMessage
     ): Decoder[DataMessage] =
-      bytes(dm.dataMessageLength).flatMap(bv => Decoder.point(DataMessage(bv)))
+      bytes(dm.dataMessageLength).flatMap(bv => Decoder.point(DataMessage(dm, bv)))
 
     private def lastDefinitionMessage(
         prev: List[Record],
