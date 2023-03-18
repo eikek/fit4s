@@ -1,6 +1,7 @@
 package fit4s
 
 import fit4s.FitMessage.DefinitionMessage
+import fit4s.profile.basetypes.LongBaseType
 import fit4s.profile.{GenBaseType, Msg}
 import scodec.{Attempt, DecodeResult, Decoder, Err}
 import scodec.bits.{BitVector, ByteVector}
@@ -14,7 +15,7 @@ object DataDecoder {
         fields
           .map {
             case r: FieldDecodeResult.Success =>
-              s"${r.globalField.fieldName}=${r.value}"
+              s"${r.globalField.fieldName}=${r.valueString}"
             case r: FieldDecodeResult.DecodeError =>
               s"Error: ${r.err.messageWithContext}"
             case r: FieldDecodeResult.UnknownField =>
@@ -43,6 +44,25 @@ object DataDecoder {
         value: GenBaseType
     ) extends FieldDecodeResult {
       val successValue = Some(value)
+
+      // TODO support for arrays
+      def scaledValue: Option[Double] =
+        (value, globalField.scale) match {
+          case (LongBaseType(rv, _), List(scale)) =>
+            Some(rv / scale)
+          case _ => None
+        }
+
+      def valueString: String = {
+        val amount = scaledValue
+          .map(_.toString)
+          .getOrElse(value match {
+            case LongBaseType(rv, _) => rv.toString
+            case _                   => value.toString
+          })
+        val unit = globalField.unit.map(_.name).getOrElse("")
+        s"$amount$unit"
+      }
     }
 
     final case class DecodeError(

@@ -10,7 +10,7 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
   val quotes = "\"\"\""
 
   test("codecs should encode and decode") {
-    val fit = IO(getClass.getResourceAsStream("/fit/Settings.fit"))
+    val fit = IO(getClass.getResourceAsStream("/fit/activity/78UI3028.FIT"))
     fs2.io
       .readInputStream(fit, 8192)
       .chunks

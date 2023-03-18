@@ -1,6 +1,6 @@
 package fit4s.profile
 
-import fit4s.profile.basetypes.{BaseTypeCodec, FitBaseType, MesgNum}
+import fit4s.profile.basetypes.{BaseTypeCodec, FitBaseType, MeasurementUnit, MesgNum}
 import scodec.Codec
 import scodec.bits.ByteOrdering
 
@@ -42,6 +42,8 @@ object Msg {
     lazy val baseTypeLen: Int = BaseTypeCodec.length(fieldBaseType)
     lazy val baseTypeCodec: ByteOrdering => Codec[Long] =
       BaseTypeCodec.baseCodec(fieldBaseType)
+
+    lazy val unit: Option[MeasurementUnit] = units.map(MeasurementUnit.fromString)
   }
 
   sealed trait ArrayDef
