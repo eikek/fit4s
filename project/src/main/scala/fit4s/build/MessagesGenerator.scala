@@ -68,6 +68,9 @@ object MessagesGenerator {
   def makeFieldDecl(typeDefs: List[TypeDesc])(fd: MessageDef): String = {
     val baseTypeNames = typeDefs.filter(_.name == "fit_base_type").map(_.valueName).toSet
     val typeName = scalaTypeName(fd.fieldType, baseTypeNames)
+    val typeNameOrLong =
+      if (baseTypeNames.contains(fd.fieldType) || fd.fieldType == "bool") "LongBaseType"
+      else typeName
     val baseType =
       if (baseTypeNames.contains(fd.fieldType))
         s"FitBaseType.${snakeCamelType(fd.fieldType)}"
@@ -76,14 +79,14 @@ object MessagesGenerator {
 
     s"""
        |/** ${fd.comment.getOrElse("")} */
-       |val ${snakeCamelIdent(fd.fieldName)}: Msg.Field[$typeName] =
+       |val ${snakeCamelIdent(fd.fieldName)}: Msg.Field[$typeNameOrLong] =
        |  add(
        |    Msg.Field(
        |      fieldDefinitionNumber = ${fd.fieldDefNumber.getOrElse(-1)},
        |      fieldName = "${fd.fieldName}",
        |      fieldTypeName = "${fd.fieldType}",
        |      fieldBaseType = $baseType,
-       |      fieldCodec = ${scalaTypeCodec(fd.fieldType, baseTypeNames)},
+       |      fieldCodec = ${scalaTypeCodec(fd.fieldType, baseType, baseTypeNames)},
        |      isArray = Msg.ArrayDef.${fd.isArray},
        |      components = ${fd.components.map(_.inQuotes)},
        |      scale = ${fd.scale},
@@ -99,9 +102,10 @@ object MessagesGenerator {
     if (baseTypes.contains(name) || name == "bool") s"FitBaseType"
     else s"${snakeCamelType(name)}"
 
-  def scalaTypeCodec(name: String, baseTypes: Set[String]): String = {
+  def scalaTypeCodec(name: String, baseType: String, baseTypes: Set[String]): String = {
     val tn = snakeCamelType(name)
-    if (baseTypes.contains(name) || name == "bool") s"FitBaseType.codec"
+    if (baseTypes.contains(name) || name == "bool")
+      s"bo => LongBaseType.codec(bo, $baseType)"
     else s"$tn.codec"
   }
 

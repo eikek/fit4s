@@ -6,6 +6,7 @@ object Dependencies {
     val scala2 = "2.13.10"
     val scala3 = "3.1.2"
 
+    val circe = "0.14.5"
     val munit = "0.7.29"
     val munitCatsEffect = "1.0.7"
     val logback = "1.4.5"
@@ -16,6 +17,12 @@ object Dependencies {
     val scalaCheck = "1.17.0"
     val organizeImports = "0.6.0"
   }
+
+  val circe = Seq(
+    "io.circe" %% "circe-core" % V.circe,
+    "io.circe" %% "circe-generic" % V.circe,
+    "io.circe" %% "circe-parser" % V.circe
+  )
 
   val organizeImports = Seq(
     "com.github.liancheng" %% "organize-imports" % V.organizeImports

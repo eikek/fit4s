@@ -11,8 +11,8 @@ final case class FitFile(
     crc: Int
 ) {
 
-  def findData(n: MesgNum): Option[FitMessage.DataMessage] =
-    records.collectFirst {
+  def findData(n: MesgNum): List[FitMessage.DataMessage] =
+    records.collect {
       case Record.DataRecord(_, cnt) if cnt.definition.isMesgNum(n) =>
         cnt
     }
@@ -23,7 +23,7 @@ object FitFile {
   def codec: Codec[FitFile] =
     FileHeader.codec
       .flatPrepend { header =>
-        fixedSizeBytes(header.dataSize, recordsCodec) :: uint16L
+        fixedSizeBytes(header.dataSize, recordsCodec.withContext("Record")) :: uint16L
       }
       .as[FitFile]
 

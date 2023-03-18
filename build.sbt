@@ -61,8 +61,11 @@ lazy val noPublish = Seq(
 )
 
 val testSettings = Seq(
-  libraryDependencies ++= (Dependencies.munit ++ Dependencies.logback ++ Dependencies.fs2 ++ Dependencies.fs2Io)
-    .map(_ % Test),
+  libraryDependencies ++= (Dependencies.munit ++
+    Dependencies.logback ++
+    Dependencies.fs2 ++
+    Dependencies.fs2Io ++
+    Dependencies.circe).map(_ % Test),
   testFrameworks += TestFrameworks.MUnit
 )
 

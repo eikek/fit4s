@@ -1,7 +1,6 @@
 package fit4s
 
 import scodec._
-import scodec.bits.BitVector
 import scodec.codecs._
 
 /** The file header provides information about the FIT File. The minimum size of the file
@@ -40,17 +39,19 @@ object FileHeader {
 
   val codec: Codec[FileHeader] = {
     val fields = ushort8 :: uint16L :: uint32L :: fixedSizeBits(32, ascii)
-    val zeroCrc = constant(BitVector.fromShort(0)).xmapc(_ => 0)(_ => ())
-    val crc = uint16L
+    val zeroCrc = provide(0)
+    val crc = uint16L.withContext("FIT file crc")
 
-    ushort8.consume[FileHeader] {
-      case 12 =>
-        fields.flatAppend(_ => zeroCrc).as[FileHeader]
-      case 14 =>
-        fields.flatAppend(_ => crc).as[FileHeader]
-      case n =>
-        fail(Err(s"FIT file headers of size $n not supported."))
-    }(_ => 14)
+    ushort8
+      .consume[FileHeader] {
+        case 12 =>
+          fields.flatAppend(_ => zeroCrc).as[FileHeader]
+        case 14 =>
+          fields.flatAppend(_ => crc).as[FileHeader]
+        case n =>
+          fail(Err(s"FIT file headers of size $n not supported."))
+      }(_ => 14)
+      .withContext("FIT file header")
   }
 
 }

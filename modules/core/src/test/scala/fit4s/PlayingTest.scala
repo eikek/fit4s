@@ -1,14 +1,16 @@
 package fit4s
 
 import cats.effect._
+import io.circe.syntax._
 import fit4s.profile.basetypes.MesgNum
-import fs2.Chunk
+import fs2.{Chunk, Stream}
 import munit.CatsEffectSuite
 
-class PlayingTest extends CatsEffectSuite {
+class PlayingTest extends CatsEffectSuite with JsonCodec {
+  val quotes = "\"\"\""
 
   test("codecs should encode and decode") {
-    val fit = IO(getClass.getResourceAsStream("/fit/activity/796A4003.FIT"))
+    val fit = IO(getClass.getResourceAsStream("/fit/Settings.fit"))
     fs2.io
       .readInputStream(fit, 8192)
       .chunks
@@ -23,19 +25,19 @@ class PlayingTest extends CatsEffectSuite {
           s"Record count: ${fit.records.size}\nFit file: ${fit.toString.take(180)}...\n"
         )
       )
-      .map { fit =>
-        fit
-          .findData(MesgNum.FileId)
-          .flatMap(dm => dm.definition.profileMsg.map(_ -> dm))
-          .map { case (gm, dm) =>
-            println(s"data: ${dm.raw}")
-            DataDecoder
-              .create(dm.definition, gm)
-              .decode(dm.raw.bits)
-              .map(_.map(_.fields.map(f => f.successValue)))
-          }
+      .flatMap(fit => Stream.emits(MesgNum.all.map(n => n -> fit.findData(n))))
+      .filter { case (_, list) => list.nonEmpty }
+      .map { case (mesg, data) =>
+        println(
+          s"""
+             |test("decode $mesg data") {
+             |  val data = ByteVector.fromValidHex("${data.head.raw.toHex}")
+             |  val definition = io.circe.parser.decode[FitMessage.DefinitionMessage]($quotes${data.head.definition.asJson.noSpaces}$quotes).fold(throw _, identity)
+             |  val profileMsg = definition.profileMsg.getOrElse(sys.error(s"no profile message"))
+             |}
+             |""".stripMargin
+        )
       }
-      .debug()
       .compile
       .drain
       .unsafeRunSync()

@@ -13,11 +13,30 @@ object TypesGenerator {
   def makeFiles(pkg: String, groups: Map[String, List[TypeDesc]]): List[SourceFile] =
     groups.view.map { case (name, defs) =>
       if (isSingleton(defs)) makeSingleton(pkg, defs.head)
+      else if (name == "date_time") makeDateTime(pkg, defs.head)
       else makeTypes(pkg, name, defs)
     }.toList
 
   def isSingleton(dfs: List[TypeDesc]) =
     dfs.tail.isEmpty && dfs.headOption.exists(_.valueName.isEmpty)
+
+  def makeDateTime(pkg: String, td: TypeDesc): SourceFile = {
+    val objName = snakeCamelType(td.name)
+    val contents =
+      s"""package $pkg.basetypes
+         |/* This file has been generated. */
+         |
+         |/** ${td.comment.getOrElse("")} */
+         |final case class $objName(rawValue: Long) extends fit4s.profile.GenBaseType {
+         |  val typeName: String = "${td.name}"
+         |}
+         |object $objName extends fit4s.profile.basetypes.DateTimeCompanion {
+         |
+         |  val baseType: FitBaseType = FitBaseType.${snakeCamelType(td.baseType)}
+         |}
+       """.stripMargin
+    SourceFile(s"${snakeCamelType(td.name)}.scala", contents)
+  }
 
   def makeSingleton(pkg: String, td: TypeDesc): SourceFile = {
     if (td.baseType != "uint32") sys.error(s"Unexpected base type: $td")

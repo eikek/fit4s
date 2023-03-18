@@ -8,12 +8,28 @@ import scodec.codecs._
 
 object DataDecoder {
 
-  final case class DataDecodeResult(fields: List[FieldDecodeResult])
+  final case class DataDecodeResult(fields: List[FieldDecodeResult]) {
+    override def toString = {
+      val fieldToString =
+        fields
+          .map {
+            case r: FieldDecodeResult.Success =>
+              s"${r.globalField.fieldName}=${r.value}"
+            case r: FieldDecodeResult.DecodeError =>
+              s"Error: ${r.err.messageWithContext}"
+            case r: FieldDecodeResult.UnknownField =>
+              s"Unknown field: ${r.localField.fieldDefNum}"
+          }
+          .mkString(", ")
+
+      s"DataDecodeResult($fieldToString)"
+    }
+  }
 
   sealed trait FieldDecodeResult {
     def widen: FieldDecodeResult = this
 
-    def successValue: Option[Any]
+    def successValue: Option[GenBaseType]
   }
   object FieldDecodeResult {
     final case class UnknownField(localField: FieldDefinition, data: ByteVector)
@@ -24,7 +40,7 @@ object DataDecoder {
     final case class Success(
         localField: FieldDefinition,
         globalField: Msg.Field[_ <: GenBaseType],
-        value: Any
+        value: GenBaseType
     ) extends FieldDecodeResult {
       val successValue = Some(value)
     }
@@ -42,7 +58,6 @@ object DataDecoder {
         pm.findField(localField.fieldDefNum) match {
           case Some(globalField) => decodeField(dm, localField, globalField)
           case None =>
-            println(s"decode field: local=$localField global=n/a")
             bytes(localField.sizeBytes).flatMap(bv =>
               Decoder.point(FieldDecodeResult.UnknownField(localField, bv))
             )
@@ -76,16 +91,10 @@ object DataDecoder {
       dm: DefinitionMessage,
       localField: FieldDefinition,
       globalField: Msg.Field[_ <: GenBaseType]
-  ): Decoder[FieldDecodeResult] = {
-    println(
-      s"decode field: local=$localField global=$globalField (fields=${dm.fields.size} vs ${dm.fieldCount})"
-    )
-
+  ): Decoder[FieldDecodeResult] =
     globalField
-      .baseTypeCodec(dm.archType)
+      .fieldCodec(dm.archType)
       .flatMap(value =>
         Decoder.point(FieldDecodeResult.Success(localField, globalField, value))
       )
-
-  }
 }

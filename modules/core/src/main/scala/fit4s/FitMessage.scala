@@ -43,7 +43,7 @@ object FitMessage {
             listOfN(provide(fc), FieldDefinition.codec) :: provide(msg)
           }
         }
-      )).as[DefinitionMessage]
+      )).as[DefinitionMessage].withContext("DefinitionMessage")
   }
 
   final case class DataMessage(definition: DefinitionMessage, raw: ByteVector)

@@ -67,11 +67,14 @@ object RecordHeader {
   }
 
   val codec: Codec[RecordHeader] = {
-    val nc: Codec[RecordHeader] = NormalHeader.codec.upcast[RecordHeader]
-    val cc: Codec[RecordHeader] = CompressedTimestampHeader.codec.upcast[RecordHeader]
+    val nc: Codec[RecordHeader] =
+      NormalHeader.codec.upcast[RecordHeader].withContext("NormalHeader")
+    val cc: Codec[RecordHeader] = CompressedTimestampHeader.codec
+      .upcast[RecordHeader]
+      .withContext("CompressedTimestampHeader")
     bits(1).consume(bv => if (bv == BitVector.one) cc else nc) {
       case _: NormalHeader              => BitVector.zero
       case _: CompressedTimestampHeader => BitVector.one
     }
-  }
+  }.withContext("RecordHeader")
 }
