@@ -34,44 +34,76 @@ object ProfileReader {
     def go(
         mn: String,
         rest: List[MessagesFormat],
-        result: List[MessageDef]
-    ): List[MessageDef] =
+        result: List[MessageFieldLine]
+    ): List[MessageFieldLine] =
       rest match {
         case Nil => result
         case a :: m =>
           a.messageName match {
             case Some(mn_) => go(mn_, m, result)
             case None =>
-              go(
-                mn,
-                m,
-                MessageDef(
-                  messageName = mn,
-                  fieldDefNumber = a.fieldDefNum,
-                  fieldName = a.fieldName.getOrElse(
-                    sys.error(s"Expected field name in row ${a.self.getRowNum}")
-                  ),
-                  fieldType = a.fieldType.getOrElse(
-                    sys.error(s"Expected field type in row ${a.self.getRowNum}")
-                  ),
-                  isArray = a.arrayDef,
-                  components = a.components,
-                  scale = a.scale,
-                  offset = a.offset,
-                  units = a.units,
-                  bits = a.bits,
-                  accumulate = a.accumulate,
-                  refFieldName = a.refFieldName,
-                  refFieldValue = a.refFieldValue,
-                  comment = a.comment,
-                  products = a.products,
-                  example = a.example
-                ) :: result
-              )
+              a.fieldDefNum match {
+                case None =>
+                  // sub field belonging to the previous field
+                  val previous = result.head
+                  val subfieldDef =
+                    MessageSubFieldLine(
+                      fieldName = a.fieldName.getOrElse(
+                        sys.error(s"Expected field name in row ${a.self.getRowNum}")
+                      ),
+                      fieldType = a.fieldType.getOrElse(
+                        sys.error(s"Expected field type in row ${a.self.getRowNum}")
+                      ),
+                      isArray = a.arrayDef,
+                      components = a.components,
+                      scale = a.scale,
+                      offset = a.offset,
+                      units = a.units,
+                      bits = a.bits,
+                      accumulate = a.accumulate,
+                      refFieldName = a.refFieldName
+                        .map(_.split(',').map(_.trim).filter(_.nonEmpty).toList)
+                        .getOrElse(Nil),
+                      refFieldValue = a.refFieldValue
+                        .map(_.split(',').map(_.trim).filter(_.nonEmpty).toList)
+                        .getOrElse(Nil),
+                      comment = a.comment
+                    )
+                  go(mn, m, previous.addSubfield(subfieldDef) :: result.tail)
+
+                case Some(fieldDefNum) =>
+                  val messageDef =
+                    MessageFieldLine(
+                      messageName = mn,
+                      fieldDefNumber = fieldDefNum,
+                      fieldName = a.fieldName.getOrElse(
+                        sys.error(s"Expected field name in row ${a.self.getRowNum}")
+                      ),
+                      fieldType = a.fieldType.getOrElse(
+                        sys.error(s"Expected field type in row ${a.self.getRowNum}")
+                      ),
+                      isArray = a.arrayDef,
+                      components = a.components,
+                      scale = a.scale,
+                      offset = a.offset,
+                      units = a.units,
+                      bits = a.bits,
+                      accumulate = a.accumulate,
+                      comment = a.comment,
+                      products = a.products,
+                      example = a.example,
+                      subFields = Nil
+                    )
+                  go(mn, m, messageDef :: result)
+              }
+
           }
       }
 
     go(initialMessageName, rows.tail.filterNot(_.isMessagesTitle), Nil).reverse
+      .groupBy(_.messageName)
+      .map(MessageDef.tupled)
+      .toList
   }
 
   def readTypes(sheet: XSSFSheet): List[TypeDesc] = {

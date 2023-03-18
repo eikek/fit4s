@@ -37,14 +37,36 @@ object Msg {
       scale: List[Double],
       offset: Option[Double],
       units: Option[String],
-      bits: List[Int]
+      bits: List[Int],
+      subFields: List[SubField[_]]
   ) {
     lazy val baseTypeLen: Int = BaseTypeCodec.length(fieldBaseType)
     lazy val baseTypeCodec: ByteOrdering => Codec[Long] =
       BaseTypeCodec.baseCodec(fieldBaseType)
 
     lazy val unit: Option[MeasurementUnit] = units.map(MeasurementUnit.fromString)
+
+    val isDynamicField: Boolean = subFields.nonEmpty
   }
+
+  final case class SubField[A <: GenBaseType](
+      references: List[ReferencedField[_]],
+      fieldName: String,
+      fieldTypeName: String,
+      fieldBaseType: FitBaseType,
+      fieldCodec: ByteOrdering => Codec[A],
+      isArray: ArrayDef,
+      components: Option[String],
+      scale: List[Double],
+      offset: Option[Double],
+      units: Option[String],
+      bits: List[Int]
+  )
+
+  final case class ReferencedField[V <: GenBaseType](
+      refField: Msg.Field[V],
+      refFieldValue: V
+  )
 
   sealed trait ArrayDef
 

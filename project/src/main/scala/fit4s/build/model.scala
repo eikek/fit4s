@@ -24,9 +24,9 @@ object model {
       comment: Option[String]
   )
 
-  final case class MessageDef(
+  final case class MessageFieldLine(
       messageName: String,
-      fieldDefNumber: Option[Int],
+      fieldDefNumber: Int,
       fieldName: String,
       fieldType: String,
       isArray: ArrayDef,
@@ -36,12 +36,37 @@ object model {
       units: Option[String],
       bits: List[Int],
       accumulate: List[Int],
-      refFieldName: Option[String],
-      refFieldValue: Option[String],
       comment: Option[String],
       products: Option[String],
-      example: Option[String]
+      example: Option[String],
+      subFields: List[MessageSubFieldLine]
+  ) {
+    def addSubfield(f: MessageSubFieldLine): MessageFieldLine =
+      copy(subFields = f :: subFields)
+  }
+
+  final case class MessageSubFieldLine(
+      fieldName: String,
+      fieldType: String,
+      isArray: ArrayDef,
+      components: Option[String],
+      scale: List[Double],
+      offset: Option[Double],
+      units: Option[String],
+      bits: List[Int],
+      accumulate: List[Int],
+      refFieldName: List[String],
+      refFieldValue: List[String],
+      comment: Option[String]
   )
+
+  final case class MessageDef(
+      messageName: String,
+      fields: List[MessageFieldLine]
+  ) {
+    def findField(name: String): Option[MessageFieldLine] =
+      fields.find(_.fieldName.equalsIgnoreCase(name))
+  }
 
   sealed trait ArrayDef
   object ArrayDef {
