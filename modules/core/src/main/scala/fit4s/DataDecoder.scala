@@ -1,7 +1,7 @@
 package fit4s
 
 import fit4s.FitMessage.DefinitionMessage
-import fit4s.profile.basetypes.LongBaseType
+import fit4s.profile.basetypes.{FitBaseType, LongBaseType, StringBaseType}
 import fit4s.profile.{GenBaseType, Msg}
 import scodec.{Attempt, DecodeResult, Decoder, Err}
 import scodec.bits.{BitVector, ByteVector}
@@ -20,6 +20,8 @@ object DataDecoder {
               s"Error: ${r.err.messageWithContext}"
             case r: FieldDecodeResult.UnknownField =>
               s"Unknown field: ${r.localField.fieldDefNum}"
+            case r: FieldDecodeResult.NoReferenceSubfield =>
+              s"No subfield reference: ${r.globalField.fieldName}"
           }
           .mkString(", ")
 
@@ -30,20 +32,23 @@ object DataDecoder {
   sealed trait FieldDecodeResult {
     def widen: FieldDecodeResult = this
 
+    def messageField: Option[Msg.Field[GenBaseType]]
     def successValue: Option[GenBaseType]
   }
   object FieldDecodeResult {
     final case class UnknownField(localField: FieldDefinition, data: ByteVector)
         extends FieldDecodeResult {
       val successValue = None
+      val messageField = None
     }
 
     final case class Success(
         localField: FieldDefinition,
-        globalField: Msg.Field[_ <: GenBaseType],
+        globalField: Msg.Field[GenBaseType],
         value: GenBaseType
     ) extends FieldDecodeResult {
       val successValue = Some(value)
+      val messageField = Some(globalField)
 
       // TODO support for arrays
       def scaledValue: Option[Double] =
@@ -69,32 +74,41 @@ object DataDecoder {
         err: Err
     ) extends FieldDecodeResult {
       val successValue = None
+      val messageField = None
+    }
+
+    final case class NoReferenceSubfield(
+        localField: FieldDefinition,
+        globalField: Msg.Field[GenBaseType]
+    ) extends FieldDecodeResult {
+      val successValue = None
+      val messageField = Some(globalField)
     }
   }
 
   def create(dm: DefinitionMessage, pm: Msg): Decoder[DataDecodeResult] = {
-    val fieldDecoders =
-      dm.fields.map { localField =>
-        pm.findField(localField.fieldDefNum) match {
-          case Some(globalField) => decodeField(dm, localField, globalField)
-          case None =>
-            bytes(localField.sizeBytes).flatMap(bv =>
-              Decoder.point(FieldDecodeResult.UnknownField(localField, bv))
-            )
-        }
+    def fieldDecoder(previous: List[FieldDecodeResult], localField: FieldDefinition) =
+      pm.findField(localField.fieldDefNum) match {
+        case Some(globalField) =>
+          decodeField(previous, dm, localField, globalField)
+
+        case None =>
+          bytes(localField.sizeBytes).flatMap(bv =>
+            Decoder.point(FieldDecodeResult.UnknownField(localField, bv))
+          )
       }
 
     (bits: BitVector) => {
       @annotation.tailrec
       def go(
-          decoders: List[Decoder[FieldDecodeResult]],
+          fields: List[FieldDefinition],
           input: BitVector,
           results: List[FieldDecodeResult]
       ): Attempt[DecodeResult[List[FieldDecodeResult]]] =
-        decoders match {
+        fields match {
           case Nil => Attempt.successful(DecodeResult(results, input))
-          case d :: m =>
-            d.decode(input) match {
+          case field :: m =>
+            fieldDecoder(results, field).decode(input) match {
               case Attempt.Successful(result) =>
                 go(m, result.remainder, result.value :: results)
               case Attempt.Failure(err) =>
@@ -103,18 +117,52 @@ object DataDecoder {
             }
         }
 
-      go(fieldDecoders, bits, Nil).map(_.map(DataDecodeResult.apply))
+      go(dm.fields, bits, Nil).map(_.map(DataDecodeResult.apply))
     }
   }
 
   def decodeField(
+      previous: List[FieldDecodeResult],
       dm: DefinitionMessage,
       localField: FieldDefinition,
-      globalField: Msg.Field[_ <: GenBaseType]
+      globalField: Msg.Field[GenBaseType]
   ): Decoder[FieldDecodeResult] =
-    globalField
-      .fieldCodec(dm.archType)
-      .flatMap(value =>
-        Decoder.point(FieldDecodeResult.Success(localField, globalField, value))
-      )
+    if (globalField.isDynamicField) {
+      // look in previous decoded values, if the referenced field matches
+      val subFieldMatch =
+        globalField.subFields.find { subField =>
+          previous.collectFirst { case p: FieldDecodeResult.Success =>
+            subField.references.exists(ref =>
+              ref.refField == p.globalField && ref.refFieldValue == p.value
+            )
+          }.isDefined
+        }
+
+      subFieldMatch match {
+        case Some(subField) =>
+          subField
+            .fieldCodec(dm.archType)
+            .flatMap(value =>
+              Decoder.point(FieldDecodeResult.Success(localField, globalField, value))
+            )
+        case None =>
+          Decoder.point(FieldDecodeResult.NoReferenceSubfield(localField, globalField))
+      }
+
+    } else {
+      if (globalField.fieldBaseType == FitBaseType.String) {
+        StringBaseType
+          .codec(localField.sizeBytes)
+          .asDecoder
+          .map(value => FieldDecodeResult.Success(localField, globalField, value))
+
+      } else {
+
+        globalField
+          .fieldCodec(dm.archType)
+          .flatMap(value =>
+            Decoder.point(FieldDecodeResult.Success(localField, globalField, value))
+          )
+      }
+    }
 }

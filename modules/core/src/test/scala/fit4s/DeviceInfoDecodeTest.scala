@@ -23,5 +23,4 @@ class DeviceInfoDecodeTest extends FunSuite with JsonCodec {
         .map(_.value)
     )
   }
-
 }

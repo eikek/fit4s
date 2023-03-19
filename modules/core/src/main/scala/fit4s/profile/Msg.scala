@@ -7,20 +7,22 @@ import scodec.bits.ByteOrdering
 import java.util.concurrent.atomic.AtomicReference
 
 abstract class Msg {
-  private[this] val fields: AtomicReference[Map[Int, Msg.Field[_ <: GenBaseType]]] =
-    new AtomicReference[Map[Int, Msg.Field[_ <: GenBaseType]]](Map.empty)
+  private[this] val fields: AtomicReference[Map[Int, Msg.Field[GenBaseType]]] =
+    new AtomicReference[Map[Int, Msg.Field[GenBaseType]]](Map.empty)
 
   protected def add[A <: GenBaseType](field: Msg.Field[A]): Msg.Field[A] = {
-    fields.updateAndGet(_.updated(field.fieldDefinitionNumber, field))
+    fields.updateAndGet(
+      _.updated(field.fieldDefinitionNumber, field.asInstanceOf[Msg.Field[GenBaseType]])
+    )
     field
   }
 
   def globalMessageNumber: MesgNum
 
-  lazy val allFields: List[Msg.Field[_]] =
+  lazy val allFields: List[Msg.Field[GenBaseType]] =
     fields.get().values.toList
 
-  def findField(fieldDefNumber: Int): Option[Msg.Field[_ <: GenBaseType]] =
+  def findField(fieldDefNumber: Int): Option[Msg.Field[GenBaseType]] =
     fields.get().get(fieldDefNumber)
 }
 
@@ -38,7 +40,7 @@ object Msg {
       offset: Option[Double],
       units: Option[String],
       bits: List[Int],
-      subFields: List[SubField[_]]
+      subFields: List[SubField[_ <: GenBaseType]]
   ) {
     lazy val baseTypeLen: Int = BaseTypeCodec.length(fieldBaseType)
     lazy val baseTypeCodec: ByteOrdering => Codec[Long] =
