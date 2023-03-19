@@ -12,11 +12,9 @@ class HrmProfileDecodeTest extends FunSuite with JsonCodec {
         """{"reserved":0,"archType":"BIG_ENDIAN","globalMessageNumber":4,"fieldCount":1,"fields":[{"fieldDefNum":1,"sizeBytes":2,"baseType":{"decoded":{"endianAbility":true,"reserved":0,"baseTypeNum":11},"fitBaseType":139}}],"profileMsg":4}"""
       )
       .fold(throw _, identity)
-    val profileMsg = definition.profileMsg.getOrElse(sys.error(s"no profile message"))
 
     println(
-      DataDecoder
-        .create(definition, profileMsg)
+      DataDecoder(definition)
         .decode(data.bits)
         .map(_.value)
     )

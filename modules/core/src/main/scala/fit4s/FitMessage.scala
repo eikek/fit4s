@@ -47,7 +47,10 @@ object FitMessage {
   }
 
   final case class DataMessage(definition: DefinitionMessage, raw: ByteVector)
-      extends FitMessage {}
+      extends FitMessage {
+
+    lazy val decoded = DataDecoder(definition).decode(raw.bits)
+  }
 
   object DataMessage {
     def decoder(prev: List[Record], header: RecordHeader): Decoder[DataMessage] =

@@ -10,7 +10,4 @@ trait DateTimeCompanion extends GenFieldTypeCompanion[DateTime] {
       .baseCodec(FitBaseType.Uint32)(bo)
       .xmap(DateTime.apply, _.rawValue)
 
-  protected val allMap: Map[DateTime, Long] = Map.empty
-
-  val all: List[DateTime] = Nil
 }

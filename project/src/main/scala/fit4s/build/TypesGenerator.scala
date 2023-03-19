@@ -30,7 +30,7 @@ object TypesGenerator {
          |final case class $objName(rawValue: Long) extends GenFieldType {
          |  val typeName: String = "${td.name}"
          |}
-         |object $objName extends fit4s.profile.types.DateTimeCompanion {
+         |object $objName extends DateTimeCompanion {
          |
          |  val baseType: FitBaseType = FitBaseType.${snakeCamelType(td.baseType)}
          |}
@@ -55,10 +55,6 @@ object TypesGenerator {
          |object $objName extends GenFieldTypeCompanion[$objName] {
          |  override def codec(bo: ByteOrdering): Codec[$objName] =
          |    fit4s.codecs.ulongx(32, bo).xmap($objName.apply(_), _.rawValue)
-         |
-         |  val all: List[$objName] = Nil
-         |
-         |  protected val allMap: Map[$objName, Long] = Map.empty
          |
          |  val baseType: FitBaseType = FitBaseType.${snakeCamelType(td.baseType)}
          |}
@@ -91,7 +87,7 @@ object TypesGenerator {
          |/* This file has been generated. */
          |
          |sealed trait $objName extends GenFieldType
-         |object $objName extends GenFieldTypeCompanion[$objName] {
+         |object $objName extends EnumFieldTypeCompanion[$objName] {
          |
          |$values
          |

@@ -19,15 +19,16 @@ class FileIdDecodeTest extends FunSuite with JsonCodec {
       .getOrElse(sys.error(s"no profile message"))
       .asInstanceOf[FileIdMsg.type]
 
-    val decodeSerialNum = profileMsg.serialNumber.fieldCodec(definition.archType)
+    val decodeSerialNum =
+      profileMsg.serialNumber.fieldCodec(definition.fields.head)(definition.archType)
     println(decodeSerialNum.decode(data.take(4).bits))
 
-    val decodeCreated = profileMsg.timeCreated.fieldCodec(definition.archType)
+    val decodeCreated =
+      profileMsg.timeCreated.fieldCodec(definition.fields(1))(definition.archType)
     println(decodeCreated.decode(data.drop(4).take(4).bits))
 
     println(
-      DataDecoder
-        .create(definition, profileMsg)
+      DataDecoder(definition)
         .decode(data.bits)
         .map(_.value)
     )
@@ -40,22 +41,18 @@ class FileIdDecodeTest extends FunSuite with JsonCodec {
         """{"reserved":0,"archType":"BIG_ENDIAN","globalMessageNumber":0,"fieldCount":4,"fields":[{"fieldDefNum":1,"sizeBytes":2,"baseType":{"decoded":{"endianAbility":true,"reserved":0,"baseTypeNum":4},"fitBaseType":132}},{"fieldDefNum":2,"sizeBytes":2,"baseType":{"decoded":{"endianAbility":true,"reserved":0,"baseTypeNum":4},"fitBaseType":132}},{"fieldDefNum":3,"sizeBytes":4,"baseType":{"decoded":{"endianAbility":true,"reserved":0,"baseTypeNum":12},"fitBaseType":140}},{"fieldDefNum":0,"sizeBytes":1,"baseType":{"decoded":{"endianAbility":false,"reserved":0,"baseTypeNum":0},"fitBaseType":0}}],"profileMsg":0}"""
       )
       .fold(throw _, identity)
-    val profileMsg = definition.profileMsg
-      .getOrElse(sys.error(s"no profile message"))
-      .asInstanceOf[FileIdMsg.type]
 
-    val decodeManufacturer = profileMsg.manufacturer.fieldCodec(definition.archType)
-    println(decodeManufacturer.decode(data.take(2).bits))
-
-    val decodeProduct = profileMsg.product.fieldCodec(definition.archType)
-    println(decodeProduct.decode(data.drop(2).take(2).bits))
-
-    val decodeSerialNum = profileMsg.serialNumber.fieldCodec(definition.archType)
-    println(decodeSerialNum.decode(data.drop(4).take(4).bits))
+//    val decodeManufacturer = profileMsg.manufacturer.fieldCodec(definition.archType)
+//    println(decodeManufacturer.decode(data.take(2).bits))
+//
+//    val decodeProduct = profileMsg.product.fieldCodec(definition.archType)
+//    println(decodeProduct.decode(data.drop(2).take(2).bits))
+//
+//    val decodeSerialNum = profileMsg.serialNumber.fieldCodec(definition.archType)
+//    println(decodeSerialNum.decode(data.drop(4).take(4).bits))
 
     println(
-      DataDecoder
-        .create(definition, profileMsg)
+      DataDecoder(definition)
         .decode(data.bits)
         .map(_.value)
     )

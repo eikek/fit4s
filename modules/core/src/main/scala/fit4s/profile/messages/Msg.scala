@@ -1,5 +1,6 @@
 package fit4s.profile.messages
 
+import fit4s.FieldDefinition
 import fit4s.profile.types._
 import scodec.Codec
 import scodec.bits.ByteOrdering
@@ -28,12 +29,30 @@ abstract class Msg {
 
 object Msg {
 
+  trait FieldWithCodec[A <: GenFieldType] {
+    def fieldName: String
+    def fieldBaseType: FitBaseType
+    def fieldCodec: FieldDefinition => ByteOrdering => Codec[A]
+    def isArray: ArrayDef
+    def components: Option[String]
+    def scale: List[Double]
+    def offset: Option[Double]
+    def units: Option[String]
+    def bits: List[Int]
+
+    lazy val baseTypeLen: Int = BaseTypeCodec.length(fieldBaseType)
+    lazy val baseTypeCodec: ByteOrdering => Codec[Long] =
+      BaseTypeCodec.baseCodec(fieldBaseType)
+
+    lazy val unit: Option[MeasurementUnit] = units.map(MeasurementUnit.fromString)
+  }
+
   final case class Field[A <: GenFieldType](
       fieldDefinitionNumber: Int,
       fieldName: String,
       fieldTypeName: String,
       fieldBaseType: FitBaseType,
-      fieldCodec: ByteOrdering => Codec[A],
+      fieldCodec: FieldDefinition => ByteOrdering => Codec[A],
       isArray: ArrayDef,
       components: Option[String],
       scale: List[Double],
@@ -41,13 +60,7 @@ object Msg {
       units: Option[String],
       bits: List[Int],
       subFields: List[SubField[_ <: GenFieldType]]
-  ) {
-    lazy val baseTypeLen: Int = BaseTypeCodec.length(fieldBaseType)
-    lazy val baseTypeCodec: ByteOrdering => Codec[Long] =
-      BaseTypeCodec.baseCodec(fieldBaseType)
-
-    lazy val unit: Option[MeasurementUnit] = units.map(MeasurementUnit.fromString)
-
+  ) extends FieldWithCodec[A] {
     val isDynamicField: Boolean = subFields.nonEmpty
   }
 
@@ -56,14 +69,14 @@ object Msg {
       fieldName: String,
       fieldTypeName: String,
       fieldBaseType: FitBaseType,
-      fieldCodec: ByteOrdering => Codec[A],
+      fieldCodec: FieldDefinition => ByteOrdering => Codec[A],
       isArray: ArrayDef,
       components: Option[String],
       scale: List[Double],
       offset: Option[Double],
       units: Option[String],
       bits: List[Int]
-  )
+  ) extends FieldWithCodec[A]
 
   final case class ReferencedField[V <: GenFieldType](
       refField: Msg.Field[V],

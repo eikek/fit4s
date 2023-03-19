@@ -10,7 +10,7 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
   val quotes = "\"\"\""
 
   test("codecs should encode and decode") {
-    val fit = IO(getClass.getResourceAsStream("/fit/activity/78UI3028.FIT"))
+    val fit = IO(getClass.getResourceAsStream("/fit/activity/2023-03-16-06-25-37.fit"))
     fs2.io
       .readInputStream(fit, 8192)
       .chunks
@@ -25,7 +25,30 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
           s"Record count: ${fit.records.size}\nFit file: ${fit.toString.take(180)}...\n"
         )
       )
-      .flatMap(fit => Stream.emits(MesgNum.all.map(n => n -> fit.findData(n))))
+      .flatMap(printDecoded)
+      .compile
+      .drain
+      .unsafeRunSync()
+  }
+
+  def printDecoded(fit: FitFile) =
+    Stream
+      .emits(fit.dataRecords)
+      .evalTap(dr =>
+        dr.definition.profileMsg match {
+          case Some(_) => IO.unit
+          case None =>
+            IO.println(
+              s"No profile message found. MesgNum=${dr.definition.globalMessageNumber}"
+            )
+        }
+      )
+      .map(r => r.definition.profileMsg -> r.decoded)
+      .evalMap(IO.println)
+
+  def printTestCases(fit: FitFile): Stream[IO, Unit] =
+    Stream
+      .emits(MesgNum.all.map(n => n -> fit.findData(n)))
       .filter { case (_, list) => list.nonEmpty }
       .map { case (mesg, data) =>
         println(
@@ -38,8 +61,4 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
              |""".stripMargin
         )
       }
-      .compile
-      .drain
-      .unsafeRunSync()
-  }
 }

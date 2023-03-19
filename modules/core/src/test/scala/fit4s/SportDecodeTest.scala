@@ -17,8 +17,7 @@ class SportDecodeTest extends FunSuite with JsonCodec {
 
     println(profileMsg)
     println(
-      DataDecoder
-        .create(definition, profileMsg)
+      DataDecoder(definition)
         .decode(data.bits)
         .map(_.value)
     )

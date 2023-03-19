@@ -176,7 +176,9 @@ object MessagesGenerator {
     val baseTypeNames = typeDefs.filter(_.name == "fit_base_type").map(_.valueName).toSet
     val typeName = scalaTypeName(fd.fieldType, baseTypeNames)
     val typeNameOrLong =
-      if (baseTypeNames.contains(fd.fieldType) || fd.fieldType == "bool") "LongFieldType"
+      if (fd.fieldType == "string") "StringFieldType"
+      else if (baseTypeNames.contains(fd.fieldType) || fd.fieldType == "bool")
+        "LongFieldType"
       else typeName
     val baseType =
       if (baseTypeNames.contains(fd.fieldType))
@@ -214,9 +216,11 @@ object MessagesGenerator {
 
   def scalaTypeCodec(name: String, baseType: String, baseTypes: Set[String]): String = {
     val tn = snakeCamelType(name)
-    if (baseTypes.contains(name) || name == "bool")
-      s"bo => LongFieldType.codec(bo, $baseType)"
-    else s"$tn.codec"
+    if (name == "string")
+      s"fieldDef => _ => StringFieldType.codec(fieldDef.sizeBytes)"
+    else if (baseTypes.contains(name) || name == "bool")
+      s"_ => bo => LongFieldType.codec(bo, $baseType)"
+    else s"_ => bo => $tn.codec(bo)"
   }
 
   implicit class StringOps(self: String) {

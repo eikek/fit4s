@@ -133,5 +133,4 @@ object MeasurementUnit {
     val key = str.replace("\\s+", "").toLowerCase
     unitMap.getOrElse(key, Unknown(key))
   }
-
 }

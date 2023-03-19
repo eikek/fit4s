@@ -16,6 +16,11 @@ final case class FitFile(
       case Record.DataRecord(_, cnt) if cnt.definition.isMesgNum(n) =>
         cnt
     }
+
+  def dataRecords: List[FitMessage.DataMessage] =
+    records.collect { case Record.DataRecord(_, cnt) =>
+      cnt
+    }
 }
 
 object FitFile {
