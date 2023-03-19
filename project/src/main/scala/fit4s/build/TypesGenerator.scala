@@ -23,14 +23,14 @@ object TypesGenerator {
   def makeDateTime(pkg: String, td: TypeDesc): SourceFile = {
     val objName = snakeCamelType(td.name)
     val contents =
-      s"""package $pkg.basetypes
+      s"""package $pkg.types
          |/* This file has been generated. */
          |
          |/** ${td.comment.getOrElse("")} */
-         |final case class $objName(rawValue: Long) extends fit4s.profile.GenBaseType {
+         |final case class $objName(rawValue: Long) extends GenFieldType {
          |  val typeName: String = "${td.name}"
          |}
-         |object $objName extends fit4s.profile.basetypes.DateTimeCompanion {
+         |object $objName extends fit4s.profile.types.DateTimeCompanion {
          |
          |  val baseType: FitBaseType = FitBaseType.${snakeCamelType(td.baseType)}
          |}
@@ -42,17 +42,17 @@ object TypesGenerator {
     if (td.baseType != "uint32") sys.error(s"Unexpected base type: $td")
     val objName = snakeCamelType(td.name)
     val contents =
-      s"""package $pkg.basetypes
+      s"""package $pkg.types
          |/* This file has been generated. */
          |
          |import scodec.Codec
          |import scodec.bits.ByteOrdering
          |
          |/** ${td.comment.getOrElse("")} */
-         |final case class $objName(rawValue: Long) extends fit4s.profile.GenBaseType {
+         |final case class $objName(rawValue: Long) extends GenFieldType {
          |  val typeName: String = "${td.name}"
          |}
-         |object $objName extends fit4s.profile.GenBaseTypeCompanion[$objName] {
+         |object $objName extends GenFieldTypeCompanion[$objName] {
          |  override def codec(bo: ByteOrdering): Codec[$objName] =
          |    fit4s.codecs.ulongx(32, bo).xmap($objName.apply(_), _.rawValue)
          |
@@ -87,11 +87,11 @@ object TypesGenerator {
     def values = dfs.map(caseObject).mkString("  ", "\n  ", "  ")
 
     val contents =
-      s"""package $pkg.basetypes
+      s"""package $pkg.types
          |/* This file has been generated. */
          |
-         |sealed trait $objName extends fit4s.profile.GenBaseType
-         |object $objName extends fit4s.profile.GenBaseTypeCompanion[$objName] {
+         |sealed trait $objName extends GenFieldType
+         |object $objName extends GenFieldTypeCompanion[$objName] {
          |
          |$values
          |

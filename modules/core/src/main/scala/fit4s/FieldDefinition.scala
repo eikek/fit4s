@@ -1,6 +1,6 @@
 package fit4s
 
-import fit4s.profile.basetypes.FitBaseType
+import fit4s.profile.types.FitBaseType
 import scodec._
 import scodec.codecs._
 

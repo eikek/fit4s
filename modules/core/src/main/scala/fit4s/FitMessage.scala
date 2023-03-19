@@ -1,11 +1,11 @@
 package fit4s
 
-import scodec._
-import scodec.codecs._
-import scodec.bits.{ByteOrdering, ByteVector}
 import fit4s.codecs._
-import fit4s.profile.{FitMessages, Msg}
-import fit4s.profile.basetypes.MesgNum
+import fit4s.profile.messages.{FitMessages, Msg}
+import fit4s.profile.types.MesgNum
+import scodec._
+import scodec.bits.{ByteOrdering, ByteVector}
+import scodec.codecs._
 
 sealed trait FitMessage
 

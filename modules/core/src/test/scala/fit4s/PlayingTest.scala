@@ -2,7 +2,7 @@ package fit4s
 
 import cats.effect._
 import io.circe.syntax._
-import fit4s.profile.basetypes.MesgNum
+import fit4s.profile.types.MesgNum
 import fs2.{Chunk, Stream}
 import munit.CatsEffectSuite
 

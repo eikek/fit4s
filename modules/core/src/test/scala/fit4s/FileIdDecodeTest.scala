@@ -1,6 +1,6 @@
 package fit4s
 
-import fit4s.profile.msg.FileIdMsg
+import fit4s.profile.messages.FileIdMsg
 import munit.FunSuite
 import scodec.bits.ByteVector
 //import scodec.codecs._

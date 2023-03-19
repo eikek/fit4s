@@ -1,6 +1,6 @@
-package fit4s.profile
+package fit4s.profile.messages
 
-import fit4s.profile.basetypes.MesgNum
+import fit4s.profile.types.MesgNum
 
 import java.util.concurrent.atomic.AtomicReference
 

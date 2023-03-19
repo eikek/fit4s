@@ -1,4 +1,4 @@
-package fit4s.profile.basetypes
+package fit4s.profile.types
 
 import fit4s.codecs._
 import scodec.Codec

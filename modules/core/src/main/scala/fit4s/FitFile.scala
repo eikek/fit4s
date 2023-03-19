@@ -1,6 +1,6 @@
 package fit4s
 
-import fit4s.profile.basetypes.MesgNum
+import fit4s.profile.types.MesgNum
 import scodec.{Attempt, Codec, DecodeResult, Encoder, SizeBound}
 import scodec.bits.BitVector
 import scodec.codecs._

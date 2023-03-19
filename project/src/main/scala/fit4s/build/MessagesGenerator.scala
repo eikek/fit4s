@@ -15,10 +15,10 @@ object MessagesGenerator {
   def makeAllMsgsFile(pkg: String, names: List[String]): SourceFile = {
     val name = "FitMessages.scala"
     val defs = names.sorted
-      .map(n => s"val ${snakeCamelIdent(n)} = add(msg.${snakeCamelType(n)}Msg)")
+      .map(n => s"val ${snakeCamelIdent(n)} = add(${snakeCamelType(n)}Msg)")
       .mkString("  ", "\n  ", "  ")
     val contents =
-      s"""package ${pkg}
+      s"""package ${pkg}.messages
          |
          |object FitMessages extends Msgs {
          |$defs
@@ -49,10 +49,9 @@ object MessagesGenerator {
       msgDef.fields.map(makeMessageField(typeDefs, msgDef)).mkString("  ", "\n  ", "  ")
 
     val contents =
-      s"""package ${pkg}.msg
+      s"""package ${pkg}.messages
          |
-         |import ${pkg}.basetypes._
-         |import fit4s.profile._
+         |import ${pkg}.types._
          |
          |object ${messageTypeName(msgDef)} extends Msg {
          |  val globalMessageNumber: MesgNum = MesgNum.${objName}
@@ -139,7 +138,7 @@ object MessagesGenerator {
     val baseTypeNames = typeDefs.filter(_.name == "fit_base_type").map(_.valueName).toSet
     val typeName = scalaTypeName(fd.fieldType, baseTypeNames)
     val typeNameOrLong =
-      if (baseTypeNames.contains(fd.fieldType) || fd.fieldType == "bool") "LongBaseType"
+      if (baseTypeNames.contains(fd.fieldType) || fd.fieldType == "bool") "LongFieldType"
       else typeName
     val baseType =
       if (baseTypeNames.contains(fd.fieldType))
@@ -177,7 +176,7 @@ object MessagesGenerator {
     val baseTypeNames = typeDefs.filter(_.name == "fit_base_type").map(_.valueName).toSet
     val typeName = scalaTypeName(fd.fieldType, baseTypeNames)
     val typeNameOrLong =
-      if (baseTypeNames.contains(fd.fieldType) || fd.fieldType == "bool") "LongBaseType"
+      if (baseTypeNames.contains(fd.fieldType) || fd.fieldType == "bool") "LongFieldType"
       else typeName
     val baseType =
       if (baseTypeNames.contains(fd.fieldType))
@@ -216,7 +215,7 @@ object MessagesGenerator {
   def scalaTypeCodec(name: String, baseType: String, baseTypes: Set[String]): String = {
     val tn = snakeCamelType(name)
     if (baseTypes.contains(name) || name == "bool")
-      s"bo => LongBaseType.codec(bo, $baseType)"
+      s"bo => LongFieldType.codec(bo, $baseType)"
     else s"$tn.codec"
   }
 

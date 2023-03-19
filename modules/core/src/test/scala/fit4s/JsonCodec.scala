@@ -1,8 +1,8 @@
 package fit4s
 
 import fit4s.FieldDefinition.BaseType
-import fit4s.profile.{FitMessages, Msg}
-import fit4s.profile.basetypes.{FitBaseType, MesgNum}
+import fit4s.profile.messages.{FitMessages, Msg}
+import fit4s.profile.types.{FitBaseType, MesgNum}
 import io.circe._
 import io.circe.generic.semiauto._
 import scodec.bits.ByteOrdering

@@ -1,8 +1,8 @@
 package fit4s
 
 import fit4s.FitMessage.DefinitionMessage
-import fit4s.profile.basetypes.{FitBaseType, LongBaseType, StringBaseType}
-import fit4s.profile.{GenBaseType, Msg}
+import fit4s.profile.messages.Msg
+import fit4s.profile.types.{FitBaseType, GenFieldType, LongFieldType, StringFieldType}
 import scodec.{Attempt, DecodeResult, Decoder, Err}
 import scodec.bits.{BitVector, ByteVector}
 import scodec.codecs._
@@ -32,8 +32,8 @@ object DataDecoder {
   sealed trait FieldDecodeResult {
     def widen: FieldDecodeResult = this
 
-    def messageField: Option[Msg.Field[GenBaseType]]
-    def successValue: Option[GenBaseType]
+    def messageField: Option[Msg.Field[GenFieldType]]
+    def successValue: Option[GenFieldType]
   }
   object FieldDecodeResult {
     final case class UnknownField(localField: FieldDefinition, data: ByteVector)
@@ -43,9 +43,9 @@ object DataDecoder {
     }
 
     final case class Success(
-        localField: FieldDefinition,
-        globalField: Msg.Field[GenBaseType],
-        value: GenBaseType
+                              localField: FieldDefinition,
+                              globalField: Msg.Field[GenFieldType],
+                              value: GenFieldType
     ) extends FieldDecodeResult {
       val successValue = Some(value)
       val messageField = Some(globalField)
@@ -53,7 +53,7 @@ object DataDecoder {
       // TODO support for arrays
       def scaledValue: Option[Double] =
         (value, globalField.scale) match {
-          case (LongBaseType(rv, _), List(scale)) =>
+          case (LongFieldType(rv, _), List(scale)) =>
             Some(rv / scale)
           case _ => None
         }
@@ -62,7 +62,7 @@ object DataDecoder {
         val amount = scaledValue
           .map(_.toString)
           .getOrElse(value match {
-            case LongBaseType(rv, _) => rv.toString
+            case LongFieldType(rv, _) => rv.toString
             case _                   => value.toString
           })
         val unit = globalField.unit.map(_.name).getOrElse("")
@@ -79,7 +79,7 @@ object DataDecoder {
 
     final case class NoReferenceSubfield(
         localField: FieldDefinition,
-        globalField: Msg.Field[GenBaseType]
+        globalField: Msg.Field[GenFieldType]
     ) extends FieldDecodeResult {
       val successValue = None
       val messageField = Some(globalField)
@@ -125,7 +125,7 @@ object DataDecoder {
       previous: List[FieldDecodeResult],
       dm: DefinitionMessage,
       localField: FieldDefinition,
-      globalField: Msg.Field[GenBaseType]
+      globalField: Msg.Field[GenFieldType]
   ): Decoder[FieldDecodeResult] =
     if (globalField.isDynamicField) {
       // look in previous decoded values, if the referenced field matches
@@ -151,7 +151,7 @@ object DataDecoder {
 
     } else {
       if (globalField.fieldBaseType == FitBaseType.String) {
-        StringBaseType
+        StringFieldType
           .codec(localField.sizeBytes)
           .asDecoder
           .map(value => FieldDecodeResult.Success(localField, globalField, value))

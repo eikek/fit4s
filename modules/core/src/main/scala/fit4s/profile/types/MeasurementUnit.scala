@@ -1,4 +1,4 @@
-package fit4s.profile.basetypes
+package fit4s.profile.types
 
 sealed trait MeasurementUnit {
   def name: String

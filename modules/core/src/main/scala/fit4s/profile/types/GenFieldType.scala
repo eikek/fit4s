@@ -1,11 +1,10 @@
-package fit4s.profile
+package fit4s.profile.types
 
-import fit4s.profile.basetypes.{BaseTypeCodec, FitBaseType}
 import scodec.Codec
 import scodec.bits.ByteOrdering
 import scodec.codecs._
 
-trait GenBaseType {
+trait GenFieldType {
 
   def rawValue: Long
 
@@ -13,7 +12,7 @@ trait GenBaseType {
 
 }
 
-trait GenBaseTypeCompanion[A <: GenBaseType] {
+trait GenFieldTypeCompanion[A <: GenFieldType] {
   def codec(bo: ByteOrdering): Codec[A] =
     mappedEnum[A, Long](BaseTypeCodec.baseCodec(baseType)(bo), allMap)
 

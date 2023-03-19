@@ -1,10 +1,9 @@
-package fit4s.profile.basetypes
+package fit4s.profile.types
 
-import fit4s.profile.GenBaseTypeCompanion
 import scodec.Codec
 import scodec.bits.ByteOrdering
 
-trait DateTimeCompanion extends GenBaseTypeCompanion[DateTime] {
+trait DateTimeCompanion extends GenFieldTypeCompanion[DateTime] {
 
   override def codec(bo: ByteOrdering): Codec[DateTime] =
     BaseTypeCodec
