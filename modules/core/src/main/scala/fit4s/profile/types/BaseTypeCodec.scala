@@ -30,12 +30,30 @@ object BaseTypeCodec {
   type PrimCodec = ByteOrdering => Codec[Long]
 
   object PrimCodec {
-    def apply(bits: Int): PrimCodec = ulongx(bits, _)
+    def ulong(bits: Int): PrimCodec = ulongx(bits, _)
+    def long(bits: Int): PrimCodec = longx(bits, _)
   }
 
-  // TODO distinguish uintz uint etc
   def baseCodec(bt: FitBaseType): PrimCodec =
-    PrimCodec(length(bt) * 8)
+    bt match {
+      case FitBaseType.Enum    => PrimCodec.ulong(8)
+      case FitBaseType.Sint8   => PrimCodec.long(8)
+      case FitBaseType.Uint8   => PrimCodec.ulong(8)
+      case FitBaseType.Sint16  => PrimCodec.long(16)
+      case FitBaseType.Uint16  => PrimCodec.ulong(16)
+      case FitBaseType.Sint32  => PrimCodec.long(32)
+      case FitBaseType.Uint32  => PrimCodec.ulong(32)
+      case FitBaseType.String  => PrimCodec.ulong(8)
+      case FitBaseType.Float32 => PrimCodec.ulong(32) // floatx TODO
+      case FitBaseType.Float64 => PrimCodec.ulong(64) // doublex TODO
+      case FitBaseType.Uint8z  => PrimCodec.ulong(8)
+      case FitBaseType.Uint16z => PrimCodec.ulong(16)
+      case FitBaseType.Uint32z => PrimCodec.ulong(32)
+      case FitBaseType.Byte    => PrimCodec.ulong(8)
+      case FitBaseType.Sint64  => PrimCodec.long(64)
+      case FitBaseType.Uint64  => PrimCodec.ulong(64)
+      case FitBaseType.Uint64z => PrimCodec.ulong(64)
+    }
 
   def invalidValue(fitBaseType: FitBaseType): ByteVector =
     fitBaseType match {

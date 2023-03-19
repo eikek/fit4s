@@ -29,8 +29,12 @@ object TypesGenerator {
          |/** ${td.comment.getOrElse("")} */
          |final case class $objName(rawValue: Long) extends GenFieldType {
          |  val typeName: String = "${td.name}"
+         |  def asInstant: java.time.Instant =
+         |    $objName.offset.plusSeconds(rawValue)
          |}
          |object $objName extends DateTimeCompanion {
+         |
+         |  val offset: java.time.Instant = java.time.Instant.parse("1989-12-31T00:00:00Z")
          |
          |  val baseType: FitBaseType = FitBaseType.${snakeCamelType(td.baseType)}
          |}

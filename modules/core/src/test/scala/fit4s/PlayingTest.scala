@@ -34,16 +34,10 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
   def printDecoded(fit: FitFile) =
     Stream
       .emits(fit.dataRecords)
-      .evalTap(dr =>
-        dr.definition.profileMsg match {
-          case Some(_) => IO.unit
-          case None =>
-            IO.println(
-              s"No profile message found. MesgNum=${dr.definition.globalMessageNumber}"
-            )
-        }
+      .map(r =>
+        r.definition.profileMsg.getOrElse(r.definition.globalMessageNumber) -> r.decoded
       )
-      .map(r => r.definition.profileMsg -> r.decoded)
+      .take(100)
       .evalMap(IO.println)
 
   def printTestCases(fit: FitFile): Stream[IO, Unit] =

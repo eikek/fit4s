@@ -25,4 +25,13 @@ object ArrayFieldType {
       bc.xmap(n => ArrayFieldType(List(LongFieldType(n, base))), _.values.head.rawValue)
     }
   }
+
+  object LongArray {
+    def unapply(f: ArrayFieldType[_]): Option[List[Long]] =
+      f.values.headOption match {
+        case Some(_: LongFieldType) =>
+          Some(f.values.map(_.asInstanceOf[LongFieldType]).map(_.rawValue))
+        case _ => None
+      }
+  }
 }

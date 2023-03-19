@@ -6,9 +6,9 @@ import fit4s.profile.messages.Msg.{ArrayDef, FieldWithCodec}
 import fit4s.profile.types.{
   ArrayFieldType,
   BaseTypeCodec,
+  DateTime,
   FitBaseType,
   GenFieldType,
-  LongArrayFieldType,
   LongFieldType,
   StringFieldType
 }
@@ -32,7 +32,9 @@ object DataDecoder {
             case r: FieldDecodeResult.NoReferenceSubfield =>
               s"No subfield reference: ${r.globalField.fieldName}"
             case r: FieldDecodeResult.InvalidValue =>
-              s"Invalid value for field ${r.localField.fieldDefNum}"
+              s"Invalid value '0x${BaseTypeCodec
+                  .invalidValue(r.localField.baseType.fitBaseType)
+                  .toHex}' for field ${r.localField.fieldDefNum}/${r.localField.baseType.fitBaseType}"
           }
           .mkString(", ")
 
@@ -68,20 +70,26 @@ object DataDecoder {
       val successValue = Some(value)
       val messageField = Some(globalField)
 
-      // TODO support for arrays
       def scaledValue: Option[List[Double]] =
         (value, globalField.scale) match {
           case (LongFieldType(rv, _), List(scale)) =>
             Some(List(rv / scale))
+
+          case (ArrayFieldType.LongArray(list), List(scale)) =>
+            Some(list.map(_ / scale))
 
           case _ => None
         }
 
       def valueString: String = {
         val amount = scaledValue
-          .map(_.toString)
+          .map {
+            case h :: Nil => h.toString
+            case l        => l.toString
+          }
           .getOrElse(value match {
             case LongFieldType(rv, _) => rv.toString
+            case dt: DateTime         => dt.asInstant.toString
             case _                    => value.toString
           })
         val unit = globalField.unit.map(_.name).getOrElse("")
@@ -220,7 +228,7 @@ object DataDecoder {
               )
             } else
               localResult(localField)(
-                LongArrayFieldType.codec(localField.sizeBytes, dm.archType, ft)
+                ArrayFieldType.codecLong(localField.sizeBytes, dm.archType, ft)
               )
           } else {
             localResult(localField)(LongFieldType.codec(dm.archType, ft))
@@ -239,6 +247,7 @@ object DataDecoder {
       if (globalField.isDynamicField) {
         // look in previous decoded values, if the referenced field matches
         // todo improve data structures to better support searches
+        // todo support for components
         val subFieldMatch =
           globalField.subFields.find { subField =>
             previous.collectFirst { case p: FieldDecodeResult.Success =>
@@ -256,19 +265,11 @@ object DataDecoder {
               subField.asInstanceOf[Msg.SubField[GenFieldType]]
             )
 
-//            subField
-//              .fieldCodec(localField)(dm.archType)
-//              .asDecoder
-//              .map(value => FieldDecodeResult.Success(localField, globalField, value))
           case None =>
             Decoder.point(FieldDecodeResult.NoReferenceSubfield(localField, globalField))
         }
       } else {
         decodeFieldWithCodec(dm, localField, globalField)
-//        globalField
-//          .fieldCodec(localField)(dm.archType)
-//          .asDecoder
-//          .map(value => FieldDecodeResult.Success(localField, globalField, value))
       }
     }
 
@@ -296,10 +297,10 @@ object DataDecoder {
         fc.asDecoder
 
       case ArrayDef.DynamicSize =>
-        ac
+        if (localField.sizeBytes > field.baseTypeLen) ac else fc
 
-      case ArrayDef.Sized(_) =>
-        ac
+      case ArrayDef.Sized(n) =>
+        if (n > 1) ac else fc
     }
   }
 }
