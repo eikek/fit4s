@@ -1,8 +1,9 @@
 package fit4s
 
 import fit4s.codecs._
-import fit4s.profile.messages.{FitMessages, Msg}
-import fit4s.profile.types.MesgNum
+import fit4s.profile.FieldValue
+import fit4s.profile.messages.{EventMsg, FitMessages, Msg}
+import fit4s.profile.types.{Event, EventType, GenFieldType, MesgNum}
 import scodec._
 import scodec.bits.{ByteOrdering, ByteVector}
 import scodec.codecs._
@@ -54,6 +55,20 @@ object FitMessage {
 
     lazy val isKnownSuccess: Boolean =
       definition.profileMsg.isDefined && decoded.fold(_ => false, _ => true)
+
+    def findField[A <: GenFieldType](
+        ft: Msg.FieldWithCodec[A]
+    ): Either[String, Option[FieldValue[A]]] =
+      decoded.toEither.left
+        .map(_.messageWithContext)
+        .map { result =>
+          result.findField(ft)
+        }
+
+    def isEvent(event: Event, eventType: EventType): Boolean =
+      definition.profileMsg.contains(EventMsg) &&
+        findField(EventMsg.eventType).map(_.map(_.value)).contains(Some(eventType)) &&
+        findField(EventMsg.event).map(_.map(_.value)).contains(Some(event))
   }
 
   object DataMessage {

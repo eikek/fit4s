@@ -1,6 +1,7 @@
 package fit4s.profile.messages
 
 import fit4s.FieldDefinition
+import fit4s.profile.FieldValue
 import fit4s.profile.types._
 import scodec.Codec
 import scodec.bits.ByteOrdering
@@ -29,10 +30,9 @@ abstract class Msg {
 
 object Msg {
 
-  trait FieldWithCodec[A <: GenFieldType] {
+  trait FieldAttributes {
     def fieldName: String
     def fieldBaseType: FitBaseType
-    def fieldCodec: FieldDefinition => ByteOrdering => Codec[A]
     def isArray: ArrayDef
     def components: Option[String]
     def scale: List[Double]
@@ -45,6 +45,18 @@ object Msg {
       BaseTypeCodec.baseCodec(fieldBaseType)
 
     lazy val unit: Option[MeasurementUnit] = units.map(MeasurementUnit.fromString)
+  }
+
+  trait FieldWithCodec[A <: GenFieldType] extends FieldAttributes {
+    def fieldName: String
+    def fieldBaseType: FitBaseType
+    def fieldCodec: FieldDefinition => ByteOrdering => Codec[A]
+    def isArray: ArrayDef
+    def components: Option[String]
+    def scale: List[Double]
+    def offset: Option[Double]
+    def units: Option[String]
+    def bits: List[Int]
   }
 
   final case class Field[A <: GenFieldType](
@@ -81,7 +93,10 @@ object Msg {
   final case class ReferencedField[V <: GenFieldType](
       refField: Msg.Field[V],
       refFieldValue: V
-  )
+  ) {
+    val asFieldValue: FieldValue[V] =
+      FieldValue(refField, refFieldValue)
+  }
 
   sealed trait ArrayDef
 

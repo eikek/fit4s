@@ -1,12 +1,13 @@
 package fit4s
 
 import fit4s.FitMessage.DefinitionMessage
+import fit4s.data.Nel
+import fit4s.profile.FieldValue
 import fit4s.profile.messages.Msg
 import fit4s.profile.messages.Msg.{ArrayDef, FieldWithCodec}
 import fit4s.profile.types.{
   ArrayFieldType,
   BaseTypeCodec,
-  DateTime,
   FitBaseType,
   GenFieldType,
   LongFieldType,
@@ -16,15 +17,22 @@ import scodec.{Attempt, DecodeResult, Decoder, Err}
 import scodec.bits.BitVector
 import scodec.codecs._
 
-private object DataDecoder {
+// TODO make private
+object DataDecoder {
 
   final case class DataDecodeResult(fields: List[FieldDecodeResult]) {
+    def findField[A <: GenFieldType](ft: Msg.FieldWithCodec[A]): Option[FieldValue[A]] =
+      fields.collectFirst {
+        case r: FieldDecodeResult.Success if r.fieldValue.field == ft =>
+          r.fieldValue.asInstanceOf[FieldValue[A]]
+      }
+
     override def toString = {
       val fieldToString =
         fields
           .map {
             case r: FieldDecodeResult.Success =>
-              s"${r.globalField.fieldName}=${r.valueString}"
+              s"${r.fieldValue}"
             case r: FieldDecodeResult.LocalSuccess =>
               s"${r.localField.fieldDefNum}=${r.value}"
             case r: FieldDecodeResult.DecodeError =>
@@ -44,73 +52,28 @@ private object DataDecoder {
 
   sealed trait FieldDecodeResult {
     def widen: FieldDecodeResult = this
-
-    def messageField: Option[Msg.FieldWithCodec[GenFieldType]]
-    def successValue: Option[GenFieldType]
   }
   object FieldDecodeResult {
-    final case class InvalidValue(localField: FieldDefinition) extends FieldDecodeResult {
-      val messageField = None
-      val successValue = None
-    }
+    final case class InvalidValue(localField: FieldDefinition) extends FieldDecodeResult
 
     final case class LocalSuccess(
         localField: FieldDefinition,
         value: GenFieldType
-    ) extends FieldDecodeResult {
-      val messageField = None
-      val successValue = Some(value)
-    }
+    ) extends FieldDecodeResult
 
     final case class Success(
         localField: FieldDefinition,
-        globalField: Msg.FieldWithCodec[GenFieldType],
-        value: GenFieldType
-    ) extends FieldDecodeResult {
-      val successValue = Some(value)
-      val messageField = Some(globalField)
-
-      def scaledValue: Option[List[Double]] =
-        (value, globalField.scale) match {
-          case (LongFieldType(rv, _), List(scale)) =>
-            Some(List(rv / scale))
-
-          case (ArrayFieldType.LongArray(list), List(scale)) =>
-            Some(list.map(_ / scale))
-
-          case _ => None
-        }
-
-      def valueString: String = {
-        val amount = scaledValue
-          .map {
-            case h :: Nil => h.toString
-            case l        => l.toString
-          }
-          .getOrElse(value match {
-            case LongFieldType(rv, _) => rv.toString
-            case dt: DateTime         => dt.asInstant.toString
-            case _                    => value.toString
-          })
-        val unit = globalField.unit.map(_.name).getOrElse("")
-        s"$amount$unit"
-      }
-    }
+        fieldValue: FieldValue[GenFieldType]
+    ) extends FieldDecodeResult
 
     final case class DecodeError(
         err: Err
-    ) extends FieldDecodeResult {
-      val successValue = None
-      val messageField = None
-    }
+    ) extends FieldDecodeResult
 
     final case class NoReferenceSubfield(
         localField: FieldDefinition,
         globalField: Msg.Field[GenFieldType]
-    ) extends FieldDecodeResult {
-      val successValue = None
-      val messageField = Some(globalField)
-    }
+    ) extends FieldDecodeResult
   }
 
   def apply(definition: DefinitionMessage): Decoder[DataDecodeResult] =
@@ -251,9 +214,7 @@ private object DataDecoder {
         val subFieldMatch =
           globalField.subFields.find { subField =>
             previous.collectFirst { case p: FieldDecodeResult.Success =>
-              subField.references.exists(ref =>
-                ref.refField == p.globalField && ref.refFieldValue == p.value
-              )
+              subField.references.exists(ref => ref.asFieldValue == p.fieldValue)
             }.isDefined
           }
 
@@ -282,15 +243,16 @@ private object DataDecoder {
       .fieldCodec(localField)(dm.archType)
       .asDecoder
       .map[FieldDecodeResult.Success](value =>
-        FieldDecodeResult.Success(localField, field, value)
+        FieldDecodeResult.Success(localField, FieldValue(field, value))
       )
 
     val ac = fixedSizeBytes(
       localField.sizeBytes,
       list(field.fieldCodec(localField)(dm.archType))
     ).asDecoder
+      .map(Nel.unsafeFromList)
       .map(ArrayFieldType.apply)
-      .map(v => FieldDecodeResult.Success(localField, field, v))
+      .map(v => FieldDecodeResult.Success(localField, FieldValue(field, v)))
 
     field.isArray match {
       case ArrayDef.NoArray =>

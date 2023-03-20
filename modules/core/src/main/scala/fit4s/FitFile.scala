@@ -1,23 +1,41 @@
 package fit4s
 
-import fit4s.profile.types.MesgNum
+import fit4s.profile.types.{Event, EventType, MesgNum}
 import scodec.{Attempt, Codec, DecodeResult, Encoder, SizeBound}
 import scodec.bits.{BitVector, ByteVector}
 import scodec.codecs._
 
 final case class FitFile(
     header: FileHeader,
-    records: List[Record],
+    records: Vector[Record],
     crc: Int
 ) {
 
-  def findData(n: MesgNum): List[FitMessage.DataMessage] =
+  def findData(
+      n: MesgNum,
+      filter: FitMessage.DataMessage => Boolean = _ => true
+  ): Vector[FitMessage.DataMessage] =
     records.collect {
-      case Record.DataRecord(_, cnt) if cnt.definition.isMesgNum(n) =>
+      case Record.DataRecord(_, cnt) if cnt.definition.isMesgNum(n) && filter(cnt) =>
         cnt
     }
 
-  def dataRecords: List[FitMessage.DataMessage] =
+  def findFirstData(
+      n: MesgNum,
+      filter: FitMessage.DataMessage => Boolean = _ => true
+  ): Either[String, FitMessage.DataMessage] =
+    findData(n, filter).headOption.toRight(s"No $n message found!")
+
+  def findEvent(
+      eventType: EventType,
+      event: Event
+  ): Either[String, FitMessage.DataMessage] =
+    findFirstData(
+      MesgNum.Event,
+      _.isEvent(event, eventType)
+    )
+
+  def dataRecords: Vector[FitMessage.DataMessage] =
     records.collect { case Record.DataRecord(_, cnt) =>
       cnt
     }
@@ -42,9 +60,9 @@ object FitFile {
     )
 
   // TODO improve by using a map of definition messages instead of list
-  private def recordsCodec: Codec[List[Record]] =
-    new Codec[List[Record]] {
-      override def decode(bits: BitVector): Attempt[DecodeResult[List[Record]]] = {
+  private def recordsCodec: Codec[Vector[Record]] =
+    new Codec[Vector[Record]] {
+      override def decode(bits: BitVector): Attempt[DecodeResult[Vector[Record]]] = {
         @annotation.tailrec
         def go(
             prev: List[Record],
@@ -60,10 +78,10 @@ object FitFile {
                 err
             }
 
-        go(Nil, bits)
+        go(Nil, bits).map(_.map(_.toVector))
       }
 
-      override def encode(value: List[Record]) =
+      override def encode(value: Vector[Record]) =
         Encoder.encodeSeq(Record.encoder)(value)
 
       override def sizeBound = SizeBound.unknown

@@ -8,23 +8,28 @@ sealed trait MeasurementUnit {
 
 object MeasurementUnit {
 
+  case object Millimeter extends MeasurementUnit { val name = "mm" }
+  case object Meter extends MeasurementUnit { val name = "m" }
   case object Km extends MeasurementUnit { val name = "km" }
+
   case object Kg extends MeasurementUnit { val name = "kg" }
+
+  case object Millisecond extends MeasurementUnit { val name = "ms" }
   case object Second extends MeasurementUnit { val name = "s" }
   case object Minute extends MeasurementUnit { val name = "minutes" }
   case object Hour extends MeasurementUnit { val name = "hr" }
-  case object Millisecond extends MeasurementUnit { val name = "ms" }
   case object Year extends MeasurementUnit { val name = "years" }
+
   case object Bytes extends MeasurementUnit { val name = "bytes" }
   case object Steps extends MeasurementUnit { val name = "steps" }
-  case object Meter extends MeasurementUnit { val name = "m" }
   case object Bpm extends MeasurementUnit { val name = "bpm" }
   case object Percent extends MeasurementUnit {
     val name = "%"
     override val alternativeNames = List("percent")
   }
-  case object Millimeter extends MeasurementUnit { val name = "mm" }
+
   case object MeterPerSecond extends MeasurementUnit { val name = "m/s" }
+
   case object Rpm extends MeasurementUnit { val name = "rpm" }
   case object Watt extends MeasurementUnit { val name = "watts" }
   case object KcalPerMin extends MeasurementUnit { val name = "kcal/min" }
