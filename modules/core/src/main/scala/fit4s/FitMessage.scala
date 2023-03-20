@@ -49,7 +49,11 @@ object FitMessage {
   final case class DataMessage(definition: DefinitionMessage, raw: ByteVector)
       extends FitMessage {
 
-    lazy val decoded = DataDecoder(definition).decode(raw.bits)
+    lazy val decoded: Attempt[DataDecoder.DataDecodeResult] =
+      DataDecoder(definition).complete.decode(raw.bits).map(_.value)
+
+    lazy val isKnownSuccess: Boolean =
+      definition.profileMsg.isDefined && decoded.fold(_ => false, _ => true)
   }
 
   object DataMessage {

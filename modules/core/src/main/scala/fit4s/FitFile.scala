@@ -2,7 +2,7 @@ package fit4s
 
 import fit4s.profile.types.MesgNum
 import scodec.{Attempt, Codec, DecodeResult, Encoder, SizeBound}
-import scodec.bits.BitVector
+import scodec.bits.{BitVector, ByteVector}
 import scodec.codecs._
 
 final case class FitFile(
@@ -31,6 +31,15 @@ object FitFile {
         fixedSizeBytes(header.dataSize, recordsCodec.withContext("Record")) :: uint16L
       }
       .as[FitFile]
+
+  def decode(bv: ByteVector): Attempt[FitFile] =
+    codec.complete.decode(bv.bits).map(_.value)
+
+  def decodeUnsafe(bv: ByteVector): FitFile =
+    decode(bv).fold(
+      err => sys.error(s"Decoding FIT failed: ${err.messageWithContext}"),
+      identity
+    )
 
   // TODO improve by using a map of definition messages instead of list
   private def recordsCodec: Codec[List[Record]] =

@@ -16,7 +16,7 @@ import scodec.{Attempt, DecodeResult, Decoder, Err}
 import scodec.bits.BitVector
 import scodec.codecs._
 
-object DataDecoder {
+private object DataDecoder {
 
   final case class DataDecodeResult(fields: List[FieldDecodeResult]) {
     override def toString = {
@@ -246,8 +246,8 @@ object DataDecoder {
     withInvalidValue(localField) {
       if (globalField.isDynamicField) {
         // look in previous decoded values, if the referenced field matches
-        // todo improve data structures to better support searches
-        // todo support for components
+        // TODO improve data structures to better support searches
+        // TODO support for components
         val subFieldMatch =
           globalField.subFields.find { subField =>
             previous.collectFirst { case p: FieldDecodeResult.Success =>

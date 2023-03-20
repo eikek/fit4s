@@ -10,16 +10,12 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
   val quotes = "\"\"\""
 
   test("codecs should encode and decode") {
-    val fit = IO(getClass.getResourceAsStream("/fit/activity/2023-03-16-06-25-37.fit"))
+    val fit = IO(getClass.getResourceAsStream("/fit/activity/796A4003.FIT"))
     fs2.io
       .readInputStream(fit, 8192)
       .chunks
       .fold(Chunk.empty[Byte])(_ ++ _)
-      .map(_.toBitVector)
-      .map(bv => FitFile.codec.decode(bv))
-      .map(_.toEither.left.map(e => new Exception(e.messageWithContext)))
-      .rethrow
-      .map(_.value)
+      .evalMap(bv => IO(FitFile.decodeUnsafe(bv.toByteVector)))
       .evalTap(fit =>
         IO.println(
           s"Record count: ${fit.records.size}\nFit file: ${fit.toString.take(180)}...\n"
@@ -34,10 +30,11 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
   def printDecoded(fit: FitFile) =
     Stream
       .emits(fit.dataRecords)
+      .filter(_.isKnownSuccess)
       .map(r =>
         r.definition.profileMsg.getOrElse(r.definition.globalMessageNumber) -> r.decoded
       )
-      .take(100)
+      .take(1000)
       .evalMap(IO.println)
 
   def printTestCases(fit: FitFile): Stream[IO, Unit] =
