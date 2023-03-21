@@ -15,16 +15,36 @@ import java.time.{Duration, ZoneId}
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.FiniteDuration
 
+@annotation.nowarn
 class PlayingTest extends CatsEffectSuite with JsonCodec {
   val quotes = "\"\"\""
 
   override def munitTimeout = new FiniteDuration(300, TimeUnit.HOURS)
 
   test("codecs should encode and decode") {
-    val dir = Path("/home/sdsc/personal/garmin")
-    makeSummary(readAllIn(dir))
-      .map(_.toList.sortBy(_._1.year))
-      .flatMap(IO.println)
+    val dir = Path("/home/eike/workspace/garmin/garmin-connect/activities")
+    val sysTime =
+      Path( // 1862739919_ACTIVITY.fit=1992-01-18T18:36:18Z   ok:1862739926_ACTIVITY.fit=2012-09-27T16:26:14Z
+        "/home/eike/workspace/garmin/garmin-connect/activities/1862739926_ACTIVITY.fit"
+      )
+
+    Files[IO]
+      .readAll(sysTime)
+      .through(parseFit)
+      .evalMap(requireFit)
+      .map(_._2)
+      .flatMap(fit =>
+        Stream.emits(fit.dataRecords.map(r => r.definition.profileMsg -> r.decoded))
+      )
+      .debug()
+      .compile
+      .drain
+
+//    readAllIn(dir)
+//      .filter(_.id.createdAt.exists(_.isSystemTime))
+//      .debug()
+//      .compile
+//      .drain
 
 //    val file = IO(getClass.getResourceAsStream("/fit/activity/2023-03-20-13-29-51.fit"))
 //    for {

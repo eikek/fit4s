@@ -9,5 +9,4 @@ trait DateTimeCompanion extends GenFieldTypeCompanion[DateTime] {
     BaseTypeCodec
       .baseCodec(FitBaseType.Uint32)(bo)
       .xmap(DateTime.apply, _.rawValue)
-
 }

@@ -14,6 +14,7 @@ object TypesGenerator {
     groups.view.map { case (name, defs) =>
       if (isSingleton(defs)) makeSingleton(pkg, defs.head)
       else if (name == "date_time") makeDateTime(pkg, defs.head)
+      else if (name == "local_date_time") makeDateTime(pkg, defs.head)
       else makeTypes(pkg, name, defs)
     }.toList
 
@@ -31,9 +32,12 @@ object TypesGenerator {
          |  val typeName: String = "${td.name}"
          |  def asInstant: java.time.Instant =
          |    $objName.offset.plusSeconds(rawValue)
-         |}
-         |object $objName extends DateTimeCompanion {
          |
+         |  def isSystemTime: Boolean =
+         |    rawValue < $objName.minTimeForOffset
+         |}
+         |object $objName extends ${objName}Companion {
+         |  val minTimeForOffset: Long = 0x10000000L
          |  val offset: java.time.Instant = java.time.Instant.parse("1989-12-31T00:00:00Z")
          |
          |  val baseType: FitBaseType = FitBaseType.${snakeCamelType(td.baseType)}

@@ -65,6 +65,17 @@ object FitMessage {
           result.findField(ft)
         }
 
+    def requireField[A <: GenFieldType](
+        ft: Msg.FieldWithCodec[A]
+    ): Either[String, FieldValue[A]] =
+      findField(ft).flatMap {
+        case Some(v) => Right(v)
+        case None =>
+          Left(
+            s"Field '${ft.fieldName}' not found in msg ${definition.profileMsg.getOrElse(definition.globalMessageNumber)}."
+          )
+      }
+
     def isEvent(event: Event, eventType: EventType): Boolean =
       definition.profileMsg.contains(EventMsg) &&
         findField(EventMsg.eventType).map(_.map(_.value)).contains(Some(eventType)) &&
