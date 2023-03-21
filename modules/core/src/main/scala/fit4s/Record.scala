@@ -6,12 +6,15 @@ case class Record(header: RecordHeader, content: FitMessage)
 
 object Record {
 
+  def codec(prev: Map[Int, FitMessage.DefinitionMessage]): Codec[Record] =
+    Codec(encoder, decoder(prev))
+
   val encoder: Encoder[Record] =
     Encoder(r =>
       Encoder.encodeBoth(RecordHeader.codec, FitMessage.encoder)(r.header, r.content)
     )
 
-  def decoder(prev: List[Record]): Decoder[Record] =
+  def decoder(prev: Map[Int, FitMessage.DefinitionMessage]): Decoder[Record] =
     RecordHeader.codec.flatMap(rh => FitMessage.decoder(prev)(rh).map(m => Record(rh, m)))
 
   object DefinitionRecord {

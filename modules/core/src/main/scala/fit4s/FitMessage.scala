@@ -25,7 +25,7 @@ object FitMessage {
     def isMesgNum(n: MesgNum): Boolean =
       globalMessageNumber.exists(_ == n)
 
-    override def toString(): String =
+    override def toString: String =
       s"DefinitionMessage(mesgNum=${globalMessageNumber}, profileMsg=$profileMsg, fieldCount=$fieldCount)"
   }
 
@@ -72,7 +72,10 @@ object FitMessage {
   }
 
   object DataMessage {
-    def decoder(prev: List[Record], header: RecordHeader): Decoder[DataMessage] =
+    def decoder(
+        prev: Map[Int, FitMessage.DefinitionMessage],
+        header: RecordHeader
+    ): Decoder[DataMessage] =
       lastDefinitionMessage(prev, header).flatMap(dm => decodeDataMessage(header, dm))
 
     @annotation.nowarn
@@ -83,22 +86,17 @@ object FitMessage {
       bytes(dm.dataMessageLength).flatMap(bv => Decoder.point(DataMessage(dm, bv)))
 
     private def lastDefinitionMessage(
-        prev: List[Record],
+        prev: Map[Int, FitMessage.DefinitionMessage],
         header: RecordHeader
     ): Decoder[DefinitionMessage] = {
-      val defMsg = prev
-        .find(r =>
-          r.header.messageType.isDefinitionMessage && r.header.localMessageType == header.localMessageType
-        )
-        .map(_.content.asInstanceOf[FitMessage.DefinitionMessage])
+      val defMsg = prev.get(header.localMessageType)
 
       Decoder.point(defMsg).flatMap {
         case Some(v) => Decoder.point(v)
         case None =>
-          val allDm = prev.filter(_.header.messageType.isDefinitionMessage)
           fail(
             Err(
-              s"No definition message for $header. Looked in ${allDm.size} previous records: $allDm"
+              s"No definition message for $header. Looked in ${prev.size} previous records: $prev"
             )
           )
       }
@@ -116,7 +114,9 @@ object FitMessage {
       }
     }
 
-  def decoder(prev: List[Record])(rh: RecordHeader): Decoder[FitMessage] =
+  def decoder(
+      prev: Map[Int, FitMessage.DefinitionMessage]
+  )(rh: RecordHeader): Decoder[FitMessage] =
     rh.messageType match {
       case MessageType.DefinitionMessage =>
         DefinitionMessage.codec.upcast[FitMessage]

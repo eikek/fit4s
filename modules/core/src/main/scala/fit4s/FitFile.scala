@@ -59,26 +59,33 @@ object FitFile {
       identity
     )
 
-  // TODO improve by using a map of definition messages instead of list
   private def recordsCodec: Codec[Vector[Record]] =
     new Codec[Vector[Record]] {
       override def decode(bits: BitVector): Attempt[DecodeResult[Vector[Record]]] = {
         @annotation.tailrec
         def go(
-            prev: List[Record],
+            prev: Map[Int, FitMessage.DefinitionMessage],
+            records: List[Record],
             input: BitVector
         ): Attempt[DecodeResult[List[Record]]] =
           if (input.isEmpty)
-            Attempt.successful(DecodeResult(prev.reverse, BitVector.empty))
+            Attempt.successful(DecodeResult(records.reverse, BitVector.empty))
           else
             Record.decoder(prev).decode(input) match {
               case Attempt.Successful(result) =>
-                go(result.value :: prev, result.remainder)
+                val prevMap =
+                  result.value match {
+                    case Record.DefinitionRecord(h, m) =>
+                      prev.updated(h.localMessageType, m)
+                    case _ =>
+                      prev
+                  }
+                go(prevMap, result.value :: records, result.remainder)
               case err @ Attempt.Failure(_) =>
                 err
             }
 
-        go(Nil, bits).map(_.map(_.toVector))
+        go(Map.empty, Nil, bits).map(_.map(_.toVector))
       }
 
       override def encode(value: Vector[Record]) =

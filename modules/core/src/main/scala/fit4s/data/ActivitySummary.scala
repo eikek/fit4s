@@ -1,8 +1,8 @@
 package fit4s.data
 
 import fit4s.FitFile
-import fit4s.profile.messages.{EventMsg, FileIdMsg, RecordMsg, SessionMsg, SportMsg}
-import fit4s.profile.types.{Event, EventType, MesgNum, Sport}
+import fit4s.profile.messages.SessionMsg
+import fit4s.profile.types.{MesgNum, Sport}
 import fit4s.util._
 
 import java.time.{Duration, Instant}
@@ -58,79 +58,8 @@ final case class ActivitySummary(
 
 object ActivitySummary {
 
-  private case class RunningTotal(
-      device: DeviceProduct = DeviceProduct.Unknown,
-      sport: Sport = Sport.Generic,
-      startTime: Instant = Instant.MIN,
-      endTime: Instant = Instant.MIN,
-      distanceMeter: Distance = Distance.zero,
-      minTemp: Temperature = Temperature.maxValue,
-      maxTemp: Temperature = Temperature.minValue,
-      sumTemp: Temperature = Temperature.zero,
-      countTemp: Int = 0,
-      maxSpeed: Speed = Speed.minValue,
-      sumSpeed: Speed = Speed.zero,
-      countSpeed: Int = 0,
-      minHr: HeartRate = HeartRate.maxValue,
-      maxHr: HeartRate = HeartRate.minValue,
-      sumHr: HeartRate = HeartRate.zero,
-      countHr: Int = 0
-  ) {
-    def setHr(hr: HeartRate): RunningTotal =
-      copy(
-        minHr = Ordering[HeartRate].min(minHr, hr),
-        maxHr = Ordering[HeartRate].max(maxHr, hr),
-        sumHr = sumHr + hr,
-        countHr = countHr + 1
-      )
-
-    def setSpeed(spd: Speed): RunningTotal =
-      copy(
-        maxSpeed = Ordering[Speed].max(maxSpeed, spd),
-        sumSpeed = sumSpeed + spd,
-        countSpeed = countSpeed + 1
-      )
-
-    def setTemp(temp: Temperature): RunningTotal =
-      copy(
-        minTemp = Ordering[Temperature].min(minTemp, temp),
-        maxTemp = Ordering[Temperature].max(maxTemp, temp),
-        countTemp = countTemp + 1
-      )
-
-    def setDistance(d: Distance): RunningTotal = copy(distanceMeter = d)
-
-    def toSummary: Either[String, ActivitySummary] = {
-      val empty = RunningTotal()
-      if (startTime == empty.startTime) Left("No startTime found.")
-      else if (endTime == empty.endTime) Left("No endTime found.")
-      else if (distanceMeter == empty.distanceMeter) Left("No distance found")
-      else
-        Right(
-          ActivitySummary(
-            device,
-            sport,
-            startTime,
-            Duration.ZERO,
-            Duration.ZERO,
-            distanceMeter,
-            minTemp,
-            maxTemp,
-            Option.when(countTemp > 0)(sumTemp / countTemp),
-            maxSpeed,
-            Option.when(countSpeed > 0)(sumSpeed / countSpeed),
-            minHr,
-            maxHr,
-            Option.when(countHr > 0)(sumHr / countHr)
-          )
-        )
-    }
-
-  }
-
-  def from2(fit: FitFile): Either[String, ActivitySummary] = {
+  def from(fit: FitFile): Either[String, ActivitySummary] = {
     val device = fit.findFirstData(MesgNum.FileId).flatMap(DeviceProduct.from)
-
     fit
       .findData(MesgNum.Session)
       .mapEither(sm =>
@@ -165,55 +94,9 @@ object ActivitySummary {
           Some(avgHr.flatMap(_.heartrate).getOrElse(HeartRate.zero))
         )
       )
-      .map(_.reduce(_ combine _))
+      .flatMap(a =>
+        if (a.isEmpty) Left(s"No session mesg found") else Right(a.reduce(_ combine _))
+      )
       .flatMap(summary => device.map(dev => summary.copy(device = dev)))
   }
-
-  def from(fit: FitFile): Either[String, ActivitySummary] =
-    fit.dataRecords
-      .foldLeft(RunningTotal().asRight[String]) { (totalsEither, dm) =>
-        for {
-          totals <- totalsEither
-          next <- dm.definition.profileMsg match {
-            case Some(FileIdMsg) =>
-              DeviceProduct.from(dm).map(d => totals.copy(device = d))
-
-            case Some(SportMsg) =>
-              dm.findField(SportMsg.sport)
-                .map(_.map(s => totals.copy(sport = s.value)).getOrElse(totals))
-
-            case Some(EventMsg) if dm.isEvent(Event.Timer, EventType.Start) =>
-              dm.findField(EventMsg.timestamp)
-                .map(
-                  _.map(dt => totals.copy(startTime = dt.value.asInstant))
-                    .getOrElse(totals)
-                )
-
-            case Some(EventMsg) if dm.isEvent(Event.Timer, EventType.StopAll) =>
-              dm.findField(EventMsg.timestamp)
-                .map(
-                  _.map(dt => totals.copy(endTime = dt.value.asInstant))
-                    .getOrElse(totals)
-                )
-
-            case Some(RecordMsg) =>
-              for {
-                dist <- dm.findField(RecordMsg.distance)
-                spd <- dm.findField(RecordMsg.speed)
-                temp <- dm.findField(RecordMsg.temperature)
-                hr <- dm.findField(RecordMsg.heartRate)
-                updates = List[RunningTotal => Option[RunningTotal]](
-                  t => dist.flatMap(_.distance).map(t.setDistance),
-                  t => spd.flatMap(_.speed).map(t.setSpeed),
-                  t => temp.flatMap(_.temperature).map(t.setTemp),
-                  t => hr.flatMap(_.heartrate).map(t.setHr)
-                )
-              } yield updates.foldLeft(totals)((r, el) => el(r).getOrElse(r))
-
-            case _ =>
-              Right(totals)
-          }
-        } yield next
-      }
-      .flatMap(_.toSummary)
 }
