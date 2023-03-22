@@ -41,8 +41,6 @@ object Msg {
     def bits: List[Int]
 
     lazy val baseTypeLen: Int = BaseTypeCodec.length(fieldBaseType)
-    lazy val baseTypeCodec: ByteOrdering => Codec[Long] =
-      BaseTypeCodec.baseCodec(fieldBaseType)
 
     lazy val unit: Option[MeasurementUnit] = units.map(MeasurementUnit.fromString)
   }

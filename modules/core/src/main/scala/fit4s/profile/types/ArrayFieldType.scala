@@ -22,7 +22,7 @@ object ArrayFieldType {
       fixedSizeBytes(sizeBytes, list(bc))
         .xmapc(Nel.unsafeFromList)(_.toList)
         .xmapc(_.map(LongTypedValue(_, base)))(_.map(_.rawValue))
-        .xmapc(nl => ArrayFieldType(nl.map(_.rawValue), nl.head.fitBaseType))(arr =>
+        .xmapc(nl => ArrayFieldType(nl.map(_.rawValue), nl.head.base))(arr =>
           arr.rawValue.map(n => LongTypedValue(n, arr.base))
         )
     } else {

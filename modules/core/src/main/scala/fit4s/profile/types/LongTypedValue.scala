@@ -3,10 +3,10 @@ package fit4s.profile.types
 import scodec.Codec
 import scodec.bits.ByteOrdering
 
-final case class LongTypedValue(rawValue: Long, fitBaseType: FitBaseType)
+final case class LongTypedValue(rawValue: Long, base: FitBaseType)
     extends TypedValue[Long] {
 
-  override def typeName = "long"
+  override def typeName = base.typeName
 }
 
 object LongTypedValue {
