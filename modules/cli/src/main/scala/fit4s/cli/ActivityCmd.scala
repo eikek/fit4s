@@ -10,6 +10,5 @@ object ActivityCmd {
   }
 
   def apply(cfg: Config): IO[ExitCode] =
-    IO.pure(ExitCode.Success)
-
+    IO.println(s"Not implemented: $cfg").as(ExitCode.Error)
 }

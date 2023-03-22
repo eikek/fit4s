@@ -7,13 +7,13 @@ import com.monovore.decline.effect.CommandIOApp
 object App
     extends CommandIOApp(
       name = "fit4s",
-      header = "Inspect fit files.",
+      header = "Read fit files.",
       version = "0.0.1"
     )
     with BasicOpts {
 
   val inspectOpts: Opts[InspectCmd.Config] =
-    Opts.subcommand("inspect", "Inspect a FIT file") {
+    Opts.subcommand("inspect", "Inspect a FIT file by converting it to readable json.") {
       fileArg.map(InspectCmd.Config.apply)
     }
 

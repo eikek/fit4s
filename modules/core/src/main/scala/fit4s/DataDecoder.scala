@@ -52,28 +52,40 @@ object DataDecoder {
 
   sealed trait FieldDecodeResult {
     def widen: FieldDecodeResult = this
+    def isKnownSuccess: Boolean
   }
   object FieldDecodeResult {
-    final case class InvalidValue(localField: FieldDefinition) extends FieldDecodeResult
+    final case class InvalidValue(localField: FieldDefinition) extends FieldDecodeResult {
+      val isKnownSuccess = false
+    }
 
     final case class LocalSuccess(
         localField: FieldDefinition,
         value: GenFieldType
-    ) extends FieldDecodeResult
+    ) extends FieldDecodeResult {
+      val isKnownSuccess = false
+    }
 
     final case class Success(
         localField: FieldDefinition,
         fieldValue: FieldValue[GenFieldType]
-    ) extends FieldDecodeResult
+    ) extends FieldDecodeResult {
+      val isKnownSuccess = true
+    }
 
     final case class DecodeError(
+        localField: FieldDefinition,
         err: Err
-    ) extends FieldDecodeResult
+    ) extends FieldDecodeResult {
+      val isKnownSuccess = false
+    }
 
     final case class NoReferenceSubfield(
         localField: FieldDefinition,
         globalField: Msg.Field[GenFieldType]
-    ) extends FieldDecodeResult
+    ) extends FieldDecodeResult {
+      val isKnownSuccess = false
+    }
   }
 
   def apply(definition: DefinitionMessage): Decoder[DataDecodeResult] =
@@ -106,7 +118,7 @@ object DataDecoder {
               case Attempt.Successful(result) =>
                 go(m, result.remainder, result.value :: results)
               case Attempt.Failure(err) =>
-                val r = FieldDecodeResult.DecodeError(err)
+                val r = FieldDecodeResult.DecodeError(field, err)
                 go(m, input.drop(field.sizeBytes * 8), r :: results)
             }
         }
@@ -132,7 +144,7 @@ object DataDecoder {
             case Attempt.Successful(result) =>
               go(m, result.remainder, result.value :: results)
             case Attempt.Failure(err) =>
-              val r = FieldDecodeResult.DecodeError(err)
+              val r = FieldDecodeResult.DecodeError(field, err)
               go(m, input.drop(field.sizeBytes * 8), r :: results)
           }
       }
@@ -184,6 +196,7 @@ object DataDecoder {
             if (localField.sizeBytes % baseLen != 0) {
               bytes(localField.sizeBytes).asDecoder.map(_ =>
                 FieldDecodeResult.DecodeError(
+                  localField,
                   Err(
                     s"Field '$localField' size is not a multiple of it's base type length '$baseLen'!"
                   )

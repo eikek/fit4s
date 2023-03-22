@@ -9,7 +9,7 @@ import scodec.codecs._
   * The lengths of the records vary in size depending on the number and size of fields
   * within them.
   */
-trait RecordHeader {
+sealed trait RecordHeader {
 
   def messageType: MessageType
 

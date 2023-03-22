@@ -1,5 +1,6 @@
 package fit4s
 
+import fit4s.FitMessage.DataMessage
 import fit4s.profile.types.{Event, EventType, MesgNum}
 import scodec.{Attempt, Codec, DecodeResult, Encoder, SizeBound}
 import scodec.bits.{BitVector, ByteVector}
@@ -10,6 +11,15 @@ final case class FitFile(
     records: Vector[Record],
     crc: Int
 ) {
+
+  def filterRecords(f: Record => Boolean): FitFile =
+    copy(records = records.filter(f))
+
+  def filterDataRecords(f: DataMessage => Boolean): FitFile =
+    filterRecords {
+      case Record.DataRecord(_, r) => f(r)
+      case _                       => true
+    }
 
   def findData(
       n: MesgNum,

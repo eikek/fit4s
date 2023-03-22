@@ -33,6 +33,9 @@ object TypesGenerator {
          |  def asInstant: java.time.Instant =
          |    $objName.offset.plusSeconds(rawValue)
          |
+         |  def asLocalDateTime: java.time.LocalDateTime =
+         |    $objName.offset.plusSeconds(rawValue).atOffset(java.time.ZoneOffset.UTC).toLocalDateTime
+         |
          |  def isSystemTime: Boolean =
          |    rawValue < $objName.minTimeForOffset
          |}

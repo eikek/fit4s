@@ -12,7 +12,7 @@ final case class FieldValue[A <: GenFieldType](
     value: A
 ) {
 
-  private def scaledValue: Option[Nel[Double]] =
+  def scaledValue: Option[Nel[Double]] =
     (value, field.scale) match {
       case (LongFieldType(rv, _), List(scale)) =>
         Some(Nel.of(rv / scale))
@@ -83,18 +83,23 @@ final case class FieldValue[A <: GenFieldType](
     }
   }
 
-  override def toString: String = {
+  def valueAsString = {
     val amount = scaledValue
       .map {
         case Nel(h, Nil) => h.toString
-        case l           => l.toString
+        case l           => l.toList.toString
       }
       .getOrElse(value match {
         case LongFieldType(rv, _) => rv.toString
+        case ArrayFieldType(nel)  => nel.toList.map(_.rawValue).toString
         case dt: DateTime         => dt.asInstant.toString
+        case dt: LocalDateTime    => dt.asLocalDateTime.toString
         case _                    => value.toString
       })
     val unit = field.unit.map(_.name).getOrElse("")
-    s"${field.fieldName}=$amount$unit"
+    s"$amount$unit"
   }
+
+  override def toString: String =
+    s"${field.fieldName}=$valueAsString"
 }
