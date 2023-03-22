@@ -5,9 +5,9 @@ import scodec.Codec
 import scodec.bits.ByteOrdering
 import scodec.codecs.{fixedSizeBytes, list}
 
-final case class ArrayFieldType[A <: TypedValue](values: Nel[A]) extends TypedValue {
-  val rawValue = -1L // TODO remove?
-  val typeName = "a[]"
+final case class ArrayFieldType[A](rawValue: Nel[A], base: FitBaseType)
+    extends TypedValue[Nel[A]] {
+  val typeName = base.typeName
 }
 
 object ArrayFieldType {
@@ -16,23 +16,27 @@ object ArrayFieldType {
       sizeBytes: Int,
       bo: ByteOrdering,
       base: FitBaseType
-  ): Codec[ArrayFieldType[LongFieldType]] = {
+  ): Codec[ArrayFieldType[Long]] = {
     val bc = BaseTypeCodec.baseCodec(base)(bo)
     if (sizeBytes > BaseTypeCodec.length(base)) {
       fixedSizeBytes(sizeBytes, list(bc))
         .xmapc(Nel.unsafeFromList)(_.toList)
-        .xmapc(_.map(LongFieldType(_, base)))(_.map(_.rawValue))
-        .xmapc(ArrayFieldType.apply)(_.values)
+        .xmapc(_.map(LongTypedValue(_, base)))(_.map(_.rawValue))
+        .xmapc(nl => ArrayFieldType(nl.map(_.rawValue), nl.head.fitBaseType))(arr =>
+          arr.rawValue.map(n => LongTypedValue(n, arr.base))
+        )
     } else {
-      bc.xmap(n => ArrayFieldType(Nel.of(LongFieldType(n, base))), _.values.head.rawValue)
+      bc.xmapc(n => ArrayFieldType(Nel.of(n), base))(_.rawValue.head)
     }
   }
 
   object LongArray {
     def unapply(f: ArrayFieldType[_]): Option[Nel[Long]] =
-      f.values.head match {
-        case _: LongFieldType =>
-          Some(f.values.map(_.asInstanceOf[LongFieldType]).map(_.rawValue))
+      f.rawValue.head match {
+        case _: LongTypedValue =>
+          Some(f.rawValue.asInstanceOf[Nel[LongTypedValue]].map(_.rawValue))
+        case _: Long =>
+          Some(f.rawValue.asInstanceOf[Nel[Long]])
         case _ => None
       }
   }

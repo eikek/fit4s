@@ -56,7 +56,7 @@ object FitMessage {
     lazy val isKnownSuccess: Boolean =
       definition.profileMsg.isDefined && decoded.fold(_ => false, _ => true)
 
-    def findField[A <: TypedValue](
+    def findField[A <: TypedValue[_]](
         ft: Msg.FieldWithCodec[A]
     ): Either[String, Option[FieldValue[A]]] =
       decoded.toEither.left
@@ -65,7 +65,7 @@ object FitMessage {
           result.findField(ft)
         }
 
-    def requireField[A <: TypedValue](
+    def requireField[A <: TypedValue[_]](
         ft: Msg.FieldWithCodec[A]
     ): Either[String, FieldValue[A]] =
       findField(ft).flatMap {

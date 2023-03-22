@@ -4,10 +4,10 @@ import fit4s.DataDecoder.{DataDecodeResult, FieldDecodeResult}
 import fit4s.profile.types.{
   ArrayFieldType,
   DateTime,
-  TypedValue,
   LocalDateTime,
-  LongFieldType,
-  MesgNum
+  LongTypedValue,
+  MesgNum,
+  TypedValue
 }
 import fit4s._
 import fit4s.data.Nel
@@ -56,7 +56,7 @@ trait JsonEncoder {
       )
     )
 
-  implicit val fieldValueEncoder: Encoder[FieldValue[TypedValue]] =
+  implicit val fieldValueEncoder: Encoder[FieldValue[TypedValue[_]]] =
     Encoder.instance { fval =>
       val amount = fval.scaledValue
         .map {
@@ -64,11 +64,11 @@ trait JsonEncoder {
           case l           => l.toList.asJson
         }
         .getOrElse(fval.value match {
-          case LongFieldType(rv, _) => rv.asJson
-          case ArrayFieldType(nel)  => nel.toList.map(_.rawValue).asJson
-          case dt: DateTime         => dt.asInstant.toString.asJson
-          case dt: LocalDateTime    => dt.asLocalDateTime.toString.asJson
-          case _                    => fval.value.toString.asJson
+          case LongTypedValue(rv, _)          => rv.asJson
+          case ArrayFieldType.LongArray(nel) => nel.toList.asJson
+          case dt: DateTime                  => dt.asInstant.toString.asJson
+          case dt: LocalDateTime             => dt.asLocalDateTime.toString.asJson
+          case _                             => fval.value.toString.asJson
         })
       fval.field.unit match {
         case Some(u) => Json.obj("value" -> amount, "unit" -> u.name.asJson)
@@ -87,7 +87,7 @@ trait JsonEncoder {
               case r: FieldDecodeResult.Success =>
                 r.fieldValue.field.fieldName -> r.fieldValue.asJson
               case r: FieldDecodeResult.LocalSuccess =>
-                r.localField.fieldDefNum.toString -> r.value.rawValue.asJson
+                r.localField.fieldDefNum.toString -> r.value.toString.asJson
               case r: FieldDecodeResult.DecodeError =>
                 r.localField.fieldDefNum.toString -> r.err.messageWithContext.asJson
               case r: FieldDecodeResult.InvalidValue =>

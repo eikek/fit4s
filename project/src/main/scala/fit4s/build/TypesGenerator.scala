@@ -28,7 +28,7 @@ object TypesGenerator {
          |/* This file has been generated. */
          |
          |/** ${td.comment.getOrElse("")} */
-         |final case class $objName(rawValue: Long) extends TypedValue {
+         |final case class $objName(rawValue: Long) extends TypedValue[Long] {
          |  val typeName: String = "${td.name}"
          |  def asInstant: java.time.Instant =
          |    $objName.offset.plusSeconds(rawValue)
@@ -60,7 +60,7 @@ object TypesGenerator {
          |import scodec.bits.ByteOrdering
          |
          |/** ${td.comment.getOrElse("")} */
-         |final case class $objName(rawValue: Long) extends TypedValue {
+         |final case class $objName(rawValue: Long) extends TypedValue[Long] {
          |  val typeName: String = "${td.name}"
          |}
          |object $objName extends TypedValueCompanion[$objName] {
@@ -97,7 +97,7 @@ object TypesGenerator {
       s"""package $pkg.types
          |/* This file has been generated. */
          |
-         |sealed trait $objName extends TypedValue
+         |sealed trait $objName extends TypedValue[Long]
          |object $objName extends EnumValueCompanion[$objName] {
          |
          |$values

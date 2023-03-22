@@ -9,22 +9,22 @@ import scodec.bits.ByteOrdering
 import java.util.concurrent.atomic.AtomicReference
 
 abstract class Msg {
-  private[this] val fields: AtomicReference[Map[Int, Msg.Field[TypedValue]]] =
-    new AtomicReference[Map[Int, Msg.Field[TypedValue]]](Map.empty)
+  private[this] val fields: AtomicReference[Map[Int, Msg.Field[TypedValue[_]]]] =
+    new AtomicReference[Map[Int, Msg.Field[TypedValue[_]]]](Map.empty)
 
-  protected def add[A <: TypedValue](field: Msg.Field[A]): Msg.Field[A] = {
+  protected def add[A <: TypedValue[_]](field: Msg.Field[A]): Msg.Field[A] = {
     fields.updateAndGet(
-      _.updated(field.fieldDefinitionNumber, field.asInstanceOf[Msg.Field[TypedValue]])
+      _.updated(field.fieldDefinitionNumber, field.asInstanceOf[Msg.Field[TypedValue[_]]])
     )
     field
   }
 
   def globalMessageNumber: MesgNum
 
-  lazy val allFields: List[Msg.Field[TypedValue]] =
+  lazy val allFields: List[Msg.Field[TypedValue[_]]] =
     fields.get().values.toList
 
-  def findField(fieldDefNumber: Int): Option[Msg.Field[TypedValue]] =
+  def findField(fieldDefNumber: Int): Option[Msg.Field[TypedValue[_]]] =
     fields.get().get(fieldDefNumber)
 }
 
@@ -47,7 +47,7 @@ object Msg {
     lazy val unit: Option[MeasurementUnit] = units.map(MeasurementUnit.fromString)
   }
 
-  trait FieldWithCodec[A <: TypedValue] extends FieldAttributes {
+  trait FieldWithCodec[A <: TypedValue[_]] extends FieldAttributes {
     def fieldName: String
     def fieldBaseType: FitBaseType
     def fieldCodec: FieldDefinition => ByteOrdering => Codec[A]
@@ -59,7 +59,7 @@ object Msg {
     def bits: List[Int]
   }
 
-  final case class Field[A <: TypedValue](
+  final case class Field[A <: TypedValue[_]](
       fieldDefinitionNumber: Int,
       fieldName: String,
       fieldTypeName: String,
@@ -71,12 +71,12 @@ object Msg {
       offset: Option[Double],
       units: Option[String],
       bits: List[Int],
-      subFields: List[SubField[_ <: TypedValue]]
+      subFields: List[SubField[_ <: TypedValue[_]]]
   ) extends FieldWithCodec[A] {
     val isDynamicField: Boolean = subFields.nonEmpty
   }
 
-  final case class SubField[A <: TypedValue](
+  final case class SubField[A <: TypedValue[_]](
       references: List[ReferencedField[_]],
       fieldName: String,
       fieldTypeName: String,
@@ -90,7 +90,7 @@ object Msg {
       bits: List[Int]
   ) extends FieldWithCodec[A]
 
-  final case class ReferencedField[V <: TypedValue](
+  final case class ReferencedField[V <: TypedValue[_]](
       refField: Msg.Field[V],
       refFieldValue: V
   ) {

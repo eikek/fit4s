@@ -7,14 +7,14 @@ import fit4s.util._
 
 import java.time.Duration
 
-final case class FieldValue[A <: TypedValue](
+final case class FieldValue[A <: TypedValue[_]](
     field: Msg.FieldAttributes,
     value: A
 ) {
 
   def scaledValue: Option[Nel[Double]] =
     (value, field.scale) match {
-      case (LongFieldType(rv, _), List(scale)) =>
+      case (LongTypedValue(rv, _), List(scale)) =>
         Some(Nel.of(rv / scale))
 
       case (ArrayFieldType.LongArray(list), List(scale)) =>
@@ -26,7 +26,7 @@ final case class FieldValue[A <: TypedValue](
   private def numericSingleValue: Option[Either[Long, Double]] =
     scaledValue.map(_.head).map(_.asRight[Long]).orElse {
       value match {
-        case LongFieldType(n, _)            => Some(n.asLeft[Double])
+        case LongTypedValue(n, _)            => Some(n.asLeft[Double])
         case ArrayFieldType.LongArray(list) => Some(list.head.asLeft[Double])
         case _                              => None
       }
@@ -90,11 +90,11 @@ final case class FieldValue[A <: TypedValue](
         case l           => l.toList.toString
       }
       .getOrElse(value match {
-        case LongFieldType(rv, _) => rv.toString
-        case ArrayFieldType(nel)  => nel.toList.map(_.rawValue).toString
-        case dt: DateTime         => dt.asInstant.toString
-        case dt: LocalDateTime    => dt.asLocalDateTime.toString
-        case _                    => value.toString
+        case LongTypedValue(rv, _)   => rv.toString
+        case ArrayFieldType(nel, _) => nel.toList.toString
+        case dt: DateTime           => dt.asInstant.toString
+        case dt: LocalDateTime      => dt.asLocalDateTime.toString
+        case _                      => value.toString
       })
     val unit = field.unit.map(_.name).getOrElse("")
     s"$amount$unit"

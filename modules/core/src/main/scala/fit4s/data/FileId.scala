@@ -32,6 +32,6 @@ object FileId {
       serial.value.rawValue,
       created.map(_.value),
       number.map(_.value.rawValue),
-      prodname.map(_.value.value)
+      prodname.map(_.value.rawValue)
     )
 }
