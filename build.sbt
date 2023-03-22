@@ -62,7 +62,6 @@ lazy val noPublish = Seq(
 
 val testSettings = Seq(
   libraryDependencies ++= (Dependencies.munit ++
-    Dependencies.logback ++
     Dependencies.fs2 ++
     Dependencies.fs2Io ++
     Dependencies.circe).map(_ % Test),
@@ -107,10 +106,27 @@ lazy val core = project
     Compile / sourceGenerators += generateProfile.taskValue
   )
 
+lazy val cli = project
+  .in(file("modules/cli"))
+  .settings(sharedSettings)
+  .settings(testSettings)
+  .settings(scalafixSettings)
+  .settings(
+    name := "fit4s-cli",
+    description := "A simple command line interface to inspect fit files",
+    libraryDependencies ++=
+      Dependencies.fs2 ++
+        Dependencies.decline ++
+        Dependencies.circeCore ++
+        Dependencies.h2 ++
+        Dependencies.doobie
+  )
+  .dependsOn(core % "compile->compile,test->test")
+
 lazy val root = project
   .in(file("."))
   .settings(sharedSettings)
   .settings(
     name := "fit4s-root"
   )
-  .aggregate(core)
+  .aggregate(core, cli)

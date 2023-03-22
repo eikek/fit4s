@@ -7,6 +7,9 @@ object Dependencies {
     val scala3 = "3.1.2"
 
     val circe = "0.14.5"
+    val decline = "2.4.1"
+    val doobie = "1.0.0-RC2"
+    val h2 = "2.1.214"
     val munit = "0.7.29"
     val munitCatsEffect = "1.0.7"
     val logback = "1.4.5"
@@ -18,11 +21,28 @@ object Dependencies {
     val organizeImports = "0.6.0"
   }
 
-  val circe = Seq(
-    "io.circe" %% "circe-core" % V.circe,
-    "io.circe" %% "circe-generic" % V.circe,
-    "io.circe" %% "circe-parser" % V.circe
+  val h2 = Seq(
+    "com.h2database" % "h2" % V.h2
   )
+
+  val doobie = Seq(
+    "org.tpolecat" %% "doobie-core" % V.doobie
+    // "org.tpolecat" %% "doobie-hikari" % DoobieVersion
+  )
+
+  val decline = Seq(
+    "com.monovore" %% "decline" % V.decline,
+    "com.monovore" %% "decline-effect" % V.decline
+  )
+
+  val circeCore = Seq(
+    "io.circe" %% "circe-core" % V.circe,
+    "io.circe" %% "circe-generic" % V.circe
+  )
+  val circeParser = Seq(
+     "io.circe" %% "circe-parser" % V.circe
+  )
+  val circe = circeCore ++ circeParser
 
   val organizeImports = Seq(
     "com.github.liancheng" %% "organize-imports" % V.organizeImports
