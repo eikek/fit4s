@@ -7,7 +7,7 @@ import fit4s.util._
 
 import java.time.Duration
 
-final case class FieldValue[A <: GenFieldType](
+final case class FieldValue[A <: TypedValue](
     field: Msg.FieldAttributes,
     value: A
 ) {

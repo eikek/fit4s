@@ -4,7 +4,7 @@ import scodec.Codec
 import scodec.bits.ByteOrdering
 
 final case class LongFieldType(rawValue: Long, fitBaseType: FitBaseType)
-    extends GenFieldType {
+    extends TypedValue {
 
   override def typeName = "long"
 }

@@ -9,7 +9,7 @@ import fit4s.profile.types.{
   ArrayFieldType,
   BaseTypeCodec,
   FitBaseType,
-  GenFieldType,
+  TypedValue,
   LongFieldType,
   StringFieldType
 }
@@ -21,7 +21,7 @@ import scodec.codecs._
 object DataDecoder {
 
   final case class DataDecodeResult(fields: List[FieldDecodeResult]) {
-    def findField[A <: GenFieldType](ft: Msg.FieldWithCodec[A]): Option[FieldValue[A]] =
+    def findField[A <: TypedValue](ft: Msg.FieldWithCodec[A]): Option[FieldValue[A]] =
       fields.collectFirst {
         case r: FieldDecodeResult.Success if r.fieldValue.field == ft =>
           r.fieldValue.asInstanceOf[FieldValue[A]]
@@ -61,14 +61,14 @@ object DataDecoder {
 
     final case class LocalSuccess(
         localField: FieldDefinition,
-        value: GenFieldType
+        value: TypedValue
     ) extends FieldDecodeResult {
       val isKnownSuccess = false
     }
 
     final case class Success(
         localField: FieldDefinition,
-        fieldValue: FieldValue[GenFieldType]
+        fieldValue: FieldValue[TypedValue]
     ) extends FieldDecodeResult {
       val isKnownSuccess = true
     }
@@ -82,7 +82,7 @@ object DataDecoder {
 
     final case class NoReferenceSubfield(
         localField: FieldDefinition,
-        globalField: Msg.Field[GenFieldType]
+        globalField: Msg.Field[TypedValue]
     ) extends FieldDecodeResult {
       val isKnownSuccess = false
     }
@@ -167,7 +167,7 @@ object DataDecoder {
 
   private def localResult(
       localField: FieldDefinition
-  )(d: Decoder[GenFieldType]): Decoder[FieldDecodeResult] =
+  )(d: Decoder[TypedValue]): Decoder[FieldDecodeResult] =
     Decoder(bits =>
       d.decode(bits) match {
         case Attempt.Successful(result) =>
@@ -217,7 +217,7 @@ object DataDecoder {
       previous: List[FieldDecodeResult],
       dm: DefinitionMessage,
       localField: FieldDefinition,
-      globalField: Msg.Field[GenFieldType]
+      globalField: Msg.Field[TypedValue]
   ): Decoder[FieldDecodeResult] =
     withInvalidValue(localField) {
       if (globalField.isDynamicField) {
@@ -236,7 +236,7 @@ object DataDecoder {
             decodeFieldWithCodec(
               dm,
               localField,
-              subField.asInstanceOf[Msg.SubField[GenFieldType]]
+              subField.asInstanceOf[Msg.SubField[TypedValue]]
             )
 
           case None =>
@@ -250,7 +250,7 @@ object DataDecoder {
   private def decodeFieldWithCodec(
       dm: DefinitionMessage,
       localField: FieldDefinition,
-      field: FieldWithCodec[GenFieldType]
+      field: FieldWithCodec[TypedValue]
   ): Decoder[FieldDecodeResult] = {
     val fc = field
       .fieldCodec(localField)(dm.archType)

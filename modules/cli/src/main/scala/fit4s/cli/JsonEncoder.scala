@@ -4,7 +4,7 @@ import fit4s.DataDecoder.{DataDecodeResult, FieldDecodeResult}
 import fit4s.profile.types.{
   ArrayFieldType,
   DateTime,
-  GenFieldType,
+  TypedValue,
   LocalDateTime,
   LongFieldType,
   MesgNum
@@ -56,7 +56,7 @@ trait JsonEncoder {
       )
     )
 
-  implicit val fieldValueEncoder: Encoder[FieldValue[GenFieldType]] =
+  implicit val fieldValueEncoder: Encoder[FieldValue[TypedValue]] =
     Encoder.instance { fval =>
       val amount = fval.scaledValue
         .map {

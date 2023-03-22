@@ -3,7 +3,7 @@ package fit4s.profile.types
 import scodec.Codec
 import scodec.codecs._
 
-final case class StringFieldType(value: String) extends GenFieldType {
+final case class StringFieldType(value: String) extends TypedValue {
   override def rawValue = value.hashCode.toLong // TODO :-)
 
   override def typeName = "string"

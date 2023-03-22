@@ -4,7 +4,7 @@ import scodec.Codec
 import scodec.bits.{ByteOrdering, ByteVector}
 import scodec.codecs._
 
-trait GenFieldType {
+trait TypedValue {
 
   def rawValue: Long
 
@@ -12,7 +12,7 @@ trait GenFieldType {
 
 }
 
-trait GenFieldTypeCompanion[A <: GenFieldType] {
+trait TypedValueCompanion[A <: TypedValue] {
   def codec(bo: ByteOrdering): Codec[A]
 
   protected def baseType: FitBaseType
@@ -20,7 +20,7 @@ trait GenFieldTypeCompanion[A <: GenFieldType] {
   lazy val invalidValue: ByteVector = BaseTypeCodec.invalidValue(baseType)
 }
 
-trait EnumFieldTypeCompanion[A <: GenFieldType] extends GenFieldTypeCompanion[A] {
+trait EnumValueCompanion[A <: TypedValue] extends TypedValueCompanion[A] {
   final def codec(bo: ByteOrdering): Codec[A] =
     mappedEnum[A, Long](BaseTypeCodec.baseCodec(baseType)(bo), allMap)
 

@@ -5,7 +5,7 @@ import scodec.Codec
 import scodec.bits.ByteOrdering
 import scodec.codecs.{fixedSizeBytes, list}
 
-final case class ArrayFieldType[A <: GenFieldType](values: Nel[A]) extends GenFieldType {
+final case class ArrayFieldType[A <: TypedValue](values: Nel[A]) extends TypedValue {
   val rawValue = -1L // TODO remove?
   val typeName = "a[]"
 }

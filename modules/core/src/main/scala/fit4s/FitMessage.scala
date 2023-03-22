@@ -3,7 +3,7 @@ package fit4s
 import fit4s.codecs._
 import fit4s.profile.FieldValue
 import fit4s.profile.messages.{EventMsg, FitMessages, Msg}
-import fit4s.profile.types.{Event, EventType, GenFieldType, MesgNum}
+import fit4s.profile.types.{Event, EventType, TypedValue, MesgNum}
 import scodec._
 import scodec.bits.{ByteOrdering, ByteVector}
 import scodec.codecs._
@@ -56,7 +56,7 @@ object FitMessage {
     lazy val isKnownSuccess: Boolean =
       definition.profileMsg.isDefined && decoded.fold(_ => false, _ => true)
 
-    def findField[A <: GenFieldType](
+    def findField[A <: TypedValue](
         ft: Msg.FieldWithCodec[A]
     ): Either[String, Option[FieldValue[A]]] =
       decoded.toEither.left
@@ -65,7 +65,7 @@ object FitMessage {
           result.findField(ft)
         }
 
-    def requireField[A <: GenFieldType](
+    def requireField[A <: TypedValue](
         ft: Msg.FieldWithCodec[A]
     ): Either[String, FieldValue[A]] =
       findField(ft).flatMap {

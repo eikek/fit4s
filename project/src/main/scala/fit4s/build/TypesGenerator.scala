@@ -28,7 +28,7 @@ object TypesGenerator {
          |/* This file has been generated. */
          |
          |/** ${td.comment.getOrElse("")} */
-         |final case class $objName(rawValue: Long) extends GenFieldType {
+         |final case class $objName(rawValue: Long) extends TypedValue {
          |  val typeName: String = "${td.name}"
          |  def asInstant: java.time.Instant =
          |    $objName.offset.plusSeconds(rawValue)
@@ -60,10 +60,10 @@ object TypesGenerator {
          |import scodec.bits.ByteOrdering
          |
          |/** ${td.comment.getOrElse("")} */
-         |final case class $objName(rawValue: Long) extends GenFieldType {
+         |final case class $objName(rawValue: Long) extends TypedValue {
          |  val typeName: String = "${td.name}"
          |}
-         |object $objName extends GenFieldTypeCompanion[$objName] {
+         |object $objName extends TypedValueCompanion[$objName] {
          |  override def codec(bo: ByteOrdering): Codec[$objName] =
          |    fit4s.codecs.ulongx(32, bo).xmap($objName.apply(_), _.rawValue)
          |
@@ -97,8 +97,8 @@ object TypesGenerator {
       s"""package $pkg.types
          |/* This file has been generated. */
          |
-         |sealed trait $objName extends GenFieldType
-         |object $objName extends EnumFieldTypeCompanion[$objName] {
+         |sealed trait $objName extends TypedValue
+         |object $objName extends EnumValueCompanion[$objName] {
          |
          |$values
          |
