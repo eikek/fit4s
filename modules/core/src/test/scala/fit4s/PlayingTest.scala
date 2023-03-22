@@ -25,7 +25,7 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
     val dir = Path("/home/eike/workspace/garmin/garmin-connect/activities")
     val sysTime =
       Path( // 1862739919_ACTIVITY.fit=1992-01-18T18:36:18Z   ok:1862739926_ACTIVITY.fit=2012-09-27T16:26:14Z
-        "/home/eike/workspace/garmin/garmin-connect/activities/1862739926_ACTIVITY.fit"
+        "/Users/ekettner/personal/fit4s/modules/core/src/test/resources/fit/activity/1862739919_ACTIVITY.fit"
       )
 
     Files[IO]
@@ -33,8 +33,8 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
       .through(parseFit)
       .evalMap(requireFit)
       .map(_._2)
-      .flatMap(fit =>
-        Stream.emits(fit.dataRecords.map(r => r.definition.profileMsg -> r.decoded))
+      .evalMap(fit => printActivitySummary(fit)
+      // Stream.emits(fit.dataRecords.map(r => r.definition.profileMsg -> r.decoded))
       )
       .debug()
       .compile
@@ -122,18 +122,17 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
           Stream.eval(IO.println(s"ERROR: Not an activity fit: $err")).drain
       }
 
-  def makeSummary(in: Stream[IO, ActivitySummary]) = {
-    Stream.eval(IO.println("INFO: Creating summary ..."))
-    in.compile.toVector
-      .map(_.groupBy(Group.key))
-      .map(
-        _.view
-          .mapValues(activities =>
-            Distance.meter(activities.map(_.distance).map(_.meter).sum)
-          )
-          .toMap
-      )
-  }
+  def makeSummary(in: Stream[IO, ActivitySummary]) =
+    IO.println("INFO: Creating summary ...") >>
+      in.compile.toVector
+        .map(_.groupBy(Group.key))
+        .map(
+          _.view
+            .mapValues(activities =>
+              Distance.meter(activities.map(_.distance).map(_.meter).sum)
+            )
+            .toMap
+        )
 
   def printDecoded(fit: FitFile) =
     Stream

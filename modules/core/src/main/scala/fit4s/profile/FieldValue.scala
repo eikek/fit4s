@@ -74,6 +74,15 @@ final case class FieldValue[A <: GenFieldType](
     }
   }
 
+  def calories: Option[Calories] = {
+    val value = numericSingleValue.map(_.fold(_.toDouble, identity))
+    field.unit match {
+      case Some(MeasurementUnit.Calories) => value.map(Calories.cal)
+      case Some(MeasurementUnit.Kcal)     => value.map(Calories.kcal)
+      case _                              => None
+    }
+  }
+
   override def toString: String = {
     val amount = scaledValue
       .map {

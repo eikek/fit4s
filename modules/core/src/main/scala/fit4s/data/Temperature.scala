@@ -7,7 +7,10 @@ final class Temperature private (val celcius: Double) extends AnyVal {
 
   def +(temp: Temperature): Temperature = new Temperature(celcius + temp.celcius)
 
-  override def toString = s"$celcius°C"
+  override def toString =
+    if (this == Temperature.maxValue) "Max"
+    else if (this == Temperature.minValue) "Min"
+    else f"$celcius%2.2f°C"
 }
 
 object Temperature {

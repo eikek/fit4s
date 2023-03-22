@@ -3,7 +3,7 @@ package fit4s.data
 import fit4s.FitFile
 import fit4s.FitMessage.DataMessage
 import fit4s.profile.messages.SessionMsg
-import fit4s.profile.types.{MesgNum, Sport}
+import fit4s.profile.types.{MesgNum, Sport, SubSport}
 import fit4s.util._
 
 import java.time.{Duration, Instant}
@@ -11,11 +11,13 @@ import java.time.{Duration, Instant}
 final case class ActivitySummary(
     id: FileId,
     sport: Sport,
+    subSport: SubSport,
     startTime: Instant,
     movingTime: Duration,
     elapsedTime: Duration,
+    calories: Calories,
     distance: Distance,
-    minTemp: Temperature,
+    minTemp: Temperature, // TODO make optional!
     maxTemp: Temperature,
     avgTemp: Option[Temperature],
     maxSpeed: Speed,
@@ -25,24 +27,24 @@ final case class ActivitySummary(
     avgHr: Option[HeartRate]
 ) {
 
-  def combine(other: ActivitySummary): ActivitySummary =
+  private def combine(other: ActivitySummary): ActivitySummary =
     ActivitySummary(
       id = id,
       sport =
         if (sport == Sport.Generic) other.sport
         else sport,
+      subSport =
+        if (subSport == SubSport.Generic) other.subSport
+        else
+          subSport,
       startTime = if (startTime.isBefore(other.startTime)) startTime else other.startTime,
       movingTime = movingTime.plus(other.movingTime),
       elapsedTime = elapsedTime.plus(other.elapsedTime),
+      calories = calories + other.calories,
       distance = distance + other.distance,
       minTemp = Ordering[Temperature].min(minTemp, other.minTemp),
       maxTemp = Ordering[Temperature].max(maxTemp, other.maxTemp),
-      avgTemp = (avgTemp, other.avgTemp) match {
-        case (Some(a), Some(b)) => Some((a + b) / 2)
-        case (Some(a), _)       => Some(a)
-        case (_, Some(b))       => Some(b)
-        case (_, _)             => None
-      },
+      avgTemp,
       maxSpeed = Ordering[Speed].max(maxSpeed, other.maxSpeed),
       avgSpeed,
       minHr = Ordering[HeartRate].min(minHr, other.minHr),
@@ -51,8 +53,8 @@ final case class ActivitySummary(
     )
 
   override def toString =
-    s"ActivitySummary(id=$id, sport=$sport, start=$startTime, moving=$movingTime, " +
-      s"elapsed=$elapsedTime, distance=$distance, minTemp=$minTemp, maxTemp=$maxTemp, " +
+    s"ActivitySummary(id=$id, sport=$sport, subSport=$subSport, start=$startTime, moving=$movingTime, " +
+      s"elapsed=$elapsedTime, calories=$calories, distance=$distance, minTemp=$minTemp, maxTemp=$maxTemp, " +
       s"avgTemp=$avgTemp, maxSpeed=$maxSpeed, avgSpeed=${avgSpeed.getOrElse("n.a.")}, " +
       s"minHr=$minHr, maxHr=$maxHr, avgHr=${avgHr.getOrElse("n.a")})"
 }
@@ -62,9 +64,11 @@ object ActivitySummary {
   def from(id: FileId, sessionMsg: DataMessage): Either[String, ActivitySummary] =
     for {
       sport <- sessionMsg.findField(SessionMsg.sport)
+      subSport <- sessionMsg.findField(SessionMsg.subSport)
       start <- sessionMsg.findField(SessionMsg.startTime)
       movingTime <- sessionMsg.findField(SessionMsg.totalMovingTime)
       elapsedTime <- sessionMsg.findField(SessionMsg.totalElapsedTime)
+      kcal <- sessionMsg.findField(SessionMsg.totalCalories)
       distance <- sessionMsg.findField(SessionMsg.totalDistance)
       maxSpeed <- sessionMsg.findField(SessionMsg.maxSpeed)
       avgSpeed <- sessionMsg.findField(SessionMsg.avgSpeed)
@@ -77,9 +81,11 @@ object ActivitySummary {
     } yield ActivitySummary(
       id,
       sport.map(_.value).getOrElse(Sport.Generic),
+      subSport.map(_.value).getOrElse(SubSport.Generic),
       start.map(_.value.asInstant).getOrElse(Instant.MIN),
       movingTime.flatMap(_.duration).getOrElse(Duration.ZERO),
       elapsedTime.flatMap(_.duration).getOrElse(Duration.ZERO),
+      kcal.flatMap(_.calories).getOrElse(Calories.zero),
       distance.flatMap(_.distance).getOrElse(Distance.zero),
       minTemp.flatMap(_.temperature).getOrElse(Temperature.minValue),
       maxTemp.flatMap(_.temperature).getOrElse(Temperature.maxValue),
@@ -95,7 +101,24 @@ object ActivitySummary {
     fileId <- fit.findFirstData(MesgNum.FileId).flatMap(FileId.from)
     activities <- fit.findData(MesgNum.Session).mapEither(from(fileId, _))
     result <-
-      if (activities.isEmpty) Left(s"No session mesg found")
+      if (activities.isEmpty) Left(s"No session message found")
       else Right(activities.reduce(_ combine _))
-  } yield result
+    // estimate averages...
+    // TODO no average when Option.empty!
+    avgSpeed = Option
+      .when(activities.nonEmpty)(
+        activities.flatMap(_.avgSpeed.map(_.meterPerSecond)).sum / activities.size
+      )
+      .map(Speed.meterPerSecond)
+    avgTemp = Option
+      .when(activities.nonEmpty)(
+        activities.flatMap(_.avgTemp.map(_.celcius)).sum / activities.size
+      )
+      .map(Temperature.celcius)
+    avgHr = Option
+      .when(activities.nonEmpty)(
+        activities.flatMap(_.avgHr.map(_.bpm)).sum / activities.size
+      )
+      .map(HeartRate.bpm)
+  } yield result.copy(avgSpeed = avgSpeed, avgTemp = avgTemp, avgHr = avgHr)
 }

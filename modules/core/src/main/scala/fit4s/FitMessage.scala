@@ -26,7 +26,7 @@ object FitMessage {
       globalMessageNumber.exists(_ == n)
 
     override def toString: String =
-      s"DefinitionMessage(mesgNum=${globalMessageNumber}, profileMsg=$profileMsg, fieldCount=$fieldCount)"
+      s"DefinitionMessage(mesgNum=$globalMessageNumber, profileMsg=$profileMsg, fieldCount=$fieldCount)"
   }
 
   object DefinitionMessage {
@@ -89,6 +89,7 @@ object FitMessage {
     ): Decoder[DataMessage] =
       lastDefinitionMessage(prev, header).flatMap(dm => decodeDataMessage(header, dm))
 
+    // TODO compressed timestamp header: pass offset to data message
     @annotation.nowarn
     private def decodeDataMessage(
         header: RecordHeader,
