@@ -12,19 +12,62 @@ final case class ArrayFieldType[A](rawValue: Nel[A], base: FitBaseType)
 
 object ArrayFieldType {
 
+  def codec(
+      sizeBytes: Int,
+      bo: ByteOrdering,
+      base: FitBaseType
+  ): Codec[ArrayFieldType[_]] =
+    (base match {
+      case FitBaseType.Enum    => codecT(sizeBytes, bo, FitBaseType.Enum)
+      case FitBaseType.Sint8   => codecT(sizeBytes, bo, FitBaseType.Sint8)
+      case FitBaseType.Uint8   => codecT(sizeBytes, bo, FitBaseType.Uint8)
+      case FitBaseType.Sint16  => codecT(sizeBytes, bo, FitBaseType.Sint16)
+      case FitBaseType.Uint16  => codecT(sizeBytes, bo, FitBaseType.Uint16)
+      case FitBaseType.Sint32  => codecT(sizeBytes, bo, FitBaseType.Sint32)
+      case FitBaseType.Uint32  => codecT(sizeBytes, bo, FitBaseType.Uint32)
+      case FitBaseType.String  => codecT(sizeBytes, bo, FitBaseType.String)
+      case FitBaseType.Float32 => codecT(sizeBytes, bo, FitBaseType.Float32)
+      case FitBaseType.Float64 => codecT(sizeBytes, bo, FitBaseType.Float64)
+      case FitBaseType.Uint8z  => codecT(sizeBytes, bo, FitBaseType.Uint8z)
+      case FitBaseType.Uint16z => codecT(sizeBytes, bo, FitBaseType.Uint16z)
+      case FitBaseType.Uint32z => codecT(sizeBytes, bo, FitBaseType.Uint32z)
+      case FitBaseType.Byte    => codecT(sizeBytes, bo, FitBaseType.Byte)
+      case FitBaseType.Sint64  => codecT(sizeBytes, bo, FitBaseType.Sint64)
+      case FitBaseType.Uint64  => codecT(sizeBytes, bo, FitBaseType.Uint64)
+      case FitBaseType.Uint64z => codecT(sizeBytes, bo, FitBaseType.Uint64z)
+    }).asInstanceOf[Codec[ArrayFieldType[_]]]
+
   def codecLong(
       sizeBytes: Int,
       bo: ByteOrdering,
       base: FitBaseType
-  )(implicit e: BaseTypeCodec[base.type, Long]): Codec[ArrayFieldType[Long]] = {
+  )(implicit e: BaseTypeCodec[base.type, Long]): Codec[ArrayFieldType[Long]] =
+    codecT[Long](sizeBytes, bo, base)
+
+  def codecDouble(
+      sizeBytes: Int,
+      bo: ByteOrdering,
+      base: FitBaseType
+  )(implicit e: BaseTypeCodec[base.type, Double]): Codec[ArrayFieldType[Double]] =
+    codecT[Double](sizeBytes, bo, base)
+
+  def codecString(
+      sizeBytes: Int,
+      bo: ByteOrdering,
+      base: FitBaseType
+  )(implicit e: BaseTypeCodec[base.type, String]): Codec[ArrayFieldType[String]] =
+    codecT[String](sizeBytes, bo, base)
+
+  def codecT[T](
+      sizeBytes: Int,
+      bo: ByteOrdering,
+      base: FitBaseType
+  )(implicit e: BaseTypeCodec[base.type, T]): Codec[ArrayFieldType[T]] = {
     val bc = BaseTypeCodec.baseCodec(base, bo)
     if (sizeBytes > BaseTypeCodec.length(base)) {
       fixedSizeBytes(sizeBytes, list(bc))
         .xmapc(Nel.unsafeFromList)(_.toList)
-        .xmapc(_.map(LongTypedValue(_, base)))(_.map(_.rawValue))
-        .xmapc(nl => ArrayFieldType(nl.map(_.rawValue), nl.head.base))(arr =>
-          arr.rawValue.map(n => LongTypedValue(n, arr.base))
-        )
+        .xmapc(nl => ArrayFieldType(nl, base))(arr => arr.rawValue)
     } else {
       bc.xmapc(n => ArrayFieldType(Nel.of(n), base))(_.rawValue.head)
     }
@@ -37,6 +80,28 @@ object ArrayFieldType {
           Some(f.rawValue.asInstanceOf[Nel[LongTypedValue]].map(_.rawValue))
         case _: Long =>
           Some(f.rawValue.asInstanceOf[Nel[Long]])
+        case _ => None
+      }
+  }
+
+  object FloatArray {
+    def unapply(f: ArrayFieldType[_]): Option[Nel[Double]] =
+      f.rawValue.head match {
+        case _: FloatTypedValue =>
+          Some(f.rawValue.asInstanceOf[Nel[FloatTypedValue]].map(_.rawValue))
+        case _: Double =>
+          Some(f.rawValue.asInstanceOf[Nel[Double]])
+        case _ => None
+      }
+  }
+
+  object StringArray {
+    def unapply(f: ArrayFieldType[_]): Option[Nel[String]] =
+      f.rawValue.head match {
+        case _: StringTypedValue =>
+          Some(f.rawValue.asInstanceOf[Nel[StringTypedValue]].map(_.rawValue))
+        case _: String =>
+          Some(f.rawValue.asInstanceOf[Nel[String]])
         case _ => None
       }
   }

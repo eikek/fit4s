@@ -1,20 +1,12 @@
 package fit4s.cli
 
-import fit4s.DataDecoder.{DataDecodeResult, FieldDecodeResult}
-import fit4s.profile.types.{
-  ArrayFieldType,
-  DateTime,
-  LocalDateTime,
-  LongTypedValue,
-  MesgNum,
-  TypedValue
-}
 import fit4s._
 import fit4s.data.Nel
 import fit4s.profile.FieldValue
-import io.circe.{Codec, Decoder, Encoder, Json}
+import fit4s.profile.types.{FloatTypedValue, _}
 import io.circe.generic.semiauto._
 import io.circe.syntax._
+import io.circe.{Codec, Decoder, Encoder, Json}
 import scodec.Attempt
 import scodec.bits.ByteOrdering
 
@@ -65,10 +57,14 @@ trait JsonEncoder {
         }
         .getOrElse(fval.value match {
           case LongTypedValue(rv, _)          => rv.asJson
-          case ArrayFieldType.LongArray(nel) => nel.toList.asJson
-          case dt: DateTime                  => dt.asInstant.toString.asJson
-          case dt: LocalDateTime             => dt.asLocalDateTime.toString.asJson
-          case _                             => fval.value.toString.asJson
+          case ArrayFieldType.LongArray(nel)  => nel.toList.asJson
+          case FloatTypedValue(rv, _)         => rv.asJson
+          case ArrayFieldType.FloatArray(nel) => nel.toList.asJson
+          case StringTypedValue(rv)           => rv.asJson
+          case ArrayFieldType.StringArray(rv) => rv.toList.asJson
+          case dt: DateTime                   => dt.asInstant.toString.asJson
+          case dt: LocalDateTime              => dt.asLocalDateTime.toString.asJson
+          case _                              => fval.value.toString.asJson
         })
       fval.field.unit match {
         case Some(u) => Json.obj("value" -> amount, "unit" -> u.name.asJson)

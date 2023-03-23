@@ -98,6 +98,9 @@ object TypesGenerator {
       s"""package $pkg.types
          |/* This file has been generated. */
          |
+         |import scodec.Codec
+         |import scodec.bits.ByteOrdering
+         |
          |sealed trait $objName extends TypedValue[Long]
          |object $objName extends EnumValueCompanion[$objName] {
          |  $values
@@ -109,6 +112,9 @@ object TypesGenerator {
          |    all.map(e => e -> e.rawValue).toMap
          |
          |  val baseType: FitBaseType = $fitBaseType
+         |
+         |  override protected def baseTypeCodec(bo: ByteOrdering): Codec[Long] =
+         |    BaseTypeCodec.baseCodec($fitBaseType, bo)
          |}
        """.stripMargin
     SourceFile(s"${snakeCamelType(name)}.scala", contents)

@@ -50,7 +50,7 @@ object FitMessage {
   final case class DataMessage(definition: DefinitionMessage, raw: ByteVector)
       extends FitMessage {
 
-    lazy val decoded: Attempt[DataDecoder.DataDecodeResult] =
+    lazy val decoded: Attempt[DataDecodeResult] =
       DataDecoder(definition).complete.decode(raw.bits).map(_.value)
 
     lazy val isKnownSuccess: Boolean =

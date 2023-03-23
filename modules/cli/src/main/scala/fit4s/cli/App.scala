@@ -24,7 +24,17 @@ object App
 
   def main: Opts[IO[ExitCode]] =
     inspectOpts.orElse(activityOpts).map {
-      case c: InspectCmd.Config  => InspectCmd(c)
-      case c: ActivityCmd.Config => ActivityCmd(c)
+      case c: InspectCmd.Config  => printError(InspectCmd(c))
+      case c: ActivityCmd.Config => printError(ActivityCmd(c))
+    }
+
+  private def printError[A](io: IO[ExitCode]): IO[ExitCode] =
+    io.attempt.flatMap {
+      case Right(code) => IO.pure(code)
+      case Left(ex: CliError) =>
+        IO.println(s"ERROR ${ex.getMessage}").as(ExitCode.Error)
+      case Left(ex) =>
+        IO.println(s"ERROR ${ex.getClass.getSimpleName}: ${ex.getMessage}")
+          .as(ExitCode.Error)
     }
 }

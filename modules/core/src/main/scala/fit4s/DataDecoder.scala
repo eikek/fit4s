@@ -5,88 +5,12 @@ import fit4s.data.Nel
 import fit4s.profile.FieldValue
 import fit4s.profile.messages.Msg
 import fit4s.profile.messages.Msg.{ArrayDef, FieldWithCodec}
-import fit4s.profile.types.{
-  ArrayFieldType,
-  BaseTypeCodec,
-  FitBaseType,
-  LongTypedValue,
-  StringTypedValue,
-  TypedValue
-}
-import scodec.{Attempt, DecodeResult, Decoder, Err}
+import fit4s.profile.types.{ArrayFieldType, BaseTypeCodec, TypedValue}
 import scodec.bits.BitVector
 import scodec.codecs._
+import scodec.{Attempt, DecodeResult, Decoder, Err}
 
-// TODO make private
-object DataDecoder {
-
-  final case class DataDecodeResult(fields: List[FieldDecodeResult]) {
-    def findField[A <: TypedValue[_]](ft: Msg.FieldWithCodec[A]): Option[FieldValue[A]] =
-      fields.collectFirst {
-        case r: FieldDecodeResult.Success if r.fieldValue.field == ft =>
-          r.fieldValue.asInstanceOf[FieldValue[A]]
-      }
-
-    override def toString = {
-      val fieldToString =
-        fields
-          .map {
-            case r: FieldDecodeResult.Success =>
-              s"${r.fieldValue}"
-            case r: FieldDecodeResult.LocalSuccess =>
-              s"${r.localField.fieldDefNum}=${r.value}"
-            case r: FieldDecodeResult.DecodeError =>
-              s"Error: ${r.err.messageWithContext}"
-            case r: FieldDecodeResult.NoReferenceSubfield =>
-              s"No subfield reference: ${r.globalField.fieldName}"
-            case r: FieldDecodeResult.InvalidValue =>
-              s"Invalid value '0x${BaseTypeCodec
-                  .invalidValue(r.localField.baseType.fitBaseType)
-                  .toHex}' for field ${r.localField.fieldDefNum}/${r.localField.baseType.fitBaseType}"
-          }
-          .mkString(", ")
-
-      s"DataDecodeResult($fieldToString)"
-    }
-  }
-
-  sealed trait FieldDecodeResult {
-    def widen: FieldDecodeResult = this
-    def isKnownSuccess: Boolean
-  }
-  object FieldDecodeResult {
-    final case class InvalidValue(localField: FieldDefinition) extends FieldDecodeResult {
-      val isKnownSuccess = false
-    }
-
-    final case class LocalSuccess(
-        localField: FieldDefinition,
-        value: TypedValue[_]
-    ) extends FieldDecodeResult {
-      val isKnownSuccess = false
-    }
-
-    final case class Success(
-        localField: FieldDefinition,
-        fieldValue: FieldValue[TypedValue[_]]
-    ) extends FieldDecodeResult {
-      val isKnownSuccess = true
-    }
-
-    final case class DecodeError(
-        localField: FieldDefinition,
-        err: Err
-    ) extends FieldDecodeResult {
-      val isKnownSuccess = false
-    }
-
-    final case class NoReferenceSubfield(
-        localField: FieldDefinition,
-        globalField: Msg.Field[TypedValue[_]]
-    ) extends FieldDecodeResult {
-      val isKnownSuccess = false
-    }
-  }
+private object DataDecoder {
 
   def apply(definition: DefinitionMessage): Decoder[DataDecodeResult] =
     definition.profileMsg.map(pm => create(definition, pm)).getOrElse(create(definition))
@@ -186,31 +110,30 @@ object DataDecoder {
       localField: FieldDefinition
   ): Decoder[FieldDecodeResult] =
     withInvalidValue(localField) {
-      localField.baseType.fitBaseType match {
-        case FitBaseType.String =>
-          localResult(localField)(StringTypedValue.codec(localField.sizeBytes))
-
-        case ft =>
-          val baseLen = BaseTypeCodec.length(ft)
-          if (localField.sizeBytes > baseLen) {
-            if (localField.sizeBytes % baseLen != 0) {
-              bytes(localField.sizeBytes).asDecoder.map(_ =>
-                FieldDecodeResult.DecodeError(
-                  localField,
-                  Err(
-                    s"Field '$localField' size is not a multiple of it's base type length '$baseLen'!"
-                  )
-                )
-              )
-            } else
-              localResult(localField)(
-                ArrayFieldType.codecLong(localField.sizeBytes, dm.archType, ft)
-              )
-          } else {
-            localResult(localField)(LongTypedValue.codec(dm.archType, ft))
-          }
+      val base = localField.baseType.fitBaseType
+      val baseLen = BaseTypeCodec.length(base)
+      if (localField.sizeBytes > baseLen && localField.sizeBytes % baseLen != 0) {
+        bytes(localField.sizeBytes).asDecoder.map(_ =>
+          FieldDecodeResult.DecodeError(
+            localField,
+            Err(
+              s"Field '$localField' size is not a multiple of it's base type length '$baseLen'!"
+            )
+          )
+        )
+      } else {
+        if (localField.sizeBytes > baseLen) {
+          localResult(localField)(
+            ArrayFieldType.codec(
+              localField.sizeBytes,
+              dm.archType,
+              localField.baseType.fitBaseType
+            )
+          )
+        } else {
+          localResult(localField)(TypedValue.codec(base, dm.archType))
+        }
       }
-
     }
 
   def decodeKnownField(
