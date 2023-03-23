@@ -246,6 +246,9 @@ object ProfileReader {
 
     def doubleListValue(index: Int): List[Double] =
       anyValue(index).map(_.split(',').map(_.toDouble).toList).getOrElse(Nil)
+
+    def stringListValue(index: Int): List[String] =
+      anyValue(index).map(_.split(',').toList).getOrElse(Nil)
   }
 
   final class TypesFormat(val self: Row) {
@@ -275,7 +278,7 @@ object ProfileReader {
         .map(_.fold(sys.error, identity))
         .getOrElse(ArrayDef.NoArray)
 
-    def components = self.stringValue(5)
+    def components = self.stringListValue(5)
     def scale = self.doubleListValue(6)
     def offset = self.doubleValue(7)
     def units = self.stringValue(8)

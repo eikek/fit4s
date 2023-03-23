@@ -34,7 +34,7 @@ object Msg {
     def fieldName: String
     def fieldBaseType: FitBaseType
     def isArray: ArrayDef
-    def components: Option[String]
+    def components: List[String]
     def scale: List[Double]
     def offset: Option[Double]
     def units: Option[String]
@@ -50,7 +50,7 @@ object Msg {
     def fieldBaseType: FitBaseType
     def fieldCodec: FieldDefinition => ByteOrdering => Codec[A]
     def isArray: ArrayDef
-    def components: Option[String]
+    def components: List[String]
     def scale: List[Double]
     def offset: Option[Double]
     def units: Option[String]
@@ -64,7 +64,7 @@ object Msg {
       fieldBaseType: FitBaseType,
       fieldCodec: FieldDefinition => ByteOrdering => Codec[A],
       isArray: ArrayDef,
-      components: Option[String],
+      components: List[String],
       scale: List[Double],
       offset: Option[Double],
       units: Option[String],
@@ -81,7 +81,7 @@ object Msg {
       fieldBaseType: FitBaseType,
       fieldCodec: FieldDefinition => ByteOrdering => Codec[A],
       isArray: ArrayDef,
-      components: Option[String],
+      components: List[String],
       scale: List[Double],
       offset: Option[Double],
       units: Option[String],

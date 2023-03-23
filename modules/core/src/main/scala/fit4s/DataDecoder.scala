@@ -19,6 +19,10 @@ private object DataDecoder {
     * profile message.
     */
   def create(dm: DefinitionMessage, pm: Msg): Decoder[DataDecodeResult] = {
+    // must expand all fields with components into its generated fields
+    // going recursively until no components exist. then continue with this decoding
+    // perhaps it is good to capture single fields + its byte-vector first, something
+    // like (localField, profileField, ByteVector) and then flatMap components
     def fieldDecoder(previous: List[FieldDecodeResult], localField: FieldDefinition) =
       pm.findField(localField.fieldDefNum) match {
         case Some(globalField) =>
@@ -147,14 +151,14 @@ private object DataDecoder {
         // look in previous decoded values, if the referenced field matches
         // TODO improve data structures to better support searches
         // TODO support for components
-        val subFieldMatch =
+        val activeSubField =
           globalField.subFields.find { subField =>
             previous.collectFirst { case p: FieldDecodeResult.Success =>
               subField.references.exists(ref => ref.asFieldValue == p.fieldValue)
             }.isDefined
           }
 
-        subFieldMatch match {
+        activeSubField match {
           case Some(subField) =>
             decodeFieldWithCodec(
               dm,

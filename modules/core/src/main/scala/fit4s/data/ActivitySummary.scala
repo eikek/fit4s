@@ -17,13 +17,13 @@ final case class ActivitySummary(
     elapsedTime: Duration,
     calories: Calories,
     distance: Distance,
-    minTemp: Temperature, // TODO make optional!
-    maxTemp: Temperature,
+    minTemp: Option[Temperature],
+    maxTemp: Option[Temperature],
     avgTemp: Option[Temperature],
     maxSpeed: Speed,
     avgSpeed: Option[Speed],
-    minHr: HeartRate,
-    maxHr: HeartRate,
+    minHr: Option[HeartRate],
+    maxHr: Option[HeartRate],
     avgHr: Option[HeartRate]
 ) {
 
@@ -42,15 +42,27 @@ final case class ActivitySummary(
       elapsedTime = elapsedTime.plus(other.elapsedTime),
       calories = calories + other.calories,
       distance = distance + other.distance,
-      minTemp = Ordering[Temperature].min(minTemp, other.minTemp),
-      maxTemp = Ordering[Temperature].max(maxTemp, other.maxTemp),
+      minTemp = select(minTemp, other.minTemp, Ordering[Temperature].min[Temperature]),
+      maxTemp = select(maxTemp, other.maxTemp, Ordering[Temperature].max[Temperature]),
       avgTemp,
       maxSpeed = Ordering[Speed].max(maxSpeed, other.maxSpeed),
       avgSpeed,
-      minHr = Ordering[HeartRate].min(minHr, other.minHr),
-      maxHr = Ordering[HeartRate].max(maxHr, other.maxHr),
+      minHr = select(minHr, other.minHr, Ordering[HeartRate].min[HeartRate]),
+      maxHr = select(maxHr, other.maxHr, Ordering[HeartRate].max[HeartRate]),
       avgHr
     )
+
+  private def select[A](
+      a: Option[A],
+      b: Option[A],
+      winner: (A, A) => A
+  ): Option[A] =
+    (a, b) match {
+      case (Some(x), Some(y)) => Some(winner(x, y))
+      case (Some(_), None)    => a
+      case (None, Some(_))    => b
+      case (None, None)       => None
+    }
 
   override def toString =
     s"ActivitySummary(id=$id, sport=$sport, subSport=$subSport, start=$startTime, moving=$movingTime, " +
@@ -87,14 +99,14 @@ object ActivitySummary {
       elapsedTime.flatMap(_.duration).getOrElse(Duration.ZERO),
       kcal.flatMap(_.calories).getOrElse(Calories.zero),
       distance.flatMap(_.distance).getOrElse(Distance.zero),
-      minTemp.flatMap(_.temperature).getOrElse(Temperature.minValue),
-      maxTemp.flatMap(_.temperature).getOrElse(Temperature.maxValue),
-      Some(avgTemp.flatMap(_.temperature).getOrElse(Temperature.zero)),
+      minTemp.flatMap(_.temperature),
+      maxTemp.flatMap(_.temperature),
+      avgTemp.flatMap(_.temperature),
       maxSpeed.flatMap(_.speed).getOrElse(Speed.zero),
-      Some(avgSpeed.flatMap(_.speed).getOrElse(Speed.zero)),
-      minHr.flatMap(_.heartrate).getOrElse(HeartRate.zero),
-      maxHr.flatMap(_.heartrate).getOrElse(HeartRate.zero),
-      Some(avgHr.flatMap(_.heartrate).getOrElse(HeartRate.zero))
+      avgSpeed.flatMap(_.speed),
+      minHr.flatMap(_.heartrate),
+      maxHr.flatMap(_.heartrate),
+      avgHr.flatMap(_.heartrate)
     )
 
   def from(fit: FitFile): Either[String, ActivitySummary] = for {
@@ -104,21 +116,18 @@ object ActivitySummary {
       if (activities.isEmpty) Left(s"No session message found")
       else Right(activities.reduce(_ combine _))
     // estimate averages...
-    // TODO no average when Option.empty!
-    avgSpeed = Option
-      .when(activities.nonEmpty)(
-        activities.flatMap(_.avgSpeed.map(_.meterPerSecond)).sum / activities.size
-      )
+    avgSpeed = makeAvg(activities.flatMap(_.avgSpeed.map(_.meterPerSecond)))
       .map(Speed.meterPerSecond)
-    avgTemp = Option
-      .when(activities.nonEmpty)(
-        activities.flatMap(_.avgTemp.map(_.celcius)).sum / activities.size
-      )
+    avgTemp = makeAvg(activities.flatMap(_.avgTemp.map(_.celcius)))
       .map(Temperature.celcius)
-    avgHr = Option
-      .when(activities.nonEmpty)(
-        activities.flatMap(_.avgHr.map(_.bpm)).sum / activities.size
-      )
+    avgHr = makeAvg(activities.flatMap(_.avgHr.map(_.bpm.toDouble)))
+      .map(_.toInt)
       .map(HeartRate.bpm)
   } yield result.copy(avgSpeed = avgSpeed, avgTemp = avgTemp, avgHr = avgHr)
+
+  private def makeAvg(values: Vector[Double]) =
+    Option.when(values.nonEmpty) {
+      val sum = values.sum
+      sum / values.size
+    }
 }

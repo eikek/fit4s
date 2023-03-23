@@ -3,6 +3,7 @@ package fit4s.build
 import scala.util.Try
 
 object model {
+  @annotation.tailrec
   def snakeCamelType(str: String): String = {
     val digits = str.takeWhile(_.isDigit)
     if (digits.isEmpty) str.split('_').map(_.capitalize).mkString
@@ -30,7 +31,7 @@ object model {
       fieldName: String,
       fieldType: String,
       isArray: ArrayDef,
-      components: Option[String],
+      components: List[String],
       scale: List[Double],
       offset: Option[Double],
       units: Option[String],
@@ -49,7 +50,7 @@ object model {
       fieldName: String,
       fieldType: String,
       isArray: ArrayDef,
-      components: Option[String],
+      components: List[String],
       scale: List[Double],
       offset: Option[Double],
       units: Option[String],
