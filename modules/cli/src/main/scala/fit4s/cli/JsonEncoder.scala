@@ -62,6 +62,7 @@ trait JsonEncoder {
           case ArrayFieldType.FloatArray(nel) => nel.toList.asJson
           case StringTypedValue(rv)           => rv.asJson
           case ArrayFieldType.StringArray(rv) => rv.toList.asJson
+          case ArrayFieldType(nel, _)         => nel.toList.map(_.toString).asJson
           case dt: DateTime                   => dt.asInstant.toString.asJson
           case dt: LocalDateTime              => dt.asLocalDateTime.toString.asJson
           case _                              => fval.value.toString.asJson
