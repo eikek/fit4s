@@ -1,10 +1,70 @@
 package fit4s.profile.types
 
-import fit4s.codecs._
-import scodec._
+import scodec.Codec
+import scodec.codecs._
 import scodec.bits._
+import fit4s.util.Codecs._
+
+trait BaseTypeCodec[T <: FitBaseType, R] {
+  def codec(byteOrdering: ByteOrdering): Codec[R]
+}
 
 object BaseTypeCodec {
+  def apply[T <: FitBaseType, R](implicit e: BaseTypeCodec[T, R]): BaseTypeCodec[T, R] = e
+
+  def instance[T <: FitBaseType, R](f: ByteOrdering => Codec[R]): BaseTypeCodec[T, R] =
+    (byteOrdering: ByteOrdering) => f(byteOrdering)
+
+  implicit val enumBaseTypeCodec: BaseTypeCodec[FitBaseType.Enum.type, Long] =
+    BaseTypeCodec.instance[FitBaseType.Enum.type, Long](ulongx(8, _))
+
+  implicit val sint8BaseTypeCodec: BaseTypeCodec[FitBaseType.Sint8.type, Long] =
+    BaseTypeCodec.instance[FitBaseType.Sint8.type, Long](longx(8, _))
+
+  implicit val uint8BaseTypeCodec: BaseTypeCodec[FitBaseType.Uint8.type, Long] =
+    BaseTypeCodec.instance[FitBaseType.Uint8.type, Long](ulongx(8, _))
+
+  implicit val sint16BaseTypeCodec: BaseTypeCodec[FitBaseType.Sint16.type, Long] =
+    BaseTypeCodec.instance[FitBaseType.Sint16.type, Long](longx(16, _))
+
+  implicit val uint16BaseTypeCodec: BaseTypeCodec[FitBaseType.Uint16.type, Long] =
+    BaseTypeCodec.instance[FitBaseType.Uint16.type, Long](ulongx(16, _))
+
+  implicit val sint32BaseTypeCodec: BaseTypeCodec[FitBaseType.Sint32.type, Long] =
+    BaseTypeCodec.instance[FitBaseType.Sint32.type, Long](longx(32, _))
+
+  implicit val uint32BaseTypeCodec: BaseTypeCodec[FitBaseType.Uint32.type, Long] =
+    BaseTypeCodec.instance[FitBaseType.Uint32.type, Long](ulongx(32, _))
+
+  implicit val stringBaseTypeCodec: BaseTypeCodec[FitBaseType.String.type, String] =
+    BaseTypeCodec.instance[FitBaseType.String.type, String](_ => cstring)
+
+  implicit val float32BaseTypeCodec: BaseTypeCodec[FitBaseType.Float32.type, Double] =
+    BaseTypeCodec.instance[FitBaseType.Float32.type, Double](floatx)
+
+  implicit val float64BaseTypeCodec: BaseTypeCodec[FitBaseType.Float64.type, Double] =
+    BaseTypeCodec.instance[FitBaseType.Float64.type, Double](doublex)
+
+  implicit val uint8zBaseTypeCodec: BaseTypeCodec[FitBaseType.Uint8z.type, Long] =
+    BaseTypeCodec.instance[FitBaseType.Uint8z.type, Long](ulongx(8, _))
+
+  implicit val uint16zBaseTypeCodec: BaseTypeCodec[FitBaseType.Uint16z.type, Long] =
+    BaseTypeCodec.instance[FitBaseType.Uint16z.type, Long](ulongx(16, _))
+
+  implicit val uint32zBaseTypeCodec: BaseTypeCodec[FitBaseType.Uint32z.type, Long] =
+    BaseTypeCodec.instance[FitBaseType.Uint32z.type, Long](ulongx(32, _))
+
+  implicit val byteBaseTypeCodec: BaseTypeCodec[FitBaseType.Byte.type, Long] =
+    BaseTypeCodec.instance[FitBaseType.Byte.type, Long](ulongx(8, _))
+
+  implicit val sint64BaseTypeCodec: BaseTypeCodec[FitBaseType.Sint64.type, Long] =
+    BaseTypeCodec.instance[FitBaseType.Sint64.type, Long](longx(64, _))
+
+  implicit val uint64BaseTypeCodec: BaseTypeCodec[FitBaseType.Uint64.type, Long] =
+    BaseTypeCodec.instance[FitBaseType.Uint64.type, Long](ulongx(64, _))
+
+  implicit val uint64zBaseTypeCodec: BaseTypeCodec[FitBaseType.Uint64z.type, Long] =
+    BaseTypeCodec.instance[FitBaseType.Uint64z.type, Long](ulongx(64, _))
 
   def length(bt: FitBaseType): Int =
     bt match {
@@ -27,33 +87,10 @@ object BaseTypeCodec {
       case FitBaseType.Uint64z => 8
     }
 
-  type PrimCodec = ByteOrdering => Codec[Long]
-
-  object PrimCodec {
-    def ulong(bits: Int): PrimCodec = ulongx(bits, _)
-    def long(bits: Int): PrimCodec = longx(bits, _)
-  }
-
-  def baseCodec(bt: FitBaseType): PrimCodec =
-    bt match {
-      case FitBaseType.Enum    => PrimCodec.ulong(8)
-      case FitBaseType.Sint8   => PrimCodec.long(8)
-      case FitBaseType.Uint8   => PrimCodec.ulong(8)
-      case FitBaseType.Sint16  => PrimCodec.long(16)
-      case FitBaseType.Uint16  => PrimCodec.ulong(16)
-      case FitBaseType.Sint32  => PrimCodec.long(32)
-      case FitBaseType.Uint32  => PrimCodec.ulong(32)
-      case FitBaseType.String  => PrimCodec.ulong(8)
-      case FitBaseType.Float32 => PrimCodec.ulong(32) // TODO floatx
-      case FitBaseType.Float64 => PrimCodec.ulong(64) // TODO doublex
-      case FitBaseType.Uint8z  => PrimCodec.ulong(8)
-      case FitBaseType.Uint16z => PrimCodec.ulong(16)
-      case FitBaseType.Uint32z => PrimCodec.ulong(32)
-      case FitBaseType.Byte    => PrimCodec.ulong(8)
-      case FitBaseType.Sint64  => PrimCodec.long(64)
-      case FitBaseType.Uint64  => PrimCodec.ulong(64)
-      case FitBaseType.Uint64z => PrimCodec.ulong(64)
-    }
+  def baseCodec[V](bt: FitBaseType, bo: ByteOrdering)(implicit
+      e: BaseTypeCodec[bt.type, V]
+  ): Codec[V] =
+    e.codec(bo)
 
   def invalidValue(fitBaseType: FitBaseType): ByteVector =
     fitBaseType match {

@@ -11,6 +11,8 @@ final case class LongTypedValue(rawValue: Long, base: FitBaseType)
 
 object LongTypedValue {
 
-  def codec(bo: ByteOrdering, base: FitBaseType): Codec[LongTypedValue] =
-    BaseTypeCodec.baseCodec(base)(bo).xmap(LongTypedValue(_, base), _.rawValue)
+  def codec(bo: ByteOrdering, base: FitBaseType)(implicit
+      e: BaseTypeCodec[base.type, Long]
+  ): Codec[LongTypedValue] =
+    BaseTypeCodec.baseCodec(base, bo).xmap(LongTypedValue(_, base), _.rawValue)
 }

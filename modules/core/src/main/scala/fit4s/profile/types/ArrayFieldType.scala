@@ -16,8 +16,8 @@ object ArrayFieldType {
       sizeBytes: Int,
       bo: ByteOrdering,
       base: FitBaseType
-  ): Codec[ArrayFieldType[Long]] = {
-    val bc = BaseTypeCodec.baseCodec(base)(bo)
+  )(implicit e: BaseTypeCodec[base.type, Long]): Codec[ArrayFieldType[Long]] = {
+    val bc = BaseTypeCodec.baseCodec(base, bo)
     if (sizeBytes > BaseTypeCodec.length(base)) {
       fixedSizeBytes(sizeBytes, list(bc))
         .xmapc(Nel.unsafeFromList)(_.toList)

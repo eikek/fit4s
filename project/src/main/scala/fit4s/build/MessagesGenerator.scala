@@ -177,6 +177,7 @@ object MessagesGenerator {
     val typeName = scalaTypeName(fd.fieldType, baseTypeNames)
     val typeNameOrLong =
       if (fd.fieldType == "string") "StringTypedValue"
+      else if (Set("float32", "float64").contains(fd.fieldType)) "FloatTypedValue"
       else if (baseTypeNames.contains(fd.fieldType) || fd.fieldType == "bool")
         "LongTypedValue"
       else typeName
@@ -218,6 +219,8 @@ object MessagesGenerator {
     val tn = snakeCamelType(name)
     if (name == "string")
       s"fieldDef => _ => StringTypedValue.codec(fieldDef.sizeBytes)"
+    else if (name == "float32" || name == "float64")
+      s"_ => bo => FloatTypedValue.codec(bo, $baseType)"
     else if (baseTypes.contains(name) || name == "bool")
       s"_ => bo => LongTypedValue.codec(bo, $baseType)"
     else s"_ => bo => $tn.codec(bo)"

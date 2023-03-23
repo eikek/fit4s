@@ -65,7 +65,7 @@ object TypesGenerator {
          |}
          |object $objName extends TypedValueCompanion[$objName] {
          |  override def codec(bo: ByteOrdering): Codec[$objName] =
-         |    fit4s.codecs.ulongx(32, bo).xmap($objName.apply(_), _.rawValue)
+         |    fit4s.util.Codecs.ulongx(32, bo).xmap($objName.apply(_), _.rawValue)
          |
          |  val baseType: FitBaseType = FitBaseType.${snakeCamelType(td.baseType)}
          |}
@@ -92,6 +92,7 @@ object TypesGenerator {
     }
 
     def values = dfs.map(caseObject).mkString("  ", "\n  ", "  ")
+    val fitBaseType = s"FitBaseType.${snakeCamelType(dfs.head.baseType)}"
 
     val contents =
       s"""package $pkg.types
@@ -99,8 +100,7 @@ object TypesGenerator {
          |
          |sealed trait $objName extends TypedValue[Long]
          |object $objName extends EnumValueCompanion[$objName] {
-         |
-         |$values
+         |  $values
          |
          |  val all: List[$objName] =
          |    List(${dfs.map(_.valueName).map(snakeCamelType).mkString(", ")})
@@ -108,7 +108,7 @@ object TypesGenerator {
          |  protected val allMap: Map[$objName, Long] =
          |    all.map(e => e -> e.rawValue).toMap
          |
-         |  val baseType: FitBaseType = FitBaseType.${snakeCamelType(dfs.head.baseType)}
+         |  val baseType: FitBaseType = $fitBaseType
          |}
        """.stripMargin
     SourceFile(s"${snakeCamelType(name)}.scala", contents)

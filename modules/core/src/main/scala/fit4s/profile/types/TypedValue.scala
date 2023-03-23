@@ -21,8 +21,9 @@ trait TypedValueCompanion[A <: TypedValue[_]] {
 }
 
 trait EnumValueCompanion[A <: TypedValue[_]] extends TypedValueCompanion[A] {
+
   final def codec(bo: ByteOrdering): Codec[A] =
-    mappedEnum[A, Long](BaseTypeCodec.baseCodec(baseType)(bo), allMap)
+    mappedEnum[A, Long](BaseTypeCodec.baseCodec(baseType, bo), allMap)
 
   def all: List[A]
 

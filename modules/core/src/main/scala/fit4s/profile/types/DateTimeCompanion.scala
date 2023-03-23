@@ -7,6 +7,6 @@ trait DateTimeCompanion extends TypedValueCompanion[DateTime] {
 
   override def codec(bo: ByteOrdering): Codec[DateTime] =
     BaseTypeCodec
-      .baseCodec(FitBaseType.Uint32)(bo)
+      .baseCodec(FitBaseType.Uint32, bo)
       .xmap(DateTime.apply, _.rawValue)
 }
