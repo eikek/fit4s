@@ -58,7 +58,7 @@ private object DataDecoder {
   /** Decodes a data message according to the definition message where no global fit
     * message exists.
     */
-  def create(dm: DefinitionMessage): Decoder[DataDecodeResult] = { (bits: BitVector) =>
+  private def create(dm: DefinitionMessage): Decoder[DataDecodeResult] = { (bits: BitVector) =>
     @annotation.tailrec
     def go(
         fields: List[FieldDefinition],
