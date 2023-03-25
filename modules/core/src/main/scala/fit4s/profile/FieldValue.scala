@@ -2,6 +2,7 @@ package fit4s.profile
 
 import fit4s.data._
 import fit4s.profile.messages.Msg
+import fit4s.profile.types.BaseTypedValue.LongBaseValue
 import fit4s.profile.types._
 import fit4s.util._
 
@@ -14,7 +15,7 @@ final case class FieldValue[A <: TypedValue[_]](
 
   def scaledValue: Option[Nel[Double]] =
     (value, field.scale) match {
-      case (LongTypedValue(rv, _), List(scale)) =>
+      case (LongBaseValue(rv, _), List(scale)) =>
         Some(Nel.of(rv / scale))
 
       case (ArrayFieldType.LongArray(list), List(scale)) =>
@@ -26,7 +27,7 @@ final case class FieldValue[A <: TypedValue[_]](
   private def numericSingleValue: Option[Either[Long, Double]] =
     scaledValue.map(_.head).map(_.asRight[Long]).orElse {
       value match {
-        case LongTypedValue(n, _)            => Some(n.asLeft[Double])
+        case LongBaseValue(n, _)            => Some(n.asLeft[Double])
         case ArrayFieldType.LongArray(list) => Some(list.head.asLeft[Double])
         case _                              => None
       }
@@ -90,7 +91,7 @@ final case class FieldValue[A <: TypedValue[_]](
         case l           => l.toList.toString
       }
       .getOrElse(value match {
-        case LongTypedValue(rv, _)   => rv.toString
+        case LongBaseValue(rv, _)   => rv.toString
         case ArrayFieldType(nel, _) => nel.toList.toString
         case dt: DateTime           => dt.asInstant.toString
         case dt: LocalDateTime      => dt.asLocalDateTime.toString

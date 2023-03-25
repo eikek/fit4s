@@ -3,6 +3,9 @@ package src.main.scala.fit4s.build
 import fit4s.build.model._
 
 object MessagesGenerator {
+  private val longBaseValue = "BaseTypedValue.LongBaseValue"
+  private val floatBaseValue = "BaseTypedValue.FloatBaseValue"
+  private val stringBaseValue = "BaseTypedValue.StringBaseValue"
 
   def generate(
       pkgname: String,
@@ -138,7 +141,7 @@ object MessagesGenerator {
     val baseTypeNames = typeDefs.filter(_.name == "fit_base_type").map(_.valueName).toSet
     val typeName = scalaTypeName(fd.fieldType, baseTypeNames)
     val typeNameOrLong =
-      if (baseTypeNames.contains(fd.fieldType) || fd.fieldType == "bool") "LongTypedValue"
+      if (baseTypeNames.contains(fd.fieldType) || fd.fieldType == "bool") longBaseValue
       else typeName
     val baseType =
       if (baseTypeNames.contains(fd.fieldType))
@@ -176,10 +179,10 @@ object MessagesGenerator {
     val baseTypeNames = typeDefs.filter(_.name == "fit_base_type").map(_.valueName).toSet
     val typeName = scalaTypeName(fd.fieldType, baseTypeNames)
     val typeNameOrLong =
-      if (fd.fieldType == "string") "StringTypedValue"
-      else if (Set("float32", "float64").contains(fd.fieldType)) "FloatTypedValue"
+      if (fd.fieldType == "string") stringBaseValue
+      else if (Set("float32", "float64").contains(fd.fieldType)) floatBaseValue
       else if (baseTypeNames.contains(fd.fieldType) || fd.fieldType == "bool")
-        "LongTypedValue"
+        longBaseValue
       else typeName
     val baseType =
       if (baseTypeNames.contains(fd.fieldType))
@@ -218,11 +221,11 @@ object MessagesGenerator {
   def scalaTypeCodec(name: String, baseType: String, baseTypes: Set[String]): String = {
     val tn = snakeCamelType(name)
     if (name == "string")
-      s"fieldDef => _ => StringTypedValue.codec(fieldDef.sizeBytes)"
+      s"fieldDef => _ => $stringBaseValue.codec(fieldDef.sizeBytes)"
     else if (name == "float32" || name == "float64")
-      s"_ => bo => FloatTypedValue.codec(bo, $baseType)"
+      s"_ => bo => $floatBaseValue.codec(bo, $baseType)"
     else if (baseTypes.contains(name) || name == "bool")
-      s"_ => bo => LongTypedValue.codec(bo, $baseType)"
+      s"_ => bo => $longBaseValue.codec(bo, $baseType)"
     else s"_ => bo => $tn.codec(bo)"
   }
 

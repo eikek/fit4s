@@ -1,5 +1,6 @@
 package fit4s
 
+import fit4s.decode.DataDecoder
 import fit4s.profile.FieldValue
 import fit4s.profile.messages.{EventMsg, FitMessages, Msg}
 import fit4s.profile.types.{Event, EventType, MesgNum, TypedValue}

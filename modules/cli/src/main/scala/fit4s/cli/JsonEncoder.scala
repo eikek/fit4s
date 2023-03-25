@@ -3,7 +3,8 @@ package fit4s.cli
 import fit4s._
 import fit4s.data.Nel
 import fit4s.profile.FieldValue
-import fit4s.profile.types.{FloatTypedValue, _}
+import fit4s.profile.types.BaseTypedValue.{FloatBaseValue, LongBaseValue, StringBaseValue}
+import fit4s.profile.types._
 import io.circe.generic.semiauto._
 import io.circe.syntax._
 import io.circe.{Codec, Decoder, Encoder, Json}
@@ -56,11 +57,11 @@ trait JsonEncoder {
           case l           => l.toList.asJson
         }
         .getOrElse(fval.value match {
-          case LongTypedValue(rv, _)          => rv.asJson
+          case LongBaseValue(rv, _)           => rv.asJson
           case ArrayFieldType.LongArray(nel)  => nel.toList.asJson
-          case FloatTypedValue(rv, _)         => rv.asJson
+          case FloatBaseValue(rv, _)          => rv.asJson
           case ArrayFieldType.FloatArray(nel) => nel.toList.asJson
-          case StringTypedValue(rv)           => rv.asJson
+          case StringBaseValue(rv)            => rv.asJson
           case ArrayFieldType.StringArray(rv) => rv.toList.asJson
           case ArrayFieldType(nel, _)         => nel.toList.map(_.toString).asJson
           case dt: DateTime                   => dt.asInstant.toString.asJson

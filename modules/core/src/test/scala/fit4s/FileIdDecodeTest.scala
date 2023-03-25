@@ -1,5 +1,6 @@
 package fit4s
 
+import fit4s.decode.DataDecoder
 import fit4s.profile.messages.FileIdMsg
 import munit.FunSuite
 import scodec.bits.ByteVector
@@ -52,7 +53,7 @@ class FileIdDecodeTest extends FunSuite with JsonCodec {
 //    println(decodeSerialNum.decode(data.drop(4).take(4).bits))
 
     println(
-      DataDecoder(definition)
+      decode.DataDecoder(definition)
         .decode(data.bits)
         .map(_.value)
     )

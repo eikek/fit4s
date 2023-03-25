@@ -30,7 +30,7 @@ abstract class Msg {
 
 object Msg {
 
-  trait FieldAttributes {
+  sealed trait FieldAttributes {
     def fieldName: String
     def fieldBaseType: FitBaseType
     def isArray: ArrayDef
@@ -45,7 +45,7 @@ object Msg {
     lazy val unit: Option[MeasurementUnit] = units.map(MeasurementUnit.fromString)
   }
 
-  trait FieldWithCodec[A <: TypedValue[_]] extends FieldAttributes {
+  sealed trait FieldWithCodec[A <: TypedValue[_]] extends FieldAttributes {
     def fieldName: String
     def fieldBaseType: FitBaseType
     def fieldCodec: FieldDefinition => ByteOrdering => Codec[A]

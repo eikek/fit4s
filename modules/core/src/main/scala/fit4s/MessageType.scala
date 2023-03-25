@@ -1,6 +1,6 @@
 package fit4s
 
-sealed trait MessageType {
+sealed trait MessageType extends Product {
   def isDefinitionMessage: Boolean = this == MessageType.DefinitionMessage
   def isDataMessage: Boolean = this == MessageType.DataMessage
   def widen: MessageType = this

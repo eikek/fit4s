@@ -1,5 +1,6 @@
 package fit4s
 
+import fit4s.decode.DataDecoder
 import munit.FunSuite
 import scodec.bits.ByteVector
 

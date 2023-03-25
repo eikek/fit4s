@@ -1,5 +1,6 @@
 package fit4s
 
+import fit4s.decode.DataDecoder
 import munit.FunSuite
 import scodec.bits.ByteVector
 
@@ -33,7 +34,7 @@ class UserProfileDecodeTest extends FunSuite with JsonCodec {
 
     println(profileMsg)
     println(
-      DataDecoder(definition)
+      decode.DataDecoder(definition)
         .decode(data.bits)
         .map(_.value)
     )

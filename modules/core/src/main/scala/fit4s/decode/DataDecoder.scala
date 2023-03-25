@@ -1,16 +1,17 @@
-package fit4s
+package fit4s.decode
 
 import fit4s.FitMessage.DefinitionMessage
 import fit4s.data.Nel
 import fit4s.profile.FieldValue
 import fit4s.profile.messages.Msg
 import fit4s.profile.messages.Msg.{ArrayDef, FieldWithCodec}
-import fit4s.profile.types.{ArrayFieldType, BaseTypeCodec, TypedValue}
+import fit4s.profile.types.{ArrayFieldType, BaseTypeCodec, BaseTypedValue, TypedValue}
+import fit4s.{DataDecodeResult, FieldDecodeResult, FieldDefinition}
 import scodec.bits.BitVector
-import scodec.codecs._
+import scodec.codecs.{bytes, fixedSizeBytes, list, peek}
 import scodec.{Attempt, DecodeResult, Decoder, Err}
 
-private object DataDecoder {
+private[fit4s] object DataDecoder {
 
   def apply(definition: DefinitionMessage): Decoder[DataDecodeResult] =
     definition.profileMsg.map(pm => create(definition, pm)).getOrElse(create(definition))
@@ -58,26 +59,27 @@ private object DataDecoder {
   /** Decodes a data message according to the definition message where no global fit
     * message exists.
     */
-  private def create(dm: DefinitionMessage): Decoder[DataDecodeResult] = { (bits: BitVector) =>
-    @annotation.tailrec
-    def go(
-        fields: List[FieldDefinition],
-        input: BitVector,
-        results: List[FieldDecodeResult]
-    ): Attempt[DecodeResult[List[FieldDecodeResult]]] =
-      fields match {
-        case Nil => Attempt.successful(DecodeResult(results, input))
-        case field :: m =>
-          decodeUnknownField(dm, field).decode(input) match {
-            case Attempt.Successful(result) =>
-              go(m, result.remainder, result.value :: results)
-            case Attempt.Failure(err) =>
-              val r = FieldDecodeResult.DecodeError(field, err)
-              go(m, input.drop(field.sizeBytes * 8), r :: results)
-          }
-      }
+  private def create(dm: DefinitionMessage): Decoder[DataDecodeResult] = {
+    (bits: BitVector) =>
+      @annotation.tailrec
+      def go(
+          fields: List[FieldDefinition],
+          input: BitVector,
+          results: List[FieldDecodeResult]
+      ): Attempt[DecodeResult[List[FieldDecodeResult]]] =
+        fields match {
+          case Nil => Attempt.successful(DecodeResult(results, input))
+          case field :: m =>
+            decodeUnknownField(dm, field).decode(input) match {
+              case Attempt.Successful(result) =>
+                go(m, result.remainder, result.value :: results)
+              case Attempt.Failure(err) =>
+                val r = FieldDecodeResult.DecodeError(field, err)
+                go(m, input.drop(field.sizeBytes * 8), r :: results)
+            }
+        }
 
-    go(dm.fields, bits, Nil).map(_.map(DataDecodeResult.apply))
+      go(dm.fields, bits, Nil).map(_.map(DataDecodeResult.apply))
   }
 
   def withInvalidValue(
@@ -135,7 +137,7 @@ private object DataDecoder {
             )
           )
         } else {
-          localResult(localField)(TypedValue.codec(base, dm.archType))
+          localResult(localField)(BaseTypedValue.codec(base, dm.archType))
         }
       }
     }

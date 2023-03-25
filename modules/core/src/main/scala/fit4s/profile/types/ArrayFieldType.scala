@@ -1,6 +1,7 @@
 package fit4s.profile.types
 
 import fit4s.data.Nel
+import fit4s.profile.types.BaseTypedValue.{FloatBaseValue, LongBaseValue, StringBaseValue}
 import scodec.Codec
 import scodec.bits.ByteOrdering
 import scodec.codecs.{fixedSizeBytes, list}
@@ -76,8 +77,8 @@ object ArrayFieldType {
   object LongArray {
     def unapply(f: ArrayFieldType[_]): Option[Nel[Long]] =
       f.rawValue.head match {
-        case _: LongTypedValue =>
-          Some(f.rawValue.asInstanceOf[Nel[LongTypedValue]].map(_.rawValue))
+        case _: LongBaseValue =>
+          Some(f.rawValue.asInstanceOf[Nel[LongBaseValue]].map(_.rawValue))
         case _: Long =>
           Some(f.rawValue.asInstanceOf[Nel[Long]])
         case _ => None
@@ -87,8 +88,8 @@ object ArrayFieldType {
   object FloatArray {
     def unapply(f: ArrayFieldType[_]): Option[Nel[Double]] =
       f.rawValue.head match {
-        case _: FloatTypedValue =>
-          Some(f.rawValue.asInstanceOf[Nel[FloatTypedValue]].map(_.rawValue))
+        case _: FloatBaseValue =>
+          Some(f.rawValue.asInstanceOf[Nel[FloatBaseValue]].map(_.rawValue))
         case _: Double =>
           Some(f.rawValue.asInstanceOf[Nel[Double]])
         case _ => None
@@ -98,8 +99,8 @@ object ArrayFieldType {
   object StringArray {
     def unapply(f: ArrayFieldType[_]): Option[Nel[String]] =
       f.rawValue.head match {
-        case _: StringTypedValue =>
-          Some(f.rawValue.asInstanceOf[Nel[StringTypedValue]].map(_.rawValue))
+        case _: StringBaseValue =>
+          Some(f.rawValue.asInstanceOf[Nel[StringBaseValue]].map(_.rawValue))
         case _: String =>
           Some(f.rawValue.asInstanceOf[Nel[String]])
         case _ => None
