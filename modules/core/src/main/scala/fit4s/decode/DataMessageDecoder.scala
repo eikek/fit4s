@@ -3,28 +3,32 @@ package fit4s.decode
 import fit4s.FieldDefinition
 import fit4s.FitMessage.DataMessage
 import fit4s.data.Nel
+import fit4s.decode.DataField.KnownField
 import fit4s.profile.messages.Msg
 import fit4s.profile.types.TypedValue
-import scodec.bits.ByteVector
+import scodec.bits.{BitVector, ByteVector}
+import CodecUtils._
+
+import scala.annotation.tailrec
 
 object DataMessageDecoder {
 
   def makeDataFields(dm: DataMessage): DataFields = {
-    @annotation.tailrec
+    @tailrec
     def loop(
         fields: List[FieldDefinition],
         bytes: ByteVector,
-        result: List[DataField]
-    ): List[DataField] =
+        result: Vector[DataField]
+    ): Vector[DataField] =
       fields match {
         case Nil => result.reverse
         case h :: t =>
           val field = dm.definition.profileMsg.flatMap(_.findField(h.fieldDefNum))
           val (raw, next) = bytes.splitAt(h.sizeBytes)
-          loop(t, next, DataField(h, dm.definition.archType, field, raw) :: result)
+          loop(t, next, DataField(h, dm.definition.archType, field, raw) +: result)
       }
 
-    DataFields(loop(dm.definition.fields, dm.raw, Nil))
+    DataFields(loop(dm.definition.fields, dm.raw, Vector.empty))
   }
 
   /** Fields are expanded as follows:
@@ -48,7 +52,7 @@ object DataMessageDecoder {
     *
     * Top-level fields may have either sub-fields or components.
     */
-  def expandField(allFields: DataFields)(field: DataField): DataFields =
+  def expandField(profileMsg: Msg, allFields: DataFields)(field: DataField): DataFields =
     field match {
       case DynamicField(subFields) =>
         val activeSubField =
@@ -56,7 +60,12 @@ object DataMessageDecoder {
             subField.references.exists { ref =>
               allFields
                 .getByName(ref.refField.fieldName)
-                .exists(_.decodedValue.fold(_ => false, _ == ref.refFieldValue))
+                .exists(
+                  _.decodedValue.fold(
+                    _ => false,
+                    r => r.asSuccess.map(_.fieldValue.value).contains(ref.refFieldValue)
+                  )
+                )
             }
           }
 
@@ -69,10 +78,44 @@ object DataMessageDecoder {
         }
 
       case f: DataField.KnownField if f.field.components.nonEmpty =>
-        // needs the mesg!
-        ???
+        @tailrec
+        def loop(
+            bits: BitVector,
+            comp: List[(String, Int)],
+            result: Vector[DataField]
+        ): Vector[DataField] =
+          comp match {
+            case Nil => result
+            case (name, len) :: t =>
+              profileMsg.getFieldByName(name) match {
+                case Some(cfield) =>
+                  val nextData = bits.takeRight(len)
+                  if (nextData.sizeLessThan(len)) {
+                    result
+                  } else {
+                    val cfieldMinLen = cfield.baseTypeLen * 8
+                    val nextBits = bits.takeRight(len) match {
+                      case b if len < cfieldMinLen =>
+                        b.lowPaddedByteVectorToLength(f.byteOrdering, cfieldMinLen)
 
-      case _ => DataFields(List(field))
+                      case b if len % 8 != 0 =>
+                        b.lowPaddedByteVector(f.byteOrdering)
+
+                      case b => b.bytes
+                    }
+                    val nextField = KnownField(f.local, f.byteOrdering, cfield, nextBits)
+
+                    loop(bits.dropRight(len), t, nextField +: result)
+                  }
+                case None =>
+                  loop(bits.dropRight(len), t, result)
+              }
+          }
+
+        val comp = f.field.components.zip(f.field.bits)
+        DataFields(loop(f.raw.bits, comp, Vector.empty))
+
+      case _ => DataFields(Vector(field))
     }
 
   private object DynamicField {

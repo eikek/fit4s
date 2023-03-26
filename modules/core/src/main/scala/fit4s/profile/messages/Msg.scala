@@ -12,9 +12,16 @@ abstract class Msg {
   private[this] val fields: AtomicReference[Map[Int, Msg.Field[TypedValue[_]]]] =
     new AtomicReference[Map[Int, Msg.Field[TypedValue[_]]]](Map.empty)
 
+  private[this] val fieldsByName: AtomicReference[Map[String, Msg.Field[TypedValue[_]]]] =
+    new AtomicReference[Map[String, Msg.Field[TypedValue[_]]]](Map.empty)
+
   protected def add[A <: TypedValue[_]](field: Msg.Field[A]): Msg.Field[A] = {
+    val f = field.asInstanceOf[Msg.Field[TypedValue[_]]]
     fields.updateAndGet(
-      _.updated(field.fieldDefinitionNumber, field.asInstanceOf[Msg.Field[TypedValue[_]]])
+      _.updated(field.fieldDefinitionNumber, f)
+    )
+    fieldsByName.updateAndGet(
+      _.updated(field.fieldName, f)
     )
     field
   }
@@ -26,6 +33,9 @@ abstract class Msg {
 
   def findField(fieldDefNumber: Int): Option[Msg.Field[TypedValue[_]]] =
     fields.get().get(fieldDefNumber)
+
+  def getFieldByName(name: String): Option[Msg.Field[TypedValue[_]]] =
+    fieldsByName.get().get(name)
 }
 
 object Msg {

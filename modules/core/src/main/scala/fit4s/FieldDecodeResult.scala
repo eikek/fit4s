@@ -8,39 +8,41 @@ import scodec.Err
 sealed trait FieldDecodeResult {
   def widen: FieldDecodeResult = this
 
-  def isKnownSuccess: Boolean
+  def asSuccess: Option[FieldDecodeResult.Success]
+
+  final def isKnownSuccess: Boolean = asSuccess.isDefined
 }
 
 object FieldDecodeResult {
   final case class InvalidValue(localField: FieldDefinition) extends FieldDecodeResult {
-    val isKnownSuccess = false
+    val asSuccess = None
   }
 
   final case class LocalSuccess(
       localField: FieldDefinition,
       value: TypedValue[_]
   ) extends FieldDecodeResult {
-    val isKnownSuccess = false
+    val asSuccess = None
   }
 
   final case class Success(
       localField: FieldDefinition,
       fieldValue: FieldValue[TypedValue[_]]
   ) extends FieldDecodeResult {
-    val isKnownSuccess = true
+    val asSuccess = Some(this)
   }
 
   final case class DecodeError(
       localField: FieldDefinition,
       err: Err
   ) extends FieldDecodeResult {
-    val isKnownSuccess = false
+    val asSuccess = None
   }
 
   final case class NoReferenceSubfield(
       localField: FieldDefinition,
       globalField: Msg.Field[TypedValue[_]]
   ) extends FieldDecodeResult {
-    val isKnownSuccess = false
+    val asSuccess = None
   }
 }

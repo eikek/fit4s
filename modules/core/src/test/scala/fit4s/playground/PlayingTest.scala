@@ -1,11 +1,13 @@
 package fit4s.playground
 
 import cats.effect._
-import fit4s.data.{ActivitySummary, Distance}
-import fit4s.playground.PlayingTest.Group
-import fit4s.profile.types.{MesgNum, Sport}
 import fit4s.FitFile
+import fit4s.FitMessage.DataMessage
+import fit4s.data.{ActivitySummary, Distance}
 import fit4s.json.JsonCodec
+import fit4s.playground.PlayingTest.Group
+import fit4s.profile.messages.Msg
+import fit4s.profile.types.{MesgNum, Sport}
 import fs2.io.file.{Files, Path}
 import fs2.{Chunk, Stream}
 import io.circe.syntax._
@@ -27,8 +29,9 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
     val dir = Path("/home/eike/workspace/garmin/garmin-connect/activities")
     val sysTime =
       Path( // 1862739919_ACTIVITY.fit=1992-01-18T18:36:18Z   ok:1862739926_ACTIVITY.fit=2012-09-27T16:26:14Z
-        //"/Users/ekettner/personal/fit4s/modules/core/src/test/resources/fit/activity/1862739919_ACTIVITY.fit"
-        "local/garmin-sdk/examples/Activity.fit"
+        // "/Users/ekettner/personal/fit4s/modules/core/src/test/resources/fit/activity/1862739919_ACTIVITY.fit"
+        "local/garmin-sdk/examples/MonitoringFile.fit"
+        // "modules/core/src/test/resources/fit/activity/2023-03-16-06-25-37.fit"
       )
 
     Files[IO]
@@ -36,9 +39,12 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
       .through(parseFit)
       .evalMap(requireFit)
       .map(_._2)
-      .evalMap(fit => printActivitySummary(fit)
-      // Stream.emits(fit.dataRecords.map(r => r.definition.profileMsg -> r.decoded))
-      )
+      .map(filterRecordsWithComponents)
+      .flatMap(Stream.emits)
+      .evalMap { case (msg, fields, dm) =>
+        IO.println(makeTestCaseStub(s"$msg components in ${fields.map(_.fieldName)}", dm))
+      }
+      // .evalMap(fit => printActivitySummary(fit))
       .debug()
       .compile
       .drain
@@ -152,16 +158,34 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
       .emits(MesgNum.all.map(n => n -> fit.findData(n)))
       .filter { case (_, list) => list.nonEmpty }
       .map { case (mesg, data) =>
-        println(
-          s"""
-             |test("decode $mesg data") {
-             |  val data = ByteVector.fromValidHex("${data.head.raw.toHex}")
-             |  val definition = io.circe.parser.decode[FitMessage.DefinitionMessage]($quotes${data.head.definition.asJson.noSpaces}$quotes).fold(throw _, identity)
-             |  val profileMsg = definition.profileMsg.getOrElse(sys.error(s"no profile message"))
-             |}
-             |""".stripMargin
-        )
+        println(makeTestCaseStub(s"decode $mesg data", data.head))
       }
+
+  def filterRecordsWithComponents(
+      fit: FitFile
+  ): Vector[(Msg, List[Msg.FieldAttributes], DataMessage)] =
+    fit.dataRecords
+      .filter(_.definition.profileMsg.isDefined)
+      .flatMap { dm =>
+        val profileMsg = dm.definition.profileMsg.get
+        val fieldsWithComponents = profileMsg.allFields.filter(_.components.nonEmpty)
+        val names = fieldsWithComponents.map(_.fieldName).toSet
+        val result = dm.definition.fields.flatMap(f =>
+          profileMsg.findField(f.fieldDefNum).filter(pf => names.contains(pf.fieldName))
+        )
+        if (result.isEmpty) Vector.empty
+        else Vector((profileMsg, result, dm))
+      }
+
+  def makeTestCaseStub(title: String, dm: DataMessage): String =
+    s"""
+       |test("$title") {
+       |  val data = ByteVector.fromValidHex("${dm.raw.toHex}")
+       |  val definition = io.circe.parser.decode[FitMessage.DefinitionMessage]($quotes${dm.definition.asJson.noSpaces}$quotes).fold(throw _, identity)
+       |
+       |}
+       |""".stripMargin
+
 }
 
 object PlayingTest {

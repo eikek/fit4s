@@ -1,23 +1,48 @@
 package fit4s.decode
 
+import fit4s.profile.messages.Msg
+import fit4s.profile.types.TypedValue
+
 final class DataFields private (
-    protected val allFields: List[DataField],
+    val allFields: Vector[DataField],
     protected val byName: Map[String, DataField.KnownField]
 ) {
+  lazy val size = allFields.size
+
   def getByName(fieldName: String): Option[DataField.KnownField] =
     byName.get(fieldName)
 
+  def get(field: Msg.FieldAttributes): Option[DataField.KnownField] =
+    getByName(field.fieldName)
+
+  def getDecodedValue(field: Msg.FieldAttributes): Option[TypedValue[_]] =
+    for {
+      field <- get(field)
+      decoded <- field.decodedValue.toOption
+      value <- decoded.asSuccess
+    } yield value.fieldValue.value
+
   def ++(other: DataFields): DataFields =
-    new DataFields(allFields ::: other.allFields, byName.concat(other.byName))
+    new DataFields(allFields ++ other.allFields, byName.concat(other.byName))
 
   def flatMap(f: DataField => List[DataField]): DataFields =
     // TODO better perf
     DataFields(allFields.flatMap(f))
+
+  override def toString =
+    s"DataFields($allFields)"
+
+  override def equals(obj: Any) = obj match {
+    case t: DataFields => t.allFields == allFields
+    case _             => false
+  }
+
+  override def hashCode() = allFields.hashCode()
 }
 
 object DataFields {
 
-  def apply(allFields: List[DataField]): DataFields = {
+  def apply(allFields: Vector[DataField]): DataFields = {
     val byName = allFields.flatMap {
       case f: DataField.KnownField => List(f.field.fieldName -> f)
       case _                       => Nil
@@ -26,5 +51,5 @@ object DataFields {
   }
 
   def of(field: DataField*): DataFields =
-    apply(field.toList)
+    apply(field.toVector)
 }

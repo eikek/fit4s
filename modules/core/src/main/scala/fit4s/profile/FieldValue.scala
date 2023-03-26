@@ -16,10 +16,10 @@ final case class FieldValue[A <: TypedValue[_]](
   def scaledValue: Option[Nel[Double]] =
     (value, field.scale) match {
       case (LongBaseValue(rv, _), List(scale)) =>
-        Some(Nel.of(rv / scale))
+        Some(Nel.of(rv / scale - field.offset.getOrElse(0d)))
 
       case (ArrayFieldType.LongArray(list), List(scale)) =>
-        Some(list.map(_ / scale))
+        Some(list.map(_ / scale - field.offset.getOrElse(0d)))
 
       case _ => None
     }

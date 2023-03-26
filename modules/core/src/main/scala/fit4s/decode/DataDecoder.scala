@@ -20,10 +20,6 @@ private[fit4s] object DataDecoder {
     * profile message.
     */
   def create(dm: DefinitionMessage, pm: Msg): Decoder[DataDecodeResult] = {
-    // must expand all fields with components into its generated fields
-    // going recursively until no components exist. then continue with this decoding
-    // perhaps it is good to capture single fields + its byte-vector first, something
-    // like (localField, profileField, ByteVector) and then flatMap components
     def fieldDecoder(previous: List[FieldDecodeResult], localField: FieldDefinition) =
       pm.findField(localField.fieldDefNum) match {
         case Some(globalField) =>
@@ -79,7 +75,7 @@ private[fit4s] object DataDecoder {
             }
         }
 
-      go(dm.fields, bits, Nil).map(_.map(DataDecodeResult.apply))
+      go(dm.fields ::: dm.devFields, bits, Nil).map(_.map(DataDecodeResult.apply))
   }
 
   def withInvalidValue(
