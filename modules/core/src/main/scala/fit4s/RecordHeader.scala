@@ -14,6 +14,8 @@ sealed trait RecordHeader {
   def messageType: MessageType
 
   def localMessageType: Int
+
+  def isExtendedDefinitionMessage: Boolean
 }
 
 object RecordHeader {
@@ -54,6 +56,8 @@ object RecordHeader {
   ) extends RecordHeader {
 
     val messageType = MessageType.DataMessage
+
+    val isExtendedDefinitionMessage: Boolean = false
   }
 
   object CompressedTimestampHeader {

@@ -65,7 +65,7 @@ object FitFile {
 
   def decodeUnsafe(bv: ByteVector): FitFile =
     decode(bv).fold(
-      err => sys.error(s"Decoding FIT failed: ${err.messageWithContext}"),
+      err => sys.error(s"Decoding FIT failed! ${err.messageWithContext}"),
       identity
     )
 

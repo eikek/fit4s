@@ -7,7 +7,7 @@ import fit4s.profile.messages.Msg
 import fit4s.profile.messages.Msg.{ArrayDef, FieldWithCodec}
 import fit4s.profile.types.{ArrayFieldType, BaseTypeCodec, BaseTypedValue, TypedValue}
 import fit4s.{DataDecodeResult, FieldDecodeResult, FieldDefinition}
-import scodec.bits.BitVector
+import scodec.bits.{BitVector, ByteOrdering}
 import scodec.codecs.{bytes, fixedSizeBytes, list, peek}
 import scodec.{Attempt, DecodeResult, Decoder, Err}
 
@@ -52,7 +52,7 @@ private[fit4s] object DataDecoder {
             }
         }
 
-      go(dm.fields, bits, Nil).map(_.map(DataDecodeResult.apply))
+      go(dm.fields ::: dm.devFields, bits, Nil).map(_.map(DataDecodeResult.apply))
     }
   }
 
@@ -163,7 +163,7 @@ private[fit4s] object DataDecoder {
         activeSubField match {
           case Some(subField) =>
             decodeFieldWithCodec(
-              dm,
+              dm.archType,
               localField,
               subField.asInstanceOf[Msg.SubField[TypedValue[_]]]
             )
@@ -172,17 +172,17 @@ private[fit4s] object DataDecoder {
             Decoder.point(FieldDecodeResult.NoReferenceSubfield(localField, globalField))
         }
       } else {
-        decodeFieldWithCodec(dm, localField, globalField)
+        decodeFieldWithCodec(dm.archType, localField, globalField)
       }
     }
 
   private def decodeFieldWithCodec(
-      dm: DefinitionMessage,
+      byteOrdering: ByteOrdering,
       localField: FieldDefinition,
       field: FieldWithCodec[TypedValue[_]]
   ): Decoder[FieldDecodeResult] = {
     val fc = field
-      .fieldCodec(localField)(dm.archType)
+      .fieldCodec(localField)(byteOrdering)
       .asDecoder
       .map[FieldDecodeResult.Success](value =>
         FieldDecodeResult.Success(localField, FieldValue(field, value))
@@ -190,7 +190,7 @@ private[fit4s] object DataDecoder {
 
     val ac = fixedSizeBytes(
       localField.sizeBytes,
-      list(field.fieldCodec(localField)(dm.archType))
+      list(field.fieldCodec(localField)(byteOrdering))
     ).asDecoder
       .map(Nel.unsafeFromList)
       .map(v => ArrayFieldType(v, localField.baseType.fitBaseType))

@@ -11,7 +11,8 @@ object Record {
 
   val encoder: Encoder[Record] =
     Encoder(r =>
-      Encoder.encodeBoth(RecordHeader.codec, FitMessage.encoder)(r.header, r.content)
+      Encoder
+        .encodeBoth(RecordHeader.codec, FitMessage.encoder(r.header))(r.header, r.content)
     )
 
   def decoder(prev: Map[Int, FitMessage.DefinitionMessage]): Decoder[Record] =

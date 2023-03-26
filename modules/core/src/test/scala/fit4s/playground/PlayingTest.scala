@@ -1,9 +1,11 @@
-package fit4s
+package fit4s.playground
 
 import cats.effect._
-import fit4s.PlayingTest.Group
 import fit4s.data.{ActivitySummary, Distance}
+import fit4s.playground.PlayingTest.Group
 import fit4s.profile.types.{MesgNum, Sport}
+import fit4s.FitFile
+import fit4s.json.JsonCodec
 import fs2.io.file.{Files, Path}
 import fs2.{Chunk, Stream}
 import io.circe.syntax._
@@ -25,7 +27,8 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
     val dir = Path("/home/eike/workspace/garmin/garmin-connect/activities")
     val sysTime =
       Path( // 1862739919_ACTIVITY.fit=1992-01-18T18:36:18Z   ok:1862739926_ACTIVITY.fit=2012-09-27T16:26:14Z
-        "/Users/ekettner/personal/fit4s/modules/core/src/test/resources/fit/activity/1862739919_ACTIVITY.fit"
+        //"/Users/ekettner/personal/fit4s/modules/core/src/test/resources/fit/activity/1862739919_ACTIVITY.fit"
+        "local/garmin-sdk/examples/Activity.fit"
       )
 
     Files[IO]

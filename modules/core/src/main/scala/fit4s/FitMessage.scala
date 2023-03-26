@@ -19,15 +19,18 @@ object FitMessage {
       globalMessageNumber: Either[Int, MesgNum],
       fieldCount: Int,
       fields: List[FieldDefinition],
-      profileMsg: Option[Msg]
+      profileMsg: Option[Msg],
+      devFieldCount: Int,
+      devFields: List[FieldDefinition]
   ) extends FitMessage {
-    def dataMessageLength: Int = fields.map(_.sizeBytes).sum
+    def dataMessageLength: Int =
+      fields.map(_.sizeBytes).sum + devFields.map(_.sizeBytes).sum
 
     def isMesgNum(n: MesgNum): Boolean =
       globalMessageNumber.exists(_ == n)
 
     override def toString: String =
-      s"DefinitionMessage(mesgNum=$globalMessageNumber, profileMsg=$profileMsg, fieldCount=$fieldCount)"
+      s"DefinitionMessage(mesgNum=$globalMessageNumber, profileMsg=$profileMsg, fieldCount=$fieldCount/$devFieldCount)"
   }
 
   object DefinitionMessage {
@@ -37,15 +40,30 @@ object FitMessage {
         bo => if (bo == ByteOrdering.LittleEndian) 0 else 1
       )
 
-    def codec: Codec[DefinitionMessage] =
-      (uint8 :: archCodec.flatPrepend(bo =>
-        fallback(uintx(16, bo), MesgNum.codec(bo)).flatPrepend { eitherMsgNum =>
-          uintx(8, bo).flatPrepend { fc =>
-            val msg = eitherMsgNum.toOption.flatMap(FitMessages.findByMesgNum)
-            listOfN(provide(fc), FieldDefinition.codec) :: provide(msg)
+    def codec(header: RecordHeader): Codec[DefinitionMessage] = {
+      val fieldCodec =
+        uint8 :: archCodec.flatPrepend(bo =>
+          fallback(uintx(16, bo), MesgNum.codec(bo)).flatPrepend { eitherMsgNum =>
+            uintx(8, bo).flatPrepend { fc =>
+              val msg = eitherMsgNum.toOption.flatMap(FitMessages.findByMesgNum)
+              listOfN(provide(fc), FieldDefinition.codec) :: provide(msg)
+            }
           }
-        }
-      )).as[DefinitionMessage].withContext("DefinitionMessage")
+        )
+
+      val devFieldCodec =
+        if (header.isExtendedDefinitionMessage)
+          uint8.flatPrepend { fc =>
+            listOfN(provide(fc), FieldDefinition.codec).hlist
+          }
+        else
+          provide(0 -> List.empty[FieldDefinition]).flattenLeftPairs
+
+      fieldCodec
+        .flatConcat(_ => devFieldCodec)
+        .as[DefinitionMessage]
+        .withContext("DefinitionMessage")
+    }
   }
 
   final case class DataMessage(definition: DefinitionMessage, raw: ByteVector)
@@ -119,10 +137,10 @@ object FitMessage {
       Encoder(dm => Attempt.successful(dm.raw.bits))
   }
 
-  val encoder: Encoder[FitMessage] =
+  def encoder(header: RecordHeader): Encoder[FitMessage] =
     Encoder[FitMessage] { (m: FitMessage) =>
       m match {
-        case dm: DefinitionMessage => DefinitionMessage.codec.encode(dm)
+        case dm: DefinitionMessage => DefinitionMessage.codec(header).encode(dm)
         case dm: DataMessage       => DataMessage.encoder.encode(dm)
       }
     }
@@ -132,7 +150,7 @@ object FitMessage {
   )(rh: RecordHeader): Decoder[FitMessage] =
     rh.messageType match {
       case MessageType.DefinitionMessage =>
-        DefinitionMessage.codec.upcast[FitMessage]
+        DefinitionMessage.codec(rh).upcast[FitMessage]
       case MessageType.DataMessage =>
         DataMessage.decoder(prev, rh)
     }

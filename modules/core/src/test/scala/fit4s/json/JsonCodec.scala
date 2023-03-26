@@ -1,10 +1,11 @@
-package fit4s
+package fit4s.json
 
 import fit4s.FieldDefinition.BaseType
 import fit4s.profile.messages.{FitMessages, Msg}
 import fit4s.profile.types.{FitBaseType, MesgNum}
-import io.circe._
-import io.circe.generic.semiauto._
+import fit4s.{FieldDefinition, FitMessage}
+import io.circe.generic.semiauto.deriveCodec
+import io.circe.{Codec, Decoder, Encoder}
 import scodec.bits.ByteOrdering
 
 trait JsonCodec {

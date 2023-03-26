@@ -1,6 +1,8 @@
-package fit4s
+package fit4s.playground
 
 import fit4s.decode.DataDecoder
+import fit4s.FitMessage
+import fit4s.json.JsonCodec
 import munit.FunSuite
 import scodec.bits.ByteVector
 
