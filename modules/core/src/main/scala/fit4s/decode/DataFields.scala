@@ -1,5 +1,6 @@
 package fit4s.decode
 
+import fit4s.profile.FieldValue
 import fit4s.profile.messages.Msg
 import fit4s.profile.types.TypedValue
 
@@ -22,12 +23,30 @@ final class DataFields private (
       value <- decoded.asSuccess
     } yield value.fieldValue.value
 
+  def getDecodedField[A <: TypedValue[_]](
+      field: Msg.FieldWithCodec[A]
+  ): Either[String, Option[FieldValue[A]]] =
+    get(field)
+      .map(_.decodedValue.toEither.left.map(_.messageWithContext))
+      .map(_.map(_.asSuccess.map(_.fieldValue.asInstanceOf[FieldValue[A]])))
+      .getOrElse(Right(None))
+
   def ++(other: DataFields): DataFields =
     new DataFields(allFields ++ other.allFields, byName.concat(other.byName))
 
-  def flatMap(f: DataField => List[DataField]): DataFields =
+  def +:(field: DataField): DataFields =
+    new DataFields(
+      allFields :+ field,
+      field match {
+        case f: DataField.KnownField =>
+          byName.updated(f.field.fieldName, f)
+        case _ => byName
+      }
+    )
+
+  def flatMap(f: DataField => DataFields): DataFields =
     // TODO better perf
-    DataFields(allFields.flatMap(f))
+    DataFields(allFields.flatMap(field => f(field).allFields))
 
   override def toString =
     s"DataFields($allFields)"

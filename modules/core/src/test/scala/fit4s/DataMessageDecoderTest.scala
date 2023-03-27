@@ -60,7 +60,7 @@ class DataMessageDecoderTest extends FunSuite with JsonCodec {
       FileIdMsg.productGarminProduct.asInstanceOf[Msg.SubField[TypedValue[_]]],
       product.raw
     )
-    assertEquals(expanded, DataFields.of(expected))
+    assertEquals(expanded, DataFields.of(product, expected))
   }
 
   test("RecordMsg expand components for speed and altitude") {
