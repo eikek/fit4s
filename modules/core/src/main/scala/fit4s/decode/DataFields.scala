@@ -48,6 +48,9 @@ final class DataFields private (
     // TODO better perf
     DataFields(allFields.flatMap(field => f(field).allFields))
 
+  def filter(f: DataField => Boolean): DataFields =
+    flatMap(df => if (f(df)) DataFields.of(df) else DataFields.empty)
+
   override def toString =
     s"DataFields($allFields)"
 
@@ -60,6 +63,8 @@ final class DataFields private (
 }
 
 object DataFields {
+
+  val empty: DataFields = DataFields(Vector.empty)
 
   def apply(allFields: Vector[DataField]): DataFields = {
     val byName = allFields.flatMap {

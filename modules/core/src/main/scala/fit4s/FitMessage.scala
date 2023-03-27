@@ -1,6 +1,6 @@
 package fit4s
 
-import fit4s.decode.DataDecoder
+import fit4s.decode.{DataFields, DataMessageDecoder}
 import fit4s.profile.FieldValue
 import fit4s.profile.messages.{EventMsg, FitMessages, Msg}
 import fit4s.profile.types.{Event, EventType, MesgNum, TypedValue}
@@ -69,20 +69,15 @@ object FitMessage {
   final case class DataMessage(definition: DefinitionMessage, raw: ByteVector)
       extends FitMessage {
 
-    lazy val decoded: Attempt[DataDecodeResult] =
-      DataDecoder(definition).complete.decode(raw.bits).map(_.value)
+    lazy val dataFields: DataFields = DataMessageDecoder.decode(this)
 
-    lazy val isKnownSuccess: Boolean =
-      definition.profileMsg.isDefined && decoded.fold(_ => false, _ => true)
+    lazy val isKnownMessage: Boolean =
+      definition.profileMsg.isDefined
 
     def findField[A <: TypedValue[_]](
         ft: Msg.FieldWithCodec[A]
     ): Either[String, Option[FieldValue[A]]] =
-      decoded.toEither.left
-        .map(_.messageWithContext)
-        .map { result =>
-          result.findField(ft)
-        }
+      dataFields.getDecodedField[A](ft)
 
     def requireField[A <: TypedValue[_]](
         ft: Msg.FieldWithCodec[A]

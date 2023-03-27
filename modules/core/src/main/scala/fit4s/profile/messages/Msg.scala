@@ -79,10 +79,8 @@ object Msg {
       offset: Option[Double],
       units: Option[String],
       bits: List[Int],
-      subFields: List[SubField[_ <: TypedValue[_]]]
-  ) extends FieldWithCodec[A] {
-    val isDynamicField: Boolean = subFields.nonEmpty
-  }
+      subFields: () => List[SubField[_ <: TypedValue[_]]]
+  ) extends FieldWithCodec[A]
 
   final case class SubField[A <: TypedValue[_]](
       references: List[ReferencedField[_]],

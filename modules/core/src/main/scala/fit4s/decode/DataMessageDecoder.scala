@@ -78,8 +78,12 @@ object DataMessageDecoder {
         val activeSubField =
           subFields.toList.find { subField =>
             subField.references.exists { ref =>
-              allFields
-                .getByName(ref.refField.fieldName)
+              assert(
+                ref.refField != null,
+                s"ref '$ref' of subfield '$subField' is null?!"
+              )
+              val x = allFields.getByName(ref.refField.fieldName)
+              x
                 .exists(
                   _.decodedValue.fold(
                     _ => false,
@@ -242,7 +246,7 @@ object DataMessageDecoder {
     def unapply(field: DataField): Option[Nel[Msg.SubField[TypedValue[_]]]] =
       field match {
         case DataField.KnownField(_, _, field: Msg.Field[TypedValue[_]], _) =>
-          Nel.fromList(field.subFields.asInstanceOf[List[Msg.SubField[TypedValue[_]]]])
+          Nel.fromList(field.subFields().asInstanceOf[List[Msg.SubField[TypedValue[_]]]])
         case _ => None
       }
 

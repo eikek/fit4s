@@ -146,9 +146,10 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
   def printDecoded(fit: FitFile) =
     Stream
       .emits(fit.dataRecords)
-      .filter(_.isKnownSuccess)
+      .filter(_.isKnownMessage)
       .map(r =>
-        r.definition.profileMsg.getOrElse(r.definition.globalMessageNumber) -> r.decoded
+        r.definition.profileMsg
+          .getOrElse(r.definition.globalMessageNumber) -> r.dataFields
       )
       // .take(1000)
       .evalMap(IO.println)

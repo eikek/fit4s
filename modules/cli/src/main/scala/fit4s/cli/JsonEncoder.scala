@@ -8,7 +8,6 @@ import fit4s.profile.types._
 import io.circe.generic.semiauto._
 import io.circe.syntax._
 import io.circe.{Codec, Decoder, Encoder, Json}
-import scodec.Attempt
 import scodec.bits.ByteOrdering
 
 trait JsonEncoder {
@@ -77,26 +76,13 @@ trait JsonEncoder {
   implicit val dataMessageEncoder: Encoder[FitMessage.DataMessage] =
     Encoder.instance { dm =>
       val msg = dm.definition.globalMessageNumber.asJson
-      dm.decoded match {
-        case Attempt.Successful(DataDecodeResult(fields)) =>
-          val pairs = fields
-            .withFilter(_.isKnownSuccess)
-            .map {
-              case r: FieldDecodeResult.Success =>
-                r.fieldValue.field.fieldName -> r.fieldValue.asJson
-              case r: FieldDecodeResult.LocalSuccess =>
-                r.localField.fieldDefNum.toString -> r.value.toString.asJson
-              case r: FieldDecodeResult.DecodeError =>
-                r.localField.fieldDefNum.toString -> r.err.messageWithContext.asJson
-              case r: FieldDecodeResult.InvalidValue =>
-                r.localField.fieldDefNum.toString -> "Invalid value".asJson
-              case r: FieldDecodeResult.NoReferenceSubfield =>
-                r.globalField.fieldName -> "No subfield reference".asJson
-            }
-          Json.obj("message" -> msg, "fields" -> Json.obj(pairs: _*))
-        case Attempt.Failure(err) =>
-          Json.obj("error" -> err.messageWithContext.asJson, "message" -> msg)
-      }
+      val pairs = dm.dataFields.allFields
+        .flatMap(_.decodedValue.toOption)
+        .flatMap(_.asSuccess) // only interested in known data
+        .map { r =>
+          r.fieldValue.field.fieldName -> r.fieldValue.asJson
+        }
+      Json.obj("message" -> msg, "fields" -> Json.obj(pairs: _*))
     }
 
   implicit val normalHeaderEncoder: Encoder[RecordHeader.NormalHeader] =

@@ -124,7 +124,7 @@ object MessagesGenerator {
             )
 
           s"""
-             |val $varName =
+             |lazy val $varName =
              |  Msg.ReferencedField[$typeName](
              |    refField = ${messageTypeName(messageDef)}.$fieldRef,
              |    refFieldValue = $typeName.$typeValue
@@ -158,7 +158,7 @@ object MessagesGenerator {
 
     s"""
        |/** ${fd.comment.getOrElse("")} */
-       |val ${makeSubfieldValName(md, fd)}: Msg.SubField[$typeNameOrLong] =
+       |lazy val ${makeSubfieldValName(md, fd)}: Msg.SubField[$typeNameOrLong] =
        |  Msg.SubField(
        |    fieldName = "${fd.fieldName}",
        |    fieldTypeName = "${fd.fieldType}",
@@ -208,7 +208,7 @@ object MessagesGenerator {
        |      offset = ${fd.offset},
        |      units = ${fd.units.map(_.inQuotes)},
        |      bits = ${fd.bits},
-       |      subFields = List($subfields)
+       |      subFields = () => List($subfields)
        |    )
        |  )
        |""".stripMargin

@@ -32,8 +32,10 @@ object App
     io.attempt.flatMap {
       case Right(code) => IO.pure(code)
       case Left(ex: CliError) =>
+        ex.printStackTrace()
         IO.println(s"ERROR ${ex.getMessage}").as(ExitCode.Error)
       case Left(ex) =>
+        ex.printStackTrace()
         IO.println(s"ERROR ${ex.getClass.getSimpleName}: ${ex.getMessage}")
           .as(ExitCode.Error)
     }

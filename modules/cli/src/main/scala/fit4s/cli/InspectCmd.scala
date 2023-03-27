@@ -17,8 +17,9 @@ object InspectCmd {
     for {
       fit <- reportError(readFit(cfg.fitFile))
       validOnly = fit
-        .filterDataRecords(dm => dm.isKnownSuccess)
+        .filterDataRecords(dm => dm.isKnownMessage)
         .filterRecords(_.header.messageType == MessageType.DataMessage)
+      // _ <- IO.println(validOnly.records.map(_.content.asInstanceOf[DataMessage].dataFields).toString().take(300))
       json = validOnly.asJson
       _ <- IO.println(json.spaces2)
     } yield ExitCode.Success

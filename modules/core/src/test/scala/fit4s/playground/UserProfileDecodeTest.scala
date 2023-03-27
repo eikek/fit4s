@@ -1,8 +1,8 @@
 package fit4s.playground
 
-import fit4s.decode.DataDecoder
+import fit4s.FitMessage
+import fit4s.decode.DataMessageDecoder
 import fit4s.json.JsonCodec
-import fit4s.{FitMessage, decode}
 import munit.FunSuite
 import scodec.bits.ByteVector
 
@@ -17,7 +17,7 @@ class UserProfileDecodeTest extends FunSuite with JsonCodec {
       .fold(throw _, identity)
 
     println(
-      DataDecoder(definition)
+      DataMessageDecoder.create(definition)
         .decode(data.bits)
         .map(_.value)
     )
@@ -36,7 +36,7 @@ class UserProfileDecodeTest extends FunSuite with JsonCodec {
 
     println(profileMsg)
     println(
-      decode.DataDecoder(definition)
+      DataMessageDecoder.create(definition)
         .decode(data.bits)
         .map(_.value)
     )
