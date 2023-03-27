@@ -16,8 +16,6 @@ final class Distance private (val meter: Double) extends AnyVal {
 
 object Distance {
   val zero: Distance = meter(0)
-  val minValue: Distance = meter(Double.MinValue)
-  val maxValue: Distance = meter(Double.MaxValue)
 
   def meter(meter: Double): Distance =
     new Distance(meter)

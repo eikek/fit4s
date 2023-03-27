@@ -24,7 +24,9 @@ final case class ActivitySummary(
     avgSpeed: Option[Speed],
     minHr: Option[HeartRate],
     maxHr: Option[HeartRate],
-    avgHr: Option[HeartRate]
+    avgHr: Option[HeartRate],
+    maxPower: Option[Power],
+    avgPower: Option[Power]
 ) {
 
   private def combine(other: ActivitySummary): ActivitySummary =
@@ -49,7 +51,9 @@ final case class ActivitySummary(
       avgSpeed,
       minHr = select(minHr, other.minHr, Ordering[HeartRate].min[HeartRate]),
       maxHr = select(maxHr, other.maxHr, Ordering[HeartRate].max[HeartRate]),
-      avgHr
+      avgHr,
+      maxPower = select(maxPower, other.maxPower, Ordering[Power].max[Power]),
+      avgPower
     )
 
   private def select[A](
@@ -68,28 +72,31 @@ final case class ActivitySummary(
     s"ActivitySummary(id=$id, sport=$sport, subSport=$subSport, start=$startTime, moving=$movingTime, " +
       s"elapsed=$elapsedTime, calories=$calories, distance=$distance, minTemp=$minTemp, maxTemp=$maxTemp, " +
       s"avgTemp=$avgTemp, maxSpeed=$maxSpeed, avgSpeed=${avgSpeed.getOrElse("n.a.")}, " +
-      s"minHr=$minHr, maxHr=$maxHr, avgHr=${avgHr.getOrElse("n.a")})"
+      s"minHr=$minHr, maxHr=$maxHr, avgHr=${avgHr.getOrElse("n.a")}, maxPower=$maxPower, avgPower=${avgPower
+          .getOrElse("n.a")})"
 }
 
 object ActivitySummary {
 
   def from(id: FileId, sessionMsg: DataMessage): Either[String, ActivitySummary] =
     for {
-      sport <- sessionMsg.findField(SessionMsg.sport)
-      subSport <- sessionMsg.findField(SessionMsg.subSport)
-      start <- sessionMsg.findField(SessionMsg.startTime)
-      movingTime <- sessionMsg.findField(SessionMsg.totalMovingTime)
-      elapsedTime <- sessionMsg.findField(SessionMsg.totalElapsedTime)
-      kcal <- sessionMsg.findField(SessionMsg.totalCalories)
-      distance <- sessionMsg.findField(SessionMsg.totalDistance)
-      maxSpeed <- sessionMsg.findField(SessionMsg.maxSpeed)
-      avgSpeed <- sessionMsg.findField(SessionMsg.avgSpeed)
-      maxHr <- sessionMsg.findField(SessionMsg.maxHeartRate)
-      minHr <- sessionMsg.findField(SessionMsg.minHeartRate)
-      avgHr <- sessionMsg.findField(SessionMsg.avgHeartRate)
-      minTemp <- sessionMsg.findField(SessionMsg.minTemperature)
-      maxTemp <- sessionMsg.findField(SessionMsg.maxTemperature)
-      avgTemp <- sessionMsg.findField(SessionMsg.avgTemperature)
+      sport <- sessionMsg.getField(SessionMsg.sport)
+      subSport <- sessionMsg.getField(SessionMsg.subSport)
+      start <- sessionMsg.getField(SessionMsg.startTime)
+      movingTime <- sessionMsg.getField(SessionMsg.totalMovingTime)
+      elapsedTime <- sessionMsg.getField(SessionMsg.totalElapsedTime)
+      kcal <- sessionMsg.getField(SessionMsg.totalCalories)
+      distance <- sessionMsg.getField(SessionMsg.totalDistance)
+      maxSpeed <- sessionMsg.getField(SessionMsg.maxSpeed)
+      avgSpeed <- sessionMsg.getField(SessionMsg.avgSpeed)
+      maxHr <- sessionMsg.getField(SessionMsg.maxHeartRate)
+      minHr <- sessionMsg.getField(SessionMsg.minHeartRate)
+      avgHr <- sessionMsg.getField(SessionMsg.avgHeartRate)
+      minTemp <- sessionMsg.getField(SessionMsg.minTemperature)
+      maxTemp <- sessionMsg.getField(SessionMsg.maxTemperature)
+      avgTemp <- sessionMsg.getField(SessionMsg.avgTemperature)
+      maxPower <- sessionMsg.getField(SessionMsg.maxPower)
+      avgPower <- sessionMsg.getField(SessionMsg.avgPower)
     } yield ActivitySummary(
       id,
       sport.map(_.value).getOrElse(Sport.Generic),
@@ -106,7 +113,9 @@ object ActivitySummary {
       avgSpeed.flatMap(_.speed),
       minHr.flatMap(_.heartrate),
       maxHr.flatMap(_.heartrate),
-      avgHr.flatMap(_.heartrate)
+      avgHr.flatMap(_.heartrate),
+      maxPower.flatMap(_.power),
+      avgPower.flatMap(_.power)
     )
 
   def from(fit: FitFile): Either[String, ActivitySummary] = for {
@@ -123,7 +132,15 @@ object ActivitySummary {
     avgHr = makeAvg(activities.flatMap(_.avgHr.map(_.bpm.toDouble)))
       .map(_.toInt)
       .map(HeartRate.bpm)
-  } yield result.copy(avgSpeed = avgSpeed, avgTemp = avgTemp, avgHr = avgHr)
+    avgPower = makeAvg(activities.flatMap(_.avgPower.map(_.watts)))
+      .map(_.toInt)
+      .map(Power.watts)
+  } yield result.copy(
+    avgSpeed = avgSpeed,
+    avgTemp = avgTemp,
+    avgHr = avgHr,
+    avgPower = avgPower
+  )
 
   private def makeAvg(values: Vector[Double]) =
     Option.when(values.nonEmpty) {

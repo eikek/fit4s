@@ -23,8 +23,8 @@ object DeviceProduct {
     fileIdMsg.definition.profileMsg match {
       case Some(FileIdMsg) =>
         for {
-          gp <- fileIdMsg.findField(FileIdMsg.productGarminProduct)
-          fp <- fileIdMsg.findField(FileIdMsg.productFaveroProduct)
+          gp <- fileIdMsg.getField(FileIdMsg.productGarminProduct)
+          fp <- fileIdMsg.getField(FileIdMsg.productFaveroProduct)
           r = gp
             .map(_.value)
             .map(Garmin)

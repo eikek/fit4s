@@ -13,8 +13,6 @@ final class HeartRate private (val bpm: Int) extends AnyVal {
 
 object HeartRate {
   val zero: HeartRate = bpm(0)
-  val minValue: HeartRate = bpm(Int.MinValue)
-  val maxValue: HeartRate = bpm(Int.MaxValue)
 
   def bpm(bpm: Int): HeartRate = new HeartRate(bpm)
 

@@ -74,26 +74,34 @@ object FitMessage {
     lazy val isKnownMessage: Boolean =
       definition.profileMsg.isDefined
 
-    def findField[A <: TypedValue[_]](
+    def getField[A <: TypedValue[_]](
         ft: Msg.FieldWithCodec[A]
     ): Either[String, Option[FieldValue[A]]] =
       dataFields.getDecodedField[A](ft)
 
-    def requireField[A <: TypedValue[_]](
+    def getRequiredField[A <: TypedValue[_]](
         ft: Msg.FieldWithCodec[A]
     ): Either[String, FieldValue[A]] =
-      findField(ft).flatMap {
+      getField(ft).flatMap {
         case Some(v) => Right(v)
         case None =>
-          Left(
-            s"Field '${ft.fieldName}' not found in msg ${definition.profileMsg.getOrElse(definition.globalMessageNumber)}."
-          )
+          Left(s"Field '${ft.fieldName}' not found in msg '${definition.profileMsg}'.")
       }
+
+    def unsafeGetField[A <: TypedValue[_]](
+        ft: Msg.FieldWithCodec[A]
+    ): Option[FieldValue[A]] =
+      getField(ft).fold(sys.error, identity)
+
+    def unsafeGetRequiredField[A <: TypedValue[_]](
+        ft: Msg.FieldWithCodec[A]
+    ): FieldValue[A] =
+      getRequiredField(ft).fold(sys.error, identity)
 
     def isEvent(event: Event, eventType: EventType): Boolean =
       definition.profileMsg.contains(EventMsg) &&
-        findField(EventMsg.eventType).map(_.map(_.value)).contains(Some(eventType)) &&
-        findField(EventMsg.event).map(_.map(_.value)).contains(Some(event))
+        getField(EventMsg.eventType).map(_.map(_.value)).contains(Some(eventType)) &&
+        getField(EventMsg.event).map(_.map(_.value)).contains(Some(event))
   }
 
   object DataMessage {

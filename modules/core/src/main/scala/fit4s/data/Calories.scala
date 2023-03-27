@@ -9,8 +9,6 @@ final class Calories private (val kcal: Double) extends AnyVal {
 
 object Calories {
   val zero: Calories = new Calories(0)
-  val minValue: Calories = new Calories(Double.MinValue)
-  val maxValue: Calories = new Calories(Double.MaxValue)
 
   def kcal(n: Double): Calories = new Calories(n)
   def cal(n: Double): Calories = new Calories(n / 1000.0)

@@ -8,7 +8,7 @@ final case class FileId(
     fileType: File,
     manufacturer: Manufacturer,
     product: DeviceProduct,
-    serialNumber: Long,
+    serialNumber: Option[Long],
     createdAt: Option[DateTime],
     number: Option[Long],
     productName: Option[String]
@@ -18,18 +18,18 @@ object FileId {
 
   def from(fileIdMsg: DataMessage): Either[String, FileId] =
     for {
-      ft <- fileIdMsg.requireField(FileIdMsg.`type`)
-      manuf <- fileIdMsg.requireField(FileIdMsg.manufacturer)
+      ft <- fileIdMsg.getRequiredField(FileIdMsg.`type`)
+      manuf <- fileIdMsg.getRequiredField(FileIdMsg.manufacturer)
       device <- DeviceProduct.from(fileIdMsg)
-      serial <- fileIdMsg.requireField(FileIdMsg.serialNumber)
-      created <- fileIdMsg.findField(FileIdMsg.timeCreated)
-      number <- fileIdMsg.findField(FileIdMsg.number)
-      prodname <- fileIdMsg.findField(FileIdMsg.productName)
+      serial <- fileIdMsg.getField(FileIdMsg.serialNumber)
+      created <- fileIdMsg.getField(FileIdMsg.timeCreated)
+      number <- fileIdMsg.getField(FileIdMsg.number)
+      prodname <- fileIdMsg.getField(FileIdMsg.productName)
     } yield FileId(
       ft.value,
       manuf.value,
       device,
-      serial.value.rawValue,
+      serial.map(_.value.rawValue),
       created.map(_.value),
       number.map(_.value.rawValue),
       prodname.map(_.value.rawValue)

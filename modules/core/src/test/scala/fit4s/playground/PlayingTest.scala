@@ -30,8 +30,9 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
     val sysTime =
       Path( // 1862739919_ACTIVITY.fit=1992-01-18T18:36:18Z   ok:1862739926_ACTIVITY.fit=2012-09-27T16:26:14Z
         // "/Users/ekettner/personal/fit4s/modules/core/src/test/resources/fit/activity/1862739919_ACTIVITY.fit"
-        "local/garmin-sdk/examples/MonitoringFile.fit"
-        // "modules/core/src/test/resources/fit/activity/2023-03-16-06-25-37.fit"
+         //"local/garmin-sdk/examples/MonitoringFile.fit"
+       // "modules/core/src/test/resources/fit/activity/2023-03-16-06-25-37.fit"
+        "modules/core/src/test/resources/fit/activity_poolswim_with_hr.fit"
       )
 
     Files[IO]
@@ -39,12 +40,7 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
       .through(parseFit)
       .evalMap(requireFit)
       .map(_._2)
-      .map(filterRecordsWithComponents)
-      .flatMap(Stream.emits)
-      .evalMap { case (msg, fields, dm) =>
-        IO.println(makeTestCaseStub(s"$msg components in ${fields.map(_.fieldName)}", dm))
-      }
-      // .evalMap(fit => printActivitySummary(fit))
+      .evalMap(fit => printActivitySummary(fit))
       .debug()
       .compile
       .drain

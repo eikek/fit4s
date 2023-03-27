@@ -10,17 +10,17 @@ final class Speed private (val meterPerSecond: Double) extends AnyVal {
 
   def +(spd: Speed): Speed = new Speed(meterPerSecond + spd.meterPerSecond)
 
-  override def toString =
-    f"$kmh%.2fkmh"
+  override def toString = f"$kmh%.2fkmh"
 }
 
 object Speed {
   val zero: Speed = meterPerSecond(0)
-  val maxValue: Speed = meterPerSecond(Double.MaxValue)
-  val minValue: Speed = meterPerSecond(Double.MinValue)
 
   def meterPerSecond(meterPerSecond: Double): Speed =
     new Speed(meterPerSecond)
+
+  def kmh(kmh: Double): Speed =
+    meterPerSecond(kmh / 3.6)
 
   implicit val ordering: Ordering[Speed] =
     Ordering.by(_.meterPerSecond)

@@ -10,6 +10,10 @@ object TestData {
 
   val exampleActivity = fromURL(getClass.getResource("/fit/Activity.fit"))
 
+  val examplePoolswimActivity = fromURL(
+    getClass.getResource("/fit/activity_poolswim_with_hr.fit")
+  )
+
   val edge530CyclingActivity = fromURL(
     getClass.getResource("/fit/activity/2023-03-16-06-25-37.fit")
   )
@@ -21,5 +25,4 @@ object TestData {
       .compile
       .fold(Chunk.empty[Byte])(_ ++ _)
       .map(_.toByteVector)
-
 }

@@ -33,8 +33,14 @@ final case class FieldValue[A <: TypedValue[_]](
       }
     }
 
+  def asLong: Option[Long] =
+    numericSingleValue.map(_.fold(identity, _.toLong))
+
+  def asDouble: Option[Double] =
+    numericSingleValue.map(_.fold(_.toDouble, identity))
+
   def distance: Option[Distance] = {
-    val value = numericSingleValue.map(_.fold(_.toDouble, identity))
+    val value = asDouble
     (value, field.unit) match {
       case (Some(v), Some(MeasurementUnit.Km)) => Some(Distance.km(v))
       case (v, Some(MeasurementUnit.Meter))    => v.map(Distance.meter)
@@ -43,7 +49,7 @@ final case class FieldValue[A <: TypedValue[_]](
   }
 
   def speed: Option[Speed] = {
-    val value = numericSingleValue.map(_.fold(_.toDouble, identity))
+    val value = asDouble
     (value, field.unit) match {
       case (v, Some(MeasurementUnit.MeterPerSecond)) => v.map(Speed.meterPerSecond)
       case _                                         => None
@@ -57,6 +63,14 @@ final case class FieldValue[A <: TypedValue[_]](
       case _ => None
     }
 
+  def power: Option[Power] =
+    field.unit match {
+      case Some(MeasurementUnit.Watt) =>
+        asLong.map(_.toInt).map(Power.watts)
+
+      case _ => None
+    }
+
   def heartrate: Option[HeartRate] =
     field.unit match {
       case Some(MeasurementUnit.Bpm) =>
@@ -65,7 +79,7 @@ final case class FieldValue[A <: TypedValue[_]](
     }
 
   def duration: Option[Duration] = {
-    val value = numericSingleValue.map(_.fold(identity, _.toLong))
+    val value = asLong
     field.unit match {
       case Some(MeasurementUnit.Millisecond) => value.map(Duration.ofMillis)
       case Some(MeasurementUnit.Second)      => value.map(Duration.ofSeconds)
