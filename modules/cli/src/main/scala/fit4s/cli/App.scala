@@ -19,7 +19,7 @@ object App
 
   val activityOpts: Opts[ActivityCmd.Config] =
     Opts.subcommand("activity", "Look into activities") {
-      Opts.apply(ActivityCmd.Config.none)
+      dirArg.map(ActivityCmd.Config.apply)
     }
 
   def main: Opts[IO[ExitCode]] =
