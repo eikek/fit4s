@@ -1,7 +1,9 @@
 package fit4s.cli
 
 import cats.effect.{ExitCode, IO}
+import com.monovore.decline.Opts
 import fit4s.FitFile
+import fit4s.cli.activity.{ImportCmd, SummaryCmd}
 import fit4s.data.{ActivitySummary, Calories, Distance}
 import fit4s.profile.types.Sport
 import fs2.io.file.{Files, Path}
@@ -9,13 +11,36 @@ import fs2.{Chunk, Stream}
 import scodec.Attempt
 
 import java.time.{Duration, ZoneId}
+import scala.annotation.nowarn
 
-object ActivityCmd {
+object ActivityCmd extends BasicOpts {
 
-  final case class Config(directory: Path)
+  val importArgs: Opts[ImportCmd.Config] =
+    Opts.subcommand("import", "Import fit files") {
+      fileOrDirArgs.map(ImportCmd.Config.apply)
+    }
 
-  def apply(cfg: Config): IO[ExitCode] =
-    readAll(cfg.directory)
+  val summaryArgs: Opts[SummaryCmd.Config] =
+    Opts.subcommand("summary", "Show a basic activity summary") {
+      Opts
+        .option[Int]("--year", "Summary of given year")
+        .orNone
+        .map(SummaryCmd.Config.apply)
+    }
+
+  final case class Config()
+
+  @nowarn
+  def apply(cfg: Config): Opts[IO[ExitCode]] =
+    importArgs.orElse(summaryArgs).map {
+      case c: ImportCmd.Config  => ImportCmd(c)
+      case c: SummaryCmd.Config => SummaryCmd(c)
+    }
+
+  // ------------------------------------------------
+
+  def adhocSummary(directory: Path): IO[ExitCode] =
+    readAll(directory)
       .through(makeSummary)
       .evalMap { summary =>
         IO {

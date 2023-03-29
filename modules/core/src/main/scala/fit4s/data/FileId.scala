@@ -3,6 +3,9 @@ package fit4s.data
 import fit4s.FitMessage.DataMessage
 import fit4s.profile.messages.FileIdMsg
 import fit4s.profile.types.{DateTime, File, Manufacturer}
+import scodec.Codec
+import scodec.bits.{Bases, ByteOrdering, ByteVector}
+import scodec.codecs._
 
 final case class FileId(
     fileType: File,
@@ -12,9 +15,39 @@ final case class FileId(
     createdAt: Option[DateTime],
     number: Option[Long],
     productName: Option[String]
-)
+) {
+
+  def asString: String =
+    FileId.idCodec
+      .encode(this)
+      .map(_.toBase58(Bases.Alphabets.Base58))
+      .toEither
+      .fold(err => sys.error(err.messageWithContext), identity)
+}
 
 object FileId {
+
+  private def idCodec: Codec[FileId] =
+    (File.codec(ByteOrdering.LittleEndian) ::
+      Manufacturer.codec(ByteOrdering.LittleEndian) ::
+      DeviceProduct.codec ::
+      optional(bool, uint32L) ::
+      optional(
+        bool,
+        DateTime
+          .codec(ByteOrdering.LittleEndian)
+      )
+      ::
+      optional(bool, uint32) ::
+      optional(bool, cstring)).as[FileId]
+
+  def fromString(str: String): Either[String, FileId] =
+    ByteVector
+      .fromBase58Descriptive(str, Bases.Alphabets.Base58)
+      .flatMap(bv =>
+        idCodec.complete.decode(bv.bits).toEither.left.map(_.messageWithContext)
+      )
+      .map(_.value)
 
   def from(fileIdMsg: DataMessage): Either[String, FileId] =
     for {

@@ -8,6 +8,8 @@ import fit4s.profile.types.{DateTime, File, GarminProduct, Manufacturer}
 import munit.FunSuite
 import scodec.bits.ByteVector
 
+import scala.util.Random
+
 class FileIdDecodeTest extends FunSuite with JsonCodec {
 
   test("decode FileId data (2)") {
@@ -64,5 +66,28 @@ class FileIdDecodeTest extends FunSuite with JsonCodec {
         )
       )
     )
+  }
+
+  test("fileId as string") {
+    val samples =
+      for {
+        file <- File.all
+        manufacturer <- Manufacturer.all
+        device <- DeviceProduct.all
+      } yield FileId(
+        file,
+        manufacturer,
+        device,
+        Option.when(Random.nextBoolean())(9845466L),
+        Option.when(Random.nextBoolean())(DateTime(873621603L)),
+        Option.when(Random.nextBoolean())(5542L),
+        Option.when(Random.nextBoolean())("xyzabc")
+      )
+
+    Random.shuffle(samples).take(50).foreach { fileId =>
+      val id = fileId.asString
+      val decoded = FileId.fromString(id)
+      assertEquals(decoded, Right(fileId))
+    }
   }
 }

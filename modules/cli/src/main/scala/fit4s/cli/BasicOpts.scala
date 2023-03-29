@@ -1,5 +1,6 @@
 package fit4s.cli
 
+import cats.data.NonEmptyList
 import com.monovore.decline.Opts
 import fs2.io.file.Path
 
@@ -20,4 +21,9 @@ trait BasicOpts {
       .validate(s"dir must be a directory")(p =>
         java.nio.file.Files.isDirectory(p.toNioPath)
       )
+
+  def fileOrDirArgs: Opts[NonEmptyList[Path]] =
+    Opts
+      .arguments[java.nio.file.Path](metavar = "fileOrDir")
+      .map(_.map(Path.fromNioPath))
 }

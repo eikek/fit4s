@@ -9,7 +9,7 @@ private[fit4s] trait EitherUtil {
 
   implicit final class VectorEitherMap[A](self: Vector[A]) {
     def mapEither[B, C](f: A => Either[B, C]): Either[B, Vector[C]] =
-      if (self.isEmpty) Right(self.asInstanceOf[Vector[C]])
+      if (self.isEmpty) Right(Vector.empty)
       else {
         val init = f(self.head).map(Vector(_))
         self.tail.foldLeft(init) { (res, el) =>
