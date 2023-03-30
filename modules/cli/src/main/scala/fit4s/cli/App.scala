@@ -19,16 +19,16 @@ object App
 
   val activityOpts: Opts[ActivityCmd.Config] =
     Opts.subcommand("activity", "Look into activities") {
-      Opts(ActivityCmd.Config())
+      ActivityCmd.opts
     }
 
   def main: Opts[IO[ExitCode]] =
     inspectOpts.orElse(activityOpts).map {
       case c: InspectCmd.Config  => printError(InspectCmd(c))
-      case c: ActivityCmd.Config => printError(ActivityCmd(c).)
+      case c: ActivityCmd.Config => printError(ActivityCmd(c))
     }
 
-  private def printError[A](io: IO[ExitCode]): IO[ExitCode] =
+  private def printError(io: IO[ExitCode]): IO[ExitCode] =
     io.attempt.flatMap {
       case Right(code) => IO.pure(code)
       case Left(ex: CliError) =>

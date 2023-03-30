@@ -1,6 +1,7 @@
 package fit4s.cli
 
 import cats.effect.{ExitCode, IO}
+import cats.syntax.all._
 import com.monovore.decline.Opts
 import fit4s.FitFile
 import fit4s.cli.activity.{ImportCmd, SummaryCmd}
@@ -11,7 +12,6 @@ import fs2.{Chunk, Stream}
 import scodec.Attempt
 
 import java.time.{Duration, ZoneId}
-import scala.annotation.nowarn
 
 object ActivityCmd extends BasicOpts {
 
@@ -21,20 +21,29 @@ object ActivityCmd extends BasicOpts {
     }
 
   val summaryArgs: Opts[SummaryCmd.Config] =
-    Opts.subcommand("summary", "Show a basic activity summary") {
-      Opts
-        .option[Int]("--year", "Summary of given year")
+    Opts.subcommand("summary", "Show a activity summary from imported activities") {
+      val year = Opts
+        .option[Int]("year", "Summary of given year")
         .orNone
-        .map(SummaryCmd.Config.apply)
+      val sport = BasicOpts.sport.orNone
+
+      (year, sport).mapN(SummaryCmd.Config.apply)
     }
 
-  final case class Config()
+  val opts = importArgs
+    .map(Config.Import)
+    .orElse(summaryArgs.map(Config.Summary))
 
-  @nowarn
-  def apply(cfg: Config): Opts[IO[ExitCode]] =
-    importArgs.orElse(summaryArgs).map {
-      case c: ImportCmd.Config  => ImportCmd(c)
-      case c: SummaryCmd.Config => SummaryCmd(c)
+  sealed trait Config extends Product
+  object Config {
+    final case class Import(cfg: ImportCmd.Config) extends Config
+    final case class Summary(cfg: SummaryCmd.Config) extends Config
+  }
+
+  def apply(cfg: Config): IO[ExitCode] =
+    cfg match {
+      case Config.Import(c)  => ImportCmd(c)
+      case Config.Summary(c) => SummaryCmd(c)
     }
 
   // ------------------------------------------------
