@@ -49,6 +49,9 @@ object FileId {
       )
       .map(_.value)
 
+  def unsafeFromString(str: String): FileId =
+    fromString(str).fold(sys.error, identity)
+
   def from(fileIdMsg: DataMessage): Either[String, FileId] =
     for {
       ft <- fileIdMsg.getRequiredField(FileIdMsg.`type`)

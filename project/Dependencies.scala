@@ -9,6 +9,7 @@ object Dependencies {
     val circe = "0.14.5"
     val decline = "2.4.1"
     val doobie = "1.0.0-RC2"
+    val flyway = "9.15.2"
     val h2 = "2.1.214"
     val munit = "0.7.29"
     val munitCatsEffect = "1.0.7"
@@ -20,6 +21,11 @@ object Dependencies {
     val scalaCheck = "1.17.0"
     val organizeImports = "0.6.0"
   }
+
+  val flyway = Seq(
+    "org.flywaydb" % "flyway-core" % V.flyway
+//    "org.flywaydb" % "flyway-mysql" % FlywayVersion
+  )
 
   val h2 = Seq(
     "com.h2database" % "h2" % V.h2
@@ -40,7 +46,7 @@ object Dependencies {
     "io.circe" %% "circe-generic" % V.circe
   )
   val circeParser = Seq(
-     "io.circe" %% "circe-parser" % V.circe
+    "io.circe" %% "circe-parser" % V.circe
   )
   val circe = circeCore ++ circeParser
 

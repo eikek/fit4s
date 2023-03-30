@@ -1,0 +1,59 @@
+package fit4s.activities.records
+
+import doobie.Meta
+import fit4s.data._
+import fit4s.profile.types.{Sport, SubSport}
+import fs2.io.file.Path
+import doobie.implicits.javatimedrivernative
+
+import java.time.{Duration, Instant}
+
+trait DoobieMeta {
+
+  implicit val pathMeta: Meta[Path] =
+    Meta[String].timap(Path.apply)(_.absolute.toString)
+
+  implicit val fileIdMeta: Meta[FileId] =
+    Meta[String].timap(FileId.unsafeFromString)(_.asString)
+
+  implicit val sportMeta: Meta[Sport] =
+    Meta[Long].timap(Sport.unsafeByRawValue)(_.rawValue)
+
+  implicit val subSportMeta: Meta[SubSport] =
+    Meta[Long].timap(SubSport.unsafeByRawValue)(_.rawValue)
+
+  implicit val instantMeta: Meta[Instant] =
+    javatimedrivernative.JavaTimeInstantMeta
+
+  implicit val durationMeta: Meta[Duration] =
+    Meta[Long].timap(Duration.ofMillis)(_.toMillis)
+
+  implicit val distanceMeta: Meta[Distance] =
+    Meta[Double].timap(Distance.meter)(_.meter)
+
+  implicit val heartRateMeta: Meta[HeartRate] =
+    Meta[Int].timap(HeartRate.bpm)(_.bpm)
+
+  implicit val speedMeta: Meta[Speed] =
+    Meta[Double].timap(Speed.meterPerSecond)(_.meterPerSecond)
+
+  implicit val caloriesMeta: Meta[Calories] =
+    Meta[Double].timap(Calories.kcal)(_.kcal)
+
+  implicit val temperatureMeta: Meta[Temperature] =
+    Meta[Double].timap(Temperature.celcius)(_.celcius)
+
+  implicit val semicircleMeta: Meta[Semicircle] =
+    Meta[Long].timap(Semicircle.semicircle)(_.semicircle)
+
+  implicit val cadenceMeta: Meta[Cadence] =
+    Meta[Int].timap(Cadence.rpm)(_.rpm)
+
+  implicit val gradeMeta: Meta[Grade] =
+    Meta[Double].timap(Grade.percent)(_.percent)
+
+  implicit val powerMeta: Meta[Power] =
+    Meta[Int].timap(Power.watts)(_.watts)
+}
+
+object DoobieMeta extends DoobieMeta

@@ -116,7 +116,8 @@ lazy val activities = project
     description := "A small database backed activity log",
     libraryDependencies ++= Dependencies.fs2 ++
       Dependencies.h2 ++
-      Dependencies.doobie
+      Dependencies.doobie ++
+      Dependencies.flyway
   )
   .dependsOn(core)
 

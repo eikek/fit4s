@@ -1,7 +1,7 @@
 package fit4s.activities
 
 import cats.Monoid
-import cats.data.{NonEmptyList, NonEmptySet}
+import cats.data.NonEmptyList
 
 trait InsertResult extends Product {
 
