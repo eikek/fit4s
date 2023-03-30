@@ -106,6 +106,20 @@ lazy val core = project
     Compile / sourceGenerators += generateProfile.taskValue
   )
 
+lazy val activities = project
+  .in(file("modules/activities"))
+  .settings(sharedSettings)
+  .settings(testSettings)
+  .settings(scalafixSettings)
+  .settings(
+    name := "fit4s-activities",
+    description := "A small database backed activity log",
+    libraryDependencies ++= Dependencies.fs2 ++
+      Dependencies.h2 ++
+      Dependencies.doobie
+  )
+  .dependsOn(core)
+
 lazy val cli = project
   .in(file("modules/cli"))
   .settings(sharedSettings)
@@ -115,13 +129,11 @@ lazy val cli = project
     name := "fit4s-cli",
     description := "A simple command line interface to inspect fit files",
     libraryDependencies ++=
-      Dependencies.fs2 ++
+      Dependencies.fs2Core ++
         Dependencies.decline ++
-        Dependencies.circeCore ++
-        Dependencies.h2 ++
-        Dependencies.doobie
+        Dependencies.circeCore
   )
-  .dependsOn(core % "compile->compile,test->test")
+  .dependsOn(core % "compile->compile,test->test", activities)
 
 lazy val root = project
   .in(file("."))
@@ -129,4 +141,4 @@ lazy val root = project
   .settings(
     name := "fit4s-root"
   )
-  .aggregate(core, cli)
+  .aggregate(core, activities, cli)
