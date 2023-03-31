@@ -2,11 +2,13 @@ package fit4s.activities.records
 
 import fit4s.data._
 import doobie.implicits._
+import fit4s.activities.data.{ActivityDataId, ActivityId}
+
 import java.time.Instant
 
 final case class ActivityDataRecord(
-    id: Long,
-    activityId: Long,
+    id: ActivityDataId,
+    activityId: ActivityId,
     timestamp: Instant,
     positionLat: Option[Semicircle],
     positionLong: Option[Semicircle],

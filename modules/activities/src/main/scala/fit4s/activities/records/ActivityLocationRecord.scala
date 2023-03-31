@@ -5,15 +5,16 @@ import doobie._
 import doobie.implicits._
 import fs2.{Chunk, Stream}
 import DoobieMeta._
+import fit4s.activities.data.LocationId
 
-final case class ActivityLocationRecord(id: Long, location: Path)
+final case class ActivityLocationRecord(id: LocationId, location: Path)
 
 object ActivityLocationRecord {
   private val table = fr"activity_location"
 
   def insert(location: Path): ConnectionIO[ActivityLocationRecord] =
     fr"INSERT INTO $table (location) VALUES ($location)".update
-      .withUniqueGeneratedKeys[Long]("id")
+      .withUniqueGeneratedKeys[LocationId]("id")
       .map(id => ActivityLocationRecord(id, location))
 
   def find(location: Path): ConnectionIO[Option[ActivityLocationRecord]] =

@@ -35,7 +35,8 @@ trait TestData {
     maxSpeed = Some(Speed.kmh(56.9)),
     avgSpeed = Some(Speed.kmh(21.4)),
     maxPower = None,
-    avgPower = Some(Power.watts(211))
+    avgPower = Some(Power.watts(211)),
+    notes = Some("this is a note")
   )
 }
 

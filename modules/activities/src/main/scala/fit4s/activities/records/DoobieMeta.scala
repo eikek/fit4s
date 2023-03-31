@@ -5,6 +5,7 @@ import fit4s.data._
 import fit4s.profile.types.{Sport, SubSport}
 import fs2.io.file.Path
 import doobie.implicits.javatimedrivernative
+import fit4s.activities.data._
 
 import java.time.{Duration, Instant}
 
@@ -54,6 +55,24 @@ trait DoobieMeta {
 
   implicit val powerMeta: Meta[Power] =
     Meta[Int].timap(Power.watts)(_.watts)
+
+  implicit val tagNameMeta: Meta[TagName] =
+    Meta[String].timap(TagName.unsafeFromString)(_.name)
+
+  implicit val tagIdMeta: Meta[TagId] =
+    Meta[Long].timap(TagId.apply)(_.id)
+
+  implicit val locationIdMeta: Meta[LocationId] =
+    Meta[Long].timap(LocationId.apply)(_.id)
+
+  implicit val activityIdMeta: Meta[ActivityId] =
+    Meta[Long].timap(ActivityId.apply)(_.id)
+
+  implicit val activityTagIdMeta: Meta[ActivityTagId] =
+    Meta[Long].timap(ActivityTagId.apply)(_.id)
+
+  implicit val activityDataIdMeta: Meta[ActivityDataId] =
+    Meta[Long].timap(ActivityDataId.apply)(_.id)
 }
 
 object DoobieMeta extends DoobieMeta

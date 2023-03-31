@@ -36,7 +36,8 @@ create table "activity"(
   "max_speed" decimal,
   "avg_speed" decimal,
   "max_power" decimal,
-  "avg_power" decimal
+  "avg_power" decimal,
+  "notes" text
 );
 
 alter table "activity" add constraint "activity_location_fkey"
