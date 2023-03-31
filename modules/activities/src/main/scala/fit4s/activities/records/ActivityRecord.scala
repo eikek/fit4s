@@ -35,13 +35,13 @@ final case class ActivityRecord(
 )
 
 object ActivityRecord {
-  private val table = fr"activity"
+  private[activities] val table = fr"activity"
   private val columns =
     fr"location_id, path, file_id, sport, sub_sport, start_time, moving_time, " ++
       fr"elapsed_time, distance, calories, min_temp, max_temp, avg_temp, min_hr, " ++
       fr"max_hr, avg_hr, max_speed, avg_speed, max_power, avg_power, notes"
 
-  private val columnsWithId = fr"id," ++ columns
+  private[activities] val columnsWithId = fr"id," ++ columns
 
   def insert(r: ActivityRecord): ConnectionIO[Long] =
     (fr"INSERT INTO $table ($columns) VALUES(" ++

@@ -6,6 +6,7 @@ object Dependencies {
     val scala2 = "2.13.10"
     val scala3 = "3.1.2"
 
+    val catsParse = "0.3.9"
     val circe = "0.14.5"
     val decline = "2.4.1"
     val doobie = "1.0.0-RC2"
@@ -21,6 +22,10 @@ object Dependencies {
     val scalaCheck = "1.17.0"
     val organizeImports = "0.6.0"
   }
+
+  val catsParse = Seq(
+    "org.typelevel" %% "cats-parse" % V.catsParse
+  )
 
   val flyway = Seq(
     "org.flywaydb" % "flyway-core" % V.flyway

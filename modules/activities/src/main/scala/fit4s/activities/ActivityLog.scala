@@ -14,11 +14,6 @@ trait ActivityLog[F[_]] {
 
   def initialize: F[Unit]
 
-  def createActivity(record: ActivityRecord): F[InsertResult]
-
-  def insertAll: Pipe[F, ActivityRecord, InsertResult] =
-    _.evalMap(createActivity)
-
   def importFromDirectories(tagged: Set[TagName]): Pipe[F, Path, InsertResult]
 
   def deleteActivities(query: Query): F[Int]

@@ -12,7 +12,7 @@ final case class ActivityTagRecord(
 )
 
 object ActivityTagRecord {
-  private val table = fr"activity_tag"
+  private[activities] val table = fr"activity_tag"
 
   def insert(activityId: ActivityId, tagId: TagId): ConnectionIO[ActivityTagRecord] =
     fr"INSERT INTO $table (activity_id, tag_id) VALUES ($activityId, $tagId)".update

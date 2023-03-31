@@ -19,8 +19,6 @@ final class ActivityLogDb[F[_]: Sync](jdbcConfig: JdbcConfig, xa: Transactor[F])
       else Sync[F].raiseError(new Exception(s"Database initialization failed! $result"))
     }
 
-  override def createActivity(record: ActivityRecord): F[InsertResult] = ???
-
   override def importFromDirectories(tagged: Set[TagName]): Pipe[F, Path, InsertResult] =
     ???
 

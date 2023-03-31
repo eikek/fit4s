@@ -9,7 +9,7 @@ import DoobieMeta._
 final case class TagRecord(id: TagId, name: TagName)
 
 object TagRecord {
-  private val table = fr"tag"
+  private[activities] val table = fr"tag"
 
   def insert(name: TagName): ConnectionIO[TagRecord] =
     fr"INSERT INTO $table (name) VALUES ($name)".update
