@@ -9,4 +9,7 @@ trait DateTimeCompanion extends TypedValueCompanion[DateTime] {
     BaseTypeCodec
       .baseCodec(FitBaseType.Uint32, bo)
       .xmap(DateTime.apply, _.rawValue)
+
+  implicit val ordering: Ordering[DateTime] =
+    Ordering.by(_.rawValue)
 }

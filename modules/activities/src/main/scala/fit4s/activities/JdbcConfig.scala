@@ -18,7 +18,7 @@ object JdbcConfig {
     JdbcConfig(
       s"jdbc:h2:file://${file.absolute.toString};MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE",
       "sa",
-      ""
+      "sa"
     )
   }
 

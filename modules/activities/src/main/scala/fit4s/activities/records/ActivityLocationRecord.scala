@@ -1,16 +1,29 @@
 package fit4s.activities.records
 
+import cats.effect._
+import cats.syntax.all._
 import fs2.io.file.Path
 import doobie._
 import doobie.implicits._
 import fs2.{Chunk, Stream}
 import DoobieMeta._
+
 import fit4s.activities.data.LocationId
 
 final case class ActivityLocationRecord(id: LocationId, location: Path)
 
 object ActivityLocationRecord {
-  private val table = fr"activity_location"
+  private[activities] val table = fr"activity_location"
+
+  def getOrCreateLocations(dir: List[Path]): ConnectionIO[Map[Path, LocationId]] =
+    dir
+      .traverse { p =>
+        find(p).flatMap {
+          case Some(r) => Sync[ConnectionIO].pure(p -> r.id)
+          case None    => insert(p).map(p -> _.id)
+        }
+      }
+      .map(_.toMap)
 
   def insert(location: Path): ConnectionIO[ActivityLocationRecord] =
     fr"INSERT INTO $table (location) VALUES ($location)".update

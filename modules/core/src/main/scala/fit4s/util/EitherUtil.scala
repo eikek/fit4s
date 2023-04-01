@@ -11,8 +11,7 @@ private[fit4s] trait EitherUtil {
     def mapEither[B, C](f: A => Either[B, C]): Either[B, Vector[C]] =
       if (self.isEmpty) Right(Vector.empty)
       else {
-        val init = f(self.head).map(Vector(_))
-        self.tail.foldLeft(init) { (res, el) =>
+        self.foldLeft(Vector.empty[C].asRight[B]) { (res, el) =>
           res.flatMap(v => f(el).map(c => v.appended(c)))
         }
       }

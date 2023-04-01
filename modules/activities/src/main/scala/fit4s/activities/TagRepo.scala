@@ -5,11 +5,11 @@ import fit4s.activities.records.TagRecord
 import fs2.Stream
 
 trait TagRepo[F[_]] {
-  def createTag(name: TagName): F[InsertResult]
+  def createTag(name: TagName): F[ImportResult[TagRecord]]
 
   def deleteTag(id: TagId): F[Int]
 
-  def updateTag(tag: TagRecord): F[InsertResult]
+  def updateTag(tag: TagRecord): F[Int]
 
   def listTags(contains: Option[TagName], page: Page): Stream[F, TagRecord]
 }

@@ -74,6 +74,9 @@ object FitMessage {
     lazy val isKnownMessage: Boolean =
       definition.profileMsg.isDefined
 
+    def isMessage(m: Msg): Boolean =
+      definition.profileMsg.contains(m)
+
     def getField[A <: TypedValue[_]](
         ft: Msg.FieldWithCodec[A]
     ): Either[String, Option[FieldValue[A]]] =

@@ -3,7 +3,7 @@ package fit4s.playground
 import cats.effect._
 import fit4s.FitFile
 import fit4s.FitMessage.DataMessage
-import fit4s.data.{ActivitySummary, Distance}
+import fit4s.data.{ActivitySession, Distance}
 import fit4s.json.JsonCodec
 import fit4s.playground.PlayingTest.Group
 import fit4s.profile.messages.Msg
@@ -30,8 +30,8 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
     val sysTime =
       Path( // 1862739919_ACTIVITY.fit=1992-01-18T18:36:18Z   ok:1862739926_ACTIVITY.fit=2012-09-27T16:26:14Z
         // "/Users/ekettner/personal/fit4s/modules/core/src/test/resources/fit/activity/1862739919_ACTIVITY.fit"
-         //"local/garmin-sdk/examples/MonitoringFile.fit"
-       // "modules/core/src/test/resources/fit/activity/2023-03-16-06-25-37.fit"
+        // "local/garmin-sdk/examples/MonitoringFile.fit"
+        // "modules/core/src/test/resources/fit/activity/2023-03-16-06-25-37.fit"
         "modules/core/src/test/resources/fit/activity_poolswim_with_hr.fit"
       )
 
@@ -102,7 +102,8 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
   def printActivitySummary(fit: FitFile) =
     IO {
       val t1 = System.nanoTime()
-      val a1 = ActivitySummary.from(fit).fold(sys.error, identity)
+      val s1 = fit.findFirstData(MesgNum.Session).fold(sys.error, identity)
+      val a1 = ActivitySession.from(s1).fold(sys.error, identity)
       val d1 = Duration.ofNanos(System.nanoTime() - t1)
 
       println(s"DEBUG: Reading summary took: $d1")
@@ -120,14 +121,15 @@ class PlayingTest extends CatsEffectSuite with JsonCodec {
       .evalMap { case (duration, fit) =>
         IO.println(s"DEBUG: Read+parsing FIT file took: ${duration.toMillis}ms").as(fit)
       }
-      .map(ActivitySummary.from)
+      .map(_.findFirstData(MesgNum.Session).fold(sys.error, identity))
+      .map(ActivitySession.from)
       .flatMap {
         case Right(a) => Stream.emit(a)
         case Left(err) =>
           Stream.eval(IO.println(s"ERROR: Not an activity fit: $err")).drain
       }
 
-  def makeSummary(in: Stream[IO, ActivitySummary]) =
+  def makeSummary(in: Stream[IO, ActivitySession]) =
     IO.println("INFO: Creating summary ...") >>
       in.compile.toVector
         .map(_.groupBy(Group.key))
@@ -191,10 +193,10 @@ object PlayingTest {
 
   object Group {
 
-    def key(a: ActivitySummary): Key =
-      Key(a.sport, a.startTime.atZone(ZoneId.of("Europe/Paris")).getYear)
+    def key(a: ActivitySession): Key =
+      Key(a.sport, a.startTime.asInstant.atZone(ZoneId.of("Europe/Paris")).getYear)
 
-    def from(a: ActivitySummary): Group =
+    def from(a: ActivitySession): Group =
       Group(key(a), a.distance)
 
     // implicit val semigroup: Semigroup[Group] =

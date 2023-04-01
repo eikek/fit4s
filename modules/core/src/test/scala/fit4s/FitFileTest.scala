@@ -7,7 +7,7 @@ class FitFileTest extends CatsEffectSuite {
 
   test("read example activity records") {
     for {
-      raw <- TestData.exampleActivity
+      raw <- FitTestData.exampleActivity
       fit = FitFile.decodeUnsafe(raw)
       _ = assertEquals(fit.header, FileHeader(32, 2147, 94080, ".FIT", 17310))
       _ = assertEquals(fit.records.size, 3622)
@@ -22,7 +22,7 @@ class FitFileTest extends CatsEffectSuite {
 
   test("read some edge 530 activity") {
     for {
-      raw <- TestData.edge530CyclingActivity
+      raw <- FitTestData.edge530CyclingActivity
       fit = FitFile.decodeUnsafe(raw)
       _ = assertEquals(fit.header, FileHeader(16, 2172, 95826, ".FIT", 41556))
       _ = assertEquals(fit.records.size, 5689)

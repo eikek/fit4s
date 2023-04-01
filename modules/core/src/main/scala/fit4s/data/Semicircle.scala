@@ -5,6 +5,8 @@ final class Semicircle(val semicircle: Long) extends AnyVal {
     semicircle * (180d / (Int.MaxValue.toDouble + 1))
 
   def toSeconds: Long = semicircle * 20
+
+  override def toString = s"Semicircles($semicircle)"
 }
 
 object Semicircle {

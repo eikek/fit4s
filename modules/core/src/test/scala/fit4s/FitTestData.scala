@@ -6,7 +6,7 @@ import java.net.URL
 import fs2._
 import scodec.bits.ByteVector
 
-object TestData {
+object FitTestData {
 
   val exampleActivity = fromURL(getClass.getResource("/fit/Activity.fit"))
 

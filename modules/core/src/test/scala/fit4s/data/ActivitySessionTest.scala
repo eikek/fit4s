@@ -1,33 +1,26 @@
 package fit4s.data
 
 import fit4s.profile.types._
-import fit4s.{FitFile, TestData}
+import fit4s.{FitFile, FitTestData}
 import munit.CatsEffectSuite
 
-import java.time.{Duration, Instant}
+import java.time.Duration
 
-class ActivitySummaryTest extends CatsEffectSuite {
+class ActivitySessionTest extends CatsEffectSuite {
 
   test("read activity data") {
     for {
-      raw <- TestData.examplePoolswimActivity
+      raw <- FitTestData.examplePoolswimActivity
       fit = FitFile.decodeUnsafe(raw)
-      summary = ActivitySummary.from(fit).fold(sys.error, identity)
+      sess = fit.findFirstData(MesgNum.Session).fold(sys.error, identity)
+      summary = ActivitySession.from(sess).fold(sys.error, identity)
       _ = assertEquals(
         summary,
-        ActivitySummary(
-          id = FileId(
-            File.Activity,
-            Manufacturer.Garmin,
-            DeviceProduct.Garmin(GarminProduct.Fenix3),
-            None,
-            Some(DateTime(840028249)),
-            None,
-            None
-          ),
+        ActivitySession(
           sport = Sport.Swimming,
           subSport = SubSport.LapSwimming,
-          startTime = Instant.parse("2016-08-13T13:10:47Z"),
+          startTime = DateTime(840028247L),
+          endTime = DateTime(840031753L),
           movingTime = Duration.ZERO,
           elapsedTime = Duration.parse("PT58M24S"),
           calories = Calories.kcal(138.0),
@@ -41,7 +34,13 @@ class ActivitySummaryTest extends CatsEffectSuite {
           maxHr = Some(HeartRate.bpm(133)),
           avgHr = Some(HeartRate.bpm(103)),
           maxPower = None,
-          avgPower = None
+          avgPower = None,
+          maxCadence = None,
+          avgCadence = Some(Cadence.rpm(23)),
+          totalAscend = None,
+          totalDescend = None,
+          startPosLat = None,
+          startPosLong = None
         )
       )
     } yield ()

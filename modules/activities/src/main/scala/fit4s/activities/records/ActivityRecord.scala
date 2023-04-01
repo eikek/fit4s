@@ -1,58 +1,54 @@
 package fit4s.activities.records
 
-import fit4s.data.{Calories, Distance, FileId, HeartRate, Power, Speed, Temperature}
-import fit4s.profile.types._
+import fit4s.activities.data.{ActivityId, LocationId}
 import doobie.implicits._
 import doobie._
 import DoobieMeta._
-import fit4s.activities.data.{ActivityId, LocationId}
+import fit4s.data.FileId
 
 import java.time.{Duration, Instant}
 
-final case class ActivityRecord(
+case class ActivityRecord(
     id: ActivityId,
     locationId: LocationId,
     path: String,
     activityFileId: FileId,
-    sport: Sport,
-    subSport: SubSport,
-    startTime: Instant,
-    movingTime: Duration,
-    elapsedTime: Duration,
-    distance: Distance,
-    calories: Option[Calories],
-    minTemp: Option[Temperature],
-    maxTemp: Option[Temperature],
-    avgTemp: Option[Temperature],
-    minHr: Option[HeartRate],
-    maxHr: Option[HeartRate],
-    avgHr: Option[HeartRate],
-    maxSpeed: Option[Speed],
-    avgSpeed: Option[Speed],
-    maxPower: Option[Power],
-    avgPower: Option[Power],
+    name: String,
+    timestamp: Instant,
+    totalTime: Duration,
     notes: Option[String]
 )
 
 object ActivityRecord {
   private[activities] val table = fr"activity"
-  private val columns =
-    fr"location_id, path, file_id, sport, sub_sport, start_time, moving_time, " ++
-      fr"elapsed_time, distance, calories, min_temp, max_temp, avg_temp, min_hr, " ++
-      fr"max_hr, avg_hr, max_speed, avg_speed, max_power, avg_power, notes"
+  private[activities] def columnList(alias: Option[String]): List[Fragment] = {
+    def c(name: String) = Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))
+    List(
+      c("id"),
+      c("location_id"),
+      c("path"),
+      c("file_id"),
+      c("name"),
+      c("timestamp"),
+      c("total_time"),
+      c("notes")
+    )
+  }
+  private val columnsWithId =
+    columnList(None).foldSmash1(Fragment.empty, sql",", Fragment.empty)
 
-  private[activities] val columnsWithId = fr"id," ++ columns
+  def insert(r: ActivityRecord): ConnectionIO[ActivityId] =
+    (sql"INSERT INTO $table (location_id, path, file_id, name, timestamp, total_time, notes) VALUES " ++
+      sql"(${r.locationId}, ${r.path}, ${r.activityFileId}, ${r.name}, ${r.timestamp}, ${r.totalTime}, ${r.notes})").update
+      .withUniqueGeneratedKeys[ActivityId]("id")
 
-  def insert(r: ActivityRecord): ConnectionIO[Long] =
-    (fr"INSERT INTO $table ($columns) VALUES(" ++
-      fr"${r.locationId}, ${r.path}, ${r.activityFileId}, ${r.sport}, " ++
-      fr"${r.subSport}, ${r.startTime}, ${r.movingTime}, ${r.elapsedTime}, ${r.distance}, " ++
-      fr"${r.calories}, ${r.minTemp}, ${r.maxTemp}, ${r.avgTemp}, ${r.minHr}, ${r.maxHr}, " ++
-      fr"${r.avgHr}, ${r.maxSpeed}, ${r.avgSpeed}, ${r.maxPower}, ${r.avgPower}, ${r.notes}" ++
-      fr")").update.withUniqueGeneratedKeys[Long]("id")
-
-  def findById(id: Long): ConnectionIO[Option[ActivityRecord]] =
+  def findById(id: ActivityId): ConnectionIO[Option[ActivityRecord]] =
     fr"SELECT $columnsWithId FROM $table WHERE id = $id"
+      .query[ActivityRecord]
+      .option
+
+  def findByFileId(fileId: FileId): ConnectionIO[Option[ActivityRecord]] =
+    sql"SELECT $columnsWithId FROM $table WHERE file_id = $fileId"
       .query[ActivityRecord]
       .option
 }

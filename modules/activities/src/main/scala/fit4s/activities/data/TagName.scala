@@ -1,6 +1,9 @@
 package fit4s.activities.data
 
-final class TagName private (val name: String) extends AnyVal
+final class TagName private (val name: String) extends AnyVal {
+
+  override def toString = name
+}
 
 object TagName {
 

@@ -115,11 +115,12 @@ lazy val activities = project
     name := "fit4s-activities",
     description := "A small database backed activity log",
     libraryDependencies ++= Dependencies.fs2 ++
+      Dependencies.catsParse ++
       Dependencies.h2 ++
       Dependencies.doobie ++
       Dependencies.flyway
   )
-  .dependsOn(core)
+  .dependsOn(core % "compile->compile;test->test")
 
 lazy val cli = project
   .in(file("modules/cli"))
@@ -134,7 +135,7 @@ lazy val cli = project
         Dependencies.decline ++
         Dependencies.circeCore
   )
-  .dependsOn(core % "compile->compile,test->test", activities)
+  .dependsOn(core % "compile->compile;test->test", activities)
 
 lazy val root = project
   .in(file("."))

@@ -71,6 +71,27 @@ final case class FieldValue[A <: TypedValue[_]](
       case _ => None
     }
 
+  def cadence: Option[Cadence] =
+    field.unit match {
+      case Some(MeasurementUnit.Rpm) =>
+        asLong.map(_.toInt).map(Cadence.rpm)
+      case _ => None
+    }
+
+  def semicircle: Option[Semicircle] =
+    field.unit match {
+      case Some(MeasurementUnit.Semicircles) =>
+        asLong.map(Semicircle.semicircle)
+      case _ => None
+    }
+
+  def grade: Option[Grade] =
+    field.unit match {
+      case Some(MeasurementUnit.Percent) =>
+        asDouble.map(Grade.percent)
+      case _ => None
+    }
+
   def heartrate: Option[HeartRate] =
     field.unit match {
       case Some(MeasurementUnit.Bpm) =>

@@ -3,6 +3,8 @@ package fit4s.activities
 import cats.effect._
 import cats.syntax.option._
 import doobie._
+import doobie.implicits._
+import fit4s.activities.records._
 import fs2.io.file.{Files, Path}
 import munit.CatsEffectSuite
 import org.h2.jdbcx.{JdbcConnectionPool, JdbcDataSource}
@@ -35,6 +37,15 @@ trait DatabaseTest extends CatsEffectSuite {
     ds <- DatabaseTest.dataSource(jdbc)
   } yield (jdbc, ds))
 
+  def deleteAllData(xa: Transactor[IO]): IO[Unit] =
+    for {
+      _ <- sql"DELETE FROM ${ActivitySessionDataRecord.table}".update.run.transact(xa)
+      _ <- sql"DELETE FROM ${ActivitySessionRecord.table}".update.run.transact(xa)
+      _ <- sql"DELETE FROM ${ActivityRecord.table}".update.run.transact(xa)
+      _ <- sql"DELETE FROM ${ActivityLocationRecord.table}".update.run.transact(xa)
+      _ <- sql"DELETE FROM ${ActivityTagRecord.table}".update.run.transact(xa)
+      _ <- sql"DELETE FROM ${TagRecord.table}".update.run.transact(xa)
+    } yield ()
 }
 
 object DatabaseTest {

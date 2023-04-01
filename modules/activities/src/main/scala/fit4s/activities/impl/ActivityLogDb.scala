@@ -1,17 +1,24 @@
 package fit4s.activities.impl
 
+import cats.data.NonEmptyList
 import cats.effect._
 import cats.syntax.all._
 import doobie.{Query => _, _}
-import fit4s.activities.data.{ActivityId, TagId, TagName}
-import fit4s.activities.records.{ActivityRecord, TagRecord}
+import doobie.implicits._
 import fit4s.activities._
-import fs2.Pipe
-import fs2.io.file.Path
+import fit4s.activities.data.{ActivityId, TagId, TagName}
+import fit4s.activities.records.{ActivityLocationRecord, ActivitySessionRecord, TagRecord}
+import fs2.io.file.{Files, Path}
+import fs2.Stream
 
-@annotation.nowarn
-final class ActivityLogDb[F[_]: Sync](jdbcConfig: JdbcConfig, xa: Transactor[F])
-    extends ActivityLog[F] {
+import java.time.ZoneId
+
+//@annotation.nowarn
+final class ActivityLogDb[F[_]: Sync: Files](
+    jdbcConfig: JdbcConfig,
+    zoneId: ZoneId,
+    xa: Transactor[F]
+) extends ActivityLog[F] {
 
   override def initialize: F[Unit] =
     FlywayMigrate[F](jdbcConfig).run.flatMap { result =>
@@ -19,20 +26,37 @@ final class ActivityLogDb[F[_]: Sync](jdbcConfig: JdbcConfig, xa: Transactor[F])
       else Sync[F].raiseError(new Exception(s"Database initialization failed! $result"))
     }
 
-  override def importFromDirectories(tagged: Set[TagName]): Pipe[F, Path, InsertResult] =
-    ???
+  override def importFromDirectories(
+      tagged: Set[TagName],
+      callback: ImportCallback[F],
+      dirs: NonEmptyList[Path]
+  ): Stream[F, ImportResult[ActivityId]] = for {
+    tags <- Stream.eval(TagRecord.getOrCreate(tagged.toList).transact(xa))
 
-  override def deleteActivities(query: Query): F[Int] = ???
+    locs <- Stream.eval(
+      ActivityLocationRecord.getOrCreateLocations(dirs.toList).transact(xa)
+    )
 
-  override def linkTag(tagId: TagId, activityId: ActivityId): F[InsertResult] = ???
+    (dir, locId) <- Stream.emits(locs.toList)
+
+    results <-
+      DirectoryImport
+        .add[F](tags.map(_.id).toSet, locId, zoneId, callback)(dir)
+        .evalMap(_.transact(xa))
+  } yield results
+
+  override def deleteActivities(query: ActivityQuery): F[Int] = ???
+
+  override def linkTag(tagId: TagId, activityId: ActivityId): F[Unit] = ???
 
   override def unlinkTag(tagId: TagId, activityId: ActivityId): F[Int] = ???
 
   override def activityTags(activityId: ActivityId): fs2.Stream[F, TagRecord] = ???
 
-  override def activityList(query: Query): fs2.Stream[F, ActivityRecord] = ???
+  override def activityList(query: ActivityQuery): fs2.Stream[F, ActivitySessionRecord] =
+    ???
 
-  override def activityStats(query: Query): F[ActivityStats] = ???
+  override def activityStats(query: ActivityQuery): F[ActivityStats] = ???
 
   override def tagRepository: TagRepo[F] = ???
 

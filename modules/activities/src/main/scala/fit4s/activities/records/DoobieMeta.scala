@@ -71,8 +71,11 @@ trait DoobieMeta {
   implicit val activityTagIdMeta: Meta[ActivityTagId] =
     Meta[Long].timap(ActivityTagId.apply)(_.id)
 
-  implicit val activityDataIdMeta: Meta[ActivityDataId] =
-    Meta[Long].timap(ActivityDataId.apply)(_.id)
+  implicit val activityDataIdMeta: Meta[ActivitySessionDataId] =
+    Meta[Long].timap(ActivitySessionDataId.apply)(_.id)
+
+  implicit val activitySessionId: Meta[ActivitySessionId] =
+    Meta[Long].timap(ActivitySessionId.apply)(_.id)
 }
 
 object DoobieMeta extends DoobieMeta

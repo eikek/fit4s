@@ -1,10 +1,11 @@
 package fit4s.activities.records
 
 import cats.effect.IO
-import fit4s.activities.{DatabaseTest, FlywayMigrate}
-import fs2.io.file.Path
 import doobie.implicits._
+import fit4s.activities.data.LocationId
+import fit4s.activities.{DatabaseTest, FlywayMigrate}
 import fs2.Chunk
+import fs2.io.file.Path
 
 class ActivityLocationRecordTest extends DatabaseTest {
   override def munitFixtures = List(h2DataSource)
@@ -16,7 +17,7 @@ class ActivityLocationRecordTest extends DatabaseTest {
       for {
         _ <- FlywayMigrate[IO](jdbc).run
         record <- ActivityLocationRecord.insert(location).transact(xa)
-        _ = assertEquals(record.id, 1L)
+        _ = assertEquals(record.id, LocationId(1L))
         _ = assertEquals(record.location, location)
 
         found <- ActivityLocationRecord.find(location).transact(xa)
