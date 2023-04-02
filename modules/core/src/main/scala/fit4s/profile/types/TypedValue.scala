@@ -34,6 +34,9 @@ trait EnumValueCompanion[A <: TypedValue[_]] extends TypedValueCompanion[A] {
   def byRawValue(n: Long): Option[A] =
     all.find(_.rawValue == n)
 
+  def byTypeName(tn: String): Option[A] =
+    all.find(_.typeName.equalsIgnoreCase(tn))
+
   def unsafeByRawValue(n: Long): A =
     byRawValue(n).getOrElse(sys.error(s"No sport found for value: $n"))
 

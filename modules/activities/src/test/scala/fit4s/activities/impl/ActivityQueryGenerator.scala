@@ -44,10 +44,14 @@ object ActivityQueryGenerator {
 
   def basicConditionGen: Gen[Condition] =
     Gen.oneOf(
-      tagNameGen.map(TagStarts),
-      nelGen(tagNameGen).map(TagMatch),
-      nelGen(pathGen).map(LocationMatch),
-      pathGen.map(LocationStarts),
+      nelGen(tagNameGen).map(TagAllStarts),
+      nelGen(tagNameGen).map(TagAnyStarts),
+      nelGen(tagNameGen).map(TagAllMatch),
+      nelGen(tagNameGen).map(TagAnyMatch),
+      nelGen(pathGen).map(LocationAllMatch),
+      nelGen(pathGen).map(LocationAnyMatch),
+      nelGen(pathGen).map(LocationAllStarts),
+      nelGen(pathGen).map(LocationAnyStarts),
       fileIdGen.map(_.asString).map(FileIdMatch),
       Gen.oneOf(Sport.all).map(SportMatch),
       Gen.oneOf(SubSport.all).map(SubSportMatch),

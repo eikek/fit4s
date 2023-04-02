@@ -1,15 +1,46 @@
 package fit4s.cli.activity
 
-import cats.effect.{ExitCode, IO}
-import fit4s.profile.types.Sport
+import cats.effect.{Clock, ExitCode, IO}
+import cats.syntax.all._
+import fit4s.activities.ActivityQuery.OrderBy
+import fit4s.activities.impl.ConditionParser
+import fit4s.activities.{ActivityLog, ActivityQuery}
+import fit4s.cli.CliError
 
-import scala.annotation.nowarn
+import java.time.ZoneId
 
 object SummaryCmd {
 
-  final case class Config(year: Option[Int], sport: Option[Sport])
+  final case class Config(
+      query: Option[String]
+  )
 
-  @nowarn
   def apply(cfg: Config): IO[ExitCode] =
-    IO.pure(ExitCode.Error)
+    ActivityLog.default[IO]().use { log =>
+      for {
+        currentTime <- Clock[IO].realTimeInstant
+
+        query <- cfg.query match {
+          case Some(q) =>
+            new ConditionParser(ZoneId.systemDefault(), currentTime)
+              .parseCondition(q)
+              .fold(
+                err => IO.raiseError(new CliError(s"Query parsing failed: $err")),
+                IO.pure
+              )
+              .map(_.some)
+
+          case None => IO.pure(None)
+        }
+
+        sessions <- log
+          .activityList(ActivityQuery(query, OrderBy.StartTime))
+          .compile
+          .toVector
+
+        _ <- IO.println(ConsoleUtil.printHeader("Summary"))
+        _ <- IO.println(Summary.summarize(sessions).summaryTable(2))
+
+      } yield ExitCode.Success
+    }
 }

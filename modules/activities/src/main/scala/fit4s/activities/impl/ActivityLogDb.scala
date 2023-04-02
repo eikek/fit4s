@@ -51,10 +51,10 @@ final class ActivityLogDb[F[_]: Sync: Files](
 
   override def unlinkTag(tagId: TagId, activityId: ActivityId): F[Int] = ???
 
-  override def activityTags(activityId: ActivityId): fs2.Stream[F, TagRecord] = ???
+  override def activityTags(activityId: ActivityId): Stream[F, TagRecord] = ???
 
-  override def activityList(query: ActivityQuery): fs2.Stream[F, ActivitySessionRecord] =
-    ???
+  override def activityList(query: ActivityQuery): Stream[F, ActivitySessionRecord] =
+    ActivityQueryBuilder.buildQuery(query).stream.transact(xa)
 
   override def activityStats(query: ActivityQuery): F[ActivityStats] = ???
 

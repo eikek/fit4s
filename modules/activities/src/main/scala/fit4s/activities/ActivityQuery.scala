@@ -1,6 +1,6 @@
 package fit4s.activities
 
-import cats.data.NonEmptyList
+import cats.data.{NonEmptyList => Nel}
 import fit4s.activities.ActivityQuery.{Condition, OrderBy}
 import fit4s.activities.data.TagName
 import fit4s.data.Distance
@@ -19,15 +19,23 @@ object ActivityQuery {
     case object Distance extends OrderBy
   }
 
-  sealed trait Condition
+  sealed trait Condition extends Product
   object Condition {
-    case class TagStarts(name: TagName) extends Condition
+    case class TagAllStarts(name: Nel[TagName]) extends Condition
 
-    case class TagMatch(names: NonEmptyList[TagName]) extends Condition
+    case class TagAnyStarts(name: Nel[TagName]) extends Condition
 
-    case class LocationMatch(paths: NonEmptyList[Path]) extends Condition
+    case class TagAllMatch(names: Nel[TagName]) extends Condition
 
-    case class LocationStarts(path: Path) extends Condition
+    case class TagAnyMatch(names: Nel[TagName]) extends Condition
+
+    case class LocationAllMatch(paths: Nel[Path]) extends Condition
+
+    case class LocationAnyMatch(paths: Nel[Path]) extends Condition
+
+    case class LocationAllStarts(path: Nel[Path]) extends Condition
+
+    case class LocationAnyStarts(path: Nel[Path]) extends Condition
 
     case class FileIdMatch(fileId: String) extends Condition
 
@@ -53,10 +61,48 @@ object ActivityQuery {
 
     case class NotesMatch(text: String) extends Condition
 
-    case class And(elements: NonEmptyList[Condition]) extends Condition
+    case class And(elements: Nel[Condition]) extends Condition
 
-    case class Or(elements: NonEmptyList[Condition]) extends Condition
+    case class Or(elements: Nel[Condition]) extends Condition
 
     case class Not(condition: Condition) extends Condition
+
+    private[activities] def normalizeCondition(c: Condition): Condition =
+      c match {
+        case Condition.And(inner) =>
+          val nodes = spliceAnd(inner)
+          if (nodes.tail.isEmpty) normalizeCondition(nodes.head)
+          else Condition.And(nodes.map(normalizeCondition))
+
+        case Condition.Or(inner) =>
+          val nodes = spliceOr(inner)
+          if (nodes.tail.isEmpty) normalizeCondition(nodes.head)
+          else Condition.Or(nodes.map(normalizeCondition))
+
+        case Condition.Not(inner) =>
+          inner match {
+            case Condition.Not(inner2) =>
+              normalizeCondition(inner2)
+            case _ =>
+              Condition.Not(normalizeCondition(inner))
+          }
+        case _ => c
+      }
+
+    private def spliceAnd(nodes: Nel[Condition]): Nel[Condition] =
+      nodes.flatMap {
+        case Condition.And(inner) =>
+          spliceAnd(inner)
+        case node =>
+          Nel.of(node)
+      }
+
+    private def spliceOr(nodes: Nel[Condition]): Nel[Condition] =
+      nodes.flatMap {
+        case Condition.Or(inner) =>
+          spliceOr(inner)
+        case node =>
+          Nel.of(node)
+      }
   }
 }

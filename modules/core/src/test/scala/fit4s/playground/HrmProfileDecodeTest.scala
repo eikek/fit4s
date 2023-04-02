@@ -12,7 +12,7 @@ class HrmProfileDecodeTest extends FunSuite with JsonCodec {
     val data = ByteVector.fromValidHex("0064")
     val definition = io.circe.parser
       .decode[FitMessage.DefinitionMessage](
-        """{"reserved":0,"archType":"BIG_ENDIAN","globalMessageNumber":4,"fieldCount":1,"fields":[{"fieldDefNum":1,"sizeBytes":2,"baseType":{"decoded":{"endianAbility":true,"reserved":0,"baseTypeNum":11},"fitBaseType":139}}],"profileMsg":4}"""
+        """{"reserved":0,"archType":"BIG_ENDIAN","globalMessageNumber":4,"fieldCount":1,"fields":[{"fieldDefNum":1,"sizeBytes":2,"baseType":{"decoded":{"endianAbility":true,"reserved":0,"baseTypeNum":11},"fitBaseType":139}}],"devFieldCount":0,"devFields":[],"profileMsg":4}"""
       )
       .fold(throw _, identity)
 

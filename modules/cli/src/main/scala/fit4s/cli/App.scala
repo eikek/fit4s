@@ -3,6 +3,7 @@ package fit4s.cli
 import cats.effect.{ExitCode, IO}
 import com.monovore.decline.Opts
 import com.monovore.decline.effect.CommandIOApp
+import fit4s.cli.activity.ConsoleUtil
 
 object App
     extends CommandIOApp(
@@ -33,10 +34,13 @@ object App
       case Right(code) => IO.pure(code)
       case Left(ex: CliError) =>
         ex.printStackTrace()
-        IO.println(s"ERROR ${ex.getMessage}").as(ExitCode.Error)
+        IO.println(
+          s"${ConsoleUtil.boldRed}ERROR ${ex.getMessage}${ConsoleUtil.reset}"
+        ).as(ExitCode.Error)
       case Left(ex) =>
         ex.printStackTrace()
-        IO.println(s"ERROR ${ex.getClass.getSimpleName}: ${ex.getMessage}")
-          .as(ExitCode.Error)
+        IO.println(
+          s"${ConsoleUtil.boldRed}ERROR ${ex.getClass.getSimpleName}: ${ex.getMessage}${ConsoleUtil.reset}"
+        ).as(ExitCode.Error)
     }
 }

@@ -5,8 +5,10 @@ import doobie.{Fragment, Query0}
 import doobie.implicits._
 import fit4s.activities.ActivityQuery
 import fit4s.activities.ActivityQuery.{Condition, OrderBy}
+import fit4s.activities.data.TagName
 import fit4s.activities.records._
 import fit4s.activities.records.DoobieMeta._
+import fs2.io.file.Path
 
 object ActivityQueryBuilder {
 
@@ -51,17 +53,41 @@ object ActivityQueryBuilder {
 
   def condition(c: Condition): Fragment =
     c match {
-      case Condition.TagStarts(name) =>
-        fr"tag.name like $name"
+      case Condition.TagAllStarts(names) =>
+        combineFragments(
+          names.toList.map(name => fr"tag.name like ${wildcardEnd(name)}"),
+          fr" AND "
+        )
 
-      case Condition.TagMatch(names) =>
+      case Condition.TagAnyStarts(names) =>
+        combineFragments(
+          names.toList.map(name => fr"tag.name like ${wildcardEnd(name)}"),
+          fr" OR "
+        )
+
+      case Condition.TagAllMatch(names) =>
         combineFragments(names.toList.map(n => fr"tag.name = $n"), fr" AND ")
 
-      case Condition.LocationMatch(nel) =>
+      case Condition.TagAnyMatch(names) =>
+        combineFragments(names.toList.map(n => fr"tag.name = $n"), fr" OR ")
+
+      case Condition.LocationAllMatch(nel) =>
         combineFragments(nel.toList.map(l => fr"loc.location = $l"), fr" AND ")
 
-      case Condition.LocationStarts(p) =>
-        fr"loc.location like $p"
+      case Condition.LocationAnyMatch(nel) =>
+        combineFragments(nel.toList.map(l => fr"loc.location = $l"), fr" OR ")
+
+      case Condition.LocationAllStarts(nel) =>
+        combineFragments(
+          nel.toList.map(p => fr"loc.location like ${wildcardEnd(p)}"),
+          fr" AND "
+        )
+
+      case Condition.LocationAnyStarts(nel) =>
+        combineFragments(
+          nel.toList.map(p => fr"loc.location like ${wildcardEnd(p)}"),
+          fr" OR "
+        )
 
       case Condition.FileIdMatch(id) =>
         fr"pa.file_id = $id"
@@ -97,7 +123,7 @@ object ActivityQueryBuilder {
         fr"act.moving_time <= $t"
 
       case Condition.NotesMatch(text) =>
-        fr"pa.notes like $text"
+        fr"pa.notes like ${wildcard(text)}"
 
       case Condition.And(elements) =>
         val inner = elements.map(condition).toList
@@ -117,4 +143,8 @@ object ActivityQueryBuilder {
       case a :: Nil => a
       case _        => cs.foldSmash1(fr"(", sep, fr")")
     }
+
+  def wildcardEnd(s: TagName): String = s"${s.name}%"
+  def wildcardEnd(p: Path): String = s"${p.toString}%"
+  def wildcard(notes: String): String = s"%$notes%"
 }
