@@ -37,8 +37,8 @@ trait TestData {
     movingTime = Duration.ofSeconds(5640),
     elapsedTime = Duration.ofSeconds(6670),
     distance = Distance.km(36.1),
-    startPositionLat = Option(Semicircle.semicircle(154655L)),
-    startPositionLong = Option(Semicircle.semicircle(9944546L)),
+    startPosition =
+      Option(Position(Semicircle.semicircle(154655L), Semicircle.semicircle(9944546L))),
     calories = Calories.kcal(246),
     totalAscend = Some(Distance.meter(351)),
     totalDescend = Some(Distance.meter(355)),

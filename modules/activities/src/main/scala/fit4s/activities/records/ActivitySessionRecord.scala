@@ -19,8 +19,7 @@ final case class ActivitySessionRecord(
     movingTime: Duration,
     elapsedTime: Duration,
     distance: Distance,
-    startPositionLat: Option[Semicircle],
-    startPositionLong: Option[Semicircle],
+    startPosition: Option[Position],
     calories: Calories,
     totalAscend: Option[Distance],
     totalDescend: Option[Distance],
@@ -77,7 +76,7 @@ object ActivitySessionRecord {
   def insert(r: ActivitySessionRecord): ConnectionIO[ActivitySessionId] =
     (fr"INSERT INTO $table ($columns) VALUES(" ++
       fr"${r.activityId}, ${r.sport}, ${r.subSport}, ${r.startTime}, ${r.endTime}, ${r.movingTime}, ${r.elapsedTime}, ${r.distance}, " ++
-      fr"${r.startPositionLat}, ${r.startPositionLong}, ${r.calories}, " ++
+      fr"${r.startPosition.map(_.latitude)}, ${r.startPosition.map(_.longitude)}, ${r.calories}, " ++
       fr"${r.totalAscend}, ${r.totalDescend}, ${r.minTemp}, ${r.maxTemp}, ${r.avgTemp}, ${r.minHr}, ${r.maxHr}, " ++
       fr"${r.avgHr}, ${r.maxSpeed}, ${r.avgSpeed}, ${r.maxPower}, ${r.avgPower}" ++
       fr")").update.withUniqueGeneratedKeys[ActivitySessionId]("id")

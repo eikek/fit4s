@@ -12,8 +12,7 @@ final case class ActivitySessionDataRecord(
     id: ActivitySessionDataId,
     activitySessionId: ActivitySessionId,
     timestamp: Instant,
-    positionLat: Option[Semicircle],
-    positionLong: Option[Semicircle],
+    position: Option[Position],
     altitude: Option[Distance],
     heartRate: Option[HeartRate],
     cadence: Option[Cadence],
@@ -54,8 +53,9 @@ object ActivitySessionDataRecord {
 
   def insert(r: ActivitySessionDataRecord): ConnectionIO[ActivitySessionDataId] =
     (sql"INSERT INTO $table ($columnsNoId) VALUES (" ++
-      sql"${r.activitySessionId}, ${r.timestamp}, ${r.positionLat}, ${r.positionLong}, " ++
-      sql"${r.altitude}, ${r.heartRate}, ${r.cadence}, ${r.distance}, ${r.speed}, " ++
+      sql"${r.activitySessionId}, ${r.timestamp}, ${r.position.map(_.latitude)}, " ++
+      sql"${r.position.map(_.longitude)}, ${r.altitude}, ${r.heartRate}, " ++
+      sql"${r.cadence}, ${r.distance}, ${r.speed}, " ++
       sql"${r.power}, ${r.grade}, ${r.temperature}, ${r.calories}" ++
       sql")").update
       .withUniqueGeneratedKeys[ActivitySessionDataId]("id")

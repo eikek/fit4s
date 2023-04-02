@@ -21,7 +21,7 @@ class ActivitySessionTest extends CatsEffectSuite {
           subSport = SubSport.LapSwimming,
           startTime = DateTime(840028247L),
           endTime = DateTime(840031753L),
-          movingTime = Duration.ZERO,
+          movingTime = Duration.parse("PT58M5S"),
           elapsedTime = Duration.parse("PT58M24S"),
           calories = Calories.kcal(138.0),
           distance = Distance.meter(1700),
@@ -39,8 +39,7 @@ class ActivitySessionTest extends CatsEffectSuite {
           avgCadence = Some(Cadence.rpm(23)),
           totalAscend = None,
           totalDescend = None,
-          startPosLat = None,
-          startPosLong = None
+          startPosition = None
         )
       )
     } yield ()

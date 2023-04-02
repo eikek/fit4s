@@ -8,30 +8,29 @@ import java.time.Duration
 import scala.math.Ordering.Implicits._
 
 final case class ActivitySession(
-    sport: Sport,
-    subSport: SubSport,
-    startTime: DateTime,
-    endTime: DateTime,
-    movingTime: Duration,
-    elapsedTime: Duration,
-    calories: Calories,
-    distance: Distance,
-    minTemp: Option[Temperature],
-    maxTemp: Option[Temperature],
-    avgTemp: Option[Temperature],
-    maxSpeed: Speed,
-    avgSpeed: Option[Speed],
-    minHr: Option[HeartRate],
-    maxHr: Option[HeartRate],
-    avgHr: Option[HeartRate],
-    maxPower: Option[Power],
-    avgPower: Option[Power],
-    maxCadence: Option[Cadence],
-    avgCadence: Option[Cadence],
-    totalAscend: Option[Distance],
-    totalDescend: Option[Distance],
-    startPosLat: Option[Semicircle],
-    startPosLong: Option[Semicircle]
+                                  sport: Sport,
+                                  subSport: SubSport,
+                                  startTime: DateTime,
+                                  endTime: DateTime,
+                                  movingTime: Duration,
+                                  elapsedTime: Duration,
+                                  calories: Calories,
+                                  distance: Distance,
+                                  minTemp: Option[Temperature],
+                                  maxTemp: Option[Temperature],
+                                  avgTemp: Option[Temperature],
+                                  maxSpeed: Speed,
+                                  avgSpeed: Option[Speed],
+                                  minHr: Option[HeartRate],
+                                  maxHr: Option[HeartRate],
+                                  avgHr: Option[HeartRate],
+                                  maxPower: Option[Power],
+                                  avgPower: Option[Power],
+                                  maxCadence: Option[Cadence],
+                                  avgCadence: Option[Cadence],
+                                  totalAscend: Option[Distance],
+                                  totalDescend: Option[Distance],
+                                  startPosition: Option[Position]
 ) {
 
   def containsTime(dt: DateTime): Boolean =
@@ -95,7 +94,9 @@ object ActivitySession {
         avgCad.flatMap(_.cadence),
         asc.flatMap(_.distance),
         desc.flatMap(_.distance),
-        startPosLat.flatMap(_.semicircle),
-        startPosLng.flatMap(_.semicircle)
+        Position.optional(
+          startPosLat.flatMap(_.semicircle),
+          startPosLng.flatMap(_.semicircle)
+        )
       )
 }

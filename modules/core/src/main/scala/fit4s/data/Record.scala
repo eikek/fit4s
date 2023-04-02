@@ -6,8 +6,7 @@ import fit4s.profile.types.DateTime
 
 final case class Record(
     timestamp: DateTime,
-    positionLat: Option[Semicircle],
-    positionLong: Option[Semicircle],
+    position: Option[Position],
     altitude: Option[Distance],
     heartRate: Option[HeartRate],
     cadence: Option[Cadence],
@@ -39,8 +38,7 @@ object Record {
         cal <- recordMsg.getField(RecordMsg.calories)
       } yield Record(
         time.value,
-        lat.flatMap(_.semicircle),
-        lng.flatMap(_.semicircle),
+        Position.optional(lat.flatMap(_.semicircle), lng.flatMap(_.semicircle)),
         alt.flatMap(_.distance),
         hr.flatMap(_.heartrate),
         cad.flatMap(_.cadence),
