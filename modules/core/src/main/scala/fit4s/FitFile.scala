@@ -1,10 +1,11 @@
 package fit4s
 
 import fit4s.FitMessage.DataMessage
-import fit4s.profile.types.{Event, EventType, MesgNum}
-import scodec.{Attempt, Codec, DecodeResult, Encoder, SizeBound}
+import fit4s.data.{FileId, Nel}
+import fit4s.profile.types.MesgNum
 import scodec.bits.{BitVector, ByteVector}
 import scodec.codecs._
+import scodec.{Attempt, Codec, DecodeResult, Encoder, Err, SizeBound}
 
 final case class FitFile(
     header: FileHeader,
@@ -36,14 +37,9 @@ final case class FitFile(
   ): Either[String, FitMessage.DataMessage] =
     findData(n, filter).headOption.toRight(s"No $n message found!")
 
-  def findEvent(
-      eventType: EventType,
-      event: Event
-  ): Either[String, FitMessage.DataMessage] =
-    findFirstData(
-      MesgNum.Event,
-      _.isEvent(event, eventType)
-    )
+  def findFileId: Either[String, FileId] =
+    findFirstData(MesgNum.FileId)
+      .flatMap(FileId.from)
 
   def dataRecords: Vector[FitMessage.DataMessage] =
     records.collect { case Record.DataRecord(_, cnt) =>
@@ -53,17 +49,24 @@ final case class FitFile(
 
 object FitFile {
 
-  def codec: Codec[FitFile] =
+  def singleCodec: Codec[FitFile] =
     FileHeader.codec
       .flatPrepend { header =>
         fixedSizeBytes(header.dataSize, recordsCodec.withContext("Record")) :: uint16L
       }
       .as[FitFile]
 
-  def decode(bv: ByteVector): Attempt[FitFile] =
-    codec.complete.decode(bv.bits).map(_.value)
+  def codec: Codec[List[FitFile]] =
+    list(singleCodec)
 
-  def decodeUnsafe(bv: ByteVector): FitFile =
+  /** Decodes from all input bytes and expects at least on fit file. */
+  def decode(bv: ByteVector): Attempt[Nel[FitFile]] =
+    codec.complete.decode(bv.bits).map(_.value).map(Nel.fromList).flatMap {
+      case Some(nel) => Attempt.successful(nel)
+      case None      => Attempt.failure(Err("No fit file found."))
+    }
+
+  def decodeUnsafe(bv: ByteVector): Nel[FitFile] =
     decode(bv).fold(
       err => sys.error(s"Decoding FIT failed! ${err.messageWithContext}"),
       identity

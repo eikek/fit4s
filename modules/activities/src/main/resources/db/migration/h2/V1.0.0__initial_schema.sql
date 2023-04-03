@@ -27,7 +27,7 @@ create table "activity"(
 );
 
 alter table "activity" add constraint "activity_location_fkey"
-foreign key ("location_id") references "activity_location"("id");
+foreign key ("location_id") references "activity_location"("id") on delete cascade;
 
 alter table "activity" add constraint "activity_file_id_uniq" unique("file_id");
 

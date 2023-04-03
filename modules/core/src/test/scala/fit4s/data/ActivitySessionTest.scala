@@ -11,7 +11,7 @@ class ActivitySessionTest extends CatsEffectSuite {
   test("read activity data") {
     for {
       raw <- FitTestData.examplePoolswimActivity
-      fit = FitFile.decodeUnsafe(raw)
+      fit = FitFile.decodeUnsafe(raw).head
       sess = fit.findFirstData(MesgNum.Session).fold(sys.error, identity)
       summary = ActivitySession.from(sess).fold(sys.error, identity)
       _ = assertEquals(

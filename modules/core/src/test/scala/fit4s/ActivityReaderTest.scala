@@ -10,7 +10,7 @@ class ActivityReaderTest extends CatsEffectSuite {
   test("read example activity") {
     for {
       data <- FitTestData.exampleActivity
-      fit = FitFile.decodeUnsafe(data)
+      fit = FitFile.decodeUnsafe(data).head
       result = ActivityReader.read(fit).fold(sys.error, identity)
       recCount = fit.dataRecords.filter(_.isMessage(RecordMsg))
       _ = assertEquals(result.activity.numSessions, 1)
@@ -23,7 +23,7 @@ class ActivityReaderTest extends CatsEffectSuite {
   test("read cycling activity") {
     for {
       data <- FitTestData.edge530CyclingActivity
-      fit = FitFile.decodeUnsafe(data)
+      fit = FitFile.decodeUnsafe(data).head
       result = ActivityReader.read(fit).fold(sys.error, identity)
       recCount = fit.dataRecords.filter(_.isMessage(RecordMsg))
       _ = assertEquals(result.activity.numSessions, 1)

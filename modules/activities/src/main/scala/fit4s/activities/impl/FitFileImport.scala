@@ -23,11 +23,14 @@ object FitFileImport {
   )(fitFile: Path): Stream[F, ConnectionIO[ImportResult[ActivityId]]] =
     Stream
       .eval(readFitFile(fitFile))
-      .map {
-        case Attempt.Successful(fit) =>
-          addFitFile(tags, notes, locationId, zoneId)(fit, relativePath)
+      .flatMap {
+        case Attempt.Successful(fits) =>
+          Stream.emits(
+            fits.map(addFitFile(tags, notes, locationId, zoneId)(_, relativePath))
+          )
+
         case Attempt.Failure(err) =>
-          Sync[ConnectionIO].pure(ImportResult.readFitError(err))
+          Stream.emit(Sync[ConnectionIO].pure(ImportResult.readFitError(err)))
       }
 
   def addFitFile(
@@ -47,11 +50,15 @@ object FitFileImport {
         )
     }
 
-  def readFitFile[F[_]: Sync: Files](file: Path): F[Attempt[FitFile]] =
+  def readFitFile[F[_]: Sync: Files](file: Path): F[Attempt[List[FitFile]]] =
     Files[F]
       .readAll(file)
       .compile
       .foldChunks[Chunk[Byte]](Chunk.empty[Byte])(_ ++ _)
       .map(_.toByteVector)
       .map(FitFile.decode)
+      .map(_.map(_.toList.filter(isMain)))
+
+  private def isMain(fit: FitFile) =
+    fit.findFileId.isRight
 }

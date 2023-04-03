@@ -24,7 +24,7 @@ class ActivityImportTest extends DatabaseTest {
 
         loc <- ActivityLocationRecord.insert(Path("/home/user/test")).transact(xa)
         fit = FitFile.decodeUnsafe(data)
-        result = ActivityReader.read(fit).fold(sys.error, identity)
+        result = ActivityReader.read(fit.head).fold(sys.error, identity)
         idResult <- ActivityImport
           .add(loc.id, "x.fit", "Morning Ride", None)(result)
           .transact(xa)

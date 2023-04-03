@@ -2,6 +2,30 @@
 
 This is a library for Scala 2.13 and 3.
 
+## TODO
+
+- add LapMsg to database(?)
+- scala3
+- cleanup playground test mess
+- summary on db
+- nicer prints, remove lines with no value, etc
+- have json and pretty output
+- list activities, option to list files only 
+- add/set/remove/rename tags
+- update command
+- [x] check path before adding location record
+- config file with db data and timezone, init command creates this file
+- add device info into activity table (is only encoded in the fileid)
+- add device to query
+- [x] fix fit parsing problems encountered when reading some older fenix5 files
+  - were concatenated fit files where the latter contain HrMsg
+- figure out how to decode HrMsg and update records
+- import strava export
+- web server and leaflet map view (same features, just web)
+- publish to strava + tracking/storing the link
+- document a bit
+- encoding (make fit files from db model)
+
 ## Format Protocol
 
 The protocol and file formats a specified in the following documents:

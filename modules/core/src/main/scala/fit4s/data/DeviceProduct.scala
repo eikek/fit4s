@@ -1,7 +1,7 @@
 package fit4s.data
 
 import fit4s.FitMessage.DataMessage
-import fit4s.profile.messages.FileIdMsg
+import fit4s.profile.messages.{DeviceInfoMsg, FileIdMsg, Msg}
 import fit4s.profile.types.{FaveroProduct, GarminProduct}
 import scodec.{Codec, Err}
 import scodec.bits.ByteOrdering
@@ -39,22 +39,36 @@ object DeviceProduct {
   val all: List[DeviceProduct] =
     Unknown :: GarminProduct.all.map(Garmin) ::: FaveroProduct.all.map(Favero)
 
-  def from(fileIdMsg: DataMessage): Either[String, DeviceProduct] =
-    fileIdMsg.definition.profileMsg match {
+  private def fromMessage(
+      msg: DataMessage,
+      sub1: Msg.SubField[GarminProduct],
+      sub2: Msg.SubField[FaveroProduct]
+  ): Either[String, DeviceProduct] =
+    for {
+      gp <- msg.getField(sub1)
+      fp <- msg.getField(sub2)
+      r = gp
+        .map(_.value)
+        .map(Garmin)
+        .orElse(fp.map(_.value).map(Favero))
+        .getOrElse(Unknown)
+    } yield r
+
+  def from(msg: DataMessage): Either[String, DeviceProduct] =
+    msg.definition.profileMsg match {
       case Some(FileIdMsg) =>
-        for {
-          gp <- fileIdMsg.getField(FileIdMsg.productGarminProduct)
-          fp <- fileIdMsg.getField(FileIdMsg.productFaveroProduct)
-          r = gp
-            .map(_.value)
-            .map(Garmin)
-            .orElse(fp.map(_.value).map(Favero))
-            .getOrElse(Unknown)
-        } yield r
+        fromMessage(msg, FileIdMsg.productGarminProduct, FileIdMsg.productFaveroProduct)
+
+      case Some(DeviceInfoMsg) =>
+        fromMessage(
+          msg,
+          DeviceInfoMsg.productGarminProduct,
+          DeviceInfoMsg.productFaveroProduct
+        )
 
       case _ =>
         Left(
-          s"Message '${fileIdMsg.definition.profileMsg}' doesn't contain a product field."
+          s"Message '${msg.definition.profileMsg}' doesn't contain a product field."
         )
     }
 }

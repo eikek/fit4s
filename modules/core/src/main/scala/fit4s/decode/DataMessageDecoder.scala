@@ -129,7 +129,11 @@ object DataMessageDecoder {
 
                       case b => b.bytes
                     }
-                    val nextField = KnownField(f.local, f.byteOrdering, cfield, nextBits)
+                    val nextLocal = f.local.copy(sizeBytes =
+                      math.min(nextBits.length, f.local.sizeBytes).toInt
+                    )
+                    val nextField =
+                      KnownField(nextLocal, f.byteOrdering, cfield, nextBits)
 
                     loop(bits.dropRight(len), t, nextField +: result)
                   }

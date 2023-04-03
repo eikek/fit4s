@@ -13,7 +13,6 @@ import fs2.Stream
 
 import java.time.ZoneId
 
-//@annotation.nowarn
 final class ActivityLogDb[F[_]: Sync: Files](
     jdbcConfig: JdbcConfig,
     zoneId: ZoneId,
@@ -31,6 +30,15 @@ final class ActivityLogDb[F[_]: Sync: Files](
       callback: ImportCallback[F],
       dirs: NonEmptyList[Path]
   ): Stream[F, ImportResult[ActivityId]] = for {
+    isDir <- Stream.eval(dirs.traverse(p => Files[F].isDirectory(p).map(p -> _)))
+    _ <-
+      if (isDir.forall(_._2)) Stream.unit
+      else
+        Stream.raiseError[F](
+          new Exception(
+            s"One or more directories do not exists or aren't directories: ${isDir.filterNot(_._2).map(_._1)}"
+          )
+        )
     tags <- Stream.eval(TagRecord.getOrCreate(tagged.toList).transact(xa))
 
     locs <- Stream.eval(
