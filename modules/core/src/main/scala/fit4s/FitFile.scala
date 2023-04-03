@@ -38,8 +38,7 @@ final case class FitFile(
     findData(n, filter).headOption.toRight(s"No $n message found!")
 
   def findFileId: Either[String, FileId] =
-    findFirstData(MesgNum.FileId)
-      .flatMap(FileId.from)
+    findFirstData(MesgNum.FileId).flatMap(FileId.from)
 
   def dataRecords: Vector[FitMessage.DataMessage] =
     records.collect { case Record.DataRecord(_, cnt) =>

@@ -22,6 +22,10 @@ object FitTestData {
     getClass.getResource("/fit/activity/fenix5_1.fit")
   )
 
+  val garminSwimActivity = fromURL(
+    getClass.getResource("/fit/mine_12980500464.fit")
+  )
+
   private def fromURL(url: URL): IO[ByteVector] =
     fs2.io
       .readInputStream(IO(url.openStream()), 8192)

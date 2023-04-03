@@ -6,6 +6,13 @@ This is a library for Scala 2.13 and 3.
 
 - add LapMsg to database(?)
 - scala3
+- [x] try fix timestamps for GarminSwim
+  - not possible to get the correct time, bc it is based on "seconds
+    from device power on" (when batteries got inserted). Since
+    batteries have been changed I can't know the correct value)
+  - The activity contains a local timestamp, this made sense for a
+    file, so I'm using this as base to correct all values that are
+    below the minimum
 - cleanup playground test mess
 - summary on db
 - nicer prints, remove lines with no value, etc

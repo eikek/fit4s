@@ -11,8 +11,12 @@ import fit4s.activities.{DatabaseTest, FlywayMigrate}
 import fit4s.{ActivityReader, FitFile, FitTestData}
 import fs2.io.file.Path
 
+import java.time.ZoneId
+
 class ActivityImportTest extends DatabaseTest {
   override def munitFixtures = Seq(h2DataSource)
+
+  val zone: ZoneId = ZoneId.systemDefault()
 
   test("insert example activity") {
     val (jdbc, ds) = h2DataSource()
@@ -24,7 +28,9 @@ class ActivityImportTest extends DatabaseTest {
 
         loc <- ActivityLocationRecord.insert(Path("/home/user/test")).transact(xa)
         fit = FitFile.decodeUnsafe(data)
-        result = ActivityReader.read(fit.head).fold(sys.error, identity)
+        result = ActivityReader
+          .read(fit.head, zone)
+          .fold(err => sys.error(err.toString), identity)
         idResult <- ActivityImport
           .add(loc.id, "x.fit", "Morning Ride", None)(result)
           .transact(xa)

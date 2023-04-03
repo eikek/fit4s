@@ -3,6 +3,7 @@ package fit4s.cli.activity
 import cats.data.NonEmptyList
 import cats.effect.{ExitCode, IO}
 import cats.kernel.Monoid
+import fit4s.ActivityReader
 import fit4s.activities.data.{ActivityId, TagName}
 import fit4s.activities.{ActivityLog, ImportCallback, ImportResult}
 import fs2.io.file.Path
@@ -32,27 +33,35 @@ object ImportCmd {
 
   def printFile: ImportCallback[IO] = (file: Path) => IO.print(s"\r$file ... ")
 
-  case class Result(success: Int, duplicates: Int, errors: Int) {
+  case class Result(success: Int, noActivity: Int, duplicates: Int, errors: Int) {
     def +(other: Result) = Result(
       success + other.success,
+      noActivity + other.noActivity,
       duplicates + other.duplicates,
       errors + other.errors
     )
 
     override def toString =
-      s"Imported: $success, Duplicates: $duplicates, Errors: $errors"
+      s"Imported: $success, Duplicates: $duplicates, not an activity: $noActivity, Errors: $errors"
   }
   object Result {
-    val empty = Result(0, 0, 0)
+    val empty = Result(0, 0, 0, 0)
     val success = empty.copy(success = 1)
     val duplicate = empty.copy(duplicates = 1)
     val error = empty.copy(errors = 1)
+    val noActivity = empty.copy(noActivity = 1)
 
     def apply(r: ImportResult[ActivityId]): Result =
       r match {
         case _: ImportResult.Success[_]                                       => success
         case ImportResult.Failure(ImportResult.FailureReason.Duplicate(_, _)) => duplicate
-        case _                                                                => error
+        case ImportResult.Failure(
+              ImportResult.FailureReason.ActivityDecodeError(
+                ActivityReader.Failure.NoActivityFound(_, _)
+              )
+            ) =>
+          noActivity
+        case _ => error
       }
 
     implicit val monoid: Monoid[Result] =

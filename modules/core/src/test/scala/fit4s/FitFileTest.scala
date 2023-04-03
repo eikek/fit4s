@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.FiniteDuration
 
 class FitFileTest extends CatsEffectSuite {
+  override def munitTimeout = FiniteDuration(3, TimeUnit.MINUTES)
 
   test("read example activity records") {
     for {
@@ -98,6 +99,4 @@ class FitFileTest extends CatsEffectSuite {
       _ = assertEquals(fit5.crc, 58021)
     } yield ()
   }
-
-  override def munitTimeout = FiniteDuration.apply(30, TimeUnit.DAYS)
 }

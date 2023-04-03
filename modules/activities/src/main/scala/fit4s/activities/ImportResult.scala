@@ -1,5 +1,6 @@
 package fit4s.activities
 
+import fit4s.ActivityReader
 import fit4s.activities.ImportResult.Failure
 import fit4s.activities.ImportResult.FailureReason.{ActivityDecodeError, FitReadError}
 import fit4s.data.FileId
@@ -29,7 +30,8 @@ object ImportResult {
   object FailureReason {
     final case class Duplicate(ids: FileId, path: String) extends FailureReason
     final case class FitReadError(err: Err) extends FailureReason
-    final case class ActivityDecodeError(message: String) extends FailureReason
+    final case class ActivityDecodeError(err: ActivityReader.Failure)
+        extends FailureReason
   }
 
   def duplicate[A](id: FileId, path: String): ImportResult[A] = Failure(
@@ -38,8 +40,8 @@ object ImportResult {
 
   def readFitError[A](err: Err): ImportResult[A] = Failure(FitReadError(err))
 
-  def activityDecodeError[A](msg: String): ImportResult[A] = Failure(
-    ActivityDecodeError(msg)
+  def activityDecodeError[A](err: ActivityReader.Failure): ImportResult[A] = Failure(
+    ActivityDecodeError(err)
   )
 
   def success[A](value: A): ImportResult[A] = Success(value)
