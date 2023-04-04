@@ -70,6 +70,9 @@ final class ConditionParser(val zoneId: ZoneId, currentTime: Instant)
     (Parser.stringIn(List("notes=", "notes:")).void *> BasicParser.qstring)
       .map(NotesMatch)
 
+  val deviceMatchCondition: Parser[Condition] =
+    (Parser.stringIn(List("device=", "dev=")) *> device).map(DeviceMatch)
+
   def andCondition(inner: Parser[Condition]): Parser[Condition] =
     inner
       .repSep(BasicParser.ws)
@@ -95,7 +98,8 @@ final class ConditionParser(val zoneId: ZoneId, currentTime: Instant)
         startedCondition ::
         distanceCondition ::
         durationCondition ::
-        notesCondition :: Nil
+        notesCondition ::
+        deviceMatchCondition :: Nil
     )
 
   val condition: Parser[Condition] =

@@ -13,7 +13,7 @@ import fs2.Stream
 
 import java.time.ZoneId
 
-final class ActivityLogDb[F[_]: Sync: Files](
+final class ActivityLogDb[F[_]: Async: Files](
     jdbcConfig: JdbcConfig,
     zoneId: ZoneId,
     xa: Transactor[F]
@@ -28,7 +28,8 @@ final class ActivityLogDb[F[_]: Sync: Files](
   override def importFromDirectories(
       tagged: Set[TagName],
       callback: ImportCallback[F],
-      dirs: NonEmptyList[Path]
+      dirs: NonEmptyList[Path],
+      concN: Int
   ): Stream[F, ImportResult[ActivityId]] = for {
     isDir <- Stream.eval(dirs.traverse(p => Files[F].isDirectory(p).map(p -> _)))
     _ <-
@@ -47,10 +48,11 @@ final class ActivityLogDb[F[_]: Sync: Files](
 
     (dir, locId) <- Stream.emits(locs.toList)
 
+    doImportTask = DirectoryImport
+      .add[F](tags.map(_.id).toSet, locId, zoneId, callback)(dir)
     results <-
-      DirectoryImport
-        .add[F](tags.map(_.id).toSet, locId, zoneId, callback)(dir)
-        .evalMap(_.transact(xa))
+      if (concN > 1) doImportTask.parEvalMap(concN)(_.transact(xa))
+      else doImportTask.evalMap(_.transact(xa))
   } yield results
 
   override def deleteActivities(query: ActivityQuery): F[Int] = ???

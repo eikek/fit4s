@@ -20,6 +20,9 @@ create table "activity"(
   "location_id" bigint not null, --fk
   "path" varchar(2000) not null,
   "file_id" varchar(254) not null, --unique
+  "device" varchar(254) not null,
+  "serial_number" bigint,
+  "created_at" timestamp,
   "name" varchar(2000) not null,
   "timestamp" timestamp not null,
   "total_time" bigint not null,

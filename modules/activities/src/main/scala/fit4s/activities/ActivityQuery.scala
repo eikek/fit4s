@@ -3,7 +3,7 @@ package fit4s.activities
 import cats.data.{NonEmptyList => Nel}
 import fit4s.activities.ActivityQuery.{Condition, OrderBy}
 import fit4s.activities.data.TagName
-import fit4s.data.Distance
+import fit4s.data.{DeviceProduct, Distance}
 import fit4s.profile.types.{Sport, SubSport}
 import fs2.io.file.Path
 
@@ -38,6 +38,8 @@ object ActivityQuery {
     case class LocationAnyStarts(path: Nel[Path]) extends Condition
 
     case class FileIdMatch(fileId: String) extends Condition
+
+    case class DeviceMatch(device: DeviceProduct) extends Condition
 
     case class SportMatch(sports: Sport) extends Condition
 

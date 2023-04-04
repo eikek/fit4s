@@ -4,7 +4,10 @@ This is a library for Scala 2.13 and 3.
 
 ## TODO
 
-- add LapMsg to database(?)
+- [x] add tags to import cmd
+- parallel directory import (max(3, cpus - 2))
+- better error when init was not called
+- add LapMsg to database
 - scala3
 - [x] try fix timestamps for GarminSwim
   - not possible to get the correct time, bc it is based on "seconds
@@ -22,7 +25,7 @@ This is a library for Scala 2.13 and 3.
 - update command
 - [x] check path before adding location record
 - config file with db data and timezone, init command creates this file
-- add device info into activity table (is only encoded in the fileid)
+- [x] add device info into activity table (is only encoded in the fileid)
 - add device to query
 - [x] fix fit parsing problems encountered when reading some older fenix5 files
   - were concatenated fit files where the latter contain HrMsg

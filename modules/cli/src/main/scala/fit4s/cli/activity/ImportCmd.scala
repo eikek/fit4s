@@ -9,19 +9,26 @@ import fit4s.activities.{ActivityLog, ImportCallback, ImportResult}
 import fs2.io.file.Path
 
 object ImportCmd {
+  private val maxConcurrent =
+    math.max(1, Runtime.getRuntime.availableProcessors() - 2)
 
-  final case class Config(fileOrDirectories: NonEmptyList[Path])
+  final case class Config(
+      fileOrDirectories: NonEmptyList[Path],
+      tags: List[TagName],
+      parallel: Boolean
+  )
 
   def apply(cfg: Config): IO[ExitCode] =
     ActivityLog.default[IO]().use { log =>
       log
         .importFromDirectories(
-          Set(TagName.unsafeFromString("bike/tito")),
+          cfg.tags.toSet,
           printFile,
-          cfg.fileOrDirectories
+          cfg.fileOrDirectories,
+          maxConcurrent
         )
         .evalTap {
-          case ImportResult.Success(_)   => IO.println("ok.")
+          case ImportResult.Success(_) => if (cfg.parallel) IO.unit else IO.println("ok.")
           case err: ImportResult.Failure => IO.println(err.messages)
         }
         .map(Result.apply)

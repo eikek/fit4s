@@ -3,7 +3,7 @@ package fit4s.activities.impl
 import cats.data.NonEmptyList
 import cats.syntax.all._
 import fit4s.activities.data.TagName
-import fit4s.data.Distance
+import fit4s.data.{DeviceProduct, Distance}
 import fit4s.profile.types.{Sport, SubSport}
 import munit.FunSuite
 import org.scalacheck.Prop.forAll
@@ -16,6 +16,13 @@ import java.time.{Duration, Instant, LocalDateTime}
 class BasicParserTest extends FunSuite {
   val current = Instant.parse("2023-04-02T10:05:00Z")
   val parser = new ConditionParser(ConditionParser.defaultZone, current)
+
+  test("parse device") {
+    DeviceProduct.all.foreach { p =>
+      val out = parser.device.parseAll(p.name.toLowerCase)
+      assertEquals(out, p.asRight)
+    }
+  }
 
   List(
     "15min" -> Duration.ofMinutes(15),

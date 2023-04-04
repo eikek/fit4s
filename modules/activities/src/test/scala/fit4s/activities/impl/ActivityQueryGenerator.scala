@@ -53,6 +53,7 @@ object ActivityQueryGenerator {
       nelGen(pathGen).map(LocationAllStarts),
       nelGen(pathGen).map(LocationAnyStarts),
       fileIdGen.map(_.asString).map(FileIdMatch),
+      deviceMatchGen,
       Gen.oneOf(Sport.all).map(SportMatch),
       Gen.oneOf(SubSport.all).map(SubSportMatch),
       instantGen.map(StartedAfter),
@@ -65,6 +66,9 @@ object ActivityQueryGenerator {
       durationGen.map(MovedGE),
       textGen.map(NotesMatch)
     )
+
+  def deviceMatchGen: Gen[DeviceMatch] =
+    deviceProductGen.map(DeviceMatch)
 
   def tagNameGen: Gen[TagName] =
     Gen

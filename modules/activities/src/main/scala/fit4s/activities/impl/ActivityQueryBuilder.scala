@@ -41,8 +41,8 @@ object ActivityQueryBuilder {
         FROM $activitySessionT act
         INNER JOIN $activityT pa ON act.activity_id = pa.id
         INNER JOIN $activityLocT loc ON loc.id = pa.location_id
-        INNER JOIN $activityTagT at ON at.activity_id = pa.id
-        INNER JOIN $tagT tag ON at.tag_id = tag.id
+        LEFT JOIN $activityTagT at ON at.activity_id = pa.id
+        LEFT JOIN $tagT tag ON at.tag_id = tag.id
       """
 
   def orderBy(order: OrderBy): Fragment =
@@ -124,6 +124,9 @@ object ActivityQueryBuilder {
 
       case Condition.NotesMatch(text) =>
         fr"pa.notes like ${wildcard(text)}"
+
+      case Condition.DeviceMatch(device) =>
+        fr"pa.device = $device"
 
       case Condition.And(elements) =>
         val inner = elements.map(condition).toList

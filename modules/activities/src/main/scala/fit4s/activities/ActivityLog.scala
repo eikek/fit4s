@@ -20,7 +20,8 @@ trait ActivityLog[F[_]] {
   def importFromDirectories(
       tagged: Set[TagName],
       callback: ImportCallback[F],
-      dirs: NonEmptyList[Path]
+      dirs: NonEmptyList[Path],
+      concN: Int
   ): Stream[F, ImportResult[ActivityId]]
 
   def deleteActivities(query: ActivityQuery): F[Int]

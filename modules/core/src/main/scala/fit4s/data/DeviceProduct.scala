@@ -27,7 +27,7 @@ object DeviceProduct {
     }
 
   case object Unknown extends DeviceProduct {
-    val name = "Unknown Device"
+    val name = "Unknown"
   }
   case class Garmin(product: GarminProduct) extends DeviceProduct {
     val name = product.toString
@@ -53,6 +53,12 @@ object DeviceProduct {
         .orElse(fp.map(_.value).map(Favero))
         .getOrElse(Unknown)
     } yield r
+
+  def fromString(str: String): Either[String, DeviceProduct] =
+    all.find(_.name.equalsIgnoreCase(str)).toRight(s"Invalid device product name: $str")
+
+  def unsafeFromString(str: String): DeviceProduct =
+    fromString(str).fold(sys.error, identity)
 
   def from(msg: DataMessage): Either[String, DeviceProduct] =
     msg.definition.profileMsg match {

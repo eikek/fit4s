@@ -52,6 +52,17 @@ trait BasicOpts {
       )
       .orEmpty
 
+  def parallel: Opts[Boolean] =
+    Opts.flag("parallel", "Whether to import using multiple threads").orFalse
+
+  def initialTags: Opts[List[TagName]] =
+    Opts
+      .options[TagName](
+        "tags",
+        help = "Associate these tags to all imported activities"
+      )
+      .orEmpty
+
   implicit private val sportArgument: Argument[Sport] =
     Argument.from[Sport]("sport") { str =>
       Sport.all.find(_.typeName.equalsIgnoreCase(str)) match {

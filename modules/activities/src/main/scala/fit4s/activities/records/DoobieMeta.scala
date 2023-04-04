@@ -11,6 +11,9 @@ import java.time.{Duration, Instant}
 
 trait DoobieMeta {
 
+  implicit val deviceProductMeta: Meta[DeviceProduct] =
+    Meta[String].timap(DeviceProduct.unsafeFromString)(_.name)
+
   implicit val pathMeta: Meta[Path] =
     Meta[String].timap(Path.apply)(_.absolute.toString)
 

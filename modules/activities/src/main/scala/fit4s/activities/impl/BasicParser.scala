@@ -4,7 +4,7 @@ import cats.data.NonEmptyList
 import cats.parse.{Numbers, Parser}
 import fit4s.activities.data.TagName
 import fit4s.activities.impl.BasicParser.ws
-import fit4s.data.Distance
+import fit4s.data.{DeviceProduct, Distance}
 import fit4s.profile.types.{Sport, SubSport}
 import fs2.io.file.Path
 
@@ -109,6 +109,11 @@ abstract class BasicParser(zoneId: ZoneId, currentTime: Instant) {
       Duration.ofMinutes(minutes)
     }
   }
+
+  val device: Parser[DeviceProduct] =
+    Parser
+      .stringIn(DeviceProduct.all.map(_.name.toLowerCase))
+      .map(DeviceProduct.unsafeFromString)
 }
 
 object BasicParser {

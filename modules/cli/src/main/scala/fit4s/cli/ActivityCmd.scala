@@ -9,7 +9,7 @@ object ActivityCmd extends BasicOpts {
 
   val importArgs: Opts[ImportCmd.Config] =
     Opts.subcommand("import", "Import fit files") {
-      fileOrDirArgs.map(ImportCmd.Config.apply)
+      (fileOrDirArgs, initialTags, parallel).mapN(ImportCmd.Config)
     }
 
   val weekSummaryArgs: Opts[WeekSummaryCmd.Config] =
