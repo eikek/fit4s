@@ -4,6 +4,7 @@ import cats.data.{NonEmptyList, Validated}
 import cats.syntax.all._
 import com.monovore.decline.{Argument, Opts}
 import fit4s.activities.data.TagName
+import fit4s.cli.activity.SummaryCmd
 import fit4s.profile.types.Sport
 import fs2.io.file.Path
 
@@ -62,6 +63,23 @@ trait BasicOpts {
         help = "Associate these tags to all imported activities"
       )
       .orEmpty
+
+  def summaryQueryOpts: Opts[SummaryCmd.SummaryQuery] = {
+    val w = Opts.flag("week", "Current week").map(_ => SummaryCmd.SummaryQuery.ThisWeek)
+
+    val y = Opts
+      .option[Int]("year", "A specific year or current")
+      .orNone
+      .map(SummaryCmd.SummaryQuery.ForYear)
+
+    val cq = Opts
+      .option[String]("query", "A custom query")
+      .map(_.trim)
+      .map(SummaryCmd.SummaryQuery.Custom)
+      .withDefault(SummaryCmd.SummaryQuery.NoQuery)
+
+    w.orElse(y).orElse(cq)
+  }
 
   implicit private val sportArgument: Argument[Sport] =
     Argument.from[Sport]("sport") { str =>

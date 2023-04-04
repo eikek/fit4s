@@ -21,13 +21,7 @@ object ActivityCmd extends BasicOpts {
 
   val summaryArgs: Opts[SummaryCmd.Config] =
     Opts.subcommand("summary", "Show an activity summary for the query.") {
-      Opts
-        .arguments[String]()
-        .orEmpty
-        .map(_.mkString(" "))
-        .map(Option(_))
-        .map(_.filter(_.nonEmpty))
-        .map(SummaryCmd.Config)
+      summaryQueryOpts.map(SummaryCmd.Config)
     }
 
   val initArgs: Opts[Unit] =
