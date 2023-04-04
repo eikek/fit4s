@@ -4,7 +4,7 @@ import cats.data.NonEmptyList
 import cats.effect._
 import doobie.util.ExecutionContexts
 import doobie.util.transactor.Transactor
-import fit4s.activities.data.{ActivityId, TagId, TagName}
+import fit4s.activities.data.{ActivityId, ActivitySessionSummary, TagId, TagName}
 import fit4s.activities.impl.ActivityLogDb
 import fit4s.activities.records.{ActivitySessionRecord, TagRecord}
 import fs2._
@@ -34,7 +34,9 @@ trait ActivityLog[F[_]] {
 
   def activityList(query: ActivityQuery): Stream[F, ActivitySessionRecord]
 
-  def activityStats(query: ActivityQuery): F[ActivityStats]
+  def activitySummary(
+      query: Option[ActivityQuery.Condition]
+  ): F[Vector[ActivitySessionSummary]]
 
   def tagRepository: TagRepo[F]
 

@@ -5,7 +5,7 @@ import doobie.{Fragment, Query0}
 import doobie.implicits._
 import fit4s.activities.ActivityQuery
 import fit4s.activities.ActivityQuery.{Condition, OrderBy}
-import fit4s.activities.data.TagName
+import fit4s.activities.data.{ActivitySessionSummary, TagName}
 import fit4s.activities.records._
 import fit4s.activities.records.DoobieMeta._
 import fs2.io.file.Path
@@ -36,10 +36,31 @@ object ActivityQueryBuilder {
     select ++ from ++ where ++ order
   }
 
+  def buildSummary(q: Option[ActivityQuery.Condition]): Query0[ActivitySessionSummary] =
+    summaryFragment(q).query[ActivitySessionSummary]
+
+  def summaryFragment(q: Option[ActivityQuery.Condition]): Fragment = {
+    val select =
+      fr"""SELECT act.sport, min(act.start_time), max(act.end_time),
+           sum(act.moving_time), sum(act.elapsed_time), sum(act.distance),
+           sum(act.calories), sum(act.total_ascend), sum(act.total_descend),
+           min(act.min_temp), max(act.max_temp), avg(act.avg_temp),
+           min(act.min_hr), max(act.max_hr), avg(act.avg_hr), max(act.max_speed),
+           avg(act.avg_speed), max(act.max_power), avg(act.avg_power), count(act.id)
+        """
+
+    val where = q match {
+      case Some(c) => fr"WHERE" ++ condition(c)
+      case None    => Fragment.empty
+    }
+
+    select ++ join ++ where ++ fr"Group By act.sport, act.sub_sport"
+  }
+
   def join: Fragment =
     sql"""
-        FROM $activitySessionT act
-        INNER JOIN $activityT pa ON act.activity_id = pa.id
+        FROM $activityT pa
+        INNER JOIN $activitySessionT act ON act.activity_id = pa.id
         INNER JOIN $activityLocT loc ON loc.id = pa.location_id
         LEFT JOIN $activityTagT at ON at.activity_id = pa.id
         LEFT JOIN $tagT tag ON at.tag_id = tag.id

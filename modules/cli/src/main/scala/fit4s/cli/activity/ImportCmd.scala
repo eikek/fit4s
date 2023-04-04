@@ -25,7 +25,7 @@ object ImportCmd {
           cfg.tags.toSet,
           printFile,
           cfg.fileOrDirectories,
-          maxConcurrent
+          if (cfg.parallel) maxConcurrent else 1
         )
         .evalTap {
           case ImportResult.Success(_) => if (cfg.parallel) IO.unit else IO.println("ok.")

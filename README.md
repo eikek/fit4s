@@ -5,10 +5,9 @@ This is a library for Scala 2.13 and 3.
 ## TODO
 
 - [x] add tags to import cmd
-- parallel directory import (max(3, cpus - 2))
-- better error when init was not called
+- [x] parallel directory import (max(3, cpus - 2))
+- better error when init was not called, or just do initialize
 - add LapMsg to database
-- scala3
 - [x] try fix timestamps for GarminSwim
   - not possible to get the correct time, bc it is based on "seconds
     from device power on" (when batteries got inserted). Since
@@ -33,6 +32,7 @@ This is a library for Scala 2.13 and 3.
 - import strava export
 - web server and leaflet map view (same features, just web)
 - publish to strava + tracking/storing the link
+- scala3
 - document a bit
 - encoding (make fit files from db model)
 

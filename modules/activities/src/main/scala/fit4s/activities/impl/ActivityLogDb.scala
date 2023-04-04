@@ -6,7 +6,7 @@ import cats.syntax.all._
 import doobie.{Query => _, _}
 import doobie.implicits._
 import fit4s.activities._
-import fit4s.activities.data.{ActivityId, TagId, TagName}
+import fit4s.activities.data.{ActivityId, ActivitySessionSummary, TagId, TagName}
 import fit4s.activities.records.{ActivityLocationRecord, ActivitySessionRecord, TagRecord}
 import fs2.io.file.{Files, Path}
 import fs2.Stream
@@ -66,7 +66,10 @@ final class ActivityLogDb[F[_]: Async: Files](
   override def activityList(query: ActivityQuery): Stream[F, ActivitySessionRecord] =
     ActivityQueryBuilder.buildQuery(query).stream.transact(xa)
 
-  override def activityStats(query: ActivityQuery): F[ActivityStats] = ???
+  override def activitySummary(
+      query: Option[ActivityQuery.Condition]
+  ): F[Vector[ActivitySessionSummary]] =
+    ActivityQueryBuilder.buildSummary(query).to[Vector].transact(xa)
 
   override def tagRepository: TagRepo[F] = ???
 
