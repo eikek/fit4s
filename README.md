@@ -4,6 +4,7 @@ This is a library for Scala 2.13 and 3.
 
 ## TODO
 
+- [x] fix missing session values using corresponding records
 - [x] add tags to import cmd
 - [x] parallel directory import (max(3, cpus - 2))
 - better error when init was not called, or just do initialize
@@ -25,7 +26,7 @@ This is a library for Scala 2.13 and 3.
 - [x] check path before adding location record
 - config file with db data and timezone, init command creates this file
 - [x] add device info into activity table (is only encoded in the fileid)
-- add device to query
+- [x] add device to query
 - [x] fix fit parsing problems encountered when reading some older fenix5 files
   - were concatenated fit files where the latter contain HrMsg
 - figure out how to decode HrMsg and update records

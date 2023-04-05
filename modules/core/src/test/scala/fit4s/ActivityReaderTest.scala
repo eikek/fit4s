@@ -1,5 +1,6 @@
 package fit4s
 
+import fit4s.data.HeartRate
 import fit4s.profile.messages.RecordMsg
 import munit.CatsEffectSuite
 
@@ -56,6 +57,43 @@ class ActivityReaderTest extends CatsEffectSuite {
       _ = assertEquals(
         result.activity.timestamp.asInstant,
         Instant.parse("2015-06-30T16:29:00Z")
+      )
+    } yield ()
+  }
+
+  test("fix missing values from records (1)") {
+    for {
+      data <- FitTestData.garminSwimActivity
+      fit = FitFile.decodeUnsafe(data).head
+      result = ActivityReader
+        .read(fit, zone)
+        .fold(err => sys.error(err.toString), identity)
+      missing = result.copy(sessions = result.sessions.map(_.copy(elapsedTime = None)))
+      fixed = ActivityReader.fixMissingValues(missing)
+      _ = assertEquals(
+        fixed.sessions.head.elapsedTime,
+        Some(Duration.ofSeconds(22 * 60 + 55))
+      )
+    } yield ()
+  }
+
+  test("fix missing values from records (2)") {
+    for {
+      data <- FitTestData.edge530CyclingActivity
+      fit = FitFile.decodeUnsafe(data).head
+      result = ActivityReader
+        .read(fit, zone)
+        .fold(err => sys.error(err.toString), identity)
+      _ = assertEquals(result.sessions.head.minHr, None)
+      missing = result.copy(sessions = result.sessions.map(_.copy(elapsedTime = None)))
+      fixed = ActivityReader.fixMissingValues(missing)
+      _ = assertEquals(
+        fixed.sessions.head.elapsedTime,
+        Some(Duration.ofSeconds(61 * 60 + 20))
+      )
+      _ = assertEquals(
+        fixed.sessions.head.minHr,
+        Some(HeartRate.bpm(111))
       )
     } yield ()
   }
