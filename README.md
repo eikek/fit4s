@@ -4,12 +4,24 @@ This is a library for Scala 2.13 and 3.
 
 ## TODO
 
-_ [x] fix invalid gps values showing up as valid
+- config file with db data and timezone, init command creates this file
+- better error when init was not called, or just do initialize
+- have json and pretty output
+- list activities, option to list files only 
+- import strava export, tracking/storing the link to strava for each activity
+  - if activity exists, add tags and other additional information
+  - ask to overwrite activity name
+- web server and leaflet map view (same features, just web, scalajs)
+- publish to strava 
+- add/set/remove/rename tags
+- update command
+- add LapMsg to database
+- cleanup playground test mess
+- catch logging from java.util.logging
+- [x] fix invalid gps values showing up as valid
 - [x] fix missing session values using corresponding records
 - [x] add tags to import cmd
 - [x] parallel directory import (max(3, cpus - 2))
-- better error when init was not called, or just do initialize
-- add LapMsg to database
 - [x] try fix timestamps for GarminSwim
   - not possible to get the correct time, bc it is based on "seconds
     from device power on" (when batteries got inserted). Since
@@ -17,23 +29,14 @@ _ [x] fix invalid gps values showing up as valid
   - The activity contains a local timestamp, this made sense for a
     file, so I'm using this as base to correct all values that are
     below the minimum
-- cleanup playground test mess
 - [x] summary on db
-- nicer prints, remove lines with no value, etc
-- have json and pretty output
-- list activities, option to list files only 
-- add/set/remove/rename tags
-- update command
+- [x] nicer prints, remove lines with no value, etc
 - [x] check path before adding location record
-- config file with db data and timezone, init command creates this file
 - [x] add device info into activity table (is only encoded in the fileid)
 - [x] add device to query
 - [x] fix fit parsing problems encountered when reading some older fenix5 files
   - were concatenated fit files where the latter contain HrMsg
-- figure out how to decode HrMsg and update records
-- import strava export
-- web server and leaflet map view (same features, just web)
-- publish to strava + tracking/storing the link
+- figure out how to decode HrMsg (reconstruct timestamps) and update records
 - scala3
 - document a bit
 - encoding (make fit files from db model)

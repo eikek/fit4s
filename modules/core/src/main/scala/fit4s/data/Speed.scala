@@ -4,7 +4,9 @@ final class Speed private (val meterPerSecond: Double) extends AnyVal {
 
   def kmh: Double = meterPerSecond * 3.6
 
-  def minPer100m = (meterPerSecond * 100d) / 60d
+  def minPer100m = (100d / meterPerSecond) / 60d
+
+  def minPer1k = (1000d / meterPerSecond) / 60d
 
   def *(factor: Double): Speed = new Speed(meterPerSecond * factor)
 

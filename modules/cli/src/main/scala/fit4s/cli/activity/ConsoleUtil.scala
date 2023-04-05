@@ -1,8 +1,10 @@
 package fit4s.cli.activity
 
 import fit4s.activities.data.ActivitySessionSummary
+import fit4s.data.Speed
+import fit4s.profile.types.Sport
 
-import java.time.{Duration, ZoneId}
+import java.time.{Duration, Instant, ZoneId}
 
 object ConsoleUtil {
   val bold = Console.BOLD
@@ -10,6 +12,9 @@ object ConsoleUtil {
   val red = Console.RED
   val green = Console.GREEN
   val boldRed = s"$bold$red"
+
+  val cFname = ""
+  val cFvalue = bold
 
   def makeHeader(header: String): String = {
     val len = header.length
@@ -21,20 +26,46 @@ object ConsoleUtil {
       s: ActivitySessionSummary
   ): (String, String) = {
     val sp = List.fill(indent)(' ').mkString
+    def ld(i: Instant) = i.atZone(zoneId).toLocalDate
 
-    makeHeader(s.sport.toString) ->
-      s"""${sp}Activities: $bold${s.count}$reset
-         |${sp}Date:       ${s.startTime.atZone(zoneId).toLocalDate} -- ${s.endTime
-          .atZone(zoneId)
-          .toLocalDate}
-         |${sp}Distance:   $bold${s.distance}$reset
-         |${sp}Time:       $bold${dur(s.movingTime)}$reset
-         |${sp}Elevation:  $bold${s.totalAscend.map(_.meter.toInt).getOrElse("-")}m$reset
-         |${sp}Calories:   $bold${s.calories}$reset
-         |${sp}Temp. °C:   ${s.minTemp.getOrElse("-")} to ${s.maxTemp.getOrElse("-")}
-         |${sp}Heart rate:  ${s.avgHr.getOrElse("-")}
-         |""".stripMargin
+    val pairs = List(
+      Some("Activities" -> s.count.toString),
+      Some("Date" -> s"${ld(s.startTime)} -- ${ld(s.endTime)}"),
+      Some("Distance" -> s.distance.toString),
+      Some("Time" -> dur(s.movingTime)),
+      s.totalAscend.map(a => "Elevation" -> s"${a.meter.toInt}m"),
+      Some("Calories" -> s.calories.toString),
+      Some("Temp." -> s"${s.minTemp.getOrElse("-")} to ${s.maxTemp.getOrElse("-")}")
+        .filter(_ => s.minTemp.isDefined || s.maxTemp.isDefined),
+      s.avgHr.map(hr => "Heart rate" -> hr.toString),
+      Some(
+        "Speed avg" -> s"${speedStr(s.avgSpeed, s.sport)}"
+      ).filter(_ =>
+        s.maxSpeed.exists(_.meterPerSecond > 0) || s.avgSpeed.exists(_.meterPerSecond > 0)
+      )
+    )
+
+    val colLen = pairs.flatMap(_.map(_._1.length)).max + 2
+    val lines = pairs
+      .collect { case Some((name, value)) =>
+        val s = List.fill(colLen - name.length)(" ").mkString
+        s"$sp$cFname$name$reset:$s$cFvalue$value$reset"
+      }
+      .mkString("\n")
+
+    makeHeader(s.sport.toString) -> lines
+
   }
+
+  private def speedStr(speed: Option[Speed], sport: Sport): String =
+    (speed, sport) match {
+      case (Some(sp), Sport.Swimming) => s"${minTomss(sp.minPer100m)} min/100m"
+      case (Some(sp), Sport.Running)  => s"${minTomss(sp.minPer1k)} min/km"
+      case (Some(sp), Sport.Walking)  => s"${minTomss(sp.minPer1k)} min/km"
+      case (Some(sp), Sport.Hiking)   => s"${minTomss(sp.minPer1k)} min/km"
+      case (Some(sp), _)              => sp.toString
+      case _                          => ""
+    }
 
   private def dur(d: Duration): String = {
     val secs = d.toSeconds
@@ -46,4 +77,9 @@ object ConsoleUtil {
       .mkString(" ")
   }
 
+  private def minTomss(min: Double): String = {
+    val minutes = min.floor.toInt
+    val secs = (min - minutes) * 60
+    f"$minutes:${secs.toInt}%02d"
+  }
 }
