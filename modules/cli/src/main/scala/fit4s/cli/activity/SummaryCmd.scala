@@ -15,7 +15,7 @@ object SummaryCmd {
   sealed trait SummaryQuery extends Product
   object SummaryQuery {
     case object NoQuery extends SummaryQuery
-    case object ThisWeek extends SummaryQuery
+    case class ForWeek(back: Option[Int]) extends SummaryQuery
     case class ForYear(year: Option[Int]) extends SummaryQuery
     case class Custom(query: String) extends SummaryQuery
   }
@@ -27,8 +27,13 @@ object SummaryCmd {
   ): Either[String, Option[ActivityQuery.Condition]] =
     q match {
       case SummaryQuery.NoQuery => None.asRight
-      case SummaryQuery.ThisWeek =>
+      case SummaryQuery.ForWeek(None) =>
         Some(StartedAfter(findStartLastMonday(currentTime.atZone(zoneId)))).asRight
+      case SummaryQuery.ForWeek(Some(back)) =>
+        val last = findStartLastMonday(currentTime.atZone(zoneId))
+        val a = last.minus(Duration.ofDays(7 * math.max(1, back)))
+        val b = a.plus(Duration.ofDays(7)).minusSeconds(1)
+        Some(makeTimeIntervalQuery(a, b)).asRight
       case SummaryQuery.ForYear(None) =>
         Some(makeYearQuery(currentTime.atZone(zoneId).getYear, zoneId)).asRight
       case SummaryQuery.ForYear(Some(y)) =>
@@ -55,10 +60,11 @@ object SummaryCmd {
           .fold(err => IO.raiseError(new CliError(err)), IO.pure)
 
         summary <- log.activitySummary(query)
+        out = summary.map(ConsoleUtil.makeSummaryTable(2, zone))
 
-        _ <- IO.println(ConsoleUtil.printHeader("Summary"))
-        _ <- IO.println(summary)
-
+        _ <- out.traverse_ { case (head, data) =>
+          IO.println(head) *> IO.println("\n") *> IO.println(data) *> IO.println("\n")
+        }
       } yield ExitCode.Success
     }
 
@@ -75,18 +81,20 @@ object SummaryCmd {
   }
 
   private def makeYearQuery(year: Int, zoneId: ZoneId): ActivityQuery.Condition =
-    And(
-      Nel.of(
-        StartedAfter(LocalDate.of(year, 1, 1).atStartOfDay(zoneId).toInstant),
-        StartedBefore(
-          ZonedDateTime
-            .of(
-              LocalDate.of(year, 12, 31),
-              LocalTime.of(23, 59, 59),
-              zoneId
-            )
-            .toInstant
+    makeTimeIntervalQuery(
+      LocalDate.of(year, 1, 1).atStartOfDay(zoneId).toInstant,
+      ZonedDateTime
+        .of(
+          LocalDate.of(year, 12, 31),
+          LocalTime.of(23, 59, 59),
+          zoneId
         )
-      )
+        .toInstant
     )
+
+  private def makeTimeIntervalQuery(
+      start: Instant,
+      end: Instant
+  ): ActivityQuery.Condition =
+    And(Nel.of(StartedAfter(start), StartedBefore(end)))
 }

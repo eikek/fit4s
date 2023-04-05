@@ -4,7 +4,7 @@ final class Calories private (val kcal: Double) extends AnyVal {
 
   def +(c: Calories): Calories = new Calories(kcal + c.kcal)
 
-  override def toString: String = f"$kcal%.2fkcal"
+  override def toString: String = f"${kcal.toInt}kcal"
 }
 
 object Calories {

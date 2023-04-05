@@ -44,22 +44,22 @@ create table "activity_session"(
   "end_time" timestamp not null,
   "moving_time" bigint not null,
   "elapsed_time" bigint not null,
-  "distance" decimal not null,
+  "distance" double not null,
   "start_pos_lat" bigint,
   "start_pos_long" bigint,
-  "calories" decimal not null,
-  "total_ascend" decimal,
-  "total_descend" decimal,
-  "min_temp" decimal,
-  "max_temp" decimal,
-  "avg_temp" decimal,
+  "calories" double not null,
+  "total_ascend" double,
+  "total_descend" double,
+  "min_temp" double,
+  "max_temp" double,
+  "avg_temp" double,
   "min_hr" int,
   "max_hr" int,
   "avg_hr" int,
-  "max_speed" decimal,
-  "avg_speed" decimal,
-  "max_power" decimal,
-  "avg_power" decimal
+  "max_speed" double,
+  "avg_speed" double,
+  "max_power" int,
+  "avg_power" int
 );
 
 alter table "activity_session" add constraint "activity_session_activity_fkey"

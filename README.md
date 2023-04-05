@@ -17,7 +17,7 @@ This is a library for Scala 2.13 and 3.
     file, so I'm using this as base to correct all values that are
     below the minimum
 - cleanup playground test mess
-- summary on db
+- [x] summary on db
 - nicer prints, remove lines with no value, etc
 - have json and pretty output
 - list activities, option to list files only 

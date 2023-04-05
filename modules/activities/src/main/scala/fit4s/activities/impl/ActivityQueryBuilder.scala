@@ -54,7 +54,7 @@ object ActivityQueryBuilder {
       case None    => Fragment.empty
     }
 
-    select ++ join ++ where ++ fr"Group By act.sport, act.sub_sport"
+    select ++ join ++ where ++ fr"GROUP BY act.sport"
   }
 
   def join: Fragment =

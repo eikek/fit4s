@@ -8,7 +8,7 @@ final class Temperature private (val celcius: Double) extends AnyVal {
   def +(temp: Temperature): Temperature = new Temperature(celcius + temp.celcius)
 
   override def toString =
-    f"$celcius%2.2f°C"
+    f"$celcius%2.1f°C"
 }
 
 object Temperature {

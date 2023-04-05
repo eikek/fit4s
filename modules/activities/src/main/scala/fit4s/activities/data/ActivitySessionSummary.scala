@@ -24,5 +24,6 @@ final case class ActivitySessionSummary(
     maxSpeed: Option[Speed],
     avgSpeed: Option[Speed],
     maxPower: Option[Power],
-    avgPower: Option[Power]
+    avgPower: Option[Power],
+    count: Int
 )

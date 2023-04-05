@@ -65,11 +65,16 @@ trait BasicOpts {
       .orEmpty
 
   def summaryQueryOpts: Opts[SummaryCmd.SummaryQuery] = {
-    val w = Opts.flag("week", "Current week").map(_ => SummaryCmd.SummaryQuery.ThisWeek)
+    val w = Opts
+      .flagOption[Int]("week", "Current week", metavar = "weeks-back")
+      .map(SummaryCmd.SummaryQuery.ForWeek)
+      .validate("Week back number must be >= 1") {
+        case SummaryCmd.SummaryQuery.ForWeek(Some(b)) if b < 1 => false
+        case _                                                 => true
+      }
 
     val y = Opts
-      .option[Int]("year", "A specific year or current")
-      .orNone
+      .flagOption[Int]("year", "A specific year or current", metavar = "year")
       .map(SummaryCmd.SummaryQuery.ForYear)
 
     val cq = Opts
@@ -78,7 +83,7 @@ trait BasicOpts {
       .map(SummaryCmd.SummaryQuery.Custom)
       .withDefault(SummaryCmd.SummaryQuery.NoQuery)
 
-    w.orElse(y).orElse(cq)
+    cq.orElse(w.orElse(y))
   }
 
   implicit private val sportArgument: Argument[Sport] =
