@@ -1,7 +1,8 @@
 package fit4s.data
 
+import fit4s.profile.messages.SessionMsg
 import fit4s.profile.types._
-import fit4s.{FitFile, FitTestData}
+import fit4s.{FieldDecodeResult, FitFile, FitTestData}
 import munit.CatsEffectSuite
 
 import java.time.Duration
@@ -45,4 +46,16 @@ class ActivitySessionTest extends CatsEffectSuite {
     } yield ()
   }
 
+  test("read indoor activity with gps invalid value") {
+    for {
+      raw <- FitTestData.indoorCyclingActivity
+      fit = FitFile.decodeUnsafe(raw).head
+      sess = fit.findFirstData(MesgNum.Session).fold(sys.error, identity)
+      field = sess.dataFields.get(SessionMsg.startPositionLat).get
+      lat = field.decodedValue.toEither.left
+        .map(_.messageWithContext)
+        .fold(sys.error, identity)
+      _ = assertEquals(lat, FieldDecodeResult.InvalidValue(field.local))
+    } yield ()
+  }
 }

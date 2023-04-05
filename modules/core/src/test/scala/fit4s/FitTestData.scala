@@ -18,6 +18,10 @@ object FitTestData {
     getClass.getResource("/fit/activity/2023-03-16-06-25-37.fit")
   )
 
+  val indoorCyclingActivity = fromURL(
+    getClass.getResource("/fit/2023-01-12-15-30-29.fit")
+  )
+
   val fenix5Activity = fromURL(
     getClass.getResource("/fit/activity/fenix5_1.fit")
   )

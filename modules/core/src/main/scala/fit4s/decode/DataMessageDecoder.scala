@@ -172,7 +172,7 @@ object DataMessageDecoder {
       .map(v => ArrayFieldType(v, localField.baseType.fitBaseType))
       .map(v => FieldDecodeResult.Success(localField, FieldValue(field, v)))
 
-    withInvalidValue(localField) {
+    withInvalidValue(localField, byteOrdering) {
       field.isArray match {
         case ArrayDef.NoArray =>
           fc.asDecoder
@@ -190,7 +190,7 @@ object DataMessageDecoder {
       byteOrdering: ByteOrdering,
       localField: FieldDefinition
   ): Decoder[FieldDecodeResult] =
-    withInvalidValue(localField) {
+    withInvalidValue(localField, byteOrdering) {
       val base = localField.baseType.fitBaseType
       val baseLen = BaseTypeCodec.length(base)
       if (localField.sizeBytes > baseLen && localField.sizeBytes % baseLen != 0) {
@@ -218,10 +218,11 @@ object DataMessageDecoder {
     }
 
   private def withInvalidValue(
-      localField: FieldDefinition
+      localField: FieldDefinition,
+      byteOrdering: ByteOrdering
   )(ifValid: Decoder[FieldDecodeResult]): Decoder[FieldDecodeResult] =
     peek(bytes(BaseTypeCodec.length(localField.baseType.fitBaseType))).flatMap { bv =>
-      if (bv == BaseTypeCodec.invalidValue(localField.baseType.fitBaseType)) {
+      if (BaseTypeCodec.isInvalid(localField.baseType.fitBaseType, byteOrdering)(bv)) {
         bytes(localField.sizeBytes).asDecoder.map(_ =>
           FieldDecodeResult.InvalidValue(localField)
         )

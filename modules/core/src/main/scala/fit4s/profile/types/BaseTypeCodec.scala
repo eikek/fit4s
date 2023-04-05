@@ -112,4 +112,10 @@ object BaseTypeCodec {
       case FitBaseType.Uint64  => hex"FFFFFFFFFFFFFFFF"
       case FitBaseType.Uint64z => hex"0000000000000000"
     }
+
+  def isInvalid(fitBaseType: FitBaseType, byteOrdering: ByteOrdering)(
+      bv: ByteVector
+  ): Boolean =
+    if (byteOrdering == ByteOrdering.BigEndian) invalidValue(fitBaseType) == bv
+    else invalidValue(fitBaseType).reverse == bv
 }

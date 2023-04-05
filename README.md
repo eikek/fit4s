@@ -4,6 +4,7 @@ This is a library for Scala 2.13 and 3.
 
 ## TODO
 
+_ [x] fix invalid gps values showing up as valid
 - [x] fix missing session values using corresponding records
 - [x] add tags to import cmd
 - [x] parallel directory import (max(3, cpus - 2))
