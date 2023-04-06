@@ -9,7 +9,7 @@ This is a library for Scala 2.13 and 3.
     another command is used
   - well, could catch the exception and print something better
 - have json and pretty output
-- list activities, option to list files only 
+- [x] list activities, option to list files only 
 - import strava export, tracking/storing the link to strava for each activity
   - if activity exists, add tags and other additional information
   - ask to overwrite activity name

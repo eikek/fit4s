@@ -3,8 +3,7 @@ package fit4s.cli
 import cats.data.{NonEmptyList, Validated}
 import cats.syntax.all._
 import com.monovore.decline.{Argument, Opts}
-import fit4s.activities.data.TagName
-import fit4s.cli.activity.SummaryCmd
+import fit4s.activities.data.{Page, TagName}
 import fit4s.profile.types.Sport
 import fs2.io.file.Path
 
@@ -64,26 +63,39 @@ trait BasicOpts {
       )
       .orEmpty
 
-  def summaryQueryOpts: Opts[SummaryCmd.SummaryQuery] = {
+  def activitySelectionOps: Opts[ActivitySelection] = {
     val w = Opts
       .flagOption[Int]("week", "Current week", metavar = "weeks-back")
-      .map(SummaryCmd.SummaryQuery.ForWeek)
+      .map(ActivitySelection.ForWeek)
       .validate("Week back number must be >= 1") {
-        case SummaryCmd.SummaryQuery.ForWeek(Some(b)) if b < 1 => false
-        case _                                                 => true
+        case ActivitySelection.ForWeek(Some(b)) if b < 1 => false
+        case _                                           => true
       }
 
     val y = Opts
       .flagOption[Int]("year", "A specific year or current", metavar = "year")
-      .map(SummaryCmd.SummaryQuery.ForYear)
+      .map(ActivitySelection.ForYear)
 
     val cq = Opts
       .option[String]("query", "A custom query")
       .map(_.trim)
-      .map(SummaryCmd.SummaryQuery.Custom)
-      .withDefault(SummaryCmd.SummaryQuery.NoQuery)
+      .map(ActivitySelection.Custom)
+      .withDefault(ActivitySelection.NoQuery)
 
     cq.orElse(w.orElse(y))
+  }
+
+  val pageOpts: Opts[Page] = {
+    val limit = Opts
+      .option[Int]("limit", "Maximum number of entries to return")
+      .withDefault(Int.MaxValue)
+      .validate(s"limit must be > 0")(_ > 0)
+    val offset = Opts
+      .option[Int]("offset", "How many entries to skip")
+      .withDefault(0)
+      .validate(s"offset must be >= 0")(_ >= 0)
+
+    (limit, offset).mapN(Page.apply)
   }
 
   implicit private val sportArgument: Argument[Sport] =

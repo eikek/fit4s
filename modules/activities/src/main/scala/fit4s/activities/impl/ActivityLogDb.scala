@@ -3,13 +3,13 @@ package fit4s.activities.impl
 import cats.data.NonEmptyList
 import cats.effect._
 import cats.syntax.all._
-import doobie.{Query => _, _}
 import doobie.implicits._
+import doobie.{Query => _, _}
 import fit4s.activities._
-import fit4s.activities.data.{ActivityId, ActivitySessionSummary, TagId, TagName}
-import fit4s.activities.records.{ActivityLocationRecord, ActivitySessionRecord, TagRecord}
-import fs2.io.file.{Files, Path}
+import fit4s.activities.data._
+import fit4s.activities.records.{ActivityLocationRecord, TagRecord}
 import fs2.Stream
+import fs2.io.file.{Files, Path}
 
 import java.time.ZoneId
 
@@ -63,8 +63,30 @@ final class ActivityLogDb[F[_]: Async: Files](
 
   override def activityTags(activityId: ActivityId): Stream[F, TagRecord] = ???
 
-  override def activityList(query: ActivityQuery): Stream[F, ActivitySessionRecord] =
-    ActivityQueryBuilder.buildQuery(query).stream.transact(xa)
+  override def activityList(
+      query: ActivityQuery
+  ): Stream[F, ActivityListResult] =
+    ActivityQueryBuilder
+      .buildQuery(query)
+      .stream
+      .transact(xa)
+      .groupAdjacentBy(_._1.id)
+      .evalMap { case (_, group) =>
+        group.toNel match {
+          case Some(nel) =>
+            ActivityQueryBuilder
+              .tagsForActivity(nel.head._1.id)
+              .transact(xa)
+              .map(tags =>
+                ActivityListResult(nel.head._1, nel.head._2, nel.map(_._3), tags)
+              )
+
+          case None =>
+            Async[F].raiseError[ActivityListResult](
+              new Exception("empty group by in stream")
+            )
+        }
+      }
 
   override def activitySummary(
       query: Option[ActivityQuery.Condition]

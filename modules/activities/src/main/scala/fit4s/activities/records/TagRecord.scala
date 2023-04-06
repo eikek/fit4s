@@ -13,6 +13,12 @@ final case class TagRecord(id: TagId, name: TagName)
 object TagRecord {
   private[activities] val table = fr"tag"
 
+  private[activities] def columnList(alias: Option[String]): List[Fragment] = {
+    def c(name: String): Fragment =
+      Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))
+    List(c("id"), c("name"))
+  }
+
   def getOrCreate(names: List[TagName]): ConnectionIO[List[TagRecord]] =
     names
       .traverse { name =>

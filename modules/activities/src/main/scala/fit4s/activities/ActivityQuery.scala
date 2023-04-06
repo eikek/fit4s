@@ -2,14 +2,14 @@ package fit4s.activities
 
 import cats.data.{NonEmptyList => Nel}
 import fit4s.activities.ActivityQuery.{Condition, OrderBy}
-import fit4s.activities.data.TagName
+import fit4s.activities.data.{Page, TagName}
 import fit4s.data.{DeviceProduct, Distance}
 import fit4s.profile.types.{Sport, SubSport}
 import fs2.io.file.Path
 
 import java.time.{Duration, Instant}
 
-final case class ActivityQuery(condition: Option[Condition], order: OrderBy)
+final case class ActivityQuery(condition: Option[Condition], order: OrderBy, page: Page)
 
 object ActivityQuery {
 

@@ -1,11 +1,10 @@
 package fit4s.activities.impl
 
-//import cats.data.NonEmptyList
-import doobie.{Fragment, Query0}
+import doobie.{ConnectionIO, Fragment, Query0}
 import doobie.implicits._
 import fit4s.activities.ActivityQuery
 import fit4s.activities.ActivityQuery.{Condition, OrderBy}
-import fit4s.activities.data.{ActivitySessionSummary, TagName}
+import fit4s.activities.data.{ActivityId, ActivitySessionSummary, Page, TagName}
 import fit4s.activities.records._
 import fit4s.activities.records.DoobieMeta._
 import fs2.io.file.Path
@@ -18,22 +17,33 @@ object ActivityQueryBuilder {
   val tagT = TagRecord.table
   val activityTagT = ActivityTagRecord.table
 
-  def buildQuery(q: ActivityQuery): Query0[ActivitySessionRecord] =
-    selectFragment(q).query[ActivitySessionRecord]
+  def buildQuery(
+      q: ActivityQuery
+  ): Query0[(ActivityRecord, ActivityLocationRecord, ActivitySessionRecord)] =
+    selectFragment(q)
+      .query[(ActivityRecord, ActivityLocationRecord, ActivitySessionRecord)]
 
   def selectFragment(q: ActivityQuery): Fragment = {
-    val cols = ActivitySessionRecord
-      .columnList(Some("act"))
-      .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
+    val cols =
+      (ActivityRecord.columnList(Some("pa")) :::
+        ActivityLocationRecord.columnList(Some("loc")) :::
+        ActivitySessionRecord.columnList(Some("act")))
+        .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
     val select = fr"SELECT $cols"
     val from = join
     val where = q.condition match {
       case Some(c) => fr"WHERE" ++ condition(c)
       case None    => Fragment.empty
     }
-    val order = orderBy(q.order)
+    val order = q.order match {
+      case OrderBy.Distance  => fr"ORDER BY act.distance, act.id"
+      case OrderBy.StartTime => fr"ORDER BY act.start_time desc, act.id"
+    }
+    val limit =
+      if (q.page == Page.unlimited) Fragment.empty
+      else fr"LIMIT ${q.page.limit} OFFSET ${q.page.offset}"
 
-    select ++ from ++ where ++ order
+    select ++ from ++ where ++ order ++ limit
   }
 
   def buildSummary(q: Option[ActivityQuery.Condition]): Query0[ActivitySessionSummary] =
@@ -57,6 +67,17 @@ object ActivityQueryBuilder {
     select ++ join ++ where ++ fr"GROUP BY act.sport"
   }
 
+  def tagsForActivity(id: ActivityId): ConnectionIO[Vector[TagRecord]] = {
+    val cols =
+      TagRecord.columnList(Some("t")).foldSmash1(Fragment.empty, sql", ", Fragment.empty)
+    sql"""SELECT DISTINCT $cols
+          FROM ${TagRecord.table} t
+          INNER JOIN ${ActivityTagRecord.table} at ON at.tag_id = t.id
+          WHERE at.activity_id = $id"""
+      .query[TagRecord]
+      .to[Vector]
+  }
+
   def join: Fragment =
     sql"""
         FROM $activityT pa
@@ -65,12 +86,6 @@ object ActivityQueryBuilder {
         LEFT JOIN $activityTagT at ON at.activity_id = pa.id
         LEFT JOIN $tagT tag ON at.tag_id = tag.id
       """
-
-  def orderBy(order: OrderBy): Fragment =
-    order match {
-      case OrderBy.Distance  => fr"ORDER BY act.distance"
-      case OrderBy.StartTime => fr"ORDER BY act.start_time"
-    }
 
   def condition(c: Condition): Fragment =
     c match {

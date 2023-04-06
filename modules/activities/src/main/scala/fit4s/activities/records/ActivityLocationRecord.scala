@@ -15,6 +15,11 @@ final case class ActivityLocationRecord(id: LocationId, location: Path)
 object ActivityLocationRecord {
   private[activities] val table = fr"activity_location"
 
+  private[activities] def columnList(alias: Option[String]): List[Fragment] = {
+    def c(name: String) = Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))
+    List(c("id"), c("location"))
+  }
+
   def getOrCreateLocations(dir: List[Path]): ConnectionIO[Map[Path, LocationId]] =
     dir
       .traverse { p =>

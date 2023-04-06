@@ -1,5 +1,7 @@
 package fit4s.activities.data
 
+import cats.Eq
+
 final class ActivityId(val id: Long) extends AnyVal {
   override def toString = s"ActivityId($id)"
 }
@@ -9,4 +11,7 @@ object ActivityId {
 
   implicit val ordering: Ordering[ActivityId] =
     Ordering.by(_.id)
+
+  implicit val eq: Eq[ActivityId] =
+    Eq.by(_.id)
 }

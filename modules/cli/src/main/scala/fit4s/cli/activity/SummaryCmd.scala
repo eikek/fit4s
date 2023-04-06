@@ -1,53 +1,19 @@
 package fit4s.cli.activity
 
-import cats.data.{NonEmptyList => Nel}
 import cats.effect.{Clock, ExitCode, IO}
 import cats.syntax.all._
-import fit4s.activities.ActivityQuery.Condition.{And, StartedAfter, StartedBefore}
-import fit4s.activities.impl.ConditionParser
-import fit4s.activities.{ActivityLog, ActivityQuery}
-import fit4s.cli.{CliConfig, CliError}
+import fit4s.activities.ActivityLog
+import fit4s.activities.data.ActivitySessionSummary
+import fit4s.cli.FormatDefinition._
+import fit4s.cli.{ActivitySelection, CliConfig, CliError, Styles}
+import fit4s.profile.types.Sport
 
-import java.time.temporal.ChronoUnit
-import java.time._
+import java.time.ZoneId
 
 object SummaryCmd {
-  sealed trait SummaryQuery extends Product
-  object SummaryQuery {
-    case object NoQuery extends SummaryQuery
-    case class ForWeek(back: Option[Int]) extends SummaryQuery
-    case class ForYear(year: Option[Int]) extends SummaryQuery
-    case class Custom(query: String) extends SummaryQuery
-  }
-
-  def makeCondition(
-      q: SummaryQuery,
-      zoneId: ZoneId,
-      currentTime: Instant
-  ): Either[String, Option[ActivityQuery.Condition]] =
-    q match {
-      case SummaryQuery.NoQuery => None.asRight
-      case SummaryQuery.ForWeek(None) =>
-        Some(StartedAfter(findStartLastMonday(currentTime.atZone(zoneId)))).asRight
-      case SummaryQuery.ForWeek(Some(back)) =>
-        val last = findStartLastMonday(currentTime.atZone(zoneId))
-        val a = last.minus(Duration.ofDays(7 * math.max(1, back)))
-        val b = a.plus(Duration.ofDays(7)).minusSeconds(1)
-        Some(makeTimeIntervalQuery(a, b)).asRight
-      case SummaryQuery.ForYear(None) =>
-        Some(makeYearQuery(currentTime.atZone(zoneId).getYear, zoneId)).asRight
-      case SummaryQuery.ForYear(Some(y)) =>
-        Some(makeYearQuery(y, zoneId)).asRight
-      case SummaryQuery.Custom(str) =>
-        new ConditionParser(zoneId, currentTime)
-          .parseCondition(str)
-          .left
-          .map(err => s"Query parsing failed: $err")
-          .map(_.some)
-    }
 
   final case class Options(
-      query: SummaryQuery
+      query: ActivitySelection
   )
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
@@ -56,11 +22,12 @@ object SummaryCmd {
         currentTime <- Clock[IO].realTimeInstant
         zone = cliCfg.timezone
 
-        query <- makeCondition(opts.query, zone, currentTime)
+        query <- ActivitySelection
+          .makeCondition(opts.query, zone, currentTime)
           .fold(err => IO.raiseError(new CliError(err)), IO.pure)
 
         summary <- log.activitySummary(query)
-        out = summary.map(ConsoleUtil.makeSummaryTable(2, zone))
+        out = summary.map(makeSummaryTable(2, zone))
 
         _ <- out.traverse_ { case (head, data) =>
           IO.println(head) *> IO.println("\n") *> IO.println(data) *> IO.println("\n")
@@ -68,33 +35,45 @@ object SummaryCmd {
       } yield ExitCode.Success
     }
 
-  def findStartLastMonday(current: ZonedDateTime) = {
-    val curDay = current.getDayOfWeek
-    val diffDays = curDay.getValue - DayOfWeek.MONDAY.getValue
-    current
-      .minus(diffDays, ChronoUnit.DAYS)
-      .withHour(0)
-      .withMinute(0)
-      .withSecond(0)
-      .truncatedTo(ChronoUnit.SECONDS)
-      .toInstant
+  def makeHeader(header: String): String = {
+    val len = header.length
+    val dashes = List.fill(len)('-').mkString
+    s"$header\n$dashes".in(Styles.headerOne)
   }
 
-  private def makeYearQuery(year: Int, zoneId: ZoneId): ActivityQuery.Condition =
-    makeTimeIntervalQuery(
-      LocalDate.of(year, 1, 1).atStartOfDay(zoneId).toInstant,
-      ZonedDateTime
-        .of(
-          LocalDate.of(year, 12, 31),
-          LocalTime.of(23, 59, 59),
-          zoneId
-        )
-        .toInstant
+  def makeSummaryTable(indent: Int, zoneId: ZoneId)(
+      s: ActivitySessionSummary
+  ): (String, String) = {
+    val sp = List.fill(indent)(' ').mkString
+    implicit val sport: Sport = s.sport
+    implicit val zone: ZoneId = zoneId
+
+    val pairs = List(
+      Some("Activities" -> s.count.toString),
+      Some("Date" -> show"${s.startTime.asDate} -- ${s.endTime.asDate}"),
+      Some("Distance" -> s.distance.show),
+      Some("Time" -> s.movingTime.show),
+      s.totalAscend.map(a => "Elevation" -> s"${a.meter.toInt}m"),
+      Some("Calories" -> s.calories.show),
+      Some("Temp." -> show"${s.minTemp} to ${s.maxTemp}")
+        .filter(_ => s.minTemp.isDefined || s.maxTemp.isDefined),
+      s.avgHr.map(hr => "Heart rate" -> hr.show),
+      Some(
+        "Speed avg" -> show"${s.avgSpeed}"
+      ).filter(_ =>
+        s.maxSpeed.exists(_.meterPerSecond > 0) || s.avgSpeed.exists(_.meterPerSecond > 0)
+      )
     )
 
-  private def makeTimeIntervalQuery(
-      start: Instant,
-      end: Instant
-  ): ActivityQuery.Condition =
-    And(Nel.of(StartedAfter(start), StartedBefore(end)))
+    val colLen = pairs.flatMap(_.map(_._1.length)).max + 2
+    val lines = pairs
+      .collect { case Some((name, value)) =>
+        val s = List.fill(colLen - name.length)(" ").mkString
+        s"$sp${name.in(Styles.summaryFieldName)}:$s${value.in(Styles.summaryFieldValue)}"
+      }
+      .mkString("\n")
+
+    makeHeader(s.sport.toString) -> lines
+
+  }
 }

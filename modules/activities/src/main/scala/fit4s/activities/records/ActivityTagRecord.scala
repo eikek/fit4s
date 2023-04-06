@@ -15,12 +15,21 @@ final case class ActivityTagRecord(
 object ActivityTagRecord {
   private[activities] val table = fr"activity_tag"
 
+  private[activities] def columnList(alias: Option[String]): List[Fragment] = {
+    def c(name: String): Fragment =
+      Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))
+    List(c("id"), c("activity_id"), c("tag_id"))
+  }
+
+  private val colsNoId =
+    columnList(None).tail.foldSmash1(Fragment.empty, sql",", Fragment.empty)
+
   def insert(activityId: ActivityId, tagId: NonEmptyList[TagId]): ConnectionIO[Int] = {
     val values = tagId.toList
       .map(id => fr"($activityId, $id)")
       .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
 
-    fr"INSERT INTO $table (activity_id, tag_id) VALUES $values".update.run
+    fr"INSERT INTO $table ($colsNoId) VALUES $values".update.run
   }
 
   def remove(activityId: ActivityId, tagId: TagId): ConnectionIO[Int] =

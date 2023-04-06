@@ -4,9 +4,9 @@ import cats.data.NonEmptyList
 import cats.effect._
 import doobie.util.ExecutionContexts
 import doobie.util.transactor.Transactor
-import fit4s.activities.data.{ActivityId, ActivitySessionSummary, TagId, TagName}
+import fit4s.activities.data._
 import fit4s.activities.impl.ActivityLogDb
-import fit4s.activities.records.{ActivitySessionRecord, TagRecord}
+import fit4s.activities.records.TagRecord
 import fs2._
 import fs2.io.file.Path
 import org.h2.jdbcx.JdbcConnectionPool
@@ -32,7 +32,7 @@ trait ActivityLog[F[_]] {
 
   def activityTags(activityId: ActivityId): Stream[F, TagRecord]
 
-  def activityList(query: ActivityQuery): Stream[F, ActivitySessionRecord]
+  def activityList(query: ActivityQuery): Stream[F, ActivityListResult]
 
   def activitySummary(
       query: Option[ActivityQuery.Condition]
