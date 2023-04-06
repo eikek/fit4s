@@ -6,7 +6,7 @@ import cats.syntax.all._
 import fit4s.activities.ActivityQuery.Condition.{And, StartedAfter, StartedBefore}
 import fit4s.activities.impl.ConditionParser
 import fit4s.activities.{ActivityLog, ActivityQuery}
-import fit4s.cli.CliError
+import fit4s.cli.{CliConfig, CliError}
 
 import java.time.temporal.ChronoUnit
 import java.time._
@@ -46,17 +46,17 @@ object SummaryCmd {
           .map(_.some)
     }
 
-  final case class Config(
+  final case class Options(
       query: SummaryQuery
   )
 
-  def apply(cfg: Config): IO[ExitCode] =
-    ActivityLog.default[IO]().use { log =>
+  def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
+    ActivityLog[IO](cliCfg.jdbcConfig, cliCfg.timezone).use { log =>
       for {
         currentTime <- Clock[IO].realTimeInstant
-        zone = ZoneId.systemDefault()
+        zone = cliCfg.timezone
 
-        query <- makeCondition(cfg.query, zone, currentTime)
+        query <- makeCondition(opts.query, zone, currentTime)
           .fold(err => IO.raiseError(new CliError(err)), IO.pure)
 
         summary <- log.activitySummary(query)

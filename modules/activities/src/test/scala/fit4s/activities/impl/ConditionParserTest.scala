@@ -10,13 +10,13 @@ import fit4s.data.Distance
 import fs2.io.file.Path
 import munit.FunSuite
 
-import java.time.{Duration, Instant}
+import java.time.{Duration, Instant, ZoneId}
 import java.time.temporal.ChronoUnit
 
 class ConditionParserTest extends FunSuite {
 
   val current = Instant.parse("2023-04-02T10:05:00Z")
-  val parser = new ConditionParser(ConditionParser.defaultZone, current)
+  val parser = new ConditionParser(ZoneId.of("Europe/Berlin"), current)
 
   def parse(p: Parser[Condition], in: String): Condition =
     p.parseAll(in).fold(e => sys.error(e.toString()), identity)

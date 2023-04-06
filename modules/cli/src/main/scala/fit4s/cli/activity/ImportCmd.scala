@@ -6,29 +6,31 @@ import cats.kernel.Monoid
 import fit4s.ActivityReader
 import fit4s.activities.data.{ActivityId, TagName}
 import fit4s.activities.{ActivityLog, ImportCallback, ImportResult}
+import fit4s.cli.CliConfig
 import fs2.io.file.Path
 
 object ImportCmd {
   private val maxConcurrent =
     math.max(1, Runtime.getRuntime.availableProcessors() - 2)
 
-  final case class Config(
+  final case class Options(
       fileOrDirectories: NonEmptyList[Path],
       tags: List[TagName],
       parallel: Boolean
   )
 
-  def apply(cfg: Config): IO[ExitCode] =
-    ActivityLog.default[IO]().use { log =>
+  def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
+    ActivityLog[IO](cliCfg.jdbcConfig, cliCfg.timezone).use { log =>
       log
         .importFromDirectories(
-          cfg.tags.toSet,
+          opts.tags.toSet,
           printFile,
-          cfg.fileOrDirectories,
-          if (cfg.parallel) maxConcurrent else 1
+          opts.fileOrDirectories,
+          if (opts.parallel) maxConcurrent else 1
         )
         .evalTap {
-          case ImportResult.Success(_) => if (cfg.parallel) IO.unit else IO.println("ok.")
+          case ImportResult.Success(_) =>
+            if (opts.parallel) IO.unit else IO.println("ok.")
           case err: ImportResult.Failure => IO.println(err.messages)
         }
         .map(Result.apply)

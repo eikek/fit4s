@@ -11,11 +11,12 @@ import org.scalacheck.Test
 import org.scalacheck.Test.Parameters
 
 import java.time.temporal.ChronoUnit
-import java.time.{Duration, Instant, LocalDateTime}
+import java.time.{Duration, Instant, LocalDateTime, ZoneId}
 
 class BasicParserTest extends FunSuite {
   val current = Instant.parse("2023-04-02T10:05:00Z")
-  val parser = new ConditionParser(ConditionParser.defaultZone, current)
+  val zone: ZoneId = ZoneId.of("Europe/Berlin")
+  val parser = new ConditionParser(zone, current)
 
   test("parse device") {
     DeviceProduct.all.foreach { p =>

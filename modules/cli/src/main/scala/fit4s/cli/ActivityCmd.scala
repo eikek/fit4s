@@ -7,14 +7,14 @@ import fit4s.cli.activity.{ImportCmd, InitCmd, SummaryCmd}
 
 object ActivityCmd extends BasicOpts {
 
-  val importArgs: Opts[ImportCmd.Config] =
+  val importArgs: Opts[ImportCmd.Options] =
     Opts.subcommand("import", "Import fit files") {
-      (fileOrDirArgs, initialTags, parallel).mapN(ImportCmd.Config)
+      (fileOrDirArgs, initialTags, parallel).mapN(ImportCmd.Options)
     }
 
-  val summaryArgs: Opts[SummaryCmd.Config] =
+  val summaryArgs: Opts[SummaryCmd.Options] =
     Opts.subcommand("summary", "Show an activity summary for the query.") {
-      summaryQueryOpts.map(SummaryCmd.Config)
+      summaryQueryOpts.map(SummaryCmd.Options)
     }
 
   val initArgs: Opts[Unit] =
@@ -29,15 +29,17 @@ object ActivityCmd extends BasicOpts {
 
   sealed trait Config extends Product
   object Config {
-    final case class Import(cfg: ImportCmd.Config) extends Config
-    final case class Summary(cfg: SummaryCmd.Config) extends Config
+    final case class Import(cfg: ImportCmd.Options) extends Config
+    final case class Summary(cfg: SummaryCmd.Options) extends Config
     final case object Init extends Config
   }
 
   def apply(cfg: Config): IO[ExitCode] =
-    cfg match {
-      case Config.Import(c)  => ImportCmd(c)
-      case Config.Summary(c) => SummaryCmd(c)
-      case Config.Init       => InitCmd.init
+    CliConfig.load[IO].flatMap { cliCfg =>
+      cfg match {
+        case Config.Import(c)  => ImportCmd(cliCfg, c)
+        case Config.Summary(c) => SummaryCmd(cliCfg, c)
+        case Config.Init       => InitCmd.init(cliCfg)
+      }
     }
 }

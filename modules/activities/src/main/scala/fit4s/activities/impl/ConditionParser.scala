@@ -111,8 +111,3 @@ final class ConditionParser(val zoneId: ZoneId, currentTime: Instant)
     }
 
 }
-
-object ConditionParser {
-  val defaultZone = ZoneId.of("Europe/Paris")
-
-}

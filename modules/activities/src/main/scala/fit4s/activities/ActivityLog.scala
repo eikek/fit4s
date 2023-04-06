@@ -60,9 +60,4 @@ object ActivityLog {
       xa = Transactor.fromDataSource[F](ds, ec)
     } yield new ActivityLogDb[F](jdbcConfig, zoneId, xa)
   }
-
-  def default[F[_]: Async](
-      zoneId: ZoneId = ZoneId.systemDefault()
-  ): Resource[F, ActivityLog[F]] =
-    Resource.eval(JdbcConfig.defaultFilesystem[F]).flatMap(apply[F](_, zoneId))
 }

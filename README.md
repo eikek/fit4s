@@ -4,8 +4,10 @@ This is a library for Scala 2.13 and 3.
 
 ## TODO
 
-- config file with db data and timezone, init command creates this file
 - better error when init was not called, or just do initialize
+  - not really possible without perf impact by checking each time
+    another command is used
+  - well, could catch the exception and print something better
 - have json and pretty output
 - list activities, option to list files only 
 - import strava export, tracking/storing the link to strava for each activity
@@ -18,6 +20,9 @@ This is a library for Scala 2.13 and 3.
 - add LapMsg to database
 - cleanup playground test mess
 - catch logging from java.util.logging
+- mima for the libraries
+- [x] config file with db data and timezone, init command creates this file
+  - decided against a config file, just use env vars it's only a few values
 - [x] fix invalid gps values showing up as valid
 - [x] fix missing session values using corresponding records
 - [x] add tags to import cmd
