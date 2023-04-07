@@ -25,5 +25,9 @@ final case class ActivitySessionSummary(
     avgSpeed: Option[Speed],
     maxPower: Option[Power],
     avgPower: Option[Power],
+    avgNormPower: Option[Power],
+    avgGrade: Option[Percent],
+    avgIntensity: Option[IntensityFactor],
+    avgTss: Option[TrainingStressScore],
     count: Int
 )

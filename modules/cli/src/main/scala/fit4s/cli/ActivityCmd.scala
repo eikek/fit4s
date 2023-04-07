@@ -8,7 +8,10 @@ import fit4s.cli.activity.{ImportCmd, InitCmd, ListCmd, SummaryCmd, UpdateCmd}
 object ActivityCmd extends BasicOpts {
 
   val importArgs: Opts[ImportCmd.Options] =
-    Opts.subcommand("import", "Import fit files") {
+    Opts.subcommand(
+      "import",
+      "Import fit files from given directories. If given a file, it is read and each line not starting with '#' is treated as a directory to import"
+    ) {
       (fileOrDirArgs, initialTags, parallel).mapN(ImportCmd.Options)
     }
 

@@ -43,5 +43,4 @@ class ActivityRecordTest extends DatabaseTest with TestData {
       } yield ()
     }
   }
-
 }

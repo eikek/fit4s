@@ -86,7 +86,9 @@ trait FormatDefinition {
     }
 
   implicit val distanceShow: Show[Distance] =
-    Show.fromToString
+    Show.show { dst =>
+      if (dst.km >= 1) f"${dst.km}%.1fkm" else f"${dst.meter.toInt}m"
+    }
 
   implicit val temperatureShow: Show[Temperature] =
     Show.fromToString
@@ -94,8 +96,25 @@ trait FormatDefinition {
   implicit val heartRateShow: Show[HeartRate] =
     Show.fromToString
 
+  implicit val iffShow: Show[IntensityFactor] =
+    Show.show { iff =>
+      f"${iff.iff}%.2fif"
+    }
+
+  implicit val tssShow: Show[TrainingStressScore] =
+    Show.show { tss =>
+      f"${tss.tss}%.2ftss"
+    }
+
+  implicit val percentShow: Show[Percent] =
+    Show.show { p =>
+      s"${p.percent}%.1f%"
+    }
+
   implicit val caloriesShow: Show[Calories] =
-    Show.fromToString
+    Show.show { cal =>
+      s"${cal.kcal.toInt}kcal"
+    }
 
   implicit val sportShow: Show[Sport] =
     Show.fromToString

@@ -42,7 +42,7 @@ class ActivityLocationRecordTest extends DatabaseTest {
           .compile
           .toVector
 
-        all <- ActivityLocationRecord.listAll.transact(xa).compile.toVector
+        all <- ActivityLocationRecord.listAll.transact(xa)
         _ = assertEquals(records.sortBy(_.id), all.sortBy(_.id))
       } yield ()
     }

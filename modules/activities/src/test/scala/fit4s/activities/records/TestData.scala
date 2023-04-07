@@ -2,11 +2,20 @@ package fit4s.activities.records
 
 import fit4s.activities.data.{ActivityId, ActivitySessionId, LocationId}
 import fit4s.data._
-import fit4s.profile.types.{DateTime, File, GarminProduct, Manufacturer, Sport, SubSport}
+import fit4s.profile.types.{
+  DateTime,
+  File,
+  GarminProduct,
+  Manufacturer,
+  Sport,
+  SubSport,
+  SwimStroke
+}
 
 import java.time.{Duration, Instant}
 
 trait TestData {
+  val importDate: Instant = Instant.parse("2023-04-07T11:00:11Z")
 
   val testActivity = ActivityRecord(
     id = ActivityId(-1),
@@ -24,7 +33,8 @@ trait TestData {
     name = "Morning Ride",
     timestamp = Instant.parse("2023-03-22T21:22:34Z"),
     totalTime = Duration.ofMinutes(56),
-    notes = Some("this is a note")
+    notes = Some("this is a note"),
+    importDate = importDate
   )
 
   val testActivitySession = ActivitySessionRecord(
@@ -51,7 +61,16 @@ trait TestData {
     maxSpeed = Some(Speed.kmh(56.9)),
     avgSpeed = Some(Speed.kmh(21.4)),
     maxPower = None,
-    avgPower = Some(Power.watts(211))
+    avgPower = Some(Power.watts(211)),
+    normPower = Some(Power.watts(198)),
+    tss = Some(TrainingStressScore.tss(2.4)),
+    numPoolLength = Some(68),
+    iff = Some(IntensityFactor.iff(3.1)),
+    swimStroke = Some(SwimStroke.Freestyle),
+    avgStrokeDistance = Some(Distance.meter(2.4)),
+    avgStrokeCount = Some(StrokesPerLap.strokesPerLap(34.4)),
+    poolLength = Some(Distance.meter(50)),
+    avgGrade = Some(Percent.percent(6.4))
   )
 }
 

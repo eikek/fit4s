@@ -60,7 +60,16 @@ create table "activity_session"(
   "max_speed" double,
   "avg_speed" double,
   "max_power" int,
-  "avg_power" int
+  "avg_power" int,
+  "norm_power" int,
+  "tss" double,
+  "num_pool_len" int,
+  "iff" double,
+  "swim_stroke" int,
+  "avg_stroke_distance" double,
+  "avg_stroke_count" double,
+  "pool_length" double,
+  "avg_grade" double
 );
 
 alter table "activity_session" add constraint "activity_session_activity_fkey"

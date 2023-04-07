@@ -2,7 +2,7 @@ package fit4s.data
 
 import fit4s.FitMessage.DataMessage
 import fit4s.profile.messages.SessionMsg
-import fit4s.profile.types.{DateTime, Sport, SubSport}
+import fit4s.profile.types.{DateTime, Sport, SubSport, SwimStroke}
 
 import java.time.Duration
 import scala.math.Ordering.Implicits._
@@ -26,11 +26,20 @@ final case class ActivitySession(
     avgHr: Option[HeartRate],
     maxPower: Option[Power],
     avgPower: Option[Power],
+    normPower: Option[Power],
     maxCadence: Option[Cadence],
     avgCadence: Option[Cadence],
     totalAscend: Option[Distance],
     totalDescend: Option[Distance],
-    startPosition: Option[Position]
+    startPosition: Option[Position],
+    trainingStressScore: Option[TrainingStressScore],
+    numPoolLength: Option[Int],
+    intensityFactor: Option[IntensityFactor],
+    swimStroke: Option[SwimStroke],
+    avgStrokeDistance: Option[Distance],
+    avgStrokeCount: Option[StrokesPerLap],
+    poolLength: Option[Distance],
+    avgGrade: Option[Percent]
 ) {
 
   def containsTime(dt: DateTime): Boolean =
@@ -65,12 +74,21 @@ object ActivitySession {
         avgTemp <- sessionMsg.getField(SessionMsg.avgTemperature)
         maxPower <- sessionMsg.getField(SessionMsg.maxPower)
         avgPower <- sessionMsg.getField(SessionMsg.avgPower)
+        normPower <- sessionMsg.getField(SessionMsg.normalizedPower)
         maxCad <- sessionMsg.getField(SessionMsg.maxCadence)
         avgCad <- sessionMsg.getField(SessionMsg.avgCadence)
         asc <- sessionMsg.getField(SessionMsg.totalAscent)
         desc <- sessionMsg.getField(SessionMsg.totalDescent)
         startPosLat <- sessionMsg.getField(SessionMsg.startPositionLat)
         startPosLng <- sessionMsg.getField(SessionMsg.startPositionLong)
+        tss <- sessionMsg.getField(SessionMsg.trainingStressScore)
+        poolLenNum <- sessionMsg.getField(SessionMsg.numLengths)
+        iff <- sessionMsg.getField(SessionMsg.intensityFactor)
+        swimStroke <- sessionMsg.getField(SessionMsg.swimStroke)
+        avgStrokeDst <- sessionMsg.getField(SessionMsg.avgStrokeDistance)
+        avgStrokeCnt <- sessionMsg.getField(SessionMsg.avgStrokeCount)
+        poolLength <- sessionMsg.getField(SessionMsg.poolLength)
+        avgGrade <- sessionMsg.getField(SessionMsg.avgGrade)
       } yield ActivitySession(
         sport.map(_.value).getOrElse(Sport.Generic),
         subSport.map(_.value).getOrElse(SubSport.Generic),
@@ -90,6 +108,7 @@ object ActivitySession {
         avgHr.flatMap(_.heartrate),
         maxPower.flatMap(_.power),
         avgPower.flatMap(_.power),
+        normPower.flatMap(_.power),
         maxCad.flatMap(_.cadence),
         avgCad.flatMap(_.cadence),
         asc.flatMap(_.distance),
@@ -97,6 +116,14 @@ object ActivitySession {
         Position.optional(
           startPosLat.flatMap(_.semicircle),
           startPosLng.flatMap(_.semicircle)
-        )
+        ),
+        tss.flatMap(_.trainingStressScore),
+        poolLenNum.flatMap(_.asLong).map(_.toInt),
+        iff.flatMap(_.intensityFactor),
+        swimStroke.map(_.value),
+        avgStrokeDst.flatMap(_.distance),
+        avgStrokeCnt.flatMap(_.strokesPerLap),
+        poolLength.flatMap(_.distance),
+        avgGrade.flatMap(_.percent)
       )
 }

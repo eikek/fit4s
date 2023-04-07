@@ -36,11 +36,20 @@ class ActivitySessionTest extends CatsEffectSuite {
           avgHr = Some(HeartRate.bpm(103)),
           maxPower = None,
           avgPower = None,
+          normPower = None,
           maxCadence = None,
           avgCadence = Some(Cadence.rpm(23)),
           totalAscend = None,
           totalDescend = None,
-          startPosition = None
+          startPosition = None,
+          trainingStressScore = None,
+          numPoolLength = Some(68),
+          intensityFactor = None,
+          swimStroke = None,
+          avgStrokeDistance = Some(Distance.meter(2.49)),
+          avgStrokeCount = None,
+          poolLength = Some(Distance.meter(25)),
+          avgGrade = None
         )
       )
     } yield ()

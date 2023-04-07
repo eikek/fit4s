@@ -100,7 +100,16 @@ object ActivityImport {
           maxSpeed = Some(session.maxSpeed),
           avgSpeed = session.avgSpeed,
           maxPower = session.maxPower,
-          avgPower = session.avgPower
+          avgPower = session.avgPower,
+          normPower = session.normPower,
+          tss = session.trainingStressScore,
+          numPoolLength = session.numPoolLength,
+          iff = session.intensityFactor,
+          swimStroke = session.swimStroke,
+          avgStrokeDistance = session.avgStrokeDistance,
+          avgStrokeCount = session.avgStrokeCount,
+          poolLength = session.poolLength,
+          avgGrade = session.avgGrade
         )
       )
       rIds <- result.recordsFor(session).traverse { r =>

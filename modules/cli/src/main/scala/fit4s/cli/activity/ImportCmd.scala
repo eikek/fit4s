@@ -6,12 +6,14 @@ import cats.kernel.Monoid
 import fit4s.ActivityReader
 import fit4s.activities.data.{ActivityId, TagName}
 import fit4s.activities.{ActivityLog, ImportCallback, ImportResult}
-import fit4s.cli.CliConfig
-import fs2.io.file.Path
+import fit4s.cli.{CliConfig, CliError}
+import fs2.io.file.{Files, Path}
 
 object ImportCmd {
   private val maxConcurrent =
     math.max(1, Runtime.getRuntime.availableProcessors() - 2)
+
+  private val files: Files[IO] = Files[IO]
 
   final case class Options(
       fileOrDirectories: NonEmptyList[Path],
@@ -20,24 +22,51 @@ object ImportCmd {
   )
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
-    ActivityLog[IO](cliCfg.jdbcConfig, cliCfg.timezone).use { log =>
-      log
-        .importFromDirectories(
-          opts.tags.toSet,
-          printFile,
-          opts.fileOrDirectories,
-          if (opts.parallel) maxConcurrent else 1
-        )
-        .evalTap {
-          case ImportResult.Success(_) =>
-            if (opts.parallel) IO.unit else IO.println("ok.")
-          case err: ImportResult.Failure => IO.println(err.messages)
-        }
-        .map(Result.apply)
-        .compile
-        .foldMonoid
-        .flatTap(r => IO.println(s"\nDone. $r"))
-        .as(ExitCode.Success)
+    getDirectories(opts).flatMap { dirs =>
+      ActivityLog[IO](cliCfg.jdbcConfig, cliCfg.timezone).use { log =>
+        log
+          .importFromDirectories(
+            opts.tags.toSet,
+            printFile,
+            dirs,
+            if (opts.parallel) maxConcurrent else 1
+          )
+          .evalTap {
+            case ImportResult.Success(_) =>
+              if (opts.parallel) IO.unit else IO.println("ok.")
+            case err: ImportResult.Failure => IO.println(err.messages)
+          }
+          .map(Result.apply)
+          .compile
+          .foldMonoid
+          .flatTap(r => IO.println(s"\nDone. $r"))
+          .as(ExitCode.Success)
+      }
+    }
+
+  def getDirectories(options: Options): IO[NonEmptyList[Path]] =
+    files.isRegularFile(options.fileOrDirectories.head).flatMap {
+      case true =>
+        files
+          .readAll(options.fileOrDirectories.head)
+          .through(fs2.text.utf8.decode)
+          .through(fs2.text.lines)
+          .filter(s => !s.startsWith("#"))
+          .map(Path.apply)
+          .evalFilter(files.isDirectory)
+          .compile
+          .toList
+          .map(NonEmptyList.fromList)
+          .flatMap {
+            case Some(nel) => IO.pure(nel)
+            case None =>
+              IO.raiseError(
+                new CliError(
+                  s"Text file doesn't contain lines that are directories: ${options.fileOrDirectories.head}"
+                )
+              )
+          }
+      case false => IO.pure(options.fileOrDirectories)
     }
 
   def printFile: ImportCallback[IO] = (file: Path) => IO.print(s"\r$file ... ")

@@ -56,7 +56,9 @@ object ActivityQueryBuilder {
            sum(act.calories), sum(act.total_ascend), sum(act.total_descend),
            min(act.min_temp), max(act.max_temp), avg(act.avg_temp),
            min(act.min_hr), max(act.max_hr), avg(act.avg_hr), max(act.max_speed),
-           avg(act.avg_speed), max(act.max_power), avg(act.avg_power), count(act.id)
+           avg(act.avg_speed), max(act.max_power), avg(act.avg_power), avg(act.norm_power),
+           avg(act.avg_grade), avg(act.iff), avg(act.tss),
+           count(act.id)
         """
 
     val where = q match {

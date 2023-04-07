@@ -27,7 +27,7 @@ trait BasicOpts {
 
   def fileOrDirArgs: Opts[NonEmptyList[Path]] =
     Opts
-      .arguments[java.nio.file.Path](metavar = "fileOrDir")
+      .arguments[java.nio.file.Path](metavar = "fileOrDirs")
       .map(_.map(Path.fromNioPath))
 
   def sport: Opts[Sport] =

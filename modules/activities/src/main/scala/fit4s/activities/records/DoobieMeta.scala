@@ -2,7 +2,7 @@ package fit4s.activities.records
 
 import doobie.Meta
 import fit4s.data._
-import fit4s.profile.types.{Sport, SubSport}
+import fit4s.profile.types.{Sport, SubSport, SwimStroke}
 import fs2.io.file.Path
 import doobie.implicits.javatimedrivernative
 import fit4s.activities.data._
@@ -10,6 +10,17 @@ import fit4s.activities.data._
 import java.time.{Duration, Instant}
 
 trait DoobieMeta {
+  implicit val swimStrokeMeta: Meta[SwimStroke] =
+    Meta[Long].timap(SwimStroke.unsafeByRawValue)(_.rawValue)
+
+  implicit val tssMeta: Meta[TrainingStressScore] =
+    Meta[Double].timap(TrainingStressScore.tss)(_.tss)
+
+  implicit val intensityFactorMeta: Meta[IntensityFactor] =
+    Meta[Double].timap(IntensityFactor.iff)(_.iff)
+
+  implicit val strokesPerLapMeta: Meta[StrokesPerLap] =
+    Meta[Double].timap(StrokesPerLap.strokesPerLap)(_.spl)
 
   implicit val deviceProductMeta: Meta[DeviceProduct] =
     Meta[String].timap(DeviceProduct.unsafeFromString)(_.name)

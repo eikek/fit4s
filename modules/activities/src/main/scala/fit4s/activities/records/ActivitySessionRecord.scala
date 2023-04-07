@@ -32,7 +32,16 @@ final case class ActivitySessionRecord(
     maxSpeed: Option[Speed],
     avgSpeed: Option[Speed],
     maxPower: Option[Power],
-    avgPower: Option[Power]
+    avgPower: Option[Power],
+    normPower: Option[Power],
+    tss: Option[TrainingStressScore],
+    numPoolLength: Option[Int],
+    iff: Option[IntensityFactor],
+    swimStroke: Option[SwimStroke],
+    avgStrokeDistance: Option[Distance],
+    avgStrokeCount: Option[StrokesPerLap],
+    poolLength: Option[Distance],
+    avgGrade: Option[Percent]
 )
 
 object ActivitySessionRecord {
@@ -69,7 +78,16 @@ object ActivitySessionRecord {
       c("max_speed"),
       c("avg_speed"),
       c("max_power"),
-      c("avg_power")
+      c("avg_power"),
+      c("norm_power"),
+      c("tss"),
+      c("num_pool_len"),
+      c("iff"),
+      c("swim_stroke"),
+      c("avg_stroke_distance"),
+      c("avg_stroke_count"),
+      c("pool_length"),
+      c("avg_grade")
     )
   }
 
@@ -78,7 +96,9 @@ object ActivitySessionRecord {
       fr"${r.activityId}, ${r.sport}, ${r.subSport}, ${r.startTime}, ${r.endTime}, ${r.movingTime}, ${r.elapsedTime}, ${r.distance}, " ++
       fr"${r.startPosition.map(_.latitude)}, ${r.startPosition.map(_.longitude)}, ${r.calories}, " ++
       fr"${r.totalAscend}, ${r.totalDescend}, ${r.minTemp}, ${r.maxTemp}, ${r.avgTemp}, ${r.minHr}, ${r.maxHr}, " ++
-      fr"${r.avgHr}, ${r.maxSpeed}, ${r.avgSpeed}, ${r.maxPower}, ${r.avgPower}" ++
+      fr"${r.avgHr}, ${r.maxSpeed}, ${r.avgSpeed}, ${r.maxPower}, ${r.avgPower}, ${r.normPower}," ++
+      fr"${r.tss}, ${r.numPoolLength}, ${r.iff}, ${r.swimStroke}, ${r.avgStrokeDistance}," ++
+      fr"${r.avgStrokeCount}, ${r.poolLength}, ${r.avgGrade}" ++
       fr")").update.withUniqueGeneratedKeys[ActivitySessionId]("id")
 
   def findById(id: ActivitySessionId): ConnectionIO[Option[ActivitySessionRecord]] =

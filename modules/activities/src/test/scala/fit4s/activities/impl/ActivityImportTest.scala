@@ -11,11 +11,12 @@ import fit4s.activities.{DatabaseTest, FlywayMigrate}
 import fit4s.{ActivityReader, FitFile, FitTestData}
 import fs2.io.file.Path
 
-import java.time.ZoneId
+import java.time.{Instant, ZoneId}
 
 class ActivityImportTest extends DatabaseTest {
   override def munitFixtures = Seq(h2DataSource)
 
+  val now = Instant.parse("2023-04-07T11:36:30Z")
   val zone: ZoneId = ZoneId.systemDefault()
 
   test("insert example activity") {
@@ -32,7 +33,7 @@ class ActivityImportTest extends DatabaseTest {
           .read(fit.head, zone)
           .fold(err => sys.error(err.toString), identity)
         idResult <- ActivityImport
-          .add(loc.id, "x.fit", "Morning Ride", None)(result)
+          .add(loc.id, "x.fit", "Morning Ride", None, now)(result)
           .transact(xa)
         id = idResult.toEither.fold(err => sys.error(err.messages), identity)
         sessCount <- ActivitySessionRecord.countAll.transact(xa)

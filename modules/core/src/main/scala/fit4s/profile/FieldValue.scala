@@ -48,6 +48,20 @@ final case class FieldValue[A <: TypedValue[_]](
     }
   }
 
+  def strokesPerLap: Option[StrokesPerLap] =
+    field.unit match {
+      case Some(MeasurementUnit.StrokesPerLap) =>
+        asDouble.map(StrokesPerLap.spl)
+      case _ => None
+    }
+
+  def percent: Option[Percent] =
+    field.unit match {
+      case Some(MeasurementUnit.Percent) =>
+        asDouble.map(Percent.percent)
+      case _ => None
+    }
+
   def speed: Option[Speed] = {
     val value = asDouble
     (value, field.unit) match {
@@ -82,6 +96,20 @@ final case class FieldValue[A <: TypedValue[_]](
     field.unit match {
       case Some(MeasurementUnit.Semicircles) =>
         asLong.map(Semicircle.semicircle)
+      case _ => None
+    }
+
+  def trainingStressScore: Option[TrainingStressScore] =
+    field.unit match {
+      case Some(MeasurementUnit.TrainingStressScore) =>
+        asDouble.map(TrainingStressScore.tss)
+      case _ => None
+    }
+
+  def intensityFactor: Option[IntensityFactor] =
+    field.unit match {
+      case Some(MeasurementUnit.IntensityFactor) =>
+        asDouble.map(IntensityFactor.iff)
       case _ => None
     }
 

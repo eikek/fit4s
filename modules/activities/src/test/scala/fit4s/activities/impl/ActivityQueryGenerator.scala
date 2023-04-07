@@ -4,17 +4,9 @@ import cats.data.NonEmptyList
 import fit4s.activities.ActivityQuery
 import fit4s.activities.ActivityQuery.Condition._
 import fit4s.activities.ActivityQuery.{Condition, OrderBy}
-import fit4s.activities.data.TagName
+import fit4s.activities.data.{Page, TagName}
 import fit4s.data.{DeviceProduct, Distance, FileId}
-import fit4s.profile.types.{
-  DateTime,
-  FaveroProduct,
-  File,
-  GarminProduct,
-  Manufacturer,
-  Sport,
-  SubSport
-}
+import fit4s.profile.types._
 import fs2.io.file.Path
 import org.scalacheck.Gen
 
@@ -26,10 +18,17 @@ object ActivityQueryGenerator {
     for {
       c <- Gen.option(conditionGenerator)
       o <- orderByGenerator
-    } yield ActivityQuery(c, o)
+      p <- pageGen
+    } yield ActivityQuery(c, o, p)
 
   def orderByGenerator: Gen[OrderBy] =
     Gen.oneOf(OrderBy.Distance, OrderBy.StartTime)
+
+  def pageGen: Gen[Page] =
+    for {
+      offset <- Gen.choose(0, 3000)
+      limit <- Gen.choose(1, 500)
+    } yield Page(limit, offset)
 
   def conditionGenerator: Gen[Condition] =
     Gen.frequency(

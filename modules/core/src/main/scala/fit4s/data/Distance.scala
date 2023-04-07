@@ -10,8 +10,7 @@ final class Distance private (val meter: Double) extends AnyVal {
 
   def +(dst: Distance): Distance = new Distance(meter + dst.meter)
 
-  override def toString =
-    if (km >= 1) f"$km%.1fkm" else f"${meter.toInt}m"
+  override def toString = s"${meter}m"
 }
 
 object Distance {

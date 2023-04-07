@@ -62,7 +62,10 @@ object SummaryCmd {
         "Speed avg" -> show"${s.avgSpeed}"
       ).filter(_ =>
         s.maxSpeed.exists(_.meterPerSecond > 0) || s.avgSpeed.exists(_.meterPerSecond > 0)
-      )
+      ),
+      s.avgGrade.map(p => "Grade" -> p.show),
+      s.avgIntensity.map(iff => "IF avg" -> iff.show),
+      s.avgTss.map(tss => "TSS avg" -> tss.show)
     )
 
     val colLen = pairs.flatMap(_.map(_._1.length)).max + 2
