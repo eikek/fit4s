@@ -20,6 +20,8 @@ class ActivityReaderTest extends CatsEffectSuite {
       _ = assertEquals(result.activity.numSessions, 1)
       _ = assertEquals(result.sessions.size, 1)
       _ = assertEquals(result.unrelatedRecords.size, 0)
+      _ = assertEquals(result.laps.values.map(_.size).sum, 1)
+      _ = assertEquals(result.unrelatedLaps.size, 0)
       _ = assertEquals(result.recordsFor(result.sessions.head).size, recCount.size)
     } yield ()
   }
@@ -35,6 +37,8 @@ class ActivityReaderTest extends CatsEffectSuite {
       _ = assertEquals(result.activity.numSessions, 1)
       _ = assertEquals(result.sessions.size, 1)
       _ = assertEquals(result.unrelatedRecords.size, 0)
+      _ = assertEquals(result.laps.values.map(_.size).sum, 6)
+      _ = assertEquals(result.unrelatedLaps.size, 0)
       _ = assertEquals(result.recordsFor(result.sessions.head).size, recCount.size)
       _ = assertEquals(
         result.activity.timestamp.asInstant,

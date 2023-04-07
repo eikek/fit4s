@@ -127,6 +127,12 @@ final case class FieldValue[A <: TypedValue[_]](
       case _ => None
     }
 
+  def counts: Option[Int] =
+    field.unit match {
+      case Some(MeasurementUnit.Counts) => asLong.map(_.toInt)
+      case _                            => None
+    }
+
   def duration: Option[Duration] = {
     val value = asLong
     field.unit match {

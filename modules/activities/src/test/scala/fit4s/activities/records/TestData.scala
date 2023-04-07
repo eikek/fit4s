@@ -1,11 +1,12 @@
 package fit4s.activities.records
 
-import fit4s.activities.data.{ActivityId, ActivitySessionId, LocationId}
+import fit4s.activities.data.{ActivityId, ActivityLapId, ActivitySessionId, LocationId}
 import fit4s.data._
 import fit4s.profile.types.{
   DateTime,
   File,
   GarminProduct,
+  LapTrigger,
   Manufacturer,
   Sport,
   SubSport,
@@ -70,7 +71,47 @@ trait TestData {
     avgStrokeDistance = Some(Distance.meter(2.4)),
     avgStrokeCount = Some(StrokesPerLap.strokesPerLap(34.4)),
     poolLength = Some(Distance.meter(50)),
-    avgGrade = Some(Percent.percent(6.4))
+    avgGrade = Some(Percent.percent(6.4)),
+    maxCadence = Some(Cadence.rpm(121)),
+    avgCadence = Some(Cadence.rpm(66))
+  )
+
+  val testActivityLap = ActivityLapRecord(
+    id = ActivityLapId(-1),
+    activitySessionId = ActivitySessionId(-1),
+    trigger = Some(LapTrigger.Distance),
+    sport = Sport.Cycling,
+    subSport = SubSport.Generic,
+    startTime = Instant.parse("2023-03-22T21:22:34Z"),
+    endTime = Instant.parse("2023-03-22T22:21:34Z"),
+    movingTime = Some(Duration.ofSeconds(5640)),
+    elapsedTime = Some(Duration.ofSeconds(6670)),
+    distance = Distance.km(36.1),
+    startPosition =
+      Option(Position(Semicircle.semicircle(154655L), Semicircle.semicircle(9944546L))),
+    endPosition =
+      Option(Position(Semicircle.semicircle(154855L), Semicircle.semicircle(9945546L))),
+    calories = Calories.kcal(246),
+    totalAscend = Some(Distance.meter(351)),
+    totalDescend = Some(Distance.meter(355)),
+    minTemp = Some(Temperature.celcius(-2)),
+    maxTemp = Some(Temperature.celcius(4)),
+    avgTemp = Some(Temperature.celcius(1.6)),
+    minHr = Some(HeartRate.bpm(118)),
+    maxHr = Some(HeartRate.bpm(190)),
+    avgHr = Some(HeartRate.bpm(161)),
+    maxSpeed = Some(Speed.kmh(56.9)),
+    avgSpeed = Some(Speed.kmh(21.4)),
+    maxPower = None,
+    avgPower = Some(Power.watts(211)),
+    normPower = Some(Power.watts(198)),
+    numPoolLength = Some(68),
+    swimStroke = Some(SwimStroke.Freestyle),
+    avgStrokeDistance = Some(Distance.meter(2.4)),
+    strokeCount = Some(46),
+    avgGrade = Some(Percent.percent(6.4)),
+    maxCadence = Some(Cadence.rpm(121)),
+    avgCadence = Some(Cadence.rpm(66))
   )
 }
 

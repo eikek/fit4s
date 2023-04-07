@@ -62,6 +62,8 @@ create table "activity_session"(
   "max_power" int,
   "avg_power" int,
   "norm_power" int,
+  "max_cadence" int,
+  "avg_cadence" int,
   "tss" double,
   "num_pool_len" int,
   "iff" double,
@@ -78,6 +80,52 @@ foreign key ("activity_id") references "activity"("id") on delete cascade;
 create index if not exists "activity_start_time_idx" on "activity_session"("start_time");
 create index if not exists "activity_sport_idx" on "activity_session"("sport");
 create index if not exists "activity_subsport_idx" on "activity_session"("sub_sport");
+
+-- ACTIVITY-LAP
+create table "activity_lap"(
+  "id" bigserial not null primary key,
+  "activity_session_id" bigint not null, --fk
+  "sport" int not null,
+  "sub_sport" int not null,
+  "trigger" int,
+  "start_time" timestamp not null,
+  "end_time" timestamp not null,
+  "start_pos_lat" bigint,
+  "start_pos_long" bigint,
+  "end_pos_lat" bigint,
+  "end_pos_long" bigint,
+  "moving_time" bigint not null,
+  "elapsed_time" bigint not null,
+  "calories" double not null,
+  "distance" double not null,
+  "min_temp" double,
+  "max_temp" double,
+  "avg_temp" double,
+  "max_speed" double,
+  "avg_speed" double,
+  "min_hr" int,
+  "max_hr" int,
+  "avg_hr" int,
+  "max_power" int,
+  "avg_power" int,
+  "norm_power" int,
+  "max_cadence" int,
+  "avg_cadence" int,
+  "total_ascend" double,
+  "total_descend" double,
+  "num_pool_len" int,
+  "swim_stroke" int,
+  "avg_stroke_distance" double,
+  "stroke_count" int,
+  "avg_grade" double
+);
+
+alter table "activity_lap" add constraint "activity_lap_activity_session_fkey"
+foreign key ("activity_session_id") references "activity_session"("id") on delete cascade;
+
+create index if not exists "activity_lap_start_time_idx" on "activity_lap"("start_time");
+create index if not exists "activity_lap_end_time_idx" on "activity_lap"("end_time");
+
 
 -- ACTIVITY-SESSION-DATA
 create table "activity_session_data"(

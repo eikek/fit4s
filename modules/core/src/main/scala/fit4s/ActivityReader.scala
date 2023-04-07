@@ -2,7 +2,7 @@ package fit4s
 
 import fit4s.ActivityReader.Failure.GeneralError
 import fit4s.data._
-import fit4s.profile.messages.{RecordMsg, SessionMsg}
+import fit4s.profile.messages.{LapMsg, RecordMsg, SessionMsg}
 import fit4s.profile.types.{DateTime, LocalDateTime, MesgNum}
 import fit4s.util._
 
@@ -20,11 +20,17 @@ object ActivityReader {
       fileId: FileId,
       activity: Activity,
       sessions: Vector[ActivitySession],
+      laps: Map[Option[DateTime], Vector[ActivityLap]],
       records: Map[Option[DateTime], Vector[data.Record]]
   ) {
     def unrelatedRecords = records.getOrElse(None, Vector.empty)
+    def unrelatedLaps = laps.getOrElse(None, Vector.empty)
+
     def recordsFor(session: ActivitySession) =
       records.getOrElse(Some(session.startTime), Vector.empty)
+
+    def lapsFor(session: ActivitySession) =
+      laps.getOrElse(Some(session.startTime), Vector.empty)
   }
 
   def read(fit: FitFile, zoneId: ZoneId): Either[Failure, Result] = for {
@@ -39,6 +45,11 @@ object ActivityReader {
       .mapEither(data.Record.from)
       .left
       .map(GeneralError)
+    lapMsgs <- fit.dataRecords
+      .filter(_.isMessage(LapMsg))
+      .mapEither(ActivityLap.from)
+      .left
+      .map(GeneralError)
     sessions <- fit.dataRecords
       .filter(_.isMessage(SessionMsg))
       .mapEither(ActivitySession.from)
@@ -48,7 +59,10 @@ object ActivityReader {
     recs = records.groupBy { r =>
       sessions.find(_.containsTime(r.timestamp)).map(_.startTime)
     }
-  } yield tryFixTimestamps(Result(fileId, am, sessions, recs), zoneId)
+    laps = lapMsgs.groupBy { l =>
+      sessions.find(_.containsTime(l.startTime)).map(_.startTime)
+    }
+  } yield tryFixTimestamps(Result(fileId, am, sessions, laps, recs), zoneId)
 
   /** Sometimes values in the session message are missing. They can be filled by computing
     * them from all corresponding records.
@@ -88,6 +102,11 @@ object ActivityReader {
           sessions = result.sessions.map(s =>
             s.copy(startTime = add(s.startTime, diff), endTime = add(s.endTime, diff))
           ),
+          laps = result.laps.map { case (optDt, laps) =>
+            addOpt(optDt, diff) -> laps.map(l =>
+              l.copy(startTime = add(l.startTime, diff), endTime = add(l.endTime, diff))
+            )
+          },
           records = result.records.map { case (optDt, records) =>
             addOpt(optDt, diff) -> records.map(r =>
               r.copy(timestamp = add(r.timestamp, diff))

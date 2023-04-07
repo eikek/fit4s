@@ -74,7 +74,9 @@ object ActivityImport {
 
   private def addSession(activityId: ActivityId, result: ActivityReader.Result)(
       session: ActivitySession
-  ): ConnectionIO[(ActivitySessionId, Vector[ActivitySessionDataId])] =
+  ): ConnectionIO[
+    (ActivitySessionId, Vector[ActivityLapId], Vector[ActivitySessionDataId])
+  ] =
     for {
       sessionId <- ActivitySessionRecord.insert(
         ActivitySessionRecord(
@@ -102,6 +104,8 @@ object ActivityImport {
           maxPower = session.maxPower,
           avgPower = session.avgPower,
           normPower = session.normPower,
+          maxCadence = session.maxCadence,
+          avgCadence = session.avgCadence,
           tss = session.trainingStressScore,
           numPoolLength = session.numPoolLength,
           iff = session.intensityFactor,
@@ -112,6 +116,45 @@ object ActivityImport {
           avgGrade = session.avgGrade
         )
       )
+      lapIds <- result.lapsFor(session).traverse { l =>
+        ActivityLapRecord.insert(
+          ActivityLapRecord(
+            id = ActivityLapId(-1),
+            activitySessionId = sessionId,
+            sport = l.sport,
+            subSport = l.subSport,
+            trigger = l.trigger,
+            startTime = l.startTime.asInstant,
+            endTime = l.endTime.asInstant,
+            startPosition = l.startPosition,
+            endPosition = l.endPosition,
+            movingTime = l.movingTime,
+            elapsedTime = l.elapsedTime,
+            calories = l.calories,
+            distance = l.distance,
+            minTemp = l.minTemp,
+            maxTemp = l.maxTemp,
+            avgTemp = l.avgTemp,
+            maxSpeed = l.maxSpeed,
+            avgSpeed = l.avgSpeed,
+            minHr = l.minHr,
+            maxHr = l.maxHr,
+            avgHr = l.avgHr,
+            maxPower = l.maxPower,
+            avgPower = l.avgPower,
+            normPower = l.normPower,
+            maxCadence = l.maxCadence,
+            avgCadence = l.avgCadence,
+            totalAscend = l.totalAscend,
+            totalDescend = l.totalDescend,
+            numPoolLength = l.numPoolLength,
+            swimStroke = l.swimStroke,
+            avgStrokeDistance = l.avgStrokeDistance,
+            strokeCount = l.strokeCount,
+            avgGrade = l.avgGrade
+          )
+        )
+      }
       rIds <- result.recordsFor(session).traverse { r =>
         ActivitySessionDataRecord.insert(
           ActivitySessionDataRecord(
@@ -131,5 +174,5 @@ object ActivityImport {
           )
         )
       }
-    } yield (sessionId, rIds)
+    } yield (sessionId, lapIds, rIds)
 }

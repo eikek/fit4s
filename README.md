@@ -18,7 +18,7 @@ This is a library for Scala 2.13 and 3.
 - [ ] publish to strava 
 - [ ] add/set/remove/rename tags
 - [x] update command
-- [ ] add LapMsg to database
+- [x] add LapMsg to database
 - [ ] cleanup playground test mess
 - [ ] catch logging from java.util.logging
 - [ ] reverse location lookup?

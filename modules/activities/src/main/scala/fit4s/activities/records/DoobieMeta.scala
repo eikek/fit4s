@@ -2,7 +2,7 @@ package fit4s.activities.records
 
 import doobie.Meta
 import fit4s.data._
-import fit4s.profile.types.{Sport, SubSport, SwimStroke}
+import fit4s.profile.types.{LapTrigger, Sport, SubSport, SwimStroke}
 import fs2.io.file.Path
 import doobie.implicits.javatimedrivernative
 import fit4s.activities.data._
@@ -10,6 +10,9 @@ import fit4s.activities.data._
 import java.time.{Duration, Instant}
 
 trait DoobieMeta {
+  implicit val lapTriggerMeta: Meta[LapTrigger] =
+    Meta[Long].timap(LapTrigger.unsafeByRawValue)(_.rawValue)
+
   implicit val swimStrokeMeta: Meta[SwimStroke] =
     Meta[Long].timap(SwimStroke.unsafeByRawValue)(_.rawValue)
 
