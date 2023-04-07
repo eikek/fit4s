@@ -55,8 +55,8 @@ object ActivityLocationRecord {
       .apply[Chunk](records)
   }
 
-  def listAll: Stream[ConnectionIO, ActivityLocationRecord] =
+  def listAll: ConnectionIO[Vector[ActivityLocationRecord]] =
     fr"SELECT id, location FROM $table ORDER BY location"
       .query[ActivityLocationRecord]
-      .streamWithChunkSize(100)
+      .to[Vector]
 }

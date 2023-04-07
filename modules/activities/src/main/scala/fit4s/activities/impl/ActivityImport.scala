@@ -1,7 +1,7 @@
 package fit4s.activities.impl
 
 import cats.data.{NonEmptyList, OptionT}
-import cats.effect.kernel.Sync
+import cats.effect.Sync
 import cats.syntax.all._
 import doobie._
 import fit4s.ActivityReader
@@ -10,7 +10,7 @@ import fit4s.activities.data._
 import fit4s.activities.records._
 import fit4s.data._
 
-import java.time.{Duration, ZoneId}
+import java.time.{Duration, Instant, ZoneId}
 
 object ActivityImport {
   def addActivity(
@@ -18,7 +18,8 @@ object ActivityImport {
       locationId: LocationId,
       path: String,
       notes: Option[String],
-      zone: ZoneId
+      zone: ZoneId,
+      now: Instant
   )(
       result: ActivityReader.Result
   ): ConnectionIO[ImportResult[ActivityId]] = {
@@ -26,7 +27,7 @@ object ActivityImport {
     val name = ActivityName.generate(result.activity.timestamp, sports, zone)
 
     for {
-      actId <- add(locationId, path, name, notes)(result)
+      actId <- add(locationId, path, name, notes, now)(result)
       _ <- NonEmptyList.fromList(tags.toList) match {
         case Some(nel) =>
           actId match {
@@ -38,7 +39,13 @@ object ActivityImport {
     } yield actId
   }
 
-  def add(locationId: LocationId, path: String, name: String, notes: Option[String])(
+  def add(
+      locationId: LocationId,
+      path: String,
+      name: String,
+      notes: Option[String],
+      now: Instant
+  )(
       result: ActivityReader.Result
   ): ConnectionIO[ImportResult[ActivityId]] = {
     val insert: ConnectionIO[ImportResult[ActivityId]] =
@@ -52,7 +59,8 @@ object ActivityImport {
             name,
             result.activity.timestamp.asInstant,
             result.activity.totalTime,
-            notes
+            notes,
+            now
           )
         )
 

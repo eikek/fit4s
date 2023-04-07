@@ -26,7 +26,8 @@ create table "activity"(
   "name" varchar(2000) not null,
   "timestamp" timestamp not null,
   "total_time" bigint not null,
-  "notes" text
+  "notes" text,
+  "import_time" timestamp not null
 );
 
 alter table "activity" add constraint "activity_location_fkey"

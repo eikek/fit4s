@@ -10,7 +10,7 @@ import fs2.io.file.{Files, Path}
 import fs2.{Chunk, Stream}
 import scodec.Attempt
 
-import java.time.ZoneId
+import java.time.{Instant, ZoneId}
 
 object FitFileImport {
 
@@ -19,14 +19,15 @@ object FitFileImport {
       notes: Option[String],
       locationId: LocationId,
       relativePath: String,
-      zoneId: ZoneId
+      zoneId: ZoneId,
+      now: Instant
   )(fitFile: Path): Stream[F, ConnectionIO[ImportResult[ActivityId]]] =
     Stream
       .eval(readFitFile(fitFile))
       .flatMap {
         case Attempt.Successful(fits) =>
           Stream.emits(
-            fits.map(addFitFile(tags, notes, locationId, zoneId)(_, relativePath))
+            fits.map(addFitFile(tags, notes, locationId, zoneId, now)(_, relativePath))
           )
 
         case Attempt.Failure(err) =>
@@ -37,7 +38,8 @@ object FitFileImport {
       tags: Set[TagId],
       notes: Option[String],
       locationId: LocationId,
-      zoneId: ZoneId
+      zoneId: ZoneId,
+      now: Instant
   )(
       fitFile: FitFile,
       relativePath: String
@@ -45,7 +47,7 @@ object FitFileImport {
     ActivityReader.read(fitFile, zoneId).map(ActivityReader.fixMissingValues) match {
       case Left(err) => Sync[ConnectionIO].pure(ImportResult.activityDecodeError(err))
       case Right(result) =>
-        ActivityImport.addActivity(tags, locationId, relativePath, notes, zoneId)(
+        ActivityImport.addActivity(tags, locationId, relativePath, notes, zoneId, now)(
           result
         )
     }

@@ -6,7 +6,6 @@ import doobie.util.ExecutionContexts
 import doobie.util.transactor.Transactor
 import fit4s.activities.data._
 import fit4s.activities.impl.ActivityLogDb
-import fit4s.activities.records.TagRecord
 import fs2._
 import fs2.io.file.Path
 import org.h2.jdbcx.JdbcConnectionPool
@@ -24,13 +23,11 @@ trait ActivityLog[F[_]] {
       concN: Int
   ): Stream[F, ImportResult[ActivityId]]
 
-  def deleteActivities(query: ActivityQuery): F[Int]
-
-  def linkTag(tagId: TagId, activityId: ActivityId): F[Unit]
-
-  def unlinkTag(tagId: TagId, activityId: ActivityId): F[Int]
-
-  def activityTags(activityId: ActivityId): Stream[F, TagRecord]
+  def syncNewFiles(
+      tagged: Set[TagName],
+      callback: ImportCallback[F],
+      concN: Int
+  ): Stream[F, ImportResult[ActivityId]]
 
   def activityList(query: ActivityQuery): Stream[F, ActivityListResult]
 

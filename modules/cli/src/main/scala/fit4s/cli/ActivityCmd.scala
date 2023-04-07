@@ -3,7 +3,7 @@ package fit4s.cli
 import cats.effect.{ExitCode, IO}
 import cats.syntax.all._
 import com.monovore.decline.Opts
-import fit4s.cli.activity.{ImportCmd, InitCmd, ListCmd, SummaryCmd}
+import fit4s.cli.activity.{ImportCmd, InitCmd, ListCmd, SummaryCmd, UpdateCmd}
 
 object ActivityCmd extends BasicOpts {
 
@@ -28,11 +28,17 @@ object ActivityCmd extends BasicOpts {
       (activitySelectionOps, pageOpts, filesOnly).mapN(ListCmd.Options)
     }
 
+  val updateArgs: Opts[UpdateCmd.Options] =
+    Opts.subcommand("update", "Import new fit files from known locations") {
+      (initialTags, parallel).mapN(UpdateCmd.Options)
+    }
+
   val opts = importArgs
     .map(Config.Import)
     .orElse(initArgs.as(Config.Init))
     .orElse(summaryArgs.map(Config.Summary))
     .orElse(listArgs.map(Config.List))
+    .orElse(updateArgs.map(Config.Update))
 
   sealed trait Config extends Product
   object Config {
@@ -40,6 +46,7 @@ object ActivityCmd extends BasicOpts {
     final case class Summary(cfg: SummaryCmd.Options) extends Config
     final case object Init extends Config
     final case class List(cfg: ListCmd.Options) extends Config
+    final case class Update(cfg: UpdateCmd.Options) extends Config
   }
 
   def apply(cfg: Config): IO[ExitCode] =
@@ -49,6 +56,7 @@ object ActivityCmd extends BasicOpts {
         case Config.Summary(c) => SummaryCmd(cliCfg, c)
         case Config.Init       => InitCmd.init(cliCfg)
         case Config.List(c)    => ListCmd(cliCfg, c)
+        case Config.Update(c)  => UpdateCmd(cliCfg, c)
       }
     }
 }

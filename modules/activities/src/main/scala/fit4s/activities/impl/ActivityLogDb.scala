@@ -48,20 +48,35 @@ final class ActivityLogDb[F[_]: Async: Files](
 
     (dir, locId) <- Stream.emits(locs.toList)
 
+    now <- Stream.eval(Clock[F].realTimeInstant)
     doImportTask = DirectoryImport
-      .add[F](tags.map(_.id).toSet, locId, zoneId, callback)(dir)
+      .add[F](tags.map(_.id).toSet, locId, zoneId, now, callback)(dir)
     results <-
       if (concN > 1) doImportTask.parEvalMap(concN)(_.transact(xa))
       else doImportTask.evalMap(_.transact(xa))
   } yield results
 
-  override def deleteActivities(query: ActivityQuery): F[Int] = ???
+  def syncNewFiles(tagged: Set[TagName], callback: ImportCallback[F], concN: Int) =
+    for {
+      sync <- Stream.eval(SyncData.get.transact(xa))
+      now <- Stream.eval(Clock[F].realTimeInstant)
+      tags <- Stream.eval(TagRecord.getOrCreate(tagged.toList).transact(xa))
 
-  override def linkTag(tagId: TagId, activityId: ActivityId): F[Unit] = ???
-
-  override def unlinkTag(tagId: TagId, activityId: ActivityId): F[Int] = ???
-
-  override def activityTags(activityId: ActivityId): Stream[F, TagRecord] = ???
+      updateTask = Stream
+        .emits(sync.locations)
+        .flatMap(
+          DirectoryImport.update[F](
+            tags.map(_.id).toSet,
+            zoneId,
+            now,
+            sync.lastImport,
+            callback
+          )
+        )
+      results <-
+        if (concN > 1) updateTask.parEvalMap(concN)(_.transact(xa))
+        else updateTask.evalMap(_.transact(xa))
+    } yield results
 
   override def activityList(
       query: ActivityQuery

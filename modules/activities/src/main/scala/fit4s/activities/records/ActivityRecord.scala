@@ -19,7 +19,8 @@ case class ActivityRecord(
     name: String,
     timestamp: Instant,
     totalTime: Duration,
-    notes: Option[String]
+    notes: Option[String],
+    importDate: Instant
 )
 
 object ActivityRecord {
@@ -31,7 +32,8 @@ object ActivityRecord {
       name: String,
       timestamp: Instant,
       totalTime: Duration,
-      notes: Option[String]
+      notes: Option[String],
+      importDate: Instant
   ): ActivityRecord = ActivityRecord(
     id,
     locationId,
@@ -43,7 +45,8 @@ object ActivityRecord {
     name,
     timestamp,
     totalTime,
-    notes
+    notes,
+    importDate
   )
 
   private[activities] val table = fr"activity"
@@ -60,7 +63,8 @@ object ActivityRecord {
       c("name"),
       c("timestamp"),
       c("total_time"),
-      c("notes")
+      c("notes"),
+      c("import_time")
     )
   }
   private val columnsWithId =
@@ -71,7 +75,9 @@ object ActivityRecord {
 
   def insert(r: ActivityRecord): ConnectionIO[ActivityId] =
     (sql"INSERT INTO $table ($columnsNoId) VALUES " ++
-      sql"(${r.locationId}, ${r.path}, ${r.activityFileId}, ${r.device}, ${r.serialNumber}, ${r.created}, ${r.name}, ${r.timestamp}, ${r.totalTime}, ${r.notes})").update
+      sql"(${r.locationId}, ${r.path}, ${r.activityFileId}, ${r.device}, " ++
+      sql"${r.serialNumber}, ${r.created}, ${r.name}, ${r.timestamp}, ${r.totalTime}, " ++
+      sql"${r.notes}, ${r.importDate})").update
       .withUniqueGeneratedKeys[ActivityId]("id")
 
   def findById(id: ActivityId): ConnectionIO[Option[ActivityRecord]] =
@@ -83,4 +89,7 @@ object ActivityRecord {
     sql"SELECT $columnsWithId FROM $table WHERE file_id = $fileId"
       .query[ActivityRecord]
       .option
+
+  def latestImport: ConnectionIO[Option[Instant]] =
+    sql"SELECT max(import_time) from $table".query[Instant].option
 }
