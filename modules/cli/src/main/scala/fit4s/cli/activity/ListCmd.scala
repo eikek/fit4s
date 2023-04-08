@@ -63,11 +63,12 @@ object ListCmd {
       (s.sport -> s.subSport).show.in(Styles.sport),
       s.distance.show.in(Styles.distance),
       s.movingTime.show.in(Styles.duration),
-      s.totalAscend.show.in(Styles.distance),
+      s.totalAscend.show.in(Styles.elevation),
       (s.avgHr -> s.maxHr).show.in(Styles.heartRate),
       (s.avgSpeed -> s.maxSpeed).show.in(Styles.speed),
       s.calories.show.in(Styles.calories),
       s.avgTemp.show.in(Styles.temperature(s.avgTemp)),
+      r.tags.show.in(Styles.tags),
       r.activity.device.show.in(Styles.device)
     )
       .mkString("  ")

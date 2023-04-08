@@ -29,7 +29,7 @@ object ActivityQueryBuilder {
         ActivityLocationRecord.columnList(Some("loc")) :::
         ActivitySessionRecord.columnList(Some("act")))
         .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
-    val select = fr"SELECT $cols"
+    val select = fr"SELECT DISTINCT $cols"
     val from = join
     val where = q.condition match {
       case Some(c) => fr"WHERE" ++ condition(c)
@@ -50,7 +50,7 @@ object ActivityQueryBuilder {
     summaryFragment(q).query[ActivitySessionSummary]
 
   def summaryFragment(q: Option[ActivityQuery.Condition]): Fragment = {
-    val select =
+    val selectGrouped =
       fr"""SELECT act.sport, min(act.start_time), max(act.end_time),
            sum(act.moving_time), sum(act.elapsed_time), sum(act.distance),
            sum(act.calories), sum(act.total_ascend), sum(act.total_descend),
@@ -61,12 +61,36 @@ object ActivityQueryBuilder {
            count(act.id)
         """
 
+    val select =
+      fr"""SELECT DISTINCT act.id, act.sport, act.start_time, act.end_time,
+           act.moving_time, act.elapsed_time, act.distance,
+           act.calories, act.total_ascend, act.total_descend,
+           act.min_temp, act.max_temp, act.avg_temp,
+           act.min_hr, act.max_hr, act.avg_hr, act.max_speed,
+           act.avg_speed, act.max_power, act.avg_power, act.norm_power,
+           act.avg_grade, act.iff, act.tss
+        """
+
     val where = q match {
       case Some(c) => fr"WHERE" ++ condition(c)
       case None    => Fragment.empty
     }
 
-    select ++ join ++ where ++ fr"GROUP BY act.sport"
+    sql"""WITH
+              session as ($select $join $where)
+            $selectGrouped
+            FROM session act
+            GROUP BY act.sport
+           """
+  }
+
+  def activityIdFragment(q: Option[ActivityQuery.Condition]) = {
+    val select = sql"SELECT DISTINCT pa.id"
+    val where = q match {
+      case Some(c) => fr"WHERE" ++ condition(c)
+      case None    => Fragment.empty
+    }
+    select ++ join ++ where
   }
 
   def tagsForActivity(id: ActivityId): ConnectionIO[Vector[TagRecord]] = {
@@ -129,6 +153,9 @@ object ActivityQueryBuilder {
 
       case Condition.FileIdMatch(id) =>
         fr"pa.file_id = $id"
+
+      case Condition.ActivityIdMatch(ids) =>
+        combineFragments(ids.toList.map(id => fr"pa.id = $id"), sql" OR ")
 
       case Condition.SportMatch(sport) =>
         fr"act.sport = $sport"

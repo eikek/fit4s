@@ -4,7 +4,7 @@ import cats.data.NonEmptyList
 import fit4s.activities.ActivityQuery
 import fit4s.activities.ActivityQuery.Condition._
 import fit4s.activities.ActivityQuery.{Condition, OrderBy}
-import fit4s.activities.data.{Page, TagName}
+import fit4s.activities.data.{ActivityId, Page, TagName}
 import fit4s.data.{DeviceProduct, Distance, FileId}
 import fit4s.profile.types._
 import fs2.io.file.Path
@@ -51,6 +51,7 @@ object ActivityQueryGenerator {
       nelGen(pathGen).map(LocationAnyMatch),
       nelGen(pathGen).map(LocationAllStarts),
       nelGen(pathGen).map(LocationAnyStarts),
+      nelGen(activityIdGen).map(ActivityIdMatch),
       fileIdGen.map(_.asString).map(FileIdMatch),
       deviceMatchGen,
       Gen.oneOf(Sport.all).map(SportMatch),
@@ -65,6 +66,9 @@ object ActivityQueryGenerator {
       durationGen.map(MovedGE),
       textGen.map(NotesMatch)
     )
+
+  def activityIdGen: Gen[ActivityId] =
+    Gen.choose[Long](0, 99999).map(ActivityId.apply)
 
   def deviceMatchGen: Gen[DeviceMatch] =
     deviceProductGen.map(DeviceMatch)

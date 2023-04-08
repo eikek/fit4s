@@ -5,7 +5,7 @@ import cats.parse.Parser
 import cats.syntax.all._
 import fit4s.activities.ActivityQuery.Condition
 import fit4s.activities.ActivityQuery.Condition._
-import fit4s.activities.data.TagName
+import fit4s.activities.data.{ActivityId, TagName}
 import fit4s.data.Distance
 import fs2.io.file.Path
 import munit.FunSuite
@@ -22,6 +22,20 @@ class ConditionParserTest extends FunSuite {
     p.parseAll(in).fold(e => sys.error(e.toString()), identity)
 
   def tag(name: String): TagName = TagName.unsafeFromString(name)
+
+  test("parse single and node") {
+    val in = "(& id=1)"
+    val result = parser.parseCondition(in)
+    val expected = ActivityIdMatch(Nel.of(ActivityId(1)))
+    assertEquals(result, expected.asRight)
+  }
+
+  test("unwrap and nodes") {
+    val in = "(& (& id=1))"
+    val result = parser.parseCondition(in)
+    val expected = ActivityIdMatch(Nel.of(ActivityId(1)))
+    assertEquals(result, expected.asRight)
+  }
 
   test("parse complex condition") {
     val in =

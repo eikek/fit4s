@@ -10,8 +10,13 @@ import java.time._
 final class ConditionParser(val zoneId: ZoneId, currentTime: Instant)
     extends BasicParser(zoneId, currentTime) {
 
-  def parseCondition(c: String): Either[Parser.Error, Condition] =
-    condition.parseAll(c.trim).map(Condition.normalizeCondition)
+  def parseCondition(c: String): Either[Parser.Error, Condition] = {
+    val str =
+      if (c.startsWith("(")) c.trim
+      else s"(& ${c.trim})"
+
+    condition.parseAll(str).map(Condition.normalizeCondition)
+  }
 
   val tagCondition: Parser[Condition] =
     (Parser.stringIn(List("tag~", "tag=")) ~ listOf(tagName)(Right(_), Left(_)))
@@ -30,7 +35,10 @@ final class ConditionParser(val zoneId: ZoneId, currentTime: Instant)
       }
 
   val fileIdCondition: Parser[Condition] =
-    (Parser.string("id=") *> fileId).map(FileIdMatch)
+    (Parser.string("file_id=") *> fileId).map(FileIdMatch)
+
+  val idCondition: Parser[Condition] =
+    (Parser.string("id=") *> activityId.repSep(BasicParser.commaSep)).map(ActivityIdMatch)
 
   val sportCondition: Parser[Condition] =
     (Parser.string("sport=") *> sport).map(SportMatch)
@@ -99,7 +107,8 @@ final class ConditionParser(val zoneId: ZoneId, currentTime: Instant)
         distanceCondition ::
         durationCondition ::
         notesCondition ::
-        deviceMatchCondition :: Nil
+        deviceMatchCondition ::
+        idCondition :: Nil
     )
 
   val condition: Parser[Condition] =

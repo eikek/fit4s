@@ -37,29 +37,27 @@ object ActivityCmd extends BasicOpts {
     }
 
   val opts = importArgs
-    .map(Config.Import)
-    .orElse(initArgs.as(Config.Init))
-    .orElse(summaryArgs.map(Config.Summary))
-    .orElse(listArgs.map(Config.List))
-    .orElse(updateArgs.map(Config.Update))
+    .map(Options.Import)
+    .orElse(initArgs.as(Options.Init))
+    .orElse(summaryArgs.map(Options.Summary))
+    .orElse(listArgs.map(Options.List))
+    .orElse(updateArgs.map(Options.Update))
 
-  sealed trait Config extends Product
-  object Config {
-    final case class Import(cfg: ImportCmd.Options) extends Config
-    final case class Summary(cfg: SummaryCmd.Options) extends Config
-    final case object Init extends Config
-    final case class List(cfg: ListCmd.Options) extends Config
-    final case class Update(cfg: UpdateCmd.Options) extends Config
+  sealed trait Options extends Product
+  object Options {
+    final case class Import(cfg: ImportCmd.Options) extends Options
+    final case class Summary(cfg: SummaryCmd.Options) extends Options
+    final case object Init extends Options
+    final case class List(cfg: ListCmd.Options) extends Options
+    final case class Update(cfg: UpdateCmd.Options) extends Options
   }
 
-  def apply(cfg: Config): IO[ExitCode] =
-    CliConfig.load[IO].flatMap { cliCfg =>
-      cfg match {
-        case Config.Import(c)  => ImportCmd(cliCfg, c)
-        case Config.Summary(c) => SummaryCmd(cliCfg, c)
-        case Config.Init       => InitCmd.init(cliCfg)
-        case Config.List(c)    => ListCmd(cliCfg, c)
-        case Config.Update(c)  => UpdateCmd(cliCfg, c)
-      }
+  def apply(cliCfg: CliConfig, cfg: Options): IO[ExitCode] =
+    cfg match {
+      case Options.Import(c)  => ImportCmd(cliCfg, c)
+      case Options.Summary(c) => SummaryCmd(cliCfg, c)
+      case Options.Init       => InitCmd.init(cliCfg)
+      case Options.List(c)    => ListCmd(cliCfg, c)
+      case Options.Update(c)  => UpdateCmd(cliCfg, c)
     }
 }

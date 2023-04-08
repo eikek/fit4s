@@ -108,7 +108,7 @@ final class ActivityLogDb[F[_]: Async: Files](
   ): F[Vector[ActivitySessionSummary]] =
     ActivityQueryBuilder.buildSummary(query).to[Vector].transact(xa)
 
-  override def tagRepository: TagRepo[F] = ???
+  val tagRepository: TagRepo[F] = new TagRepoDb[F](xa)
 
   override def locationRepository: LocationRepo[F] = ???
 }

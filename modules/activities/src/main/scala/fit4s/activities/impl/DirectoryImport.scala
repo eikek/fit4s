@@ -26,7 +26,7 @@ object DirectoryImport {
       .evalFilter { p =>
         val created = Files[F]
           .getBasicFileAttributes(p)
-          .map(_.creationTime)
+          .map(_.lastAccessTime)
 
         created.map(_.toMillis > latestImport.toEpochMilli)
       }

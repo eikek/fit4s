@@ -18,16 +18,40 @@ object App
       fileArg.map(InspectCmd.Config.apply)
     }
 
-  val activityOpts: Opts[ActivityCmd.Config] =
+  val activityOpts: Opts[ActivityCmd.Options] =
     Opts.subcommand("activity", "Look into activities") {
       ActivityCmd.opts
     }
 
-  def main: Opts[IO[ExitCode]] =
-    inspectOpts.orElse(activityOpts).map {
-      case c: InspectCmd.Config  => printError(InspectCmd(c))
-      case c: ActivityCmd.Config => printError(ActivityCmd(c))
+  val tagOpts: Opts[TagCmd.SubOpts] =
+    Opts.subcommand("tags", "Manage tags on activities") {
+      TagCmd.options
     }
+
+  val subCommandOpts: Opts[SubCommandOpts] =
+    inspectOpts
+      .map(SubCommandOpts.Inspect)
+      .orElse(activityOpts.map(SubCommandOpts.Activity))
+      .orElse(tagOpts.map(SubCommandOpts.Tag))
+
+  def main: Opts[IO[ExitCode]] =
+    subCommandOpts.map(run).map(printError)
+
+  def run(opts: SubCommandOpts): IO[ExitCode] =
+    CliConfig.load[IO].flatMap { cliCfg =>
+      opts match {
+        case SubCommandOpts.Inspect(c)  => InspectCmd(c)
+        case SubCommandOpts.Activity(c) => ActivityCmd(cliCfg, c)
+        case SubCommandOpts.Tag(c)      => TagCmd(cliCfg, c)
+      }
+    }
+
+  sealed trait SubCommandOpts
+  object SubCommandOpts {
+    case class Inspect(opts: InspectCmd.Config) extends SubCommandOpts
+    case class Activity(opts: ActivityCmd.Options) extends SubCommandOpts
+    case class Tag(opts: TagCmd.SubOpts) extends SubCommandOpts
+  }
 
   private def printError(io: IO[ExitCode]): IO[ExitCode] =
     io.attempt.flatMap {

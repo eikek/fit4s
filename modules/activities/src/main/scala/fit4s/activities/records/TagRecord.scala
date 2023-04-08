@@ -3,7 +3,7 @@ package fit4s.activities.records
 import cats.syntax.all._
 import doobie._
 import doobie.implicits._
-import fit4s.activities.data.{TagId, TagName}
+import fit4s.activities.data.{Page, TagId, TagName}
 import fs2.Stream
 import DoobieMeta._
 import cats.effect.kernel.Sync
@@ -34,7 +34,7 @@ object TagRecord {
       .map(id => TagRecord(id, name))
 
   def find(name: TagName): ConnectionIO[Option[TagRecord]] =
-    fr"SELECT id, name FROM $table WHERE name like $name"
+    fr"SELECT id, name FROM $table WHERE name ilike $name"
       .query[TagRecord]
       .option
 
@@ -44,8 +44,15 @@ object TagRecord {
       .unique
       .map(_ > 0)
 
-  def listAll: Stream[ConnectionIO, TagRecord] =
-    fr"SELECT (id, name) FROM $table ORDER BY name"
+  def listAll(nameLike: Option[String], page: Page): Stream[ConnectionIO, TagRecord] = {
+    val cond =
+      nameLike.map(_.trim).filter(_.nonEmpty) match {
+        case Some(like) => fr"WHERE name ilike $like"
+        case None       => Fragment.empty
+      }
+
+    fr"SELECT id, name FROM $table $cond ORDER BY name LIMIT ${page.limit} OFFSET ${page.offset}"
       .query[TagRecord]
       .streamWithChunkSize(100)
+  }
 }

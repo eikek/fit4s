@@ -55,6 +55,15 @@ trait BasicOpts {
   def parallel: Opts[Boolean] =
     Opts.flag("parallel", "Whether to import using multiple threads").orFalse
 
+  def addTags: Opts[NonEmptyList[TagName]] =
+    Opts.options[TagName](
+      "tag",
+      help = "Add these tags to selected activities."
+    )
+
+  def tagFilter: Opts[Option[TagName]] =
+    Opts.option[TagName]("tag", "Filter with a tag name").orNone
+
   def initialTags: Opts[List[TagName]] =
     Opts
       .options[TagName](

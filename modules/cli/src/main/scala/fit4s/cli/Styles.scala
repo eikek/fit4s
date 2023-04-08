@@ -39,11 +39,16 @@ object Styles {
       case _              => frgb(153, 102, 102)
     }
 
-  val distance = frgb(230, 230, 0)
-  val duration = frgb(230, 230, 0)
+  val tags = frgb(153, 204, 255)
+
+  val distance = frgb(230, 230, 0) ++ Styles("→ ")
+  val elevation = frgb(179, 255, 26) ++ Styles("↗ ")
+
+  val duration = frgb(230, 230, 0) ++ Styles("⏲ ")
   val speed = frgb(230, 230, 0)
   val calories = frgb(230, 230, 0)
-  val heartRate = frgb(255, 128, 128)
+  val heartRate = frgb(255, 128, 128) ++ Styles("❤ ")
+  val intensityFactor = frgb(255, 128, 128)
   val device = frgb(102, 102, 102)
 
   def temperature(t: Option[Temperature]): Styles =

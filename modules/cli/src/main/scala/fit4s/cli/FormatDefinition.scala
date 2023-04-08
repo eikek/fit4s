@@ -3,11 +3,14 @@ package fit4s.cli
 import cats.Show
 import cats.syntax.all._
 import fit4s.activities.data.ActivityId
+import fit4s.activities.records.TagRecord
 import fit4s.cli.FormatDefinition.{DateInstant, TimeInstant}
 import fit4s.data._
 import fit4s.profile.types.{Sport, SubSport}
 
+import java.time.format.TextStyle
 import java.time.{Duration, Instant, ZoneId}
+import java.util.Locale
 
 trait FormatDefinition {
 
@@ -57,8 +60,10 @@ trait FormatDefinition {
 
   implicit def instantShow(implicit zoneId: ZoneId): Show[Instant] =
     Show.show { i =>
-      val ld = i.atZone(zoneId).toLocalDateTime
-      s"${ld.toLocalDate} ${ld.toLocalTime}"
+      val zoned = i.atZone(zoneId)
+      val dow = zoned.getDayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault)
+      val ld = zoned.toLocalDateTime
+      s"$dow, ${ld.toLocalDate} ${ld.toLocalTime}"
     }
 
   implicit def dateInstantShow(implicit zoneId: ZoneId): Show[DateInstant] =
@@ -91,20 +96,25 @@ trait FormatDefinition {
     }
 
   implicit val temperatureShow: Show[Temperature] =
-    Show.fromToString
+    Show.show { temp =>
+      f"${temp.celcius}%.1f" match {
+        case str if str.endsWith("0") => s"${temp.celcius.toInt}°C"
+        case str                      => s"$str°C"
+      }
+    }
+
+  implicit val intensityFactorShow: Show[IntensityFactor] =
+    Show.show { iff =>
+      f"${iff.iff}%.1fIF"
+    }
+
+  implicit val trainingStressScoreShow: Show[TrainingStressScore] =
+    Show.show { tss =>
+      f"${tss.tss}%.1ftss"
+    }
 
   implicit val heartRateShow: Show[HeartRate] =
     Show.fromToString
-
-  implicit val iffShow: Show[IntensityFactor] =
-    Show.show { iff =>
-      f"${iff.iff}%.2fif"
-    }
-
-  implicit val tssShow: Show[TrainingStressScore] =
-    Show.show { tss =>
-      f"${tss.tss}%.2ftss"
-    }
 
   implicit val percentShow: Show[Percent] =
     Show.show { p =>
@@ -132,6 +142,11 @@ trait FormatDefinition {
       case DeviceProduct.Unknown   => "-"
     }
 
+  implicit val tagVectorShow: Show[Vector[TagRecord]] =
+    Show.show { records =>
+      records.map(_.name.name).sorted.mkString("[", ",", "]")
+    }
+
   implicit final class InstantOps(i: Instant) {
     def asDate: DateInstant = DateInstant(i)
     def asTime: TimeInstant = TimeInstant(i)
@@ -139,7 +154,8 @@ trait FormatDefinition {
 
   implicit class StringOps(self: String) {
     def in(s: Styles): String =
-      s"${s.style}$self${Console.RESET}"
+      if (self.isBlank) ""
+      else s"${s.style}$self${Console.RESET}"
   }
 }
 

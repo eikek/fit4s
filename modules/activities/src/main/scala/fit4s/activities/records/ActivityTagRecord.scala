@@ -5,6 +5,9 @@ import doobie.implicits._
 import fit4s.activities.data.{ActivityId, ActivityTagId, TagId}
 import DoobieMeta._
 import cats.data.NonEmptyList
+import cats.effect.kernel.Sync
+import fit4s.activities.ActivityQuery
+import fit4s.activities.impl.ActivityQueryBuilder
 
 final case class ActivityTagRecord(
     id: ActivityTagId,
@@ -34,4 +37,24 @@ object ActivityTagRecord {
 
   def remove(activityId: ActivityId, tagId: TagId): ConnectionIO[Int] =
     fr"DELETE FROM $table WHERE activity_id = $activityId AND tag_id = $tagId".update.run
+
+  def removeTags(tags: List[TagId]): ConnectionIO[Int] =
+    if (tags.isEmpty) Sync[ConnectionIO].pure(0)
+    else {
+      val tagIds = tags.map(id => sql"$id").foldSmash1(sql"(", sql", ", sql")")
+      sql"DELETE FROM $table WHERE tag_id in $tagIds".update.run
+    }
+
+  def insertAll(actQuery: Option[ActivityQuery.Condition], tags: NonEmptyList[TagId]) = {
+    val actSql = ActivityQueryBuilder.activityIdFragment(actQuery)
+    val tids = tags.toList
+      .map(id => sql"($id)")
+      .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
+
+    sql"""
+      INSERT INTO $table ($colsNoId)
+        WITH actids as ($actSql)
+        SELECT * FROM actids
+        CROSS JOIN (VALUES $tids) as t(tid)""".update.run
+  }
 }

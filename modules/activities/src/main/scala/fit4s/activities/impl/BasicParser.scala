@@ -2,7 +2,7 @@ package fit4s.activities.impl
 
 import cats.data.NonEmptyList
 import cats.parse.{Numbers, Parser}
-import fit4s.activities.data.TagName
+import fit4s.activities.data.{ActivityId, TagName}
 import fit4s.activities.impl.BasicParser.ws
 import fit4s.data.{DeviceProduct, Distance}
 import fit4s.profile.types.{Sport, SubSport}
@@ -114,6 +114,9 @@ abstract class BasicParser(zoneId: ZoneId, currentTime: Instant) {
     Parser
       .stringIn(DeviceProduct.all.map(_.name.toLowerCase))
       .map(DeviceProduct.unsafeFromString)
+
+  val activityId: Parser[ActivityId] =
+    Numbers.nonNegativeIntString.map(_.toLong).map(ActivityId.apply)
 }
 
 object BasicParser {
