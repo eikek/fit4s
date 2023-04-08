@@ -4,6 +4,7 @@ import fit4s.activities.data.{ActivityId, LocationId}
 import doobie.implicits._
 import doobie._
 import DoobieMeta._
+import cats.data.NonEmptyList
 import fit4s.data.{DeviceProduct, FileId}
 
 import java.time.{Duration, Instant}
@@ -98,4 +99,10 @@ object ActivityRecord {
 
   def updateNotes(id: ActivityId, desc: String): ConnectionIO[Int] =
     sql"UPDATE $table SET notes = $desc WHERE id = $id".update.run
+
+  def delete(ids: NonEmptyList[ActivityId]): ConnectionIO[Int] = {
+    val in =
+      ids.toList.map(id => sql"$id").foldSmash1(Fragment.empty, sql",", Fragment.empty)
+    sql"DELETE FROM $table WHERE id in ($in)".update.run
+  }
 }

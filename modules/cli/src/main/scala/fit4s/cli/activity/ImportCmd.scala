@@ -40,11 +40,7 @@ object ImportCmd extends SharedOpts {
             dirs,
             if (opts.parallel) maxConcurrent else 1
           )
-          .evalTap {
-            case ImportResult.Success(_) =>
-              if (opts.parallel) IO.unit else IO.println("ok.")
-            case err: ImportResult.Failure => IO.println(err.messages)
-          }
+          .evalTap(res => IO.println(res.show))
           .map(Result.apply)
           .compile
           .foldMonoid
@@ -60,7 +56,8 @@ object ImportCmd extends SharedOpts {
           .readAll(options.fileOrDirectories.head)
           .through(fs2.text.utf8.decode)
           .through(fs2.text.lines)
-          .filter(s => !s.startsWith("#"))
+          .map(_.trim)
+          .filter(s => !s.startsWith("#") && s.nonEmpty)
           .map(Path.apply)
           .evalFilter(files.isDirectory)
           .compile

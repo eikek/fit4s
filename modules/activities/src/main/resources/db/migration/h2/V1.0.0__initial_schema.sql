@@ -6,6 +6,8 @@ create table "tag"(
 alter table "tag" add constraint "tag_name_uniq" unique("name");
 create index if not exists "tag_name_idx" on "tag"("name");
 
+insert into "tag" ("id", "name") values (-999, 'System/Deleted');
+
 -- LOCATION
 create table "activity_location"(
   "id" bigserial not null primary key,

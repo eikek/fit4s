@@ -7,7 +7,12 @@ import doobie.implicits._
 import doobie.{Query => _, _}
 import fit4s.activities._
 import fit4s.activities.data._
-import fit4s.activities.records.{ActivityLocationRecord, TagRecord}
+import fit4s.activities.records.{
+  ActivityLocationRecord,
+  ActivityRecord,
+  ActivityTagRecord,
+  TagRecord
+}
 import fs2.Stream
 import fs2.io.file.{Files, Path}
 
@@ -107,6 +112,10 @@ final class ActivityLogDb[F[_]: Async: Files](
       query: Option[ActivityQuery.Condition]
   ): F[Vector[ActivitySessionSummary]] =
     ActivityQueryBuilder.buildSummary(query).to[Vector].transact(xa)
+
+  def deleteActivities(ids: NonEmptyList[ActivityId], hardDelete: Boolean): F[Int] =
+    if (hardDelete) ActivityRecord.delete(ids).transact(xa)
+    else ActivityTagRecord.insert2(TagRecord.softDelete.id, ids).transact(xa)
 
   val tagRepository: TagRepo[F] = new TagRepoDb[F](xa)
 

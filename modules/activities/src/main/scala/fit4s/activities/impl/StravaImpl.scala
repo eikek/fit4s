@@ -83,7 +83,7 @@ final class StravaImpl[F[_]: Async](zoneId: ZoneId, xa: Transactor[F])
           NonEmptyList
             .fromList(entryTags.toList)
             .map { nel =>
-              (ActivityTagRecord.remove(id, nel) *> ActivityTagRecord.insert(id, nel))
+              (ActivityTagRecord.remove(id, nel) *> ActivityTagRecord.insert1(id, nel))
                 .transact(xa)
                 .void
             }

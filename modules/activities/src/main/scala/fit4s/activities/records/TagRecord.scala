@@ -11,6 +11,9 @@ import cats.effect.kernel.Sync
 final case class TagRecord(id: TagId, name: TagName)
 
 object TagRecord {
+  val softDelete: TagRecord =
+    TagRecord(TagId(-999L), TagName.unsafeFromString("System/Deleted"))
+
   private[activities] val table = fr"tag"
 
   private[activities] def columnList(alias: Option[String]): List[Fragment] = {

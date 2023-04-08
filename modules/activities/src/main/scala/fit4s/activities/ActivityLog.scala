@@ -35,6 +35,8 @@ trait ActivityLog[F[_]] {
       query: Option[ActivityQuery.Condition]
   ): F[Vector[ActivitySessionSummary]]
 
+  def deleteActivities(ids: NonEmptyList[ActivityId], hardDelete: Boolean): F[Int]
+
   def tagRepository: TagRepo[F]
 
   def locationRepository: LocationRepo[F]

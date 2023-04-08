@@ -13,6 +13,7 @@ This is a library for Scala 2.13 and 3.
   - can first look into the local database and cache results
   - is enough to have +-2000 semicircle accuracy
 - [ ] mima for the libraries
+- [x] delete (soft/hard) activties
 - [x] import strava export, tracking/storing the link to strava for each activity
   - if activity exists, add tags and other additional information
   - overwrite activity name + notes

@@ -31,7 +31,7 @@ object ActivityImport {
       _ <- NonEmptyList.fromList(tags.toList) match {
         case Some(nel) =>
           actId match {
-            case ImportResult.Success(id) => ActivityTagRecord.insert(id, nel)
+            case ImportResult.Success(id) => ActivityTagRecord.insert1(id, nel)
             case _                        => Sync[ConnectionIO].pure(0)
           }
         case None => Sync[ConnectionIO].pure(0)

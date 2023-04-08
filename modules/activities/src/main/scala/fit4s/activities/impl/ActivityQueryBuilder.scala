@@ -1,13 +1,13 @@
 package fit4s.activities.impl
 
-import doobie.{ConnectionIO, Fragment, Query0}
 import doobie.implicits._
+import doobie.{ConnectionIO, Fragment, Query0}
 import fit4s.activities.ActivityQuery
 import fit4s.activities.ActivityQuery.{Condition, OrderBy}
 import fit4s.activities.data.{ActivityId, ActivitySessionSummary, Page, TagName}
 import fit4s.activities.records._
-import fit4s.activities.records.DoobieMeta._
 import fs2.io.file.Path
+import DoobieMeta._
 
 object ActivityQueryBuilder {
 
@@ -31,10 +31,7 @@ object ActivityQueryBuilder {
         .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
     val select = fr"SELECT DISTINCT $cols"
     val from = join
-    val where = q.condition match {
-      case Some(c) => fr"WHERE" ++ condition(c)
-      case None    => Fragment.empty
-    }
+    val where = makeWhere(q.condition)
     val order = q.order match {
       case OrderBy.Distance  => fr"ORDER BY act.distance, act.id"
       case OrderBy.StartTime => fr"ORDER BY act.start_time desc, act.id"
@@ -71,10 +68,7 @@ object ActivityQueryBuilder {
            act.avg_cadence, act.avg_grade, act.iff, act.tss
         """
 
-    val where = q match {
-      case Some(c) => fr"WHERE" ++ condition(c)
-      case None    => Fragment.empty
-    }
+    val where = makeWhere(q)
 
     sql"""WITH
               session as ($select $join $where)
@@ -86,10 +80,7 @@ object ActivityQueryBuilder {
 
   def activityIdFragment(q: Option[ActivityQuery.Condition]) = {
     val select = sql"SELECT DISTINCT pa.id"
-    val where = q match {
-      case Some(c) => fr"WHERE" ++ condition(c)
-      case None    => Fragment.empty
-    }
+    val where = makeWhere(q)
     select ++ join ++ where
   }
 
@@ -99,12 +90,12 @@ object ActivityQueryBuilder {
     sql"""SELECT DISTINCT $cols
           FROM ${TagRecord.table} t
           INNER JOIN ${ActivityTagRecord.table} at ON at.tag_id = t.id
-          WHERE at.activity_id = $id"""
+          WHERE at.activity_id = $id AND t.id <> ${TagRecord.softDelete.id}"""
       .query[TagRecord]
       .to[Vector]
   }
 
-  def join: Fragment =
+  private def join: Fragment =
     sql"""
         FROM $activityT pa
         INNER JOIN $activitySessionT act ON act.activity_id = pa.id
@@ -112,6 +103,16 @@ object ActivityQueryBuilder {
         LEFT JOIN $activityTagT at ON at.activity_id = pa.id
         LEFT JOIN $tagT tag ON at.tag_id = tag.id
       """
+
+  private def makeWhere(cond: Option[Condition]): Fragment = {
+    val hideDeleted =
+      fr"WHERE (at.tag_id is null OR at.tag_id <> ${TagRecord.softDelete.id})"
+
+    cond match {
+      case Some(c) => hideDeleted ++ fr"AND" ++ condition(c)
+      case None    => hideDeleted
+    }
+  }
 
   def condition(c: Condition): Fragment =
     c match {

@@ -52,11 +52,7 @@ object ImportCmd extends SharedOpts {
           printFile,
           if (opts.parallel) maxConcurrent else 1
         )
-        .evalTap {
-          case ImportResult.Success(_) =>
-            if (opts.parallel) IO.unit else IO.println("ok.")
-          case err: ImportResult.Failure => IO.println(err.messages)
-        }
+        .evalTap(res => IO.println(res.show))
         .map(Result.apply)
         .compile
         .foldMonoid

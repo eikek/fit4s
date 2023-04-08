@@ -27,9 +27,17 @@ object ActivityTagRecord {
   private val colsNoId =
     columnList(None).tail.foldSmash1(Fragment.empty, sql",", Fragment.empty)
 
-  def insert(activityId: ActivityId, tagId: NonEmptyList[TagId]): ConnectionIO[Int] = {
-    val values = tagId.toList
-      .map(id => fr"($activityId, $id)")
+  def insert1(activityId: ActivityId, tagIds: NonEmptyList[TagId]): ConnectionIO[Int] = {
+    val values = tagIds.toList
+      .map(tagId => fr"($activityId, $tagId)")
+      .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
+
+    fr"INSERT INTO $table ($colsNoId) VALUES $values".update.run
+  }
+
+  def insert2(tagId: TagId, activityIds: NonEmptyList[ActivityId]): ConnectionIO[Int] = {
+    val values = activityIds.toList
+      .map(activityId => fr"($activityId, $tagId)")
       .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
 
     fr"INSERT INTO $table ($colsNoId) VALUES $values".update.run

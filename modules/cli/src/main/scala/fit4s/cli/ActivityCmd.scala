@@ -25,12 +25,16 @@ object ActivityCmd extends SharedOpts {
   val updateArgs: Opts[UpdateCmd.Options] =
     Opts.subcommand("update", "Import new fit files from known locations")(UpdateCmd.opts)
 
+  val deleteArgs: Opts[DeleteCmd.Options] =
+    Opts.subcommand("delete", "Delete activities by their ids")(DeleteCmd.opts)
+
   val opts = importArgs
     .map(Options.Import)
     .orElse(initArgs.as(Options.Init))
     .orElse(summaryArgs.map(Options.Summary))
     .orElse(listArgs.map(Options.List))
     .orElse(updateArgs.map(Options.Update))
+    .orElse(deleteArgs.map(Options.Delete))
 
   sealed trait Options extends Product
   object Options {
@@ -39,6 +43,7 @@ object ActivityCmd extends SharedOpts {
     final case object Init extends Options
     final case class List(cfg: ListCmd.Options) extends Options
     final case class Update(cfg: UpdateCmd.Options) extends Options
+    final case class Delete(cfg: DeleteCmd.Options) extends Options
   }
 
   def apply(cliCfg: CliConfig, cfg: Options): IO[ExitCode] =
@@ -48,5 +53,6 @@ object ActivityCmd extends SharedOpts {
       case Options.Init       => InitCmd.init(cliCfg)
       case Options.List(c)    => ListCmd(cliCfg, c)
       case Options.Update(c)  => UpdateCmd(cliCfg, c)
+      case Options.Delete(c)  => DeleteCmd(cliCfg, c)
     }
 }

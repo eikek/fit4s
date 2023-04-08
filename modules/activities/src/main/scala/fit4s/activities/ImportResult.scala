@@ -1,5 +1,7 @@
 package fit4s.activities
 
+import cats.Show
+import cats.syntax.all._
 import fit4s.ActivityReader
 import fit4s.activities.ImportResult.Failure
 import fit4s.activities.ImportResult.FailureReason.{ActivityDecodeError, FitReadError}
@@ -34,6 +36,17 @@ object ImportResult {
     final case class FitReadError(err: Err) extends FailureReason
     final case class ActivityDecodeError(err: ActivityReader.Failure)
         extends FailureReason
+
+    implicit val show: Show[FailureReason] =
+      Show.show {
+        case _: Duplicate      => "Duplicate"
+        case FitReadError(err) => err.messageWithContext
+        case ActivityDecodeError(_: ActivityReader.Failure.NoActivityFound) =>
+          "No activity"
+        case ActivityDecodeError(_: ActivityReader.Failure.NoFileIdFound) =>
+          "No file_id message"
+        case ActivityDecodeError(ActivityReader.Failure.GeneralError(msg)) => msg
+      }
   }
 
   def duplicate[A](
@@ -51,4 +64,10 @@ object ImportResult {
   )
 
   def success[A](value: A): ImportResult[A] = Success(value)
+
+  implicit def show[A]: Show[ImportResult[A]] =
+    Show.show {
+      case _: Success[_]   => "Ok"
+      case Failure(reason) => reason.show
+    }
 }

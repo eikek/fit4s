@@ -3,7 +3,7 @@ package fit4s.cli
 import cats.data.Validated
 import cats.syntax.all._
 import com.monovore.decline.{Argument, Opts}
-import fit4s.activities.data.{Page, TagName}
+import fit4s.activities.data.{ActivityId, Page, TagName}
 import fit4s.profile.types.Sport
 import fs2.io.file.Path
 
@@ -23,6 +23,9 @@ trait SharedOpts {
 
   implicit val pathArgument: Argument[Path] =
     Argument.readPath.map(Path.fromNioPath)
+
+  implicit val activityIdArgument: Argument[ActivityId] =
+    Argument.readLong.map(ActivityId.apply)
 
   val parallel: Opts[Boolean] =
     Opts.flag("parallel", "Whether to import using multiple threads").orFalse
