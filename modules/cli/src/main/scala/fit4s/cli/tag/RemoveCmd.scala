@@ -4,9 +4,9 @@ import cats.effect.{ExitCode, IO}
 import com.monovore.decline.Opts
 import fit4s.activities.ActivityLog
 import fit4s.activities.data.TagName
-import fit4s.cli.{BasicOpts, CliConfig}
+import fit4s.cli.{SharedOpts, CliConfig}
 
-object RemoveCmd extends BasicOpts {
+object RemoveCmd extends SharedOpts {
 
   case class Options(tag: TagName)
 

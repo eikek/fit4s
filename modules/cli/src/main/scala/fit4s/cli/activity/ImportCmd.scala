@@ -2,14 +2,16 @@ package fit4s.cli.activity
 
 import cats.data.NonEmptyList
 import cats.effect.{ExitCode, IO}
-import cats.kernel.Monoid
+import cats.Monoid
+import cats.syntax.all._
+import com.monovore.decline.Opts
 import fit4s.ActivityReader
 import fit4s.activities.data.{ActivityId, TagName}
 import fit4s.activities.{ActivityLog, ImportCallback, ImportResult}
-import fit4s.cli.{CliConfig, CliError}
+import fit4s.cli.{SharedOpts, CliConfig, CliError}
 import fs2.io.file.{Files, Path}
 
-object ImportCmd {
+object ImportCmd extends SharedOpts {
   private val maxConcurrent =
     math.max(1, Runtime.getRuntime.availableProcessors() - 2)
 
@@ -20,6 +22,14 @@ object ImportCmd {
       tags: List[TagName],
       parallel: Boolean
   )
+
+  val opts: Opts[Options] = {
+    val fileOrDirArgs: Opts[NonEmptyList[Path]] =
+      Opts
+        .arguments[java.nio.file.Path](metavar = "fileOrDirs")
+        .map(_.map(Path.fromNioPath))
+    (fileOrDirArgs, initialTags, parallel).mapN(Options)
+  }
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
     getDirectories(opts).flatMap { dirs =>

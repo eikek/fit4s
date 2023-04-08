@@ -11,12 +11,12 @@ object App
       header = "Read fit files.",
       version = "0.0.1"
     )
-    with BasicOpts {
+    with SharedOpts {
 
-  val inspectOpts: Opts[InspectCmd.Config] =
-    Opts.subcommand("inspect", "Inspect a FIT file by converting it to readable json.") {
-      fileArg.map(InspectCmd.Config.apply)
-    }
+  val inspectOpts: Opts[InspectCmd.Options] =
+    Opts.subcommand("inspect", "Inspect a FIT file by converting it to readable json.")(
+      InspectCmd.opts
+    )
 
   val activityOpts: Opts[ActivityCmd.Options] =
     Opts.subcommand("activity", "Look into activities") {
@@ -48,7 +48,7 @@ object App
 
   sealed trait SubCommandOpts
   object SubCommandOpts {
-    case class Inspect(opts: InspectCmd.Config) extends SubCommandOpts
+    case class Inspect(opts: InspectCmd.Options) extends SubCommandOpts
     case class Activity(opts: ActivityCmd.Options) extends SubCommandOpts
     case class Tag(opts: TagCmd.SubOpts) extends SubCommandOpts
   }

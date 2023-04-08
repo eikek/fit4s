@@ -2,13 +2,22 @@ package fit4s.cli.tag
 
 import cats.data.NonEmptyList
 import cats.effect.{Clock, ExitCode, IO}
+import cats.syntax.all._
+import com.monovore.decline.Opts
 import fit4s.activities.ActivityLog
 import fit4s.activities.data.TagName
-import fit4s.cli.{ActivitySelection, CliConfig, CliError}
+import fit4s.cli.{ActivitySelection, SharedOpts, CliConfig, CliError}
 
-object AddCmd {
+object AddCmd extends SharedOpts {
 
   final case class Options(query: ActivitySelection, tags: NonEmptyList[TagName])
+
+  val opts: Opts[Options] = {
+    val addTags =
+      Opts.options[TagName]("tag", help = "Add these tags to selected activities.")
+
+    (activitySelectionOps, addTags).mapN(AddCmd.Options)
+  }
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
     ActivityLog[IO](cliCfg.jdbcConfig, cliCfg.timezone).use { log =>
@@ -22,5 +31,4 @@ object AddCmd {
         _ <- IO.println("Done.")
       } yield ExitCode.Success
     }
-
 }

@@ -2,19 +2,25 @@ package fit4s.cli.activity
 
 import cats.effect._
 import cats.syntax.all._
+import com.monovore.decline.Opts
 import fit4s.activities.ActivityQuery.OrderBy
 import fit4s.activities.data.{ActivityListResult, Page}
 import fit4s.activities.records.ActivitySessionRecord
 import fit4s.activities.{ActivityLog, ActivityQuery}
 import fit4s.cli.FormatDefinition._
-import fit4s.cli.{ActivitySelection, CliConfig, CliError, Styles}
+import fit4s.cli.{ActivitySelection, SharedOpts, CliConfig, CliError, Styles}
 import fit4s.profile.types.Sport
 
 import java.time.ZoneId
 
-object ListCmd {
+object ListCmd extends SharedOpts {
 
   final case class Options(query: ActivitySelection, page: Page, filePathOnly: Boolean)
+
+  val opts: Opts[Options] = {
+    val filesOnly = Opts.flag("files-only", "Only print filenames").orFalse
+    (activitySelectionOps, pageOpts, filesOnly).mapN(Options)
+  }
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
     ActivityLog[IO](cliCfg.jdbcConfig, cliCfg.timezone).use { log =>

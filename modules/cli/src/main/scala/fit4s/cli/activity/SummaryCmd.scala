@@ -2,19 +2,23 @@ package fit4s.cli.activity
 
 import cats.effect.{Clock, ExitCode, IO}
 import cats.syntax.all._
+import com.monovore.decline.Opts
 import fit4s.activities.ActivityLog
 import fit4s.activities.data.ActivitySessionSummary
 import fit4s.cli.FormatDefinition._
-import fit4s.cli.{ActivitySelection, CliConfig, CliError, Styles}
+import fit4s.cli.{ActivitySelection, SharedOpts, CliConfig, CliError, Styles}
 import fit4s.profile.types.Sport
 
 import java.time.ZoneId
 
-object SummaryCmd {
+object SummaryCmd extends SharedOpts {
 
   final case class Options(
       query: ActivitySelection
   )
+
+  val opts: Opts[Options] =
+    activitySelectionOps.map(Options)
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
     ActivityLog[IO](cliCfg.jdbcConfig, cliCfg.timezone).use { log =>

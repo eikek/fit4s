@@ -1,6 +1,7 @@
 package fit4s.cli
 
 import cats.effect.{ExitCode, IO}
+import com.monovore.decline.Opts
 import fit4s.cli.JsonEncoder._
 import fit4s.{FitFile, MessageType}
 import fs2.io.file.{Files, Path}
@@ -9,11 +10,20 @@ import scodec.bits.ByteVector
 
 object InspectCmd {
 
-  final case class Config(
+  final case class Options(
       fitFile: Path
   )
 
-  def apply(cfg: Config): IO[ExitCode] =
+  val opts: Opts[Options] =
+    Opts
+      .argument[java.nio.file.Path](metavar = "file")
+      .map(Path.fromNioPath)
+      .validate(s"file must be a file")(p =>
+        !java.nio.file.Files.isDirectory(p.toNioPath)
+      )
+      .map(Options)
+
+  def apply(cfg: Options): IO[ExitCode] =
     for {
       fits <- reportError(readFit(cfg.fitFile))
       validOnly = fits.map(
