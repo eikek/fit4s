@@ -55,4 +55,10 @@ object TagRecord {
       .query[TagRecord]
       .streamWithChunkSize(100)
   }
+
+  def rename(from: TagName, to: TagName): ConnectionIO[Int] =
+    sql"UPDATE $table SET name = $to WHERE name = $from".update.run
+
+  def delete(tag: TagName): ConnectionIO[Int] =
+    sql"DELETE FROM $table WHERE name = $tag".update.run
 }

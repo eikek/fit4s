@@ -107,7 +107,7 @@ trait BasicOpts {
     (limit, offset).mapN(Page.apply)
   }
 
-  implicit private val sportArgument: Argument[Sport] =
+  implicit val sportArgument: Argument[Sport] =
     Argument.from[Sport]("sport") { str =>
       Sport.all.find(_.typeName.equalsIgnoreCase(str)) match {
         case Some(s) => Validated.validNel(s)
@@ -115,7 +115,7 @@ trait BasicOpts {
       }
     }
 
-  implicit private val tagNameArgument: Argument[TagName] =
+  implicit val tagNameArgument: Argument[TagName] =
     Argument.from[TagName]("tag") { str =>
       TagName.fromString(str).toValidatedNel
     }

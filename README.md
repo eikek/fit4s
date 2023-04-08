@@ -4,10 +4,11 @@ This is a library for Scala 2.13 and 3.
 
 ## TODO
 
-- [ ] better error when init was not called, or just do initialize
+- [x] better error when init was not called, or just do initialize
   - not really possible without perf impact by checking each time
     another command is used
   - well, could catch the exception and print something better
+  - this is already ok enough when the printStacktrace is gone
 - [ ] have json and pretty output
 - [x] update files from known locations
 - [x] list activities, option to list files only 
@@ -16,11 +17,10 @@ This is a library for Scala 2.13 and 3.
   - ask to overwrite activity name
 - [ ] web server and leaflet map view (same features, just web, scalajs)
 - [ ] publish to strava 
-- [ ] add/set/remove/rename tags
+- [x] add/remove/rename tags
 - [x] update command
 - [x] add LapMsg to database
 - [ ] cleanup playground test mess
-- [ ] catch logging from java.util.logging
 - [ ] reverse location lookup?
   - https://nominatim.openstreetmap.org/reverse?format=json&lat=30.4573699&lon=-97.8247654
   - it is allowed to do 1req/s
@@ -47,6 +47,7 @@ This is a library for Scala 2.13 and 3.
 - [x] add device to query
 - [x] fix fit parsing problems encountered when reading some older fenix5 files
   - were concatenated fit files where the latter contain HrMsg
+- [ ] catch logging from java.util.logging
 - [ ] remove hr data from fit files (so to upload without this data in them)
 - [ ] figure out how to decode HrMsg (reconstruct timestamps) and update records
 - [ ] scala3

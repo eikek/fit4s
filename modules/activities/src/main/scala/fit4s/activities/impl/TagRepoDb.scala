@@ -29,6 +29,10 @@ final class TagRepoDb[F[_]: Sync](xa: Transactor[F]) extends TagRepo[F] {
     TagRecord
       .listAll(contains.map(t => s"%${t.name}%"), page)
       .transact(xa)
-}
 
-object TagRepoDb {}
+  def rename(from: TagName, to: TagName): F[Boolean] =
+    TagRecord.rename(from, to).transact(xa).map(_ > 0)
+
+  def remove(tag: TagName): F[Int] =
+    TagRecord.delete(tag).transact(xa)
+}

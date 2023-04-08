@@ -12,4 +12,8 @@ trait TagRepo[F[_]] {
   ): F[Unit]
 
   def listTags(contains: Option[TagName], page: Page): Stream[F, TagRecord]
+
+  def rename(from: TagName, to: TagName): F[Boolean]
+
+  def remove(tag: TagName): F[Int]
 }
