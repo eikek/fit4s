@@ -168,3 +168,21 @@ alter table "activity_tag" add constraint "activity_tag_tag_id_fk"
 foreign key ("tag_id") references "tag"("id") on delete cascade;
 
 alter table "activity_tag" add constraint "activity_tag_uniq" unique("activity_id", "tag_id");
+
+-- ACTIVITY_STRAVA
+
+create table "activity_strava"(
+  "id" bigserial not null primary key,
+  "activity_id" bigint not null,
+  "strava_id" bigint not null
+);
+
+alter table "activity_strava" add constraint "activity_strava_activity_fkey"
+foreign key ("activity_id") references "activity"("id") on delete cascade;
+
+create index if not exists "activity_strava_strava_id_idx" on "activity_strava"("strava_id");
+
+alter table "activity_strava"
+ add constraint "activity_strava_strava_id_uniq" unique("strava_id");
+alter table "activity_strava"
+ add constraint "activity_strava_strava_id_activity_id_uniq" unique("activity_id", "strava_id");

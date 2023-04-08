@@ -40,7 +40,7 @@ object ImportCmd extends SharedOpts {
             dirs,
             if (opts.parallel) maxConcurrent else 1
           )
-          .evalTap(res => IO.println(res.show))
+          .evalTap(res => if (opts.parallel) IO.unit else IO.println(res.show))
           .map(Result.apply)
           .compile
           .foldMonoid

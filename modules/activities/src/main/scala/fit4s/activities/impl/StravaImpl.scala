@@ -10,6 +10,7 @@ import fit4s.activities.impl.StravaExportExtract.ExportData
 import fit4s.activities.records.{
   ActivityLocationRecord,
   ActivityRecord,
+  ActivityStravaRecord,
   ActivityTagRecord,
   TagRecord
 }
@@ -35,14 +36,24 @@ final class StravaImpl[F[_]: Async](zoneId: ZoneId, xa: Transactor[F])
         StravaExportExtract
           .activities[F](stravaExport)
       )
-      .flatMap(importFrom(stravaExport, bikeTagPrefix, shoeTagPrefix, commuteTag, tagged))
+      .flatMap(
+        importFrom(
+          stravaExport,
+          bikeTagPrefix,
+          shoeTagPrefix,
+          commuteTag,
+          tagged,
+          callback
+        )
+      )
 
   private def importFrom(
       exportLocation: Path,
       bikeTagPrefix: Option[TagName],
       shoeTagPrefix: Option[TagName],
       commuteTag: Option[TagName],
-      moreTags: Set[TagName]
+      moreTags: Set[TagName],
+      callback: ImportCallback[F]
   )(exportData: Vector[ExportData]): Stream[F, ImportResult[ActivityId]] = {
     val bikeTags = bikeTagPrefix
       .map(makeGearTags(exportData.flatMap(_.bike)))
@@ -66,6 +77,7 @@ final class StravaImpl[F[_]: Async](zoneId: ZoneId, xa: Transactor[F])
       (locId, allTags) <- Stream.eval(locationAndTag.transact(xa))
       now <- Stream.eval(Clock[F].realTimeInstant)
       entry <- Stream.emits(exportData)
+      _ <- Stream.eval(callback.onFile(entry.fitFile))
       entryTags = selectTagIds(allTags, bikeTagPrefix, shoeTagPrefix, commuteTag)(entry)
 
       cioResult <- FitFileImport.addSingle(
@@ -87,22 +99,28 @@ final class StravaImpl[F[_]: Async](zoneId: ZoneId, xa: Transactor[F])
                 .transact(xa)
                 .void
             }
-            .getOrElse(Async[F].unit) *> updateNameNotes(id, entry)
+            .getOrElse(Async[F].unit) *> updateStravaMeta(id, entry)
 
         case ImportResult.Success(id) =>
-          updateNameNotes(id, entry)
+          updateStravaMeta(id, entry)
 
         case _ => Async[F].unit
       })
     } yield result
   }
 
-  private def updateNameNotes(id: ActivityId, entry: ExportData): F[Unit] =
+  private def updateStravaMeta(id: ActivityId, entry: ExportData): F[Unit] =
     for {
       _ <- entry.name.traverse_(n => ActivityRecord.updateName(id, n).transact(xa))
       _ <- entry.description.traverse_(d =>
         ActivityRecord.updateNotes(id, d).transact(xa)
       )
+      _ <- entry.id
+        .traverse_ { stravaId =>
+          ActivityStravaRecord.removeForStravaId(stravaId) *>
+            ActivityStravaRecord.insert(id, stravaId)
+        }
+        .transact(xa)
     } yield ()
 
   private def selectTagIds(

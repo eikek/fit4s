@@ -106,10 +106,10 @@ object ActivityQueryBuilder {
 
   private def makeWhere(cond: Option[Condition]): Fragment = {
     val hideDeleted =
-      fr"WHERE (at.tag_id is null OR at.tag_id <> ${TagRecord.softDelete.id})"
+      fr"WHERE (tag.id is null OR tag.id <> ${TagRecord.softDelete.id})"
 
     cond match {
-      case Some(c) => hideDeleted ++ fr"AND" ++ condition(c)
+      case Some(c) => hideDeleted ++ fr"AND (" ++ condition(c) ++ sql")"
       case None    => hideDeleted
     }
   }

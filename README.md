@@ -4,6 +4,7 @@ This is a library for Scala 2.13 and 3.
 
 ## TODO
 
+- [ ] fix multi tag problem with negation
 - [ ] web server and leaflet map view (same features, just web, scalajs)
 - [ ] publish to strava 
 - [ ] cleanup playground test mess
