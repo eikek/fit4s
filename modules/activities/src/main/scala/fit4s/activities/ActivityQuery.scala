@@ -63,7 +63,9 @@ object ActivityQuery {
 
     case class MovedLE(time: Duration) extends Condition
 
-    case class NotesMatch(text: String) extends Condition
+    case class NotesContains(text: String) extends Condition
+
+    case class NameContains(text: String) extends Condition
 
     case class And(elements: Nel[Condition]) extends Condition
 

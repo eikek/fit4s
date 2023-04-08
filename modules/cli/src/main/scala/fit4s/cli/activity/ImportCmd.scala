@@ -1,14 +1,14 @@
 package fit4s.cli.activity
 
+import cats.Monoid
 import cats.data.NonEmptyList
 import cats.effect.{ExitCode, IO}
-import cats.Monoid
 import cats.syntax.all._
 import com.monovore.decline.Opts
 import fit4s.ActivityReader
 import fit4s.activities.data.{ActivityId, TagName}
 import fit4s.activities.{ActivityLog, ImportCallback, ImportResult}
-import fit4s.cli.{SharedOpts, CliConfig, CliError}
+import fit4s.cli.{CliConfig, CliError, SharedOpts}
 import fs2.io.file.{Files, Path}
 
 object ImportCmd extends SharedOpts {
@@ -25,9 +25,8 @@ object ImportCmd extends SharedOpts {
 
   val opts: Opts[Options] = {
     val fileOrDirArgs: Opts[NonEmptyList[Path]] =
-      Opts
-        .arguments[java.nio.file.Path](metavar = "fileOrDirs")
-        .map(_.map(Path.fromNioPath))
+      Opts.arguments[Path](metavar = "fileOrDirs")
+
     (fileOrDirArgs, initialTags, parallel).mapN(Options)
   }
 
@@ -72,7 +71,7 @@ object ImportCmd extends SharedOpts {
             case None =>
               IO.raiseError(
                 new CliError(
-                  s"Text file doesn't contain lines that are directories: ${options.fileOrDirectories.head}"
+                  s"Text file doesn't contain lines of directories: ${options.fileOrDirectories.head}"
                 )
               )
           }
@@ -101,8 +100,8 @@ object ImportCmd extends SharedOpts {
 
     def apply(r: ImportResult[ActivityId]): Result =
       r match {
-        case _: ImportResult.Success[_]                                       => success
-        case ImportResult.Failure(ImportResult.FailureReason.Duplicate(_, _)) => duplicate
+        case _: ImportResult.Success[_]                                    => success
+        case ImportResult.Failure(_: ImportResult.FailureReason.Duplicate) => duplicate
         case ImportResult.Failure(
               ImportResult.FailureReason.ActivityDecodeError(
                 ActivityReader.Failure.NoActivityFound(_, _)

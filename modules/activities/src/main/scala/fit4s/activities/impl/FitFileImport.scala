@@ -6,6 +6,7 @@ import doobie._
 import fit4s.activities.ImportResult
 import fit4s.activities.data.{ActivityId, LocationId, TagId}
 import fit4s.{ActivityReader, FitFile}
+import fs2.compression.Compression
 import fs2.io.file.{Files, Path}
 import fs2.{Chunk, Stream}
 import scodec.Attempt
@@ -53,13 +54,19 @@ object FitFileImport {
     }
 
   def readFitFile[F[_]: Sync: Files](file: Path): F[Attempt[List[FitFile]]] =
-    Files[F]
-      .readAll(file)
-      .compile
+    readFileOrGz[F](file).compile
       .foldChunks[Chunk[Byte]](Chunk.empty[Byte])(_ ++ _)
       .map(_.toByteVector)
       .map(FitFile.decode)
       .map(_.map(_.toList.filter(isMain)))
+
+  private def readFileOrGz[F[_]: Files: Compression](file: Path): Stream[F, Byte] =
+    if (file.extName.equalsIgnoreCase(".gz"))
+      Files[F]
+        .readAll(file)
+        .through(fs2.compression.Compression[F].gunzip())
+        .flatMap(_.content)
+    else Files[F].readAll(file)
 
   private def isMain(fit: FitFile) =
     fit.findFileId.isRight

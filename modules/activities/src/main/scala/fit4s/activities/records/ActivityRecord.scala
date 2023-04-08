@@ -92,4 +92,10 @@ object ActivityRecord {
 
   def latestImport: ConnectionIO[Option[Instant]] =
     sql"SELECT max(import_time) from $table".query[Instant].option
+
+  def updateName(id: ActivityId, name: String): ConnectionIO[Int] =
+    sql"UPDATE $table SET name = $name WHERE id = $id".update.run
+
+  def updateNotes(id: ActivityId, desc: String): ConnectionIO[Int] =
+    sql"UPDATE $table SET notes = $desc WHERE id = $id".update.run
 }

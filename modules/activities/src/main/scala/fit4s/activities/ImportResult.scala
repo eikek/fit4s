@@ -3,6 +3,7 @@ package fit4s.activities
 import fit4s.ActivityReader
 import fit4s.activities.ImportResult.Failure
 import fit4s.activities.ImportResult.FailureReason.{ActivityDecodeError, FitReadError}
+import fit4s.activities.data.ActivityId
 import fit4s.data.FileId
 import scodec.Err
 
@@ -28,14 +29,19 @@ object ImportResult {
 
   sealed trait FailureReason extends Product
   object FailureReason {
-    final case class Duplicate(ids: FileId, path: String) extends FailureReason
+    final case class Duplicate(id: ActivityId, fileId: FileId, path: String)
+        extends FailureReason
     final case class FitReadError(err: Err) extends FailureReason
     final case class ActivityDecodeError(err: ActivityReader.Failure)
         extends FailureReason
   }
 
-  def duplicate[A](id: FileId, path: String): ImportResult[A] = Failure(
-    FailureReason.Duplicate(id, path)
+  def duplicate[A](
+      activityId: ActivityId,
+      fileId: FileId,
+      path: String
+  ): ImportResult[A] = Failure(
+    FailureReason.Duplicate(activityId, fileId, path)
   )
 
   def readFitError[A](err: Err): ImportResult[A] = Failure(FitReadError(err))

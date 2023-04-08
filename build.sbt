@@ -118,7 +118,8 @@ lazy val activities = project
       Dependencies.catsParse ++
       Dependencies.h2 ++
       Dependencies.doobie ++
-      Dependencies.flyway
+      Dependencies.flyway ++
+      Dependencies.scalaCsv
   )
   .dependsOn(core % "compile->compile;test->test")
 

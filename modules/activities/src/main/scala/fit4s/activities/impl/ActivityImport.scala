@@ -68,7 +68,7 @@ object ActivityImport {
       } yield ImportResult.success(actId)
 
     OptionT(ActivityRecord.findByFileId(result.fileId))
-      .map(_ => ImportResult.duplicate(result.fileId, path))
+      .map(r => ImportResult.duplicate(r.id, result.fileId, path))
       .getOrElseF(insert)
   }
 

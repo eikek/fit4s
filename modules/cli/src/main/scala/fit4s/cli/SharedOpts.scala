@@ -5,6 +5,7 @@ import cats.syntax.all._
 import com.monovore.decline.{Argument, Opts}
 import fit4s.activities.data.{Page, TagName}
 import fit4s.profile.types.Sport
+import fs2.io.file.Path
 
 trait SharedOpts {
   implicit val sportArgument: Argument[Sport] =
@@ -19,6 +20,9 @@ trait SharedOpts {
     Argument.from[TagName]("tag") { str =>
       TagName.fromString(str).toValidatedNel
     }
+
+  implicit val pathArgument: Argument[Path] =
+    Argument.readPath.map(Path.fromNioPath)
 
   val parallel: Opts[Boolean] =
     Opts.flag("parallel", "Whether to import using multiple threads").orFalse

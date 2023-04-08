@@ -3,6 +3,9 @@ package fit4s.activities.data
 final class TagName private (val name: String) extends AnyVal {
 
   override def toString = name
+
+  def /(next: TagName): TagName =
+    TagName.unsafeFromString(s"$name/${next.name}")
 }
 
 object TagName {

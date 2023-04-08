@@ -35,8 +35,10 @@ object ActivityTagRecord {
     fr"INSERT INTO $table ($colsNoId) VALUES $values".update.run
   }
 
-  def remove(activityId: ActivityId, tagId: TagId): ConnectionIO[Int] =
-    fr"DELETE FROM $table WHERE activity_id = $activityId AND tag_id = $tagId".update.run
+  def remove(activityId: ActivityId, tags: NonEmptyList[TagId]): ConnectionIO[Int] = {
+    val tagIds = tags.map(id => sql"$id").foldSmash1(sql"(", sql", ", sql")")
+    fr"DELETE FROM $table WHERE activity_id = $activityId AND tag_id in $tagIds".update.run
+  }
 
   def removeTags(tags: List[TagId]): ConnectionIO[Int] =
     if (tags.isEmpty) Sync[ConnectionIO].pure(0)

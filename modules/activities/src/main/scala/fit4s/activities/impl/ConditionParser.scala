@@ -76,7 +76,11 @@ final class ConditionParser(val zoneId: ZoneId, currentTime: Instant)
 
   val notesCondition: Parser[Condition] =
     (Parser.stringIn(List("notes=", "notes:")).void *> BasicParser.qstring)
-      .map(NotesMatch)
+      .map(NotesContains)
+
+  val nameCondition: Parser[Condition] =
+    (Parser.stringIn(List("name=", "name:")).void *> BasicParser.qstring)
+      .map(NameContains)
 
   val deviceMatchCondition: Parser[Condition] =
     (Parser.stringIn(List("device=", "dev=")) *> device).map(DeviceMatch)
@@ -107,6 +111,7 @@ final class ConditionParser(val zoneId: ZoneId, currentTime: Instant)
         distanceCondition ::
         durationCondition ::
         notesCondition ::
+        nameCondition ::
         deviceMatchCondition ::
         idCondition :: Nil
     )

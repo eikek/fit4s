@@ -21,8 +21,13 @@ object Dependencies {
     val catsCore = "2.9.0"
     val fs2 = "3.6.1"
     val scalaCheck = "1.17.0"
+    val scalaCsv = "1.3.10"
     val organizeImports = "0.6.0"
   }
+
+  val scalaCsv = Seq(
+    "com.github.tototoshi" %% "scala-csv" % V.scalaCsv
+  )
 
   val ciris = Seq(
     "is.cir" %% "ciris" % V.ciris

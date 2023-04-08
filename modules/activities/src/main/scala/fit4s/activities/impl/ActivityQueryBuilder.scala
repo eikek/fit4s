@@ -117,21 +117,24 @@ object ActivityQueryBuilder {
     c match {
       case Condition.TagAllStarts(names) =>
         combineFragments(
-          names.toList.map(name => fr"tag.name like ${wildcardEnd(name)}"),
+          names.toList.map(name => fr"tag.name ilike ${wildcardEnd(name)}"),
           fr" AND "
         )
 
       case Condition.TagAnyStarts(names) =>
         combineFragments(
-          names.toList.map(name => fr"tag.name like ${wildcardEnd(name)}"),
+          names.toList.map(name => fr"tag.name ilike ${wildcardEnd(name)}"),
           fr" OR "
         )
 
       case Condition.TagAllMatch(names) =>
-        combineFragments(names.toList.map(n => fr"tag.name = $n"), fr" AND ")
+        combineFragments(
+          names.toList.map(n => fr"lower(tag.name) = lower($n)"),
+          fr" AND "
+        )
 
       case Condition.TagAnyMatch(names) =>
-        combineFragments(names.toList.map(n => fr"tag.name = $n"), fr" OR ")
+        combineFragments(names.toList.map(n => fr"lower(tag.name) = lower($n)"), fr" OR ")
 
       case Condition.LocationAllMatch(nel) =>
         combineFragments(nel.toList.map(l => fr"loc.location = $l"), fr" AND ")
@@ -187,8 +190,11 @@ object ActivityQueryBuilder {
       case Condition.MovedLE(t) =>
         fr"act.moving_time <= $t"
 
-      case Condition.NotesMatch(text) =>
-        fr"pa.notes like ${wildcard(text)}"
+      case Condition.NotesContains(text) =>
+        fr"pa.notes ilike ${wildcard(text)}"
+
+      case Condition.NameContains(text) =>
+        fr"pa.name ilike ${wildcard(text)}"
 
       case Condition.DeviceMatch(device) =>
         fr"pa.device = $device"

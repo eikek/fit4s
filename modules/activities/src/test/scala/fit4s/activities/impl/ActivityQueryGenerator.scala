@@ -64,7 +64,8 @@ object ActivityQueryGenerator {
       durationGen.map(ElapsedLE),
       durationGen.map(MovedLE),
       durationGen.map(MovedGE),
-      textGen.map(NotesMatch)
+      textGen.map(NotesContains),
+      textGen.map(NameContains)
     )
 
   def activityIdGen: Gen[ActivityId] =

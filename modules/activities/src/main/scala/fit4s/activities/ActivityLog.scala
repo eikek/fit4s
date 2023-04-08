@@ -38,6 +38,8 @@ trait ActivityLog[F[_]] {
   def tagRepository: TagRepo[F]
 
   def locationRepository: LocationRepo[F]
+
+  def strava: StravaSupport[F]
 }
 
 object ActivityLog {
