@@ -65,6 +65,14 @@ trait SharedOpts {
 
     (limit, offset).mapN(Page.apply)
   }
+
+  val outputFormatOpts: Opts[OutputFormat] = {
+    val json = Opts.flag("json", "Print results in JSON").as(OutputFormat.Json)
+    val text =
+      Opts.flag("text", "Print results in human readable form").as(OutputFormat.Text)
+
+    json.orElse(text).withDefault(OutputFormat.Text)
+  }
 }
 
 object SharedOpts extends SharedOpts

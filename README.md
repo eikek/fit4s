@@ -9,7 +9,7 @@ This is a library for Scala 2.13 and 3.
     another command is used
   - well, could catch the exception and print something better
   - this is already ok enough when the printStacktrace is gone
-- [ ] have json and pretty output
+- [x] have json and pretty output
 - [x] update files from known locations
 - [x] list activities, option to list files only 
 - [ ] import strava export, tracking/storing the link to strava for each activity

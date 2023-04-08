@@ -8,18 +8,24 @@ import fit4s.activities.data.{ActivityListResult, Page}
 import fit4s.activities.records.ActivitySessionRecord
 import fit4s.activities.{ActivityLog, ActivityQuery}
 import fit4s.cli.FormatDefinition._
-import fit4s.cli.{ActivitySelection, SharedOpts, CliConfig, CliError, Styles}
+import fit4s.cli._
 import fit4s.profile.types.Sport
+import io.circe.syntax.EncoderOps
 
 import java.time.ZoneId
 
 object ListCmd extends SharedOpts {
 
-  final case class Options(query: ActivitySelection, page: Page, filePathOnly: Boolean)
+  final case class Options(
+      query: ActivitySelection,
+      page: Page,
+      filePathOnly: Boolean,
+      format: OutputFormat
+  )
 
   val opts: Opts[Options] = {
     val filesOnly = Opts.flag("files-only", "Only print filenames").orFalse
-    (activitySelectionOps, pageOpts, filesOnly).mapN(Options)
+    (activitySelectionOps, pageOpts, filesOnly, outputFormatOpts).mapN(Options)
   }
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
@@ -35,12 +41,24 @@ object ListCmd extends SharedOpts {
         list = log.activityList(ActivityQuery(query, OrderBy.StartTime, opts.page))
 
         _ <- list
-          .map(makeString(zone, opts.filePathOnly))
-          .evalMap(IO.println)
+          .evalMap(
+            opts.format.fold(
+              printJson(opts.filePathOnly),
+              printText(zone, opts.filePathOnly)
+            )
+          )
           .compile
           .drain
       } yield ExitCode.Success
     }
+
+  def printJson(filesOnly: Boolean): ActivityListResult => IO[Unit] = {
+    if (filesOnly) (filePathString _).andThen(_.asJson).andThen(IO.println)
+    (ActivityListResultJson.encode _).andThen(_.spaces2).andThen(IO.println)
+  }
+
+  def printText(zoneId: ZoneId, filesOnly: Boolean): ActivityListResult => IO[Unit] =
+    (makeString(zoneId, filesOnly) _).andThen(IO.println)
 
   def makeString(zoneId: ZoneId, filesOnly: Boolean)(r: ActivityListResult): String =
     if (filesOnly) filePathString(r)

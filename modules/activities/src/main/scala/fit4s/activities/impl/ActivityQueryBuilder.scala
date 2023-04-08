@@ -57,7 +57,7 @@ object ActivityQueryBuilder {
            min(act.min_temp), max(act.max_temp), avg(act.avg_temp),
            min(act.min_hr), max(act.max_hr), avg(act.avg_hr), max(act.max_speed),
            avg(act.avg_speed), max(act.max_power), avg(act.avg_power), avg(act.norm_power),
-           avg(act.avg_grade), avg(act.iff), avg(act.tss),
+           avg(act.avg_cadence), avg(act.avg_grade), avg(act.iff), avg(act.tss),
            count(act.id)
         """
 
@@ -68,7 +68,7 @@ object ActivityQueryBuilder {
            act.min_temp, act.max_temp, act.avg_temp,
            act.min_hr, act.max_hr, act.avg_hr, act.max_speed,
            act.avg_speed, act.max_power, act.avg_power, act.norm_power,
-           act.avg_grade, act.iff, act.tss
+           act.avg_cadence, act.avg_grade, act.iff, act.tss
         """
 
     val where = q match {

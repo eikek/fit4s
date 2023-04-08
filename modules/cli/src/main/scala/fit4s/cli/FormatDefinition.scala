@@ -142,6 +142,17 @@ trait FormatDefinition {
       case DeviceProduct.Unknown   => "-"
     }
 
+  implicit val powerShow: Show[Power] =
+    Show.show { pwr =>
+      s"${pwr.watts}W"
+    }
+
+  implicit val cadenceShow: Show[Cadence] =
+    Show.show(c => s"${c.rpm}rpm")
+
+  implicit val strokesPerLapShow: Show[StrokesPerLap] =
+    Show.show(spl => s"${spl.spl} strokes/lap")
+
   implicit val tagVectorShow: Show[Vector[TagRecord]] =
     Show.show { records =>
       records.map(_.name.name).sorted.mkString("[", ",", "]")
