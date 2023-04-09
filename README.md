@@ -4,16 +4,16 @@ This is a library for Scala 2.13 and 3.
 
 ## TODO
 
-- [ ] fix multi tag problem with negation
-- [ ] web server and leaflet map view (same features, just web, scalajs)
 - [ ] publish to strava 
-- [ ] cleanup playground test mess
+- [ ] web server and leaflet map view (same features, just web, scalajs)
 - [ ] reverse location lookup?
   - https://nominatim.openstreetmap.org/reverse?format=json&lat=30.4573699&lon=-97.8247654
   - it is allowed to do 1req/s
   - can first look into the local database and cache results
   - is enough to have +-2000 semicircle accuracy
 - [ ] mima for the libraries
+- [x] cleanup playground test mess
+- [x] fix multi tag problem with negation
 - [x] delete (soft/hard) activties
 - [x] import strava export, tracking/storing the link to strava for each activity
   - if activity exists, add tags and other additional information
