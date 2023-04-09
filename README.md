@@ -7,7 +7,7 @@ This is a library for Scala 2.13 and 3.
 - [ ] publish to strava 
 - [ ] web server and leaflet map view (same features, just web, scalajs)
 - [ ] reverse location lookup?
-  - https://nominatim.openstreetmap.org/reverse?format=json&lat=30.4573699&lon=-97.8247654
+  - https://nominatim.openstreetmap.org/reverse?format=json&lat=47.4573699&lon=8.4247654
   - it is allowed to do 1req/s
   - can first look into the local database and cache results
   - is enough to have +-2000 semicircle accuracy

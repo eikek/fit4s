@@ -106,6 +106,22 @@ lazy val core = project
     Compile / sourceGenerators += generateProfile.taskValue
   )
 
+lazy val geocode = project
+  .in(file("modules/geocode"))
+  .settings(sharedSettings)
+  .settings(testSettings)
+  .settings(scalafixSettings)
+  .settings(
+    name := "fit4s-geocode",
+    description := "Uses webservices to reverse lookup coordinates",
+    libraryDependencies ++=
+      Dependencies.http4sClient ++
+        Dependencies.fs2Core ++
+        Dependencies.circe ++
+        Dependencies.http4sCirce
+  )
+  .dependsOn(core)
+
 lazy val activities = project
   .in(file("modules/activities"))
   .settings(sharedSettings)
@@ -121,7 +137,10 @@ lazy val activities = project
       Dependencies.flyway ++
       Dependencies.scalaCsv
   )
-  .dependsOn(core % "compile->compile;test->test")
+  .dependsOn(
+    core % "compile->compile;test->test",
+    geocode % "compile->compile;test->test"
+  )
 
 lazy val cli = project
   .in(file("modules/cli"))
@@ -145,4 +164,4 @@ lazy val root = project
   .settings(
     name := "fit4s-root"
   )
-  .aggregate(core, activities, cli)
+  .aggregate(core, geocode, activities, cli)

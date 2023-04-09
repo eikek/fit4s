@@ -11,6 +11,7 @@ object Dependencies {
     val ciris = "3.1.0"
     val decline = "2.4.1"
     val doobie = "1.0.0-RC2"
+    val http4sClient = "0.23.18"
     val flyway = "9.16.1"
     val h2 = "2.1.214"
     val munit = "0.7.29"
@@ -24,6 +25,13 @@ object Dependencies {
     val scalaCsv = "1.3.10"
     val organizeImports = "0.6.0"
   }
+
+  val http4sClient = Seq(
+    "org.http4s" %% "http4s-ember-client" % V.http4sClient
+  )
+  val http4sCirce = Seq(
+    "org.http4s" %% "http4s-circe" % V.http4sClient
+  )
 
   val scalaCsv = Seq(
     "com.github.tototoshi" %% "scala-csv" % V.scalaCsv
