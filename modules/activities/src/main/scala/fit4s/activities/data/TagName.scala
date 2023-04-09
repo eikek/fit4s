@@ -6,6 +6,9 @@ final class TagName private (val name: String) extends AnyVal {
 
   def /(next: TagName): TagName =
     TagName.unsafeFromString(s"$name/${next.name}")
+
+  def toLowerCase: TagName =
+    new TagName(name.toLowerCase)
 }
 
 object TagName {
