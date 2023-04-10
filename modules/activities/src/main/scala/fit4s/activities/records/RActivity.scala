@@ -9,7 +9,7 @@ import fit4s.data.{DeviceProduct, FileId}
 
 import java.time.{Duration, Instant}
 
-case class ActivityRecord(
+case class RActivity(
     id: ActivityId,
     locationId: LocationId,
     path: String,
@@ -24,7 +24,7 @@ case class ActivityRecord(
     importDate: Instant
 )
 
-object ActivityRecord {
+object RActivity {
   def apply(
       id: ActivityId,
       locationId: LocationId,
@@ -35,7 +35,7 @@ object ActivityRecord {
       totalTime: Duration,
       notes: Option[String],
       importDate: Instant
-  ): ActivityRecord = ActivityRecord(
+  ): RActivity = RActivity(
     id,
     locationId,
     path,
@@ -74,21 +74,21 @@ object ActivityRecord {
   private val columnsNoId =
     columnList(None).tail.foldSmash1(Fragment.empty, sql",", Fragment.empty)
 
-  def insert(r: ActivityRecord): ConnectionIO[ActivityId] =
+  def insert(r: RActivity): ConnectionIO[ActivityId] =
     (sql"INSERT INTO $table ($columnsNoId) VALUES " ++
       sql"(${r.locationId}, ${r.path}, ${r.activityFileId}, ${r.device}, " ++
       sql"${r.serialNumber}, ${r.created}, ${r.name}, ${r.timestamp}, ${r.totalTime}, " ++
       sql"${r.notes}, ${r.importDate})").update
       .withUniqueGeneratedKeys[ActivityId]("id")
 
-  def findById(id: ActivityId): ConnectionIO[Option[ActivityRecord]] =
+  def findById(id: ActivityId): ConnectionIO[Option[RActivity]] =
     fr"SELECT $columnsWithId FROM $table WHERE id = $id"
-      .query[ActivityRecord]
+      .query[RActivity]
       .option
 
-  def findByFileId(fileId: FileId): ConnectionIO[Option[ActivityRecord]] =
+  def findByFileId(fileId: FileId): ConnectionIO[Option[RActivity]] =
     sql"SELECT $columnsWithId FROM $table WHERE file_id = $fileId"
-      .query[ActivityRecord]
+      .query[RActivity]
       .option
 
   def latestImport: ConnectionIO[Option[Instant]] =

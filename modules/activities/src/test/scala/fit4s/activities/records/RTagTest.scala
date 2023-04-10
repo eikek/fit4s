@@ -5,7 +5,7 @@ import doobie.implicits._
 import fit4s.activities.data.{TagId, TagName}
 import fit4s.activities.{DatabaseTest, FlywayMigrate}
 
-class TagRecordTest extends DatabaseTest {
+class RTagTest extends DatabaseTest {
   override def munitFixtures = List(h2DataSource)
 
   test("insert record") {
@@ -14,14 +14,14 @@ class TagRecordTest extends DatabaseTest {
       for {
         _ <- FlywayMigrate[IO](jdbc).run
         tag = TagName.unsafeFromString("a-tag")
-        record <- TagRecord.insert(tag).transact(xa)
+        record <- RTag.insert(tag).transact(xa)
         _ = assertEquals(record.id, TagId(1L))
         _ = assertEquals(record.name, tag)
 
-        found <- TagRecord.find(tag).transact(xa)
+        found <- RTag.find(tag).transact(xa)
         _ = assertEquals(found, Some(record))
 
-        exists <- TagRecord.exists(tag).transact(xa)
+        exists <- RTag.exists(tag).transact(xa)
         _ = assert(exists)
       } yield ()
     }

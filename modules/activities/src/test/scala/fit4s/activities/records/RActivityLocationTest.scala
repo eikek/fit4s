@@ -7,7 +7,7 @@ import fit4s.activities.{DatabaseTest, FlywayMigrate}
 import fs2.Chunk
 import fs2.io.file.Path
 
-class ActivityLocationRecordTest extends DatabaseTest {
+class RActivityLocationTest extends DatabaseTest {
   override def munitFixtures = List(h2DataSource)
 
   test("insert record") {
@@ -16,14 +16,14 @@ class ActivityLocationRecordTest extends DatabaseTest {
       val location = Path("/home/user/test")
       for {
         _ <- FlywayMigrate[IO](jdbc).run
-        record <- ActivityLocationRecord.insert(location).transact(xa)
+        record <- RActivityLocation.insert(location).transact(xa)
         _ = assertEquals(record.id, LocationId(1L))
         _ = assertEquals(record.location, location)
 
-        found <- ActivityLocationRecord.find(location).transact(xa)
+        found <- RActivityLocation.find(location).transact(xa)
         _ = assertEquals(found, Some(record))
 
-        exists <- ActivityLocationRecord.exists(location).transact(xa)
+        exists <- RActivityLocation.exists(location).transact(xa)
         _ = assert(exists)
       } yield ()
     }
@@ -36,13 +36,13 @@ class ActivityLocationRecordTest extends DatabaseTest {
         _ <- FlywayMigrate[IO](jdbc).run
         _ <- sql"DELETE FROM activity_location".update.run.transact(xa)
         locations = Chunk("/home/a", "/home/b", "/home/c").map(Path.apply)
-        records <- ActivityLocationRecord
+        records <- RActivityLocation
           .insertAll(locations)
           .transact(xa)
           .compile
           .toVector
 
-        all <- ActivityLocationRecord.listAll.transact(xa)
+        all <- RActivityLocation.listAll.transact(xa)
         _ = assertEquals(records.sortBy(_.id), all.sortBy(_.id))
       } yield ()
     }

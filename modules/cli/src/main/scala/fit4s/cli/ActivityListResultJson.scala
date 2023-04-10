@@ -15,7 +15,7 @@ object ActivityListResultJson {
       "tags" -> r.tags.asJson
     )
 
-  implicit def sessionEncoder: Encoder[ActivitySessionRecord] =
+  implicit def sessionEncoder: Encoder[RActivitySession] =
     Encoder.instance { s =>
       implicit val sport = s.sport
       Json.obj(
@@ -53,7 +53,7 @@ object ActivityListResultJson {
       )
     }
 
-  implicit def activityEncoder: Encoder[(ActivityRecord, ActivityLocationRecord)] =
+  implicit def activityEncoder: Encoder[(RActivity, RActivityLocation)] =
     Encoder.instance { case (a, loc) =>
       Json.obj(
         "id" -> a.id.asJson,
@@ -70,7 +70,7 @@ object ActivityListResultJson {
       )
     }
 
-  implicit def tagEncoder: Encoder[TagRecord] =
+  implicit def tagEncoder: Encoder[RTag] =
     Encoder.encodeString.contramap(_.name.name)
 
 }

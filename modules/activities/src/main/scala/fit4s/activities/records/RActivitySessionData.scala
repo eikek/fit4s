@@ -8,7 +8,7 @@ import DoobieMeta._
 
 import java.time.Instant
 
-final case class ActivitySessionDataRecord(
+final case class RActivitySessionData(
     id: ActivitySessionDataId,
     activitySessionId: ActivitySessionId,
     timestamp: Instant,
@@ -24,7 +24,7 @@ final case class ActivitySessionDataRecord(
     calories: Option[Calories]
 )
 
-object ActivitySessionDataRecord {
+object RActivitySessionData {
   private[activities] val table = fr"activity_session_data"
   private[activities] def columnList(alias: Option[String]): List[Fragment] = {
     def c(name: String): Fragment =
@@ -51,7 +51,7 @@ object ActivitySessionDataRecord {
   private val columnsNoId =
     columnList(None).tail.foldSmash1(Fragment.empty, fr",", Fragment.empty)
 
-  def insert(r: ActivitySessionDataRecord): ConnectionIO[ActivitySessionDataId] =
+  def insert(r: RActivitySessionData): ConnectionIO[ActivitySessionDataId] =
     (sql"INSERT INTO $table ($columnsNoId) VALUES (" ++
       sql"${r.activitySessionId}, ${r.timestamp}, ${r.position.map(_.latitude)}, " ++
       sql"${r.position.map(_.longitude)}, ${r.altitude}, ${r.heartRate}, " ++

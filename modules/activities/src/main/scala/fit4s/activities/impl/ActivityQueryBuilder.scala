@@ -12,23 +12,23 @@ import cats.data.NonEmptyList
 
 object ActivityQueryBuilder {
 
-  val activityT = ActivityRecord.table
-  val activitySessionT = ActivitySessionRecord.table
-  val activityLocT = ActivityLocationRecord.table
-  val tagT = TagRecord.table
-  val activityTagT = ActivityTagRecord.table
+  val activityT = RActivity.table
+  val activitySessionT = RActivitySession.table
+  val activityLocT = RActivityLocation.table
+  val tagT = RTag.table
+  val activityTagT = RActivityTag.table
 
   def buildQuery(
       q: ActivityQuery
-  ): Query0[(ActivityRecord, ActivityLocationRecord, ActivitySessionRecord)] =
+  ): Query0[(RActivity, RActivityLocation, RActivitySession)] =
     selectFragment(q)
-      .query[(ActivityRecord, ActivityLocationRecord, ActivitySessionRecord)]
+      .query[(RActivity, RActivityLocation, RActivitySession)]
 
   def selectFragment(q: ActivityQuery): Fragment = {
     val cols =
-      (ActivityRecord.columnList(Some("pa")) :::
-        ActivityLocationRecord.columnList(Some("loc")) :::
-        ActivitySessionRecord.columnList(Some("act")))
+      (RActivity.columnList(Some("pa")) :::
+        RActivityLocation.columnList(Some("loc")) :::
+        RActivitySession.columnList(Some("act")))
         .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
     val select = fr"SELECT DISTINCT $cols"
     val from = join
@@ -85,14 +85,14 @@ object ActivityQueryBuilder {
     select ++ join ++ where
   }
 
-  def tagsForActivity(id: ActivityId): ConnectionIO[Vector[TagRecord]] = {
+  def tagsForActivity(id: ActivityId): ConnectionIO[Vector[RTag]] = {
     val cols =
-      TagRecord.columnList(Some("t")).foldSmash1(Fragment.empty, sql", ", Fragment.empty)
+      RTag.columnList(Some("t")).foldSmash1(Fragment.empty, sql", ", Fragment.empty)
     sql"""SELECT DISTINCT $cols
-          FROM ${TagRecord.table} t
-          INNER JOIN ${ActivityTagRecord.table} at ON at.tag_id = t.id
-          WHERE at.activity_id = $id AND t.id <> ${TagRecord.softDelete.id}"""
-      .query[TagRecord]
+          FROM ${RTag.table} t
+          INNER JOIN ${RActivityTag.table} at ON at.tag_id = t.id
+          WHERE at.activity_id = $id AND t.id <> ${RTag.softDelete.id}"""
+      .query[RTag]
       .to[Vector]
   }
 
@@ -104,7 +104,7 @@ object ActivityQueryBuilder {
       """
 
   private def makeWhere(cond: Option[Condition]): Fragment = {
-    val hideTags = NonEmptyList.of(TagRecord.softDelete.id)
+    val hideTags = NonEmptyList.of(RTag.softDelete.id)
     val hideDeleted =
       fr"WHERE (pa.id not in (${activitiesWithAllTagIds(hideTags)}))"
 

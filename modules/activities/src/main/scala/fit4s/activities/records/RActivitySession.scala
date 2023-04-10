@@ -2,51 +2,52 @@ package fit4s.activities.records
 
 import doobie._
 import doobie.implicits._
-import fit4s.activities.data.{ActivityLapId, ActivitySessionId}
+import fit4s.activities.data.{ActivityId, ActivitySessionId}
 import fit4s.activities.records.DoobieMeta._
 import fit4s.data._
 import fit4s.profile.types._
 
 import java.time.{Duration, Instant}
 
-final case class ActivityLapRecord(
-    id: ActivityLapId,
-    activitySessionId: ActivitySessionId,
+final case class RActivitySession(
+    id: ActivitySessionId,
+    activityId: ActivityId,
     sport: Sport,
     subSport: SubSport,
-    trigger: Option[LapTrigger],
     startTime: Instant,
     endTime: Instant,
-    startPosition: Option[Position],
-    endPosition: Option[Position],
-    movingTime: Option[Duration],
-    elapsedTime: Option[Duration],
-    calories: Calories,
+    movingTime: Duration,
+    elapsedTime: Duration,
     distance: Distance,
+    startPosition: Option[Position],
+    calories: Calories,
+    totalAscend: Option[Distance],
+    totalDescend: Option[Distance],
     minTemp: Option[Temperature],
     maxTemp: Option[Temperature],
     avgTemp: Option[Temperature],
-    maxSpeed: Option[Speed],
-    avgSpeed: Option[Speed],
     minHr: Option[HeartRate],
     maxHr: Option[HeartRate],
     avgHr: Option[HeartRate],
+    maxSpeed: Option[Speed],
+    avgSpeed: Option[Speed],
     maxPower: Option[Power],
     avgPower: Option[Power],
     normPower: Option[Power],
     maxCadence: Option[Cadence],
     avgCadence: Option[Cadence],
-    totalAscend: Option[Distance],
-    totalDescend: Option[Distance],
+    tss: Option[TrainingStressScore],
     numPoolLength: Option[Int],
+    iff: Option[IntensityFactor],
     swimStroke: Option[SwimStroke],
     avgStrokeDistance: Option[Distance],
-    strokeCount: Option[Int],
+    avgStrokeCount: Option[StrokesPerLap],
+    poolLength: Option[Distance],
     avgGrade: Option[Percent]
 )
 
-object ActivityLapRecord {
-  private[activities] val table = fr"activity_lap"
+object RActivitySession {
+  private[activities] val table = fr"activity_session"
   private val columns = columnList(None).tail
     .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
 
@@ -57,59 +58,56 @@ object ActivityLapRecord {
     def c(name: String) = Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))
     List(
       c("id"),
-      c("activity_session_id"),
+      c("activity_id"),
       c("sport"),
       c("sub_sport"),
-      c("trigger"),
       c("start_time"),
       c("end_time"),
-      c("start_pos_lat"),
-      c("start_pos_long"),
-      c("end_pos_lat"),
-      c("end_pos_long"),
       c("moving_time"),
       c("elapsed_time"),
-      c("calories"),
       c("distance"),
+      c("start_pos_lat"),
+      c("start_pos_long"),
+      c("calories"),
+      c("total_ascend"),
+      c("total_descend"),
       c("min_temp"),
       c("max_temp"),
       c("avg_temp"),
-      c("max_speed"),
-      c("avg_speed"),
       c("min_hr"),
       c("max_hr"),
       c("avg_hr"),
+      c("max_speed"),
+      c("avg_speed"),
       c("max_power"),
       c("avg_power"),
       c("norm_power"),
       c("max_cadence"),
       c("avg_cadence"),
-      c("total_ascend"),
-      c("total_descend"),
+      c("tss"),
       c("num_pool_len"),
+      c("iff"),
       c("swim_stroke"),
       c("avg_stroke_distance"),
-      c("stroke_count"),
+      c("avg_stroke_count"),
+      c("pool_length"),
       c("avg_grade")
     )
   }
 
-  def insert(r: ActivityLapRecord): ConnectionIO[ActivityLapId] =
+  def insert(r: RActivitySession): ConnectionIO[ActivitySessionId] =
     (fr"INSERT INTO $table ($columns) VALUES(" ++
-      fr"${r.activitySessionId}, ${r.sport}, ${r.subSport}, ${r.trigger}, ${r.startTime}, ${r.endTime}, " ++
-      fr"${r.startPosition.map(_.latitude)}, ${r.startPosition.map(_.longitude)}, " ++
-      fr"${r.endPosition.map(_.latitude)}, ${r.endPosition.map(_.longitude)}, " ++
-      fr"${r.movingTime}, ${r.elapsedTime}, ${r.calories}, ${r.distance}, " ++
-      fr"${r.minTemp}, ${r.maxTemp}, ${r.avgTemp}, ${r.maxSpeed}, ${r.avgSpeed}," ++
-      fr"${r.minHr}, ${r.maxHr}, ${r.avgHr}, ${r.maxPower}, ${r.avgPower}, ${r.normPower}," ++
-      fr"${r.maxCadence}, ${r.avgCadence}, ${r.totalAscend}, ${r.totalDescend}," ++
-      fr"${r.numPoolLength}, ${r.swimStroke}, ${r.avgStrokeDistance}, ${r.strokeCount}," ++
-      fr"${r.avgGrade}" ++
-      fr")").update.withUniqueGeneratedKeys[ActivityLapId]("id")
+      fr"${r.activityId}, ${r.sport}, ${r.subSport}, ${r.startTime}, ${r.endTime}, ${r.movingTime}, ${r.elapsedTime}, ${r.distance}, " ++
+      fr"${r.startPosition.map(_.latitude)}, ${r.startPosition.map(_.longitude)}, ${r.calories}, " ++
+      fr"${r.totalAscend}, ${r.totalDescend}, ${r.minTemp}, ${r.maxTemp}, ${r.avgTemp}, ${r.minHr}, ${r.maxHr}, " ++
+      fr"${r.avgHr}, ${r.maxSpeed}, ${r.avgSpeed}, ${r.maxPower}, ${r.avgPower}, ${r.normPower}," ++
+      fr"${r.maxCadence}, ${r.avgCadence}, ${r.tss}, ${r.numPoolLength}, ${r.iff}, ${r.swimStroke}, ${r.avgStrokeDistance}," ++
+      fr"${r.avgStrokeCount}, ${r.poolLength}, ${r.avgGrade}" ++
+      fr")").update.withUniqueGeneratedKeys[ActivitySessionId]("id")
 
-  def findById(id: ActivityLapId): ConnectionIO[Option[ActivityLapRecord]] =
+  def findById(id: ActivitySessionId): ConnectionIO[Option[RActivitySession]] =
     fr"SELECT $columnsWithId FROM $table WHERE id = $id"
-      .query[ActivityLapRecord]
+      .query[RActivitySession]
       .option
 
   def countAll =

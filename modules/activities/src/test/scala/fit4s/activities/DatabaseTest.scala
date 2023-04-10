@@ -39,12 +39,12 @@ trait DatabaseTest extends CatsEffectSuite {
 
   def deleteAllData(xa: Transactor[IO]): IO[Unit] =
     for {
-      _ <- sql"DELETE FROM ${ActivitySessionDataRecord.table}".update.run.transact(xa)
-      _ <- sql"DELETE FROM ${ActivitySessionRecord.table}".update.run.transact(xa)
-      _ <- sql"DELETE FROM ${ActivityRecord.table}".update.run.transact(xa)
-      _ <- sql"DELETE FROM ${ActivityLocationRecord.table}".update.run.transact(xa)
-      _ <- sql"DELETE FROM ${ActivityTagRecord.table}".update.run.transact(xa)
-      _ <- sql"DELETE FROM ${TagRecord.table}".update.run.transact(xa)
+      _ <- sql"DELETE FROM ${RActivitySessionData.table}".update.run.transact(xa)
+      _ <- sql"DELETE FROM ${RActivitySession.table}".update.run.transact(xa)
+      _ <- sql"DELETE FROM ${RActivity.table}".update.run.transact(xa)
+      _ <- sql"DELETE FROM ${RActivityLocation.table}".update.run.transact(xa)
+      _ <- sql"DELETE FROM ${RActivityTag.table}".update.run.transact(xa)
+      _ <- sql"DELETE FROM ${RTag.table}".update.run.transact(xa)
     } yield ()
 }
 

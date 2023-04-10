@@ -3,7 +3,7 @@ package fit4s.cli
 import cats.Show
 import cats.syntax.all._
 import fit4s.activities.data.ActivityId
-import fit4s.activities.records.TagRecord
+import fit4s.activities.records.RTag
 import fit4s.cli.FormatDefinition.{DateInstant, TimeInstant}
 import fit4s.data._
 import fit4s.profile.types.{Sport, SubSport}
@@ -153,7 +153,7 @@ trait FormatDefinition {
   implicit val strokesPerLapShow: Show[StrokesPerLap] =
     Show.show(spl => s"${spl.spl} strokes/lap")
 
-  implicit val tagVectorShow: Show[Vector[TagRecord]] =
+  implicit val tagVectorShow: Show[Vector[RTag]] =
     Show.show { records =>
       records.map(_.name.name).sorted.mkString("[", ",", "]")
     }

@@ -5,7 +5,7 @@ import doobie.implicits._
 import fit4s.activities.{DatabaseTest, FlywayMigrate}
 import fs2.io.file.Path
 
-class ActivityRecordTest extends DatabaseTest with TestData {
+class RActivityTest extends DatabaseTest with TestData {
   override def munitFixtures = List(h2DataSource)
 
   test("insert record") {
@@ -14,11 +14,11 @@ class ActivityRecordTest extends DatabaseTest with TestData {
       for {
         _ <- FlywayMigrate[IO](jdbc).run
         _ <- deleteAllData(xa)
-        location <- ActivityLocationRecord.insert(Path("/home/user/fit")).transact(xa)
-        recordId <- ActivityRecord
+        location <- RActivityLocation.insert(Path("/home/user/fit")).transact(xa)
+        recordId <- RActivity
           .insert(testActivity.copy(locationId = location.id))
           .transact(xa)
-        found <- ActivityRecord.findById(recordId).transact(xa)
+        found <- RActivity.findById(recordId).transact(xa)
         expect = testActivity.copy(id = recordId, locationId = location.id)
         _ = assertEquals(found, Some(expect))
       } yield ()
@@ -31,11 +31,11 @@ class ActivityRecordTest extends DatabaseTest with TestData {
       for {
         _ <- FlywayMigrate[IO](jdbc).run
         _ <- deleteAllData(xa)
-        location <- ActivityLocationRecord.insert(Path("/home/user/fit")).transact(xa)
-        _ <- ActivityRecord
+        location <- RActivityLocation.insert(Path("/home/user/fit")).transact(xa)
+        _ <- RActivity
           .insert(testActivity.copy(locationId = location.id))
           .transact(xa)
-        result <- ActivityRecord
+        result <- RActivity
           .insert(testActivity.copy(locationId = location.id))
           .transact(xa)
           .attempt

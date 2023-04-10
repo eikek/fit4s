@@ -10,9 +10,9 @@ import DoobieMeta._
 
 import fit4s.activities.data.LocationId
 
-final case class ActivityLocationRecord(id: LocationId, location: Path)
+final case class RActivityLocation(id: LocationId, location: Path)
 
-object ActivityLocationRecord {
+object RActivityLocation {
   private[activities] val table = fr"activity_location"
 
   private[activities] def columnList(alias: Option[String]): List[Fragment] = {
@@ -30,14 +30,14 @@ object ActivityLocationRecord {
       }
       .map(_.toMap)
 
-  def insert(location: Path): ConnectionIO[ActivityLocationRecord] =
+  def insert(location: Path): ConnectionIO[RActivityLocation] =
     fr"INSERT INTO $table (location) VALUES ($location)".update
       .withUniqueGeneratedKeys[LocationId]("id")
-      .map(id => ActivityLocationRecord(id, location))
+      .map(id => RActivityLocation(id, location))
 
-  def find(location: Path): ConnectionIO[Option[ActivityLocationRecord]] =
+  def find(location: Path): ConnectionIO[Option[RActivityLocation]] =
     fr"SELECT id, location FROM $table WHERE location = $location"
-      .query[ActivityLocationRecord]
+      .query[RActivityLocation]
       .option
 
   def exists(location: Path): ConnectionIO[Boolean] =
@@ -48,15 +48,15 @@ object ActivityLocationRecord {
 
   def insertAll(
       records: Chunk[Path]
-  ): Stream[ConnectionIO, ActivityLocationRecord] = {
+  ): Stream[ConnectionIO, RActivityLocation] = {
     val sql = s"INSERT INTO ${table.internals.sql} (location) VALUES (?)"
     Update[Path](sql)
-      .updateManyWithGeneratedKeys[ActivityLocationRecord]("id", "location")
+      .updateManyWithGeneratedKeys[RActivityLocation]("id", "location")
       .apply[Chunk](records)
   }
 
-  def listAll: ConnectionIO[Vector[ActivityLocationRecord]] =
+  def listAll: ConnectionIO[Vector[RActivityLocation]] =
     fr"SELECT id, location FROM $table ORDER BY location"
-      .query[ActivityLocationRecord]
+      .query[RActivityLocation]
       .to[Vector]
 }

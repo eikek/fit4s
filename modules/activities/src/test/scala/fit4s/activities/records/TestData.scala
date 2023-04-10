@@ -18,7 +18,7 @@ import java.time.{Duration, Instant}
 trait TestData {
   val importDate: Instant = Instant.parse("2023-04-07T11:00:11Z")
 
-  val testActivity = ActivityRecord(
+  val testActivity = RActivity(
     id = ActivityId(-1),
     locationId = LocationId(-1),
     path = "storage/file.fit",
@@ -38,7 +38,7 @@ trait TestData {
     importDate = importDate
   )
 
-  val testActivitySession = ActivitySessionRecord(
+  val testActivitySession = RActivitySession(
     id = ActivitySessionId(-1),
     activityId = ActivityId(-1),
     sport = Sport.Cycling,
@@ -76,7 +76,7 @@ trait TestData {
     avgCadence = Some(Cadence.rpm(66))
   )
 
-  val testActivityLap = ActivityLapRecord(
+  val testActivityLap = RActivityLap(
     id = ActivityLapId(-1),
     activitySessionId = ActivitySessionId(-1),
     trigger = Some(LapTrigger.Distance),

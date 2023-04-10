@@ -1,11 +1,11 @@
 package fit4s.activities.records
 
 import cats.effect.IO
-import doobie.implicits._
 import fit4s.activities.{DatabaseTest, FlywayMigrate}
 import fs2.io.file.Path
+import doobie.implicits._
 
-class ActivityLapRecordTest extends DatabaseTest with TestData {
+class RActivitySessionTest extends DatabaseTest with TestData {
   override def munitFixtures = List(h2DataSource)
 
   test("insert record") {
@@ -14,20 +14,18 @@ class ActivityLapRecordTest extends DatabaseTest with TestData {
       for {
         _ <- FlywayMigrate[IO](jdbc).run
         _ <- deleteAllData(xa)
-        location <- ActivityLocationRecord.insert(Path("/home/user/fit")).transact(xa)
-        activityId <- ActivityRecord
+        location <- RActivityLocation.insert(Path("/home/user/fit")).transact(xa)
+        activityId <- RActivity
           .insert(testActivity.copy(locationId = location.id))
           .transact(xa)
-        sessionId <- ActivitySessionRecord
+        recordId <- RActivitySession
           .insert(testActivitySession.copy(activityId = activityId))
           .transact(xa)
-        lapId <- ActivityLapRecord
-          .insert(testActivityLap.copy(activitySessionId = sessionId))
-          .transact(xa)
-        found <- ActivityLapRecord.findById(lapId).transact(xa)
-        expect = testActivityLap.copy(id = lapId, activitySessionId = sessionId)
+        found <- RActivitySession.findById(recordId).transact(xa)
+        expect = testActivitySession.copy(id = recordId, activityId = activityId)
         _ = assertEquals(found, Some(expect))
       } yield ()
     }
   }
+
 }

@@ -9,13 +9,13 @@ import cats.effect.kernel.Sync
 import fit4s.activities.ActivityQuery
 import fit4s.activities.impl.ActivityQueryBuilder
 
-final case class ActivityTagRecord(
+final case class RActivityTag(
     id: ActivityTagId,
     activityId: ActivityId,
     tagId: TagId
 )
 
-object ActivityTagRecord {
+object RActivityTag {
   private[activities] val table = fr"activity_tag"
 
   private[activities] def columnList(alias: Option[String]): List[Fragment] = {

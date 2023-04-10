@@ -8,11 +8,11 @@ import fs2.Stream
 import DoobieMeta._
 import cats.effect.kernel.Sync
 
-final case class TagRecord(id: TagId, name: TagName)
+final case class RTag(id: TagId, name: TagName)
 
-object TagRecord {
-  val softDelete: TagRecord =
-    TagRecord(TagId(-999L), TagName.unsafeFromString("System/Deleted"))
+object RTag {
+  val softDelete: RTag =
+    RTag(TagId(-999L), TagName.unsafeFromString("System/Deleted"))
 
   private[activities] val table = fr"tag"
 
@@ -22,7 +22,7 @@ object TagRecord {
     List(c("id"), c("name"))
   }
 
-  def getOrCreate(names: List[TagName]): ConnectionIO[List[TagRecord]] =
+  def getOrCreate(names: List[TagName]): ConnectionIO[List[RTag]] =
     names
       .traverse { name =>
         find(name).flatMap {
@@ -31,14 +31,14 @@ object TagRecord {
         }
       }
 
-  def insert(name: TagName): ConnectionIO[TagRecord] =
+  def insert(name: TagName): ConnectionIO[RTag] =
     fr"INSERT INTO $table (name) VALUES ($name)".update
       .withUniqueGeneratedKeys[TagId]("id")
-      .map(id => TagRecord(id, name))
+      .map(id => RTag(id, name))
 
-  def find(name: TagName): ConnectionIO[Option[TagRecord]] =
+  def find(name: TagName): ConnectionIO[Option[RTag]] =
     fr"SELECT id, name FROM $table WHERE name ilike $name"
-      .query[TagRecord]
+      .query[RTag]
       .option
 
   def exists(name: TagName): ConnectionIO[Boolean] =
@@ -47,7 +47,7 @@ object TagRecord {
       .unique
       .map(_ > 0)
 
-  def listAll(nameLike: Option[String], page: Page): Stream[ConnectionIO, TagRecord] = {
+  def listAll(nameLike: Option[String], page: Page): Stream[ConnectionIO, RTag] = {
     val cond =
       nameLike.map(_.trim).filter(_.nonEmpty) match {
         case Some(like) => fr"WHERE name ilike $like"
@@ -55,7 +55,7 @@ object TagRecord {
       }
 
     fr"SELECT id, name FROM $table $cond ORDER BY name LIMIT ${page.limit} OFFSET ${page.offset}"
-      .query[TagRecord]
+      .query[RTag]
       .streamWithChunkSize(100)
   }
 

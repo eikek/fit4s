@@ -8,11 +8,11 @@ import doobie.implicits._
 import fit4s.activities.data.{ActivityId, TagId, TagName}
 import fit4s.activities.impl.StravaExportExtract.ExportData
 import fit4s.activities.records.{
-  ActivityLocationRecord,
-  ActivityRecord,
-  ActivityStravaRecord,
-  ActivityTagRecord,
-  TagRecord
+  RActivityLocation,
+  RActivity,
+  RActivityStrava,
+  RActivityTag,
+  RTag
 }
 import fit4s.activities.{ImportCallback, ImportResult, StravaSupport}
 import fs2.Stream
@@ -65,10 +65,10 @@ final class StravaImpl[F[_]: Async](zoneId: ZoneId, xa: Transactor[F])
     val givenTags = moreTags ++ bikeTags ++ shoeTags ++ commuteTag.iterator.toSet
 
     val locationAndTag = for {
-      loc <- ActivityLocationRecord
+      loc <- RActivityLocation
         .getOrCreateLocations(List(exportLocation))
         .map(_.apply(exportLocation))
-      tagIds <- TagRecord
+      tagIds <- RTag
         .getOrCreate(givenTags.toList)
         .map(_.map(r => r.name -> r.id).toMap)
     } yield (loc, tagIds)
@@ -95,7 +95,7 @@ final class StravaImpl[F[_]: Async](zoneId: ZoneId, xa: Transactor[F])
           NonEmptyList
             .fromList(entryTags.toList)
             .map { nel =>
-              (ActivityTagRecord.remove(id, nel) *> ActivityTagRecord.insert1(id, nel))
+              (RActivityTag.remove(id, nel) *> RActivityTag.insert1(id, nel))
                 .transact(xa)
                 .void
             }
@@ -111,14 +111,14 @@ final class StravaImpl[F[_]: Async](zoneId: ZoneId, xa: Transactor[F])
 
   private def updateStravaMeta(id: ActivityId, entry: ExportData): F[Unit] =
     for {
-      _ <- entry.name.traverse_(n => ActivityRecord.updateName(id, n).transact(xa))
+      _ <- entry.name.traverse_(n => RActivity.updateName(id, n).transact(xa))
       _ <- entry.description.traverse_(d =>
-        ActivityRecord.updateNotes(id, d).transact(xa)
+        RActivity.updateNotes(id, d).transact(xa)
       )
       _ <- entry.id
         .traverse_ { stravaId =>
-          ActivityStravaRecord.removeForStravaId(stravaId) *>
-            ActivityStravaRecord.insert(id, stravaId)
+          RActivityStrava.removeForStravaId(stravaId) *>
+            RActivityStrava.insert(id, stravaId)
         }
         .transact(xa)
     } yield ()

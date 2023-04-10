@@ -5,7 +5,7 @@ import cats.syntax.all._
 import com.monovore.decline.Opts
 import fit4s.activities.ActivityQuery.OrderBy
 import fit4s.activities.data.{ActivityListResult, Page}
-import fit4s.activities.records.ActivitySessionRecord
+import fit4s.activities.records.RActivitySession
 import fit4s.activities.{ActivityLog, ActivityQuery}
 import fit4s.cli.FormatDefinition._
 import fit4s.cli._
@@ -75,7 +75,7 @@ object ListCmd extends SharedOpts {
   }
 
   def sessionString(r: ActivityListResult, zoneId: ZoneId)(
-      s: ActivitySessionRecord
+      s: RActivitySession
   ): String = {
     implicit val zone: ZoneId = zoneId
     implicit val sport: Sport = s.sport

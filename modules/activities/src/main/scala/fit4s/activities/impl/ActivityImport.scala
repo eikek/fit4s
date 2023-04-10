@@ -31,7 +31,7 @@ object ActivityImport {
       _ <- NonEmptyList.fromList(tags.toList) match {
         case Some(nel) =>
           actId match {
-            case ImportResult.Success(id) => ActivityTagRecord.insert1(id, nel)
+            case ImportResult.Success(id) => RActivityTag.insert1(id, nel)
             case _                        => Sync[ConnectionIO].pure(0)
           }
         case None => Sync[ConnectionIO].pure(0)
@@ -50,8 +50,8 @@ object ActivityImport {
   ): ConnectionIO[ImportResult[ActivityId]] = {
     val insert: ConnectionIO[ImportResult[ActivityId]] =
       for {
-        actId <- ActivityRecord.insert(
-          ActivityRecord(
+        actId <- RActivity.insert(
+          RActivity(
             ActivityId(-1),
             locationId,
             path,
@@ -67,7 +67,7 @@ object ActivityImport {
         _ <- result.sessions.traverse_(addSession(actId, result))
       } yield ImportResult.success(actId)
 
-    OptionT(ActivityRecord.findByFileId(result.fileId))
+    OptionT(RActivity.findByFileId(result.fileId))
       .map(r => ImportResult.duplicate(r.id, result.fileId, path))
       .getOrElseF(insert)
   }
@@ -78,8 +78,8 @@ object ActivityImport {
     (ActivitySessionId, Vector[ActivityLapId], Vector[ActivitySessionDataId])
   ] =
     for {
-      sessionId <- ActivitySessionRecord.insert(
-        ActivitySessionRecord(
+      sessionId <- RActivitySession.insert(
+        RActivitySession(
           id = ActivitySessionId(-1),
           activityId = activityId,
           sport = session.sport,
@@ -117,8 +117,8 @@ object ActivityImport {
         )
       )
       lapIds <- result.lapsFor(session).traverse { l =>
-        ActivityLapRecord.insert(
-          ActivityLapRecord(
+        RActivityLap.insert(
+          RActivityLap(
             id = ActivityLapId(-1),
             activitySessionId = sessionId,
             sport = l.sport,
@@ -156,8 +156,8 @@ object ActivityImport {
         )
       }
       rIds <- result.recordsFor(session).traverse { r =>
-        ActivitySessionDataRecord.insert(
-          ActivitySessionDataRecord(
+        RActivitySessionData.insert(
+          RActivitySessionData(
             id = ActivitySessionDataId(-1),
             activitySessionId = sessionId,
             timestamp = r.timestamp.asInstant,

@@ -4,13 +4,13 @@ import doobie._
 import doobie.implicits._
 import fit4s.activities.data._
 
-final case class ActivityStravaRecord(
+final case class RActivityStrava(
     id: ActivityStravaId,
     activityId: ActivityId,
     stravaId: StravaExternalId
 )
 
-object ActivityStravaRecord {
+object RActivityStrava {
   private[activities] val table = fr"activity_strava"
 
   private[activities] def columnList(alias: Option[String]): List[Fragment] = {
@@ -29,7 +29,7 @@ object ActivityStravaRecord {
   private val columnsNoId =
     columnList(None).tail.foldSmash1(Fragment.empty, sql",", Fragment.empty)
 
-  def insert(r: ActivityStravaRecord): ConnectionIO[Int] =
+  def insert(r: RActivityStrava): ConnectionIO[Int] =
     insert(r.activityId, r.stravaId)
 
   def insert(activityId: ActivityId, stravaId: StravaExternalId): ConnectionIO[Int] =
