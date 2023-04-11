@@ -4,7 +4,6 @@ import cats.Show
 import cats.effect.{Clock, ExitCode, IO}
 import cats.syntax.all._
 import com.monovore.decline.Opts
-import fit4s.activities.ActivityLog
 import fit4s.activities.data.ActivitySessionSummary
 import fit4s.cli.FormatDefinition._
 import fit4s.cli._
@@ -27,7 +26,7 @@ object SummaryCmd extends SharedOpts {
     (activitySelectionOps, outputFormatOpts).mapN(Options)
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
-    ActivityLog[IO](cliCfg.jdbcConfig, cliCfg.timezone).use { log =>
+    activityLog(cliCfg).use { log =>
       for {
         currentTime <- Clock[IO].realTimeInstant
         zone = cliCfg.timezone

@@ -4,9 +4,8 @@ import cats.data.NonEmptyList
 import cats.effect.{Clock, ExitCode, IO}
 import cats.syntax.all._
 import com.monovore.decline.Opts
-import fit4s.activities.ActivityLog
 import fit4s.activities.data.TagName
-import fit4s.cli.{ActivitySelection, SharedOpts, CliConfig, CliError}
+import fit4s.cli.{ActivitySelection, CliConfig, CliError, SharedOpts}
 
 object AddCmd extends SharedOpts {
 
@@ -20,7 +19,7 @@ object AddCmd extends SharedOpts {
   }
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
-    ActivityLog[IO](cliCfg.jdbcConfig, cliCfg.timezone).use { log =>
+    activityLog(cliCfg).use { log =>
       for {
         currentTime <- Clock[IO].realTimeInstant
         query <- ActivitySelection

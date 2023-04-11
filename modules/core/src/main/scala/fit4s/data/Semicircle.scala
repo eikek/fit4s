@@ -4,13 +4,17 @@ final class Semicircle(val semicircle: Long) extends AnyVal {
   def toDegree: Double =
     semicircle * Semicircle.scToDegFactor
 
+  def toRadian =
+    (semicircle * math.Pi) / Semicircle.maxC
+
   def toSeconds: Long = semicircle * 20
 
   override def toString = s"Semicircles($semicircle)"
 }
 
 object Semicircle {
-  private val scToDegFactor = 180d / (Int.MaxValue.toDouble + 1)
+  private val maxC = Int.MaxValue.toDouble + 1
+  private val scToDegFactor = 180d / maxC
 
   def semicircle(value: Long): Semicircle = new Semicircle(value)
 

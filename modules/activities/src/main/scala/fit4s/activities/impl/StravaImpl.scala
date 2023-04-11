@@ -7,13 +7,7 @@ import doobie._
 import doobie.implicits._
 import fit4s.activities.data.{ActivityId, TagId, TagName}
 import fit4s.activities.impl.StravaExportExtract.ExportData
-import fit4s.activities.records.{
-  RActivityLocation,
-  RActivity,
-  RActivityStrava,
-  RActivityTag,
-  RTag
-}
+import fit4s.activities.records._
 import fit4s.activities.{ImportCallback, ImportResult, StravaSupport}
 import fs2.Stream
 import fs2.io.file.Path

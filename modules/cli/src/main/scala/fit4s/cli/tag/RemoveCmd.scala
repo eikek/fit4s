@@ -2,9 +2,8 @@ package fit4s.cli.tag
 
 import cats.effect.{ExitCode, IO}
 import com.monovore.decline.Opts
-import fit4s.activities.ActivityLog
 import fit4s.activities.data.TagName
-import fit4s.cli.{SharedOpts, CliConfig}
+import fit4s.cli.{CliConfig, SharedOpts}
 
 object RemoveCmd extends SharedOpts {
 
@@ -14,7 +13,7 @@ object RemoveCmd extends SharedOpts {
     Opts.argument[TagName]("tag").map(Options)
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
-    ActivityLog[IO](cliCfg.jdbcConfig, cliCfg.timezone).use { log =>
+    activityLog(cliCfg).use { log =>
       for {
         result <- log.tagRepository.remove(opts.tag)
         rc <-

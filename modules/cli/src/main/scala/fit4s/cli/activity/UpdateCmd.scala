@@ -4,8 +4,8 @@ import cats.effect.{ExitCode, IO}
 import cats.syntax.all._
 import com.monovore.decline.Opts
 import fit4s.activities.data.TagName
-import fit4s.activities.{ActivityLog, ImportCallback, ImportResult}
-import fit4s.cli.{SharedOpts, CliConfig}
+import fit4s.activities.{ImportCallback, ImportResult}
+import fit4s.cli.{CliConfig, SharedOpts}
 import fs2.io.file.Path
 
 object UpdateCmd extends SharedOpts {
@@ -22,7 +22,7 @@ object UpdateCmd extends SharedOpts {
     (initialTags, parallel).mapN(Options)
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
-    ActivityLog[IO](cliCfg.jdbcConfig, cliCfg.timezone).use { log =>
+    activityLog(cliCfg).use { log =>
       log
         .syncNewFiles(
           opts.tags.toSet,

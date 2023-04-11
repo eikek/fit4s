@@ -4,7 +4,6 @@ import cats.data.NonEmptyList
 import cats.effect.{ExitCode, IO}
 import cats.syntax.all._
 import com.monovore.decline.Opts
-import fit4s.activities.ActivityLog
 import fit4s.activities.data.ActivityId
 import fit4s.cli.{CliConfig, SharedOpts}
 
@@ -19,8 +18,8 @@ object DeleteCmd extends SharedOpts {
     (ids, hard).mapN(Options)
   }
 
-  def apply(cliConfig: CliConfig, opts: Options): IO[ExitCode] =
-    ActivityLog[IO](cliConfig.jdbcConfig, cliConfig.timezone).use { log =>
+  def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
+    activityLog(cliCfg).use { log =>
       for {
         n <- log.deleteActivities(opts.ids, opts.hard)
         _ <- IO.println(s"Removed $n activities.")

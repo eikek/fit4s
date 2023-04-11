@@ -3,7 +3,9 @@ package fit4s.geocode
 import fit4s.data.{Position, Semicircle}
 
 case class Place(
-    place_id: PlaceId,
+    place_id: NominatimPlaceId,
+    osm_type: String,
+    osm_id: NominatimOsmId,
     lat: Semicircle,
     lon: Semicircle,
     display_name: String,

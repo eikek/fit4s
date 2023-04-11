@@ -186,3 +186,41 @@ alter table "activity_strava"
  add constraint "activity_strava_strava_id_uniq" unique("strava_id");
 alter table "activity_strava"
  add constraint "activity_strava_strava_id_activity_id_uniq" unique("activity_id", "strava_id");
+
+
+-- GEOPLACE
+create table "geo_place"(
+  "id" bigserial not null primary key,
+  "osm_place_id" bigint not null,
+  "osm_id" bigint not null,
+  "position_lat" bigint not null,
+  "position_lng" bigint not null,
+  "road" varchar(255),
+  "location" varchar(255),
+  "country" varchar(255),
+  "country_code" varchar(50) not null,
+  "post_code" varchar(50),
+  "bbox_lat1" bigint not null,
+  "bbox_lat2" bigint not null,
+  "bbox_lng1" bigint not null,
+  "bbox_lng2" bigint not null
+);
+--alter table "geo_place"
+--add constraint "geo_place_osm_place_id_uniq"
+--unique ("osm_place_id");
+
+alter table "geo_place"
+add constraint "geo_place_position_uniq"
+unique ("position_lat", "position_lng");
+
+-- activity place
+create table "activity_geo_place" (
+  "id" bigserial not null primary key,
+  "geo_place_id" bigint not null,
+  "activity_id" bigint not null
+);
+alter table "activity_geo_place"
+add constraint "activity_geo_place_place_activity_uniq"
+unique ("geo_place_id", "activity_id");
+
+CREATE ALIAS HAVSC FOR "fit4s.activities.h2.Functions.hav"

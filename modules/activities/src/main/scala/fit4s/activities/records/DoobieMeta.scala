@@ -10,6 +10,18 @@ import fit4s.activities.data._
 import java.time.{Duration, Instant}
 
 trait DoobieMeta {
+  implicit val countryCodeMeta: Meta[CountryCode] =
+    Meta[String].timap(CountryCode.apply)(_.cc)
+
+  implicit val postCodeMeta: Meta[PostCode] =
+    Meta[String].timap(PostCode.apply)(_.zip)
+
+  implicit val activityGeoPlaceIdMeta: Meta[ActivityGeoPlaceId] =
+    Meta[Long].timap(ActivityGeoPlaceId.apply)(_.id)
+
+  implicit val geoPlaceIdMeta: Meta[GeoPlaceId] =
+    Meta[Long].timap(GeoPlaceId.apply)(_.id)
+
   implicit val lapTriggerMeta: Meta[LapTrigger] =
     Meta[Long].timap(LapTrigger.unsafeByRawValue)(_.rawValue)
 

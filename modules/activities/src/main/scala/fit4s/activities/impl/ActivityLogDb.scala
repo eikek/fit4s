@@ -8,8 +8,10 @@ import doobie.{Query => _, _}
 import fit4s.activities._
 import fit4s.activities.data._
 import fit4s.activities.records.{
-  RActivityLocation,
   RActivity,
+  RActivityGeoPlace,
+  RActivityLocation,
+  RActivitySession,
   RActivityTag,
   RTag
 }
@@ -21,7 +23,8 @@ import java.time.ZoneId
 final class ActivityLogDb[F[_]: Async: Files](
     jdbcConfig: JdbcConfig,
     zoneId: ZoneId,
-    xa: Transactor[F]
+    xa: Transactor[F],
+    geoLookup: GeoLookup[F]
 ) extends ActivityLog[F] {
 
   override def initialize: F[Unit] =
@@ -59,7 +62,33 @@ final class ActivityLogDb[F[_]: Async: Files](
     results <-
       if (concN > 1) doImportTask.parEvalMap(concN)(_.transact(xa))
       else doImportTask.evalMap(_.transact(xa))
+
+    _ <- results match {
+      case ImportResult.Success(id) =>
+        Stream.eval(attachGeoPlace(id))
+
+      case ImportResult.Failure(ImportResult.FailureReason.Duplicate(id, _, _)) =>
+        Stream.eval(attachGeoPlace(id))
+
+      case _ =>
+        Stream.unit
+    }
   } yield results
+
+  def attachGeoPlace(id: ActivityId): F[List[ActivityGeoPlaceId]] =
+    RActivityGeoPlace.findByActivity(id).transact(xa).flatMap {
+      case Nil =>
+        for {
+          pos <- RActivitySession.getStartPositions(id).transact(xa)
+          pIds <- pos.traverse(geoLookup.lookup)
+          res <- pIds.flatten
+            .map(_.id)
+            .traverse(pId => RActivityGeoPlace.insert(id, pId))
+            .transact(xa)
+        } yield res
+
+      case list => list.map(_.id).pure[F]
+    }
 
   def syncNewFiles(tagged: Set[TagName], callback: ImportCallback[F], concN: Int) =
     for {

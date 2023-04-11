@@ -3,10 +3,10 @@ package fit4s.cli.activity
 import cats.effect._
 import cats.syntax.all._
 import com.monovore.decline.Opts
+import fit4s.activities.ActivityQuery
 import fit4s.activities.ActivityQuery.OrderBy
 import fit4s.activities.data.{ActivityListResult, Page}
 import fit4s.activities.records.RActivitySession
-import fit4s.activities.{ActivityLog, ActivityQuery}
 import fit4s.cli.FormatDefinition._
 import fit4s.cli._
 import fit4s.profile.types.Sport
@@ -29,7 +29,7 @@ object ListCmd extends SharedOpts {
   }
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
-    ActivityLog[IO](cliCfg.jdbcConfig, cliCfg.timezone).use { log =>
+    activityLog(cliCfg).use { log =>
       for {
         currentTime <- Clock[IO].realTimeInstant
         zone = cliCfg.timezone

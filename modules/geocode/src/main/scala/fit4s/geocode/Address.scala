@@ -1,7 +1,7 @@
 package fit4s.geocode
 
 case class Address(
-    house_number: Option[Int],
+    house_number: Option[String],
     road: Option[String],
     village: Option[String],
     city: Option[String],

@@ -112,4 +112,13 @@ object RActivitySession {
 
   def countAll =
     sql"SELECT count(*) FROM $table".query[Long].unique
+
+  def getStartPositions(id: ActivityId): ConnectionIO[List[Position]] =
+    sql"""SELECT act.start_pos_lat, act.start_pos_long
+          FROM $table act
+          INNER JOIN ${RActivity.table} pa ON pa.id = act.activity_id
+          WHERE pa.id = $id AND act.start_pos_lat is not null AND act.start_pos_long is not null
+         """
+      .query[Position]
+      .to[List]
 }

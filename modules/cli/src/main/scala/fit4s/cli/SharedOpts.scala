@@ -1,8 +1,10 @@
 package fit4s.cli
 
 import cats.data.Validated
+import cats.effect.{IO, Resource}
 import cats.syntax.all._
 import com.monovore.decline.{Argument, Opts}
+import fit4s.activities.ActivityLog
 import fit4s.activities.data.{ActivityId, Page, TagName}
 import fit4s.profile.types.Sport
 import fs2.io.file.Path
@@ -80,6 +82,9 @@ trait SharedOpts {
 
     json.orElse(text).withDefault(OutputFormat.Text)
   }
+
+  def activityLog(cliConfig: CliConfig): Resource[IO, ActivityLog[IO]] =
+    ActivityLog[IO](cliConfig.jdbcConfig, cliConfig.nominatimConfig, cliConfig.timezone)
 }
 
 object SharedOpts extends SharedOpts

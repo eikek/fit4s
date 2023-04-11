@@ -7,6 +7,9 @@ trait ReverseLookup[F[_]] {
 
   def lookup(position: Position): F[Option[Place]]
 
+  /** Version without potential caching. */
+  def lookupRaw(position: Position): F[Option[Place]]
+
 }
 
 object ReverseLookup {

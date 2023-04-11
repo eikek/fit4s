@@ -26,9 +26,9 @@ final class NominatimOSM[F[_]: Async](
     FiniteDuration(((1 * 1000) / cfg.maxReqPerSecond).toLong, TimeUnit.MILLISECONDS)
 
   override def lookup(position: Position): F[Option[Place]] =
-    cache.cached(lookup1)(position)
+    cache.cached(lookupRaw)(position)
 
-  def lookup1(position: Position): F[Option[Place]] = {
+  def lookupRaw(position: Position): F[Option[Place]] = {
     // ?format=json&lat=47.4573699&lon=8.4247654
     val url = cfg.baseUrl
       .withQueryParam("format", "json")
