@@ -3,90 +3,76 @@ package fit4s.activities.records
 import cats.effect.IO
 import cats.syntax.all._
 import doobie.implicits._
+import fit4s.activities.data.{CountryCode, GeoPlaceId, PostCode}
 import fit4s.activities.{DatabaseTest, FlywayMigrate}
-import fit4s.activities.data.{CountryCode, GeoPlaceId}
 import fit4s.data._
 import fit4s.geocode.{BoundingBox, NominatimOsmId, NominatimPlaceId}
 
-class RGeoPlaceTest extends DatabaseTest {
+class RGeoPlaceTest extends DatabaseTest with TestData {
   override def munitFixtures = List(h2DataSource)
 
-  val place1 = RGeoPlace(
-    id = GeoPlaceId(-1),
-    osmPlaceId = NominatimPlaceId(15),
-    osmId = NominatimOsmId(56),
-    position = Position(Semicircle.degree(51.5), Semicircle.degree(0)),
-    road = None,
-    location = "London",
-    country = None,
-    countryCode = CountryCode("gb"),
-    postCode = None,
-    boundingBox = BoundingBox(
-      Semicircle.degree(50),
-      Semicircle.degree(52),
-      Semicircle.degree(-1),
-      Semicircle.degree(1)
-    )
-  )
+  // TODO better data not leak
+  test("test not in bounding box") {
+    // sometimes the position is not completely in the reported bbox
+    val place =
+      RGeoPlace(
+        id = GeoPlaceId(-1),
+        osmPlaceId = NominatimPlaceId(94115511),
+        osmId = NominatimOsmId(9056605070L),
+        position =
+          Position(Semicircle.semicircle(566560625), Semicircle.semicircle(104581107)),
+        road = Some("Arbergstrasse"),
+        location = "Winterthur",
+        country = Some("Schweiz/Suisse"),
+        countryCode = CountryCode("ch"),
+        postCode = Some(PostCode("8405")),
+        boundingBox = BoundingBox(
+          Semicircle.semicircle(566560028),
+          Semicircle.semicircle(566561221),
+          Semicircle.semicircle(104544334),
+          Semicircle.semicircle(104551727)
+        )
+      )
 
-  val place2 = RGeoPlace(
-    id = GeoPlaceId(-1),
-    osmPlaceId = NominatimPlaceId(16),
-    osmId = NominatimOsmId(58),
-    position = Position(Semicircle.degree(50.8), Semicircle.degree(0.4)),
-    road = None,
-    location = "London?",
-    country = None,
-    countryCode = CountryCode("gb"),
-    postCode = None,
-    boundingBox = BoundingBox(
-      Semicircle.degree(50),
-      Semicircle.degree(52),
-      Semicircle.degree(-1),
-      Semicircle.degree(1)
-    )
-  )
+    val (jdbc, ds) = h2DataSource()
+    DatabaseTest.makeXA(ds).use { xa =>
+      for {
+        _ <- FlywayMigrate[IO](jdbc).run
+        _ <- List(place)
+          .traverse_(RGeoPlace.insert)
+          .transact(xa)
 
-  val place3 = RGeoPlace(
-    id = GeoPlaceId(-1),
-    osmPlaceId = NominatimPlaceId(30),
-    osmId = NominatimOsmId(151),
-    position = Position(Semicircle.degree(38.8), Semicircle.degree(-77.1)),
-    road = None,
-    location = "Arlington",
-    country = None,
-    countryCode = CountryCode("us"),
-    postCode = None,
-    boundingBox = BoundingBox(
-      Semicircle.degree(37),
-      Semicircle.degree(39),
-      Semicircle.degree(-77.5),
-      Semicircle.degree(78)
-    )
-  )
+        res1 <- RGeoPlace
+          .findByPosition(place.position)
+          .transact(xa)
+        _ <- IO.println(res1)
+        _ = assertEquals(res1.get._1, place.copy(id = res1.get._1.id))
+      } yield ()
+    }
+  }
 
   test("test distance") {
     val (jdbc, ds) = h2DataSource()
     DatabaseTest.makeXA(ds).use { xa =>
       for {
         _ <- FlywayMigrate[IO](jdbc).run
-        _ <- List(place1, place2, place3)
+        _ <- List(testPlace1, testPlace2, testPlace3)
           .traverse_(RGeoPlace.insert)
           .transact(xa)
 
         res1 <- RGeoPlace
-          .findPosition(Position(Semicircle.degree(50.6), Semicircle.degree(0.5)))
+          .findByPosition(Position(Semicircle.degree(50.6), Semicircle.degree(0.5)))
           .transact(xa)
-        _ = assertEquals(res1.get._1, place2.copy(id = res1.get._1.id))
+        _ = assertEquals(res1.get._1, testPlace2.copy(id = res1.get._1.id))
 
         res3 <- RGeoPlace
-          .findPosition(place3.position)
+          .findByPosition(testPlace3.position)
           .transact(xa)
-        _ = assertEquals(res3.get._1, place3.copy(id = res3.get._1.id))
+        _ = assertEquals(res3.get._1, testPlace3.copy(id = res3.get._1.id))
         _ = assertEquals(res3.get._2, 0d)
 
         res2 <- RGeoPlace
-          .findPosition(Position(Semicircle.degree(12), Semicircle.degree(-6)))
+          .findByPosition(Position(Semicircle.degree(12), Semicircle.degree(-6)))
           .transact(xa)
         _ = assertEquals(res2, None)
       } yield ()

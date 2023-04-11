@@ -1,7 +1,8 @@
 package fit4s.activities.records
 
-import fit4s.activities.data.{ActivityId, ActivityLapId, ActivitySessionId, LocationId}
+import fit4s.activities.data._
 import fit4s.data._
+import fit4s.geocode.{BoundingBox, NominatimOsmId, NominatimPlaceId}
 import fit4s.profile.types.{
   DateTime,
   File,
@@ -112,6 +113,60 @@ trait TestData {
     avgGrade = Some(Percent.percent(6.4)),
     maxCadence = Some(Cadence.rpm(121)),
     avgCadence = Some(Cadence.rpm(66))
+  )
+
+  val testPlace1 = RGeoPlace(
+    id = GeoPlaceId(-1),
+    osmPlaceId = NominatimPlaceId(15),
+    osmId = NominatimOsmId(56),
+    position = Position(Semicircle.degree(51.5), Semicircle.degree(0)),
+    road = None,
+    location = "London",
+    country = None,
+    countryCode = CountryCode("gb"),
+    postCode = None,
+    boundingBox = BoundingBox(
+      Semicircle.degree(50),
+      Semicircle.degree(52),
+      Semicircle.degree(-1),
+      Semicircle.degree(1)
+    )
+  )
+
+  val testPlace2 = RGeoPlace(
+    id = GeoPlaceId(-1),
+    osmPlaceId = NominatimPlaceId(16),
+    osmId = NominatimOsmId(58),
+    position = Position(Semicircle.degree(50.8), Semicircle.degree(0.4)),
+    road = None,
+    location = "London?",
+    country = None,
+    countryCode = CountryCode("gb"),
+    postCode = None,
+    boundingBox = BoundingBox(
+      Semicircle.degree(50),
+      Semicircle.degree(52),
+      Semicircle.degree(-1),
+      Semicircle.degree(1)
+    )
+  )
+
+  val testPlace3 = RGeoPlace(
+    id = GeoPlaceId(-1),
+    osmPlaceId = NominatimPlaceId(30),
+    osmId = NominatimOsmId(151),
+    position = Position(Semicircle.degree(38.8), Semicircle.degree(-77.1)),
+    road = None,
+    location = "Arlington",
+    country = None,
+    countryCode = CountryCode("us"),
+    postCode = None,
+    boundingBox = BoundingBox(
+      Semicircle.degree(37),
+      Semicircle.degree(39),
+      Semicircle.degree(-77.5),
+      Semicircle.degree(78)
+    )
   )
 }
 

@@ -205,9 +205,9 @@ create table "geo_place"(
   "bbox_lng1" bigint not null,
   "bbox_lng2" bigint not null
 );
---alter table "geo_place"
---add constraint "geo_place_osm_place_id_uniq"
---unique ("osm_place_id");
+alter table "geo_place"
+add constraint "geo_place_osm_place_id_uniq"
+unique ("osm_place_id");
 
 alter table "geo_place"
 add constraint "geo_place_position_uniq"
@@ -217,10 +217,20 @@ unique ("position_lat", "position_lng");
 create table "activity_geo_place" (
   "id" bigserial not null primary key,
   "geo_place_id" bigint not null,
-  "activity_id" bigint not null
+  "activity_session_id" bigint not null,
+  "position_name" varchar(255) not null
 );
-alter table "activity_geo_place"
-add constraint "activity_geo_place_place_activity_uniq"
-unique ("geo_place_id", "activity_id");
 
-CREATE ALIAS HAVSC FOR "fit4s.activities.h2.Functions.hav"
+alter table "activity_geo_place"
+add constraint "activity_geo_place_geo_place_id_fk"
+foreign key ("geo_place_id") references "geo_place"("id");
+
+alter table "activity_geo_place"
+add constraint "activity_geo_place_activity_session_id_fk"
+foreign key ("activity_session_id") references "activity_session"("id");
+
+alter table "activity_geo_place"
+add constraint "activity_geo_place_place_activity_session_uniq"
+unique ("geo_place_id", "activity_session_id");
+
+CREATE ALIAS HAVSC FOR "fit4s.activities.h2.Functions.hav";

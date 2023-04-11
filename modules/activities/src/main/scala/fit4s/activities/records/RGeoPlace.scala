@@ -77,17 +77,23 @@ object RGeoPlace {
       sql"${r.boundingBox.lat1}, ${r.boundingBox.lat2}, ${r.boundingBox.lng1}, ${r.boundingBox.lng2}" ++
       sql")").update.withUniqueGeneratedKeys[GeoPlaceId]("id")
 
-  def findPosition(pos: Position): ConnectionIO[Option[(RGeoPlace, Double)]] =
-    // find in bbox order by distance to position asc
+  def findByPosition(pos: Position): ConnectionIO[Option[(RGeoPlace, Double)]] =
+    // find in bbox order by distance-to-position asc
     sql"""SELECT $cols, HAVSC(${pos.latitude}, ${pos.longitude}, position_lat, position_lng) as dst FROM $table
-          WHERE
-               (bbox_lat1 < ${pos.latitude} AND
-                bbox_lat2 > ${pos.latitude} AND
-                bbox_lng1 < ${pos.longitude} AND
-                bbox_lng2 > ${pos.longitude})
+          WHERE (ABS(position_lat - ${pos.latitude}) < 800 AND ABS(position_lng - ${pos.longitude}) < 800) OR
+               (bbox_lat1 - 500 <= ${pos.latitude} AND
+                bbox_lat2 + 500 >= ${pos.latitude} AND
+                bbox_lng1 - 500 <= ${pos.longitude} AND
+                bbox_lng2 + 500 >= ${pos.longitude})
           ORDER BY dst ASC
           LIMIT 1
-          """
-      .query[(RGeoPlace, Double)]
+          """.query[(RGeoPlace, Double)].option
+
+  def findByPlace(p: Place): ConnectionIO[Option[RGeoPlace]] =
+    sql"""SELECT $cols FROM $table
+         WHERE (position_lat = ${p.lat} AND position_lng = ${p.lon})
+           OR osm_place_id = ${p.place_id}
+         LIMIT 1"""
+      .query[RGeoPlace]
       .option
 }

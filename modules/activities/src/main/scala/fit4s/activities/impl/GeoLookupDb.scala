@@ -9,7 +9,7 @@ import fit4s.activities.GeoLookup
 import fit4s.activities.data.GeoPlaceId
 import fit4s.activities.records.RGeoPlace
 import fit4s.data.Position
-import fit4s.geocode.ReverseLookup
+import fit4s.geocode.{Place, ReverseLookup}
 
 class GeoLookupDb[F[_]: Sync](
     reverseLookup: ReverseLookup[F],
@@ -21,28 +21,35 @@ class GeoLookupDb[F[_]: Sync](
 
   def lookup(position: Position): F[Option[RGeoPlace]] =
     for {
-      fromDB <- RGeoPlace.findPosition(position).transact(xa)
+      fromDB <- RGeoPlace.findByPosition(position).transact(xa)
       fromWs <- fromDB match {
         case Some((p, dst)) if dst < distanceThresholdKm => p.some.pure[F]
         case _ =>
           reverseLookup.lookup(position).flatMap {
-            case None => Option.empty[RGeoPlace].pure[F]
-            case Some(p) =>
-              RGeoPlace.fromPlace(GeoPlaceId(-1), p) match {
-                case Some(record) =>
-                  writeSem.permit.use { _ =>
-                    RGeoPlace
-                      .insert(record)
-                      .transact(xa)
-                      .map(id => record.copy(id = id).some)
-                  }
-
-                case None =>
-                  Option.empty[RGeoPlace].pure[F]
-              }
+            case Some(p) => insertPlace(p)
+            case None    => Option.empty[RGeoPlace].pure[F]
           }
       }
     } yield fromWs
+
+  private def insertPlace(p: Place) =
+    writeSem.permit.use { _ =>
+      // response may have different position which may already in db
+      RGeoPlace.findByPlace(p).transact(xa).flatMap {
+        case Some(r) => r.some.pure[F]
+        case None =>
+          RGeoPlace.fromPlace(GeoPlaceId(-1), p) match {
+            case Some(record) =>
+              RGeoPlace
+                .insert(record)
+                .transact(xa)
+                .map(id => record.copy(id = id).some)
+
+            case None =>
+              Option.empty[RGeoPlace].pure[F]
+          }
+      }
+    }
 }
 
 object GeoLookupDb {

@@ -13,6 +13,5 @@ case class Place(
     boundingbox: BoundingBox
 ) {
 
-  val position: Position =
-    Position(lat, lon)
+  val position: Position = Position(lat, lon)
 }

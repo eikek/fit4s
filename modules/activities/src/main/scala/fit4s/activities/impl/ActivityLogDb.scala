@@ -5,7 +5,7 @@ import cats.effect._
 import cats.syntax.all._
 import doobie.implicits._
 import doobie.{Query => _, _}
-import fit4s.activities._
+import fit4s.activities.{data, _}
 import fit4s.activities.data._
 import fit4s.activities.records.{
   RActivity,
@@ -80,11 +80,18 @@ final class ActivityLogDb[F[_]: Async: Files](
       case Nil =>
         for {
           pos <- RActivitySession.getStartPositions(id).transact(xa)
-          pIds <- pos.traverse(geoLookup.lookup)
-          res <- pIds.flatten
-            .map(_.id)
-            .traverse(pId => RActivityGeoPlace.insert(id, pId))
-            .transact(xa)
+          pIds <- pos.traverse(t => geoLookup.lookup(t._2).map(t._1 -> _))
+          res <- pIds.flatTraverse { case (sessionId, optPlace) =>
+            optPlace match {
+              case Some(p) =>
+                RActivityGeoPlace
+                  .insert(sessionId, p.id, PositionName.Start)
+                  .transact(xa)
+                  .map(List(_))
+              case None =>
+                List.empty[data.ActivityGeoPlaceId].pure[F]
+            }
+          }
         } yield res
 
       case list => list.map(_.id).pure[F]
