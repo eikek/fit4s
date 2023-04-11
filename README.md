@@ -4,6 +4,7 @@ This is a library for Scala 2.13 and 3.
 
 ## TODO
 
+- [ ] fix strava metadat problem. tag "Bike/" is added to swimming activities
 - [ ] publish to strava 
 - [ ] web server and leaflet map view (same features, just web, scalajs)
 - [ ] activity detail command

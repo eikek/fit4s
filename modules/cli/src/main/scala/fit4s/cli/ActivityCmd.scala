@@ -28,6 +28,9 @@ object ActivityCmd extends SharedOpts {
   val deleteArgs: Opts[DeleteCmd.Options] =
     Opts.subcommand("delete", "Delete activities by their ids")(DeleteCmd.opts)
 
+  val showArgs: Opts[ShowCmd.Options] =
+    Opts.subcommand("show", "Show details of an activity")(ShowCmd.opts)
+
   val opts = importArgs
     .map(Options.Import)
     .orElse(initArgs.as(Options.Init))
@@ -35,6 +38,7 @@ object ActivityCmd extends SharedOpts {
     .orElse(listArgs.map(Options.List))
     .orElse(updateArgs.map(Options.Update))
     .orElse(deleteArgs.map(Options.Delete))
+    .orElse(showArgs.map(Options.Show))
 
   sealed trait Options extends Product
   object Options {
@@ -44,6 +48,7 @@ object ActivityCmd extends SharedOpts {
     final case class List(cfg: ListCmd.Options) extends Options
     final case class Update(cfg: UpdateCmd.Options) extends Options
     final case class Delete(cfg: DeleteCmd.Options) extends Options
+    final case class Show(cfg: ShowCmd.Options) extends Options
   }
 
   def apply(cliCfg: CliConfig, cfg: Options): IO[ExitCode] =
@@ -54,5 +59,6 @@ object ActivityCmd extends SharedOpts {
       case Options.List(c)    => ListCmd(cliCfg, c)
       case Options.Update(c)  => UpdateCmd(cliCfg, c)
       case Options.Delete(c)  => DeleteCmd(cliCfg, c)
+      case Options.Show(c)    => ShowCmd(cliCfg, c)
     }
 }
