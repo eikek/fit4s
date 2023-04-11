@@ -10,6 +10,8 @@ final class Distance private (val meter: Double) extends AnyVal {
 
   def +(dst: Distance): Distance = new Distance(meter + dst.meter)
 
+  def rounded: Distance = new Distance(meter.round.toDouble)
+
   override def toString = s"${meter}m"
 }
 

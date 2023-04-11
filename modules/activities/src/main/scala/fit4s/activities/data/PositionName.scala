@@ -3,7 +3,7 @@ package fit4s.activities.data
 import cats.data.NonEmptyList
 
 sealed trait PositionName extends Product {
-
+  final def widen: PositionName = this
   final def name: String =
     productPrefix.toLowerCase
 }

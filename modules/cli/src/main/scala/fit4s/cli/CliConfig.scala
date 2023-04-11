@@ -7,6 +7,7 @@ import ciris._
 import fit4s.activities.JdbcConfig
 import fit4s.geocode.NominatimConfig
 import fs2.io.file.{Files, Path}
+import org.http4s.Uri
 
 import java.time.ZoneId
 
@@ -34,8 +35,22 @@ object CliConfig {
         else None
       }
 
-    def nominatimCfg =
-      ConfigValue.default(NominatimConfig())
+    def nominatimCfg = {
+      val defcfg = NominatimConfig()
+      val baseUrl =
+        env(s"${envPrefix}_NOMINATIM_URL")
+          .or(prop(s"$propPrefix.nominatim.url"))
+          .map(Uri.unsafeFromString)
+          .default(defcfg.baseUrl)
+
+      val maxReq =
+        env(s"${envPrefix}_NOMINATIM_MAX_REQPS")
+          .or(prop(s"$propPrefix.nominatim.max_reqps"))
+          .map(_.toFloat)
+          .default(defcfg.maxReqPerSecond)
+
+      (baseUrl, maxReq).mapN(NominatimConfig.apply)
+    }
 
     def defaultStorageDir[F[_]: Files: Monad]: F[Path] =
       for {

@@ -139,7 +139,7 @@ trait TestData {
     osmId = NominatimOsmId(58),
     position = Position(Semicircle.degree(50.8), Semicircle.degree(0.4)),
     road = None,
-    location = "London?",
+    location = "Bexhill",
     country = None,
     countryCode = CountryCode("gb"),
     postCode = None,

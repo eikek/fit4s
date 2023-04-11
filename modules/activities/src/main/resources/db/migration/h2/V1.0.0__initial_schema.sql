@@ -223,14 +223,14 @@ create table "activity_geo_place" (
 
 alter table "activity_geo_place"
 add constraint "activity_geo_place_geo_place_id_fk"
-foreign key ("geo_place_id") references "geo_place"("id");
+foreign key ("geo_place_id") references "geo_place"("id") on delete cascade;
 
 alter table "activity_geo_place"
 add constraint "activity_geo_place_activity_session_id_fk"
-foreign key ("activity_session_id") references "activity_session"("id");
+foreign key ("activity_session_id") references "activity_session"("id") on delete cascade;
 
 alter table "activity_geo_place"
 add constraint "activity_geo_place_place_activity_session_uniq"
-unique ("geo_place_id", "activity_session_id");
+unique ("geo_place_id", "activity_session_id", "position_name");
 
 CREATE ALIAS HAVSC FOR "fit4s.activities.h2.Functions.hav";

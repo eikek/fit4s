@@ -5,16 +5,9 @@ import cats.effect._
 import cats.syntax.all._
 import doobie.implicits._
 import doobie.{Query => _, _}
-import fit4s.activities.{data, _}
+import fit4s.activities._
 import fit4s.activities.data._
-import fit4s.activities.records.{
-  RActivity,
-  RActivityGeoPlace,
-  RActivityLocation,
-  RActivitySession,
-  RActivityTag,
-  RTag
-}
+import fit4s.activities.records.{RActivity, RActivityLocation, RActivityTag, RTag}
 import fs2.Stream
 import fs2.io.file.{Files, Path}
 
@@ -26,6 +19,7 @@ final class ActivityLogDb[F[_]: Async: Files](
     xa: Transactor[F],
     geoLookup: GeoLookup[F]
 ) extends ActivityLog[F] {
+  private[this] val placeAttach = new GeoPlaceAttach[F](xa, geoLookup)
 
   override def initialize: F[Unit] =
     FlywayMigrate[F](jdbcConfig).run.flatMap { result =>
@@ -65,37 +59,15 @@ final class ActivityLogDb[F[_]: Async: Files](
 
     _ <- results match {
       case ImportResult.Success(id) =>
-        Stream.eval(attachGeoPlace(id))
+        Stream.eval(placeAttach.attachGeoPlace(id))
 
       case ImportResult.Failure(ImportResult.FailureReason.Duplicate(id, _, _)) =>
-        Stream.eval(attachGeoPlace(id))
+        Stream.eval(placeAttach.attachGeoPlace(id))
 
       case _ =>
         Stream.unit
     }
   } yield results
-
-  def attachGeoPlace(id: ActivityId): F[List[ActivityGeoPlaceId]] =
-    RActivityGeoPlace.findByActivity(id).transact(xa).flatMap {
-      case Nil =>
-        for {
-          pos <- RActivitySession.getStartPositions(id).transact(xa)
-          pIds <- pos.traverse(t => geoLookup.lookup(t._2).map(t._1 -> _))
-          res <- pIds.flatTraverse { case (sessionId, optPlace) =>
-            optPlace match {
-              case Some(p) =>
-                RActivityGeoPlace
-                  .insert(sessionId, p.id, PositionName.Start)
-                  .transact(xa)
-                  .map(List(_))
-              case None =>
-                List.empty[data.ActivityGeoPlaceId].pure[F]
-            }
-          }
-        } yield res
-
-      case list => list.map(_.id).pure[F]
-    }
 
   def syncNewFiles(tagged: Set[TagName], callback: ImportCallback[F], concN: Int) =
     for {

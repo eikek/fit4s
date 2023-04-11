@@ -123,4 +123,24 @@ object RActivitySession {
          """
       .query[(ActivitySessionId, Position)]
       .to[List]
+
+  /** Finds the last position in all sessions of an activity. Since this is not recorded
+    * in the session of a fit file, the position of the latest record is used here.
+    */
+  def getEndPositions(id: ActivityId): ConnectionIO[List[(ActivitySessionId, Position)]] =
+    sql"""WITH
+        latest(sessionId, ts) as (
+           SELECT DISTINCT
+             d.activity_session_id, max(d.timestamp)
+           FROM activity_session_data d
+           WHERE d.position_lat is not null AND d.position_long is not null
+              AND d.activity_session_id in (select id from activity_session where activity_id = $id)
+           GROUP BY d.activity_session_id
+         )
+      SELECT d.activity_session_id, d.position_lat, d.position_long
+      FROM activity_session_data d
+      INNER JOIN latest l on l.sessionId = d.activity_session_id AND l.ts = d.timestamp;
+      """
+      .query[(ActivitySessionId, Position)]
+      .to[List]
 }
