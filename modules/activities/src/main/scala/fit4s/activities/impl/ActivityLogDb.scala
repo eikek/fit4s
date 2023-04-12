@@ -116,6 +116,9 @@ final class ActivityLogDb[F[_]: Async: Files](
   ): F[Vector[ActivitySessionSummary]] =
     ActivityQueryBuilder.buildSummary(query).to[Vector].transact(xa)
 
+  def activityDetails(id: ActivityId): F[Option[ActivityDetailResult]] =
+    ActivityDetailQuery.create(id).transact(xa)
+
   def deleteActivities(ids: NonEmptyList[ActivityId], hardDelete: Boolean): F[Int] =
     if (hardDelete) RActivity.delete(ids).transact(xa)
     else RActivityTag.insert2(RTag.softDelete.id, ids).transact(xa)

@@ -11,6 +11,7 @@ public class Functions {
         return sc * Math.PI / C;
     }
 
+    // A bit overkill for this purpose, but why not :)
     public static double hav(double lat1, double lng1, double lat2, double lng2) {
         double lat1r = scToRad(lat1);
         double lat2r = scToRad(lat2);

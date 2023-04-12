@@ -40,4 +40,9 @@ object RActivityStrava {
 
   def removeForStravaId(stravaId: StravaExternalId): ConnectionIO[Int] =
     sql"DELETE FROM $table WHERE strava_id = $stravaId".update.run
+
+  def find(id: ActivityId): ConnectionIO[Option[StravaExternalId]] =
+    sql"SELECT strava_id FROM $table WHERE activity_id = $id"
+      .query[StravaExternalId]
+      .option
 }
