@@ -4,11 +4,14 @@ This is a library for Scala 2.13 and 3.
 
 ## TODO
 
-- [ ] fix strava metadat problem. tag "Bike/" is added to swimming activities
+- [ ] fix problem with invalid value for max. speed in fit sdk examples (standuppaddleboading)
+- [ ] fix strava metadata problem. tag "Bike/" is added to swimming activities
+- [ ] implement location manage (move, delete, list)
 - [ ] publish to strava 
 - [ ] web server and leaflet map view (same features, just web, scalajs)
 - [ ] activity detail command
 - [ ] mima for the libraries
+- [ ] cleanup test cases/resources and personal data in code
 - [x] reverse location lookup?
   - https://nominatim.openstreetmap.org/reverse?format=json&lat=47.4573699&lon=8.4247654
   - it is allowed to do 1req/s

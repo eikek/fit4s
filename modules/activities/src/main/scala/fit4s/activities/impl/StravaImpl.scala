@@ -14,8 +14,11 @@ import fs2.io.file.Path
 
 import java.time.ZoneId
 
-final class StravaImpl[F[_]: Async](zoneId: ZoneId, xa: Transactor[F])
-    extends StravaSupport[F] {
+final class StravaImpl[F[_]: Async](
+    zoneId: ZoneId,
+    xa: Transactor[F],
+    placeAttach: GeoPlaceAttach[F]
+) extends StravaSupport[F] {
   override def loadExport(
       stravaExport: Path,
       tagged: Set[TagName],
@@ -100,15 +103,14 @@ final class StravaImpl[F[_]: Async](zoneId: ZoneId, xa: Transactor[F])
 
         case _ => Async[F].unit
       })
+      _ <- Stream.eval(placeAttach.applyResult(result))
     } yield result
   }
 
   private def updateStravaMeta(id: ActivityId, entry: ExportData): F[Unit] =
     for {
       _ <- entry.name.traverse_(n => RActivity.updateName(id, n).transact(xa))
-      _ <- entry.description.traverse_(d =>
-        RActivity.updateNotes(id, d).transact(xa)
-      )
+      _ <- entry.description.traverse_(d => RActivity.updateNotes(id, d).transact(xa))
       _ <- entry.id
         .traverse_ { stravaId =>
           RActivityStrava.removeForStravaId(stravaId) *>

@@ -57,19 +57,14 @@ final class ActivityLogDb[F[_]: Async: Files](
       if (concN > 1) doImportTask.parEvalMap(concN)(_.transact(xa))
       else doImportTask.evalMap(_.transact(xa))
 
-    _ <- results match {
-      case ImportResult.Success(id) =>
-        Stream.eval(placeAttach.attachGeoPlace(id))
-
-      case ImportResult.Failure(ImportResult.FailureReason.Duplicate(id, _, _)) =>
-        Stream.eval(placeAttach.attachGeoPlace(id))
-
-      case _ =>
-        Stream.unit
-    }
+    _ <- Stream.eval(placeAttach.applyResult(results))
   } yield results
 
-  def syncNewFiles(tagged: Set[TagName], callback: ImportCallback[F], concN: Int) =
+  def syncNewFiles(
+      tagged: Set[TagName],
+      callback: ImportCallback[F],
+      concN: Int
+  ): Stream[F, ImportResult[ActivityId]] =
     for {
       sync <- Stream.eval(SyncData.get.transact(xa))
       now <- Stream.eval(Clock[F].realTimeInstant)
@@ -127,7 +122,7 @@ final class ActivityLogDb[F[_]: Async: Files](
 
   val tagRepository: TagRepo[F] = new TagRepoDb[F](xa)
 
-  val strava: StravaSupport[F] = new StravaImpl[F](zoneId, xa)
+  val strava: StravaSupport[F] = new StravaImpl[F](zoneId, xa, placeAttach)
 
   override def locationRepository: LocationRepo[F] = ???
 

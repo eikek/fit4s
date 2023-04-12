@@ -36,9 +36,10 @@ trait FormatDefinition {
 
   implicit def sportSubSportShow: Show[(Sport, SubSport)] =
     Show.show {
-      case (s, SubSport.Generic) => s.show
-      case (Sport.Generic, s)    => s.show
-      case (a, b)                => show"$a/$b"
+      case (s, SubSport.Generic)                                     => s.show
+      case (Sport.Generic, s)                                        => s.show
+      case (a, b) if b.show.toLowerCase.contains(a.show.toLowerCase) => b.show
+      case (a, b)                                                    => show"$a/$b"
     }
 
   implicit def speedShow(implicit sport: Sport): Show[Speed] =

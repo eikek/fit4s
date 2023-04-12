@@ -4,12 +4,24 @@ import cats.effect._
 import cats.syntax.all._
 import doobie._
 import doobie.implicits._
-import fit4s.activities.GeoLookup
+import fit4s.activities.{GeoLookup, ImportResult}
 import fit4s.activities.data._
 import fit4s.activities.records.{RActivityGeoPlace, RActivitySession}
 import fit4s.data.Position
 
 final class GeoPlaceAttach[F[_]: Async](xa: Transactor[F], geoLookup: GeoLookup[F]) {
+
+  def applyResult(result: ImportResult[ActivityId]): F[List[ActivityGeoPlaceId]] =
+    result match {
+      case ImportResult.Success(id) =>
+        attachGeoPlace(id)
+
+      case ImportResult.Failure(ImportResult.FailureReason.Duplicate(id, _, _)) =>
+        attachGeoPlace(id)
+
+      case _ =>
+        List.empty[ActivityGeoPlaceId].pure[F]
+    }
 
   def attachGeoPlace(id: ActivityId): F[List[ActivityGeoPlaceId]] =
     RActivityGeoPlace.findByActivity(id).transact(xa).flatMap {

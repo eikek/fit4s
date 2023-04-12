@@ -40,7 +40,7 @@ final class NominatimOSM[F[_]: Async](
       nextTime <- state.tryModify(_.nextLookup(begin, reqEvery))
       resp <- nextTime match {
         case Some(d) if d == Duration.Zero =>
-          client.expectOption[Place](GET(url))
+          client.expectOption[Place](GET(url)).attempt.map(_.fold(_ => None, identity))
         case Some(d) =>
           Async[F].sleep(d).flatMap(_ => lookup(position))
         case None =>
