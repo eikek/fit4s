@@ -33,18 +33,34 @@ object ActivityDetailQuery {
           RActivityGeoPlace.getStartEndDistance(s.id).map(_.map(s.id -> _))
         )
       )
+      laps <- OptionT.liftF(
+        ses.toList.traverse(s => laps(s.id).map(s.id -> _))
+      )
     } yield ActivityDetailResult(
       activity = al._1,
       location = al._2,
       sessions = ses,
       tags = tt,
       stravaId = stravaId,
+      laps = laps.toMap,
       startPlace =
         places.view.withFilter(_._2 == PositionName.Start).map(t => t._1 -> t._3).toMap,
       endPlace =
         places.view.withFilter(_._2 == PositionName.End).map(t => t._1 -> t._3).toMap,
       startEndDistance = dist.flatten.toMap
     )).value
+
+  private def laps(id: ActivitySessionId): ConnectionIO[List[RActivityLap]] = {
+    val cols = RActivityLap
+      .columnList(Some("lap"))
+      .foldSmash1(Fragment.empty, sql",", Fragment.empty)
+    sql"""SELECT $cols
+          FROM ${RActivityLap.table} lap
+          WHERE lap.activity_session_id = $id
+          ORDER BY lap.start_time ASC"""
+      .query[RActivityLap]
+      .to[List]
+  }
 
   private def places(id: ActivityId) = {
     val placeCols =
@@ -106,5 +122,4 @@ object ActivityDetailQuery {
       .query[(RActivity, RActivityLocation)]
       .option
   }
-
 }

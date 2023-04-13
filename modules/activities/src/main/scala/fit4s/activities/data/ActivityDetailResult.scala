@@ -10,6 +10,7 @@ final case class ActivityDetailResult(
     sessions: NonEmptyList[RActivitySession],
     tags: Vector[RTag],
     stravaId: Option[StravaExternalId],
+    laps: Map[ActivitySessionId, List[RActivityLap]],
     startPlace: Map[ActivitySessionId, RGeoPlace],
     endPlace: Map[ActivitySessionId, RGeoPlace],
     startEndDistance: Map[ActivitySessionId, Distance]

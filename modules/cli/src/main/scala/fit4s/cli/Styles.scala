@@ -14,7 +14,7 @@ object Styles {
   // private def brgb(r: Int, g: Int, b: Int): Styles =
   //  Styles(s"""\u001b[48;2;$r;$g;${b}m""")
 
-  private val bold = Styles(Console.BOLD)
+  val bold = Styles(Console.BOLD)
 
   val error = frgb(255, 0, 0) ++ bold
 
@@ -30,6 +30,10 @@ object Styles {
 
   val summaryFieldName = frgb(153, 204, 255)
   val summaryFieldValue = frgb(255, 255, 230) ++ bold
+
+  val fieldValue = frgb(230, 230, 230)
+
+  val lightGrey = frgb(180, 180, 180)
 
   def sport(implicit s: Sport) =
     s match {
@@ -54,9 +58,9 @@ object Styles {
   def temperature(t: Option[Temperature]): Styles =
     t match {
       case None                      => Styles("")
-      case Some(t) if t.celcius < 1  => frgb(5, 102, 199)
+      case Some(t) if t.celcius < 1  => frgb(153, 204, 255)
       case Some(t) if t.celcius < 10 => frgb(77, 210, 255)
       case Some(t) if t.celcius < 25 => frgb(255, 77, 77)
-      case _                         => frgb(255, 128, 128)
+      case _                         => frgb(255, 0, 0)
     }
 }

@@ -6,9 +6,10 @@ import fit4s.activities.data.ActivityId
 import fit4s.activities.records.RTag
 import fit4s.cli.FormatDefinition.{DateInstant, TimeInstant}
 import fit4s.data._
-import fit4s.profile.types.{Sport, SubSport}
+import fit4s.profile.types.{Sport, SubSport, SwimStroke}
 
 import java.time.format.TextStyle
+import java.time.temporal.ChronoUnit
 import java.time.{Duration, Instant, ZoneId}
 import java.util.Locale
 
@@ -53,6 +54,9 @@ trait FormatDefinition {
       }
     }
 
+  implicit val swimStrokeShow: Show[SwimStroke] =
+    Show.show(_.typeName)
+
   private def minTomss(min: Double): String = {
     val minutes = min.floor.toInt
     val secs = (min - minutes) * 60
@@ -63,7 +67,7 @@ trait FormatDefinition {
     Show.show { i =>
       val zoned = i.atZone(zoneId)
       val dow = zoned.getDayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault)
-      val ld = zoned.toLocalDateTime
+      val ld = zoned.truncatedTo(ChronoUnit.MINUTES).toLocalDateTime
       s"$dow, ${ld.toLocalDate} ${ld.toLocalTime}"
     }
 

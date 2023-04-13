@@ -84,6 +84,8 @@ final class ActivityLogDb[F[_]: Async: Files](
       results <-
         if (concN > 1) updateTask.parEvalMap(concN)(_.transact(xa))
         else updateTask.evalMap(_.transact(xa))
+
+      _ <- Stream.eval(placeAttach.applyResult(results))
     } yield results
 
   override def activityList(
