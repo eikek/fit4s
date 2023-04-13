@@ -48,11 +48,15 @@ object RActivityTag {
     fr"DELETE FROM $table WHERE activity_id = $activityId AND tag_id in $tagIds".update.run
   }
 
-  def removeTags(tags: List[TagId]): ConnectionIO[Int] =
+  def removeTags(
+      actQuery: Option[ActivityQuery.Condition],
+      tags: List[TagId]
+  ): ConnectionIO[Int] =
     if (tags.isEmpty) Sync[ConnectionIO].pure(0)
     else {
+      val actSql = ActivityQueryBuilder.activityIdFragment(actQuery)
       val tagIds = tags.map(id => sql"$id").foldSmash1(sql"(", sql", ", sql")")
-      sql"DELETE FROM $table WHERE tag_id in $tagIds".update.run
+      sql"DELETE FROM $table WHERE tag_id in $tagIds AND activity_id in ($actSql)".update.run
     }
 
   def insertAll(actQuery: Option[ActivityQuery.Condition], tags: NonEmptyList[TagId]) = {

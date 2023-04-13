@@ -19,7 +19,7 @@ final class TagRepoDb[F[_]: Sync](xa: Transactor[F]) extends TagRepo[F] {
       tagNel = NonEmptyList.fromListUnsafe(tags)
 
       recreateTags = for {
-        _ <- RActivityTag.removeTags(tags.map(_.id))
+        _ <- RActivityTag.removeTags(cond, tags.map(_.id))
         _ <- RActivityTag.insertAll(cond, tagNel.map(_.id))
       } yield ()
       _ <- recreateTags.transact(xa)
