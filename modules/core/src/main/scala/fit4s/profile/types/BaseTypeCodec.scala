@@ -92,7 +92,7 @@ object BaseTypeCodec {
   ): Codec[V] =
     e.codec(bo)
 
-  def invalidValue(fitBaseType: FitBaseType): ByteVector =
+  private def invalidValue(fitBaseType: FitBaseType): ByteVector =
     fitBaseType match {
       case FitBaseType.Enum    => hex"ff"
       case FitBaseType.Sint8   => hex"7f"

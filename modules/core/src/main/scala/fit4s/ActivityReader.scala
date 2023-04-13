@@ -62,7 +62,16 @@ object ActivityReader {
     laps = lapMsgs.groupBy { l =>
       sessions.find(_.containsTime(l.startTime)).map(_.startTime)
     }
-  } yield tryFixTimestamps(Result(fileId, am, sessions, laps, recs), zoneId)
+  } yield tryFixTimestamps(
+    Result(
+      fileId,
+      am,
+      sessions.sortBy(_.startTime),
+      laps.view.mapValues(_.sortBy(_.startTime)).toMap,
+      recs
+    ),
+    zoneId
+  )
 
   /** Sometimes values in the session message are missing. They can be filled by computing
     * them from all corresponding records.

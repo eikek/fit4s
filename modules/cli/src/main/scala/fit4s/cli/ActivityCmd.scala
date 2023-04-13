@@ -1,7 +1,6 @@
 package fit4s.cli
 
 import cats.effect.{ExitCode, IO}
-import cats.syntax.all._
 import com.monovore.decline.Opts
 import fit4s.cli.activity._
 
@@ -15,9 +14,6 @@ object ActivityCmd extends SharedOpts {
 
   val summaryArgs: Opts[SummaryCmd.Options] =
     Opts.subcommand("summary", "Show an activity summary for the query.")(SummaryCmd.opts)
-
-  val initArgs: Opts[Unit] =
-    Opts.subcommand("init", "Initialize the database.")(Opts.unit)
 
   val listArgs: Opts[ListCmd.Options] =
     Opts.subcommand("list", "List activities")(ListCmd.opts)
@@ -33,7 +29,6 @@ object ActivityCmd extends SharedOpts {
 
   val opts = importArgs
     .map(Options.Import)
-    .orElse(initArgs.as(Options.Init))
     .orElse(summaryArgs.map(Options.Summary))
     .orElse(listArgs.map(Options.List))
     .orElse(updateArgs.map(Options.Update))
@@ -44,7 +39,6 @@ object ActivityCmd extends SharedOpts {
   object Options {
     final case class Import(cfg: ImportCmd.Options) extends Options
     final case class Summary(cfg: SummaryCmd.Options) extends Options
-    final case object Init extends Options
     final case class List(cfg: ListCmd.Options) extends Options
     final case class Update(cfg: UpdateCmd.Options) extends Options
     final case class Delete(cfg: DeleteCmd.Options) extends Options
@@ -55,7 +49,6 @@ object ActivityCmd extends SharedOpts {
     cfg match {
       case Options.Import(c)  => ImportCmd(cliCfg, c)
       case Options.Summary(c) => SummaryCmd(cliCfg, c)
-      case Options.Init       => InitCmd.init(cliCfg)
       case Options.List(c)    => ListCmd(cliCfg, c)
       case Options.Update(c)  => UpdateCmd(cliCfg, c)
       case Options.Delete(c)  => DeleteCmd(cliCfg, c)

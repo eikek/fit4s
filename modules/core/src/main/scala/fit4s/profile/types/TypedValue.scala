@@ -1,7 +1,7 @@
 package fit4s.profile.types
 
 import scodec.Codec
-import scodec.bits.{ByteOrdering, ByteVector}
+import scodec.bits.ByteOrdering
 import scodec.codecs._
 
 trait TypedValue[V] {
@@ -16,8 +16,6 @@ trait TypedValueCompanion[A <: TypedValue[_]] {
   def codec(bo: ByteOrdering): Codec[A]
 
   protected def baseType: FitBaseType
-
-  lazy val invalidValue: ByteVector = BaseTypeCodec.invalidValue(baseType)
 }
 
 trait EnumValueCompanion[A <: TypedValue[_]] extends TypedValueCompanion[A] {

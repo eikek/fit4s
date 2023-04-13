@@ -56,11 +56,16 @@ object ShowCmd extends SharedOpts with FormatDefinition {
           .map(showSession(r, _))
           .mkString("\n"),
         " ",
-        deviceAndFilePath(r)
+        device(r),
+        fileId(r),
+        filePath(r)
       ).filter(_.nonEmpty).mkString("\n")
     )
 
   }
+
+  def fileId(r: ActivityDetailResult) =
+    s"File-Id: ${r.activity.activityFileId.asString}".in(Styles.device)
 
   def showSession(r: ActivityDetailResult, s: RActivitySession)(implicit
       zoneId: ZoneId
@@ -153,7 +158,7 @@ object ShowCmd extends SharedOpts with FormatDefinition {
         }
         .getOrElse("")
 
-    show"${s.distance.show.in(Styles.bold)}${fromTo} in ${s.movingTime.show.in(Styles.bold)}"
+    show"${s.distance.show.in(Styles.bold)}$fromTo in ${s.movingTime.show.in(Styles.bold)}"
   }
 
   def notes(r: ActivityDetailResult) =
@@ -226,10 +231,13 @@ object ShowCmd extends SharedOpts with FormatDefinition {
       .mkString("\n")
   }
 
-  def deviceAndFilePath(r: ActivityDetailResult) = {
+  def filePath(r: ActivityDetailResult) = {
     val path = r.location.location / r.activity.path
-    show"${r.activity.device} $path".in(Styles.device)
+    path.show.in(Styles.device)
   }
+
+  def device(r: ActivityDetailResult) =
+    show"Device: ${r.activity.device}".in(Styles.device)
 
   implicit override def instantShow(implicit zoneId: ZoneId): Show[Instant] =
     Show.show { i =>

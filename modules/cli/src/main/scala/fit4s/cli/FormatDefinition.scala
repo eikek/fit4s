@@ -45,13 +45,15 @@ trait FormatDefinition {
 
   implicit def speedShow(implicit sport: Sport): Show[Speed] =
     Show.show { speed =>
-      (speed, sport) match {
-        case (sp, Sport.Swimming) => s"${minTomss(sp.minPer100m)} min/100m"
-        case (sp, Sport.Running)  => s"${minTomss(sp.minPer1k)} min/km"
-        case (sp, Sport.Walking)  => s"${minTomss(sp.minPer1k)} min/km"
-        case (sp, Sport.Hiking)   => s"${minTomss(sp.minPer1k)} min/km"
-        case (sp, _)              => sp.toString
-      }
+      if (speed.isZero) "-"
+      else
+        (speed, sport) match {
+          case (sp, Sport.Swimming) => s"${minTomss(sp.minPer100m)} min/100m"
+          case (sp, Sport.Running)  => s"${minTomss(sp.minPer1k)} min/km"
+          case (sp, Sport.Walking)  => s"${minTomss(sp.minPer1k)} min/km"
+          case (sp, Sport.Hiking)   => s"${minTomss(sp.minPer1k)} min/km"
+          case (sp, _)              => sp.toString
+        }
     }
 
   implicit val swimStrokeShow: Show[SwimStroke] =

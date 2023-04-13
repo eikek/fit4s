@@ -9,7 +9,8 @@ object ActivityName {
     case n if n >= 0 && n <= 4  => "Night"
     case n if n > 4 && n <= 11  => "Morning"
     case n if n > 11 && n <= 13 => "Lunch"
-    case n if n > 13 && n <= 22 => "Evening"
+    case n if n > 13 && n <= 18 => "Afternoon"
+    case n if n > 18 && n <= 21 => "Evening"
     case _                      => "Night"
   }
 

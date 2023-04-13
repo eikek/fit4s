@@ -24,7 +24,9 @@ object ActivityImport {
       result: ActivityReader.Result
   ): ConnectionIO[ImportResult[ActivityId]] = {
     val sports = result.sessions.map(_.sport).toSet
-    val name = ActivityName.generate(result.activity.timestamp, sports, zone)
+    val startTime =
+      result.sessions.headOption.map(_.startTime).getOrElse(result.activity.timestamp)
+    val name = ActivityName.generate(startTime, sports, zone)
 
     for {
       actId <- add(locationId, path, name, notes, now)(result)

@@ -1,7 +1,6 @@
-package fit4s.cli.activity
+package fit4s.cli
 
 import cats.effect.{ExitCode, IO}
-import fit4s.cli.{CliConfig, SharedOpts}
 
 object InitCmd extends SharedOpts {
 

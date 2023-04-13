@@ -18,6 +18,9 @@ object App
       InspectCmd.opts
     )
 
+  private val initArgs: Opts[Unit] =
+    Opts.subcommand("init", "Initialize the database.")(Opts.unit)
+
   private val activityOpts: Opts[ActivityCmd.Options] =
     Opts.subcommand("activity", "Look into activities")(ActivityCmd.opts)
 
@@ -33,6 +36,7 @@ object App
       .orElse(activityOpts.map(SubCommandOpts.Activity))
       .orElse(tagOpts.map(SubCommandOpts.Tag))
       .orElse(stravaOpts.map(SubCommandOpts.Strava))
+      .orElse(initArgs.map(_ => SubCommandOpts.Init))
 
   def main: Opts[IO[ExitCode]] =
     subCommandOpts.map(run).map(printError)
@@ -44,6 +48,7 @@ object App
         case SubCommandOpts.Activity(c) => ActivityCmd(cliCfg, c)
         case SubCommandOpts.Tag(c)      => TagCmd(cliCfg, c)
         case SubCommandOpts.Strava(c)   => StravaCmd(cliCfg, c)
+        case SubCommandOpts.Init        => InitCmd.init(cliCfg)
       }
     }
 
@@ -53,6 +58,7 @@ object App
     case class Activity(opts: ActivityCmd.Options) extends SubCommandOpts
     case class Tag(opts: TagCmd.SubOpts) extends SubCommandOpts
     case class Strava(opts: StravaCmd.SubCmdOpts) extends SubCommandOpts
+    case object Init extends SubCommandOpts
   }
 
   private def printError(io: IO[ExitCode]): IO[ExitCode] =

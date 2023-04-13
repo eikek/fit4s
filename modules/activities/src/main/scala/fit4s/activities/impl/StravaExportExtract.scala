@@ -65,20 +65,20 @@ object StravaExportExtract {
     val data = reader.allWithHeaders()
     data.flatMap { m =>
       val (bike, shoe) = m.get("Activity Gear") match {
-        case Some(g) if bikes.contains(g) => (g.some, None)
-        case Some(g) if shoes.contains(g) => (None, g.some)
-        case g                            => (g, None)
+        case Some(g) if g.trim.nonEmpty && bikes.contains(g.trim) => (g.trim.some, None)
+        case Some(g) if g.trim.nonEmpty && shoes.contains(g.trim) => (None, g.trim.some)
+        case g                                                    => (g.asNonBlank, None)
       }
-      m.get("Filename").map { fn =>
+      m.get("Filename").asNonBlank.map { fn =>
         ExportData(
           fitFile = dir / fn,
           relativePath = fn,
           exportFile = dir,
           id = m.get("Activity ID").flatMap(_.toLongOption).map(StravaExternalId.apply),
-          name = m.get("Activity Name"),
-          description = m.get("Activity Description"),
-          bike = bike,
-          shoe = shoe,
+          name = m.get("Activity Name").asNonBlank,
+          description = m.get("Activity Description").asNonBlank,
+          bike = bike.asNonBlank,
+          shoe = shoe.asNonBlank,
           commute = m.get("Commute").flatMap(_.toDoubleOption).exists(_ > 0)
         )
       }
@@ -133,6 +133,10 @@ object StravaExportExtract {
 
   private def activityZipFilter: Zip.NameFilter =
     n => n.startsWith("activities") || n == "bikes.csv" || n == "shoes.csv"
+
+  implicit class StringOptionOps(self: Option[String]) {
+    def asNonBlank = self.map(_.trim).filter(_.nonEmpty)
+  }
 
   sealed trait InputDirType extends Product {
     def widen: InputDirType = this

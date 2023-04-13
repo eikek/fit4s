@@ -1,12 +1,17 @@
 package fit4s.data
 
 final class Speed private (val meterPerSecond: Double) extends AnyVal {
+  def isZero: Boolean = this == Speed.zero
 
   def kmh: Double = meterPerSecond * 3.6
 
-  def minPer100m = (100d / meterPerSecond) / 60d
+  def minPer100m =
+    if (meterPerSecond <= 0) 0
+    else (100d / meterPerSecond) / 60d
 
-  def minPer1k = (1000d / meterPerSecond) / 60d
+  def minPer1k =
+    if (meterPerSecond <= 0) 0
+    else (1000d / meterPerSecond) / 60d
 
   def *(factor: Double): Speed = new Speed(meterPerSecond * factor)
 

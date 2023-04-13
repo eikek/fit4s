@@ -1,6 +1,6 @@
 package fit4s
 
-import fit4s.data.HeartRate
+import fit4s.data.{HeartRate, Speed}
 import fit4s.profile.messages.RecordMsg
 import munit.CatsEffectSuite
 
@@ -61,6 +61,10 @@ class ActivityReaderTest extends CatsEffectSuite {
       _ = assertEquals(
         result.activity.timestamp.asInstant,
         Instant.parse("2015-06-30T16:29:00Z")
+      )
+      _ = assertEquals(
+        result.sessions.head.maxSpeed,
+        Speed.meterPerSecond(0)
       )
     } yield ()
   }

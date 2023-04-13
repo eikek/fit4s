@@ -59,8 +59,8 @@ object Styles {
     t match {
       case None                      => Styles("")
       case Some(t) if t.celcius < 1  => frgb(153, 204, 255)
-      case Some(t) if t.celcius < 10 => frgb(77, 210, 255)
-      case Some(t) if t.celcius < 25 => frgb(255, 77, 77)
+      case Some(t) if t.celcius < 15 => frgb(102, 179, 255)
+      case Some(t) if t.celcius < 25 => frgb(255, 153, 102)
       case _                         => frgb(255, 0, 0)
     }
 }
