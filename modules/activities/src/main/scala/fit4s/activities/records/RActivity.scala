@@ -5,9 +5,11 @@ import doobie.implicits._
 import doobie._
 import DoobieMeta._
 import cats.data.NonEmptyList
+import cats.effect.kernel.Clock
+import fit4s.activities.impl.ActivityName
 import fit4s.data.{DeviceProduct, FileId}
 
-import java.time.{Duration, Instant}
+import java.time.{Duration, Instant, ZoneId}
 
 case class RActivity(
     id: ActivityId,
@@ -97,7 +99,16 @@ object RActivity {
   def updateName(id: ActivityId, name: String): ConnectionIO[Int] =
     sql"UPDATE $table SET name = $name WHERE id = $id".update.run
 
-  def updateNotes(id: ActivityId, desc: String): ConnectionIO[Int] =
+  def setGeneratedName(id: ActivityId, zoneId: ZoneId): ConnectionIO[Int] =
+    for {
+      sports <- RActivitySession.sportsByActivity(id)
+      start <- RActivitySession.lowestStartTime(id)
+      now <- Clock[ConnectionIO].realTimeInstant
+      name = ActivityName.generate(start.getOrElse(now), sports, zoneId)
+      n <- updateName(id, name)
+    } yield n
+
+  def updateNotes(id: ActivityId, desc: Option[String]): ConnectionIO[Int] =
     sql"UPDATE $table SET notes = $desc WHERE id = $id".update.run
 
   def delete(ids: NonEmptyList[ActivityId]): ConnectionIO[Int] = {

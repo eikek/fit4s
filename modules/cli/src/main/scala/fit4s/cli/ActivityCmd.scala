@@ -27,6 +27,12 @@ object ActivityCmd extends SharedOpts {
   val showArgs: Opts[ShowCmd.Options] =
     Opts.subcommand("show", "Show details of an activity")(ShowCmd.opts)
 
+  val setNameArgs: Opts[SetNameCmd.Options] =
+    Opts.subcommand("set-name", "Set an activity name")(SetNameCmd.opts)
+
+  val setNotesArgs: Opts[SetNotesCmd.Options] =
+    Opts.subcommand("set-notes", "Set activity notes")(SetNotesCmd.opts)
+
   val opts = importArgs
     .map(Options.Import)
     .orElse(summaryArgs.map(Options.Summary))
@@ -34,6 +40,8 @@ object ActivityCmd extends SharedOpts {
     .orElse(updateArgs.map(Options.Update))
     .orElse(deleteArgs.map(Options.Delete))
     .orElse(showArgs.map(Options.Show))
+    .orElse(setNameArgs.map(Options.SetName))
+    .orElse(setNotesArgs.map(Options.SetNotes))
 
   sealed trait Options extends Product
   object Options {
@@ -43,15 +51,19 @@ object ActivityCmd extends SharedOpts {
     final case class Update(cfg: UpdateCmd.Options) extends Options
     final case class Delete(cfg: DeleteCmd.Options) extends Options
     final case class Show(cfg: ShowCmd.Options) extends Options
+    final case class SetName(cfg: SetNameCmd.Options) extends Options
+    final case class SetNotes(cfg: SetNotesCmd.Options) extends Options
   }
 
   def apply(cliCfg: CliConfig, cfg: Options): IO[ExitCode] =
     cfg match {
-      case Options.Import(c)  => ImportCmd(cliCfg, c)
-      case Options.Summary(c) => SummaryCmd(cliCfg, c)
-      case Options.List(c)    => ListCmd(cliCfg, c)
-      case Options.Update(c)  => UpdateCmd(cliCfg, c)
-      case Options.Delete(c)  => DeleteCmd(cliCfg, c)
-      case Options.Show(c)    => ShowCmd(cliCfg, c)
+      case Options.Import(c)   => ImportCmd(cliCfg, c)
+      case Options.Summary(c)  => SummaryCmd(cliCfg, c)
+      case Options.List(c)     => ListCmd(cliCfg, c)
+      case Options.Update(c)   => UpdateCmd(cliCfg, c)
+      case Options.Delete(c)   => DeleteCmd(cliCfg, c)
+      case Options.Show(c)     => ShowCmd(cliCfg, c)
+      case Options.SetName(c)  => SetNameCmd(cliCfg, c)
+      case Options.SetNotes(c) => SetNotesCmd(cliCfg, c)
     }
 }

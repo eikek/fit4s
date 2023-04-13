@@ -12,13 +12,13 @@ Examples:
 
 ## TODO
 
-- [ ] change activity name
 - [ ] json output for detail command
 - [ ] implement location manage (move, delete, list)
 - [ ] publish to strava 
 - [ ] web server and leaflet map view (same features, just web, scalajs)
 - [ ] mima for the libraries
 - [ ] cleanup test cases/resources and personal data in code
+- [x] change activity name/notes
 - [x] check if resolving tags is case-insensitive
 - [x] fix strava metadata problem. tag "Bike/" is added to swimming activities
 - [x] fix problem with invalid value for max. speed in fit sdk examples (standuppaddleboading)

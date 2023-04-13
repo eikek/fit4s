@@ -110,7 +110,9 @@ final class StravaImpl[F[_]: Async](
   private def updateStravaMeta(id: ActivityId, entry: ExportData): F[Unit] =
     for {
       _ <- entry.name.traverse_(n => RActivity.updateName(id, n).transact(xa))
-      _ <- entry.description.traverse_(d => RActivity.updateNotes(id, d).transact(xa))
+      _ <- entry.description.traverse_(d =>
+        RActivity.updateNotes(id, d.some).transact(xa)
+      )
       _ <- entry.id
         .traverse_ { stravaId =>
           RActivityStrava.removeForStravaId(stravaId) *>

@@ -114,7 +114,7 @@ final class ActivityLogDb[F[_]: Async: Files](
       }
 
   override def activitySummary(
-      query: Option[ActivityQuery.Condition]
+      query: ActivityQuery
   ): F[Vector[ActivitySessionSummary]] =
     ActivityQueryBuilder.buildSummary(query).to[Vector].transact(xa)
 
@@ -124,6 +124,16 @@ final class ActivityLogDb[F[_]: Async: Files](
   def deleteActivities(ids: NonEmptyList[ActivityId], hardDelete: Boolean): F[Int] =
     if (hardDelete) RActivity.delete(ids).transact(xa)
     else RActivityTag.insert2(RTag.softDelete.id, ids).transact(xa)
+
+  def setActivityName(id: ActivityId, name: Option[String]): F[Unit] =
+    name
+      .map(RActivity.updateName(id, _))
+      .getOrElse(RActivity.setGeneratedName(id, zoneId))
+      .transact(xa)
+      .void
+
+  def setActivityNotes(id: ActivityId, notes: Option[String]): F[Unit] =
+    RActivity.updateNotes(id, notes).transact(xa).void
 
   val tagRepository: TagRepo[F] = new TagRepoDb[F](xa)
 

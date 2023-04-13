@@ -4,7 +4,6 @@ import cats.effect._
 import cats.syntax.all._
 import com.monovore.decline.Opts
 import fit4s.activities.ActivityQuery
-import fit4s.activities.ActivityQuery.OrderBy
 import fit4s.activities.data.{ActivityListResult, Page}
 import fit4s.activities.records.RActivitySession
 import fit4s.cli.FormatDefinition._
@@ -38,7 +37,7 @@ object ListCmd extends SharedOpts {
           .makeCondition(opts.query, zone, currentTime)
           .fold(err => IO.raiseError(new CliError(err)), IO.pure)
 
-        list = log.activityList(ActivityQuery(query, OrderBy.StartTime, opts.page))
+        list = log.activityList(ActivityQuery(query, opts.page))
 
         _ <- list
           .evalMap(
@@ -71,7 +70,7 @@ object ListCmd extends SharedOpts {
     val lineSep = List.fill(78)('-').mkString.in(Styles.sessionSeparator)
     r.sessions.toList
       .map(sessionString(r, zoneId))
-      .mkString("", "\n", "\n  ") + lineSep + "\n"
+      .mkString("", "\n", "\n  ") + lineSep
   }
 
   def sessionString(r: ActivityListResult, zoneId: ZoneId)(

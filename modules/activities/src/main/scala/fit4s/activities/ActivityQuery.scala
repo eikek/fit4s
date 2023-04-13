@@ -1,7 +1,7 @@
 package fit4s.activities
 
 import cats.data.{NonEmptyList => Nel}
-import fit4s.activities.ActivityQuery.{Condition, OrderBy}
+import fit4s.activities.ActivityQuery.Condition
 import fit4s.activities.data.{ActivityId, Page, TagName}
 import fit4s.data.{DeviceProduct, Distance}
 import fit4s.profile.types.{Sport, SubSport}
@@ -9,15 +9,9 @@ import fs2.io.file.Path
 
 import java.time.{Duration, Instant}
 
-final case class ActivityQuery(condition: Option[Condition], order: OrderBy, page: Page)
+final case class ActivityQuery(condition: Option[Condition], page: Page)
 
 object ActivityQuery {
-
-  sealed trait OrderBy
-  object OrderBy {
-    case object StartTime extends OrderBy
-    case object Distance extends OrderBy
-  }
 
   sealed trait Condition extends Product
   object Condition {

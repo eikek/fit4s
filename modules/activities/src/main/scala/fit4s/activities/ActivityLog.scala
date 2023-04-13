@@ -33,12 +33,16 @@ trait ActivityLog[F[_]] {
   def activityList(query: ActivityQuery): Stream[F, ActivityListResult]
 
   def activitySummary(
-      query: Option[ActivityQuery.Condition]
+      query: ActivityQuery
   ): F[Vector[ActivitySessionSummary]]
 
   def activityDetails(id: ActivityId): F[Option[ActivityDetailResult]]
 
   def deleteActivities(ids: NonEmptyList[ActivityId], hardDelete: Boolean): F[Int]
+
+  def setActivityName(id: ActivityId, name: Option[String]): F[Unit]
+
+  def setActivityNotes(id: ActivityId, notes: Option[String]): F[Unit]
 
   def tagRepository: TagRepo[F]
 

@@ -2,7 +2,7 @@ package fit4s.activities.impl
 
 import fit4s.profile.types.{DateTime, Sport}
 
-import java.time.ZoneId
+import java.time.{Instant, ZoneId}
 
 object ActivityName {
   private val timeMap: Int => String = {
@@ -14,12 +14,15 @@ object ActivityName {
     case _                      => "Night"
   }
 
-  def generate(startTime: DateTime, sports: Set[Sport], zone: ZoneId): String = {
+  def generate(startTime: Instant, sports: Set[Sport], zone: ZoneId): String = {
     val sport = sportVerb(sports)
-    val hour = startTime.asInstant.atZone(zone).getHour
+    val hour = startTime.atZone(zone).getHour
     val timeVerb = timeMap(hour)
     s"$timeVerb $sport"
   }
+
+  def generate(startTime: DateTime, sports: Set[Sport], zone: ZoneId): String =
+    generate(startTime.asInstant, sports, zone)
 
   def sportVerb(sports: Set[Sport]): String =
     if (sports.isEmpty) "Activity"

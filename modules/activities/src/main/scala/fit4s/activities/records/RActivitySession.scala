@@ -143,4 +143,14 @@ object RActivitySession {
       """
       .query[(ActivitySessionId, Position)]
       .to[List]
+
+  def sportsByActivity(id: ActivityId): ConnectionIO[Set[Sport]] =
+    sql"""SELECT sport FROM $table WHERE activity_id = $id"""
+      .query[Sport]
+      .to[Set]
+
+  def lowestStartTime(id: ActivityId): ConnectionIO[Option[Instant]] =
+    sql"""SELECT min(start_time) FROM $table WHERE activity_id = $id"""
+      .query[Instant]
+      .option
 }

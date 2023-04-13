@@ -4,7 +4,8 @@ import cats.Show
 import cats.effect.{Clock, ExitCode, IO}
 import cats.syntax.all._
 import com.monovore.decline.Opts
-import fit4s.activities.data.ActivitySessionSummary
+import fit4s.activities.ActivityQuery
+import fit4s.activities.data.{ActivitySessionSummary, Page}
 import fit4s.cli.FormatDefinition._
 import fit4s.cli._
 import fit4s.data._
@@ -19,11 +20,12 @@ object SummaryCmd extends SharedOpts {
 
   final case class Options(
       query: ActivitySelection,
+      page: Page,
       format: OutputFormat
   )
 
   val opts: Opts[Options] =
-    (activitySelectionOps, outputFormatOpts).mapN(Options)
+    (activitySelectionOps, pageOpts, outputFormatOpts).mapN(Options)
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
     activityLog(cliCfg).use { log =>
@@ -35,7 +37,7 @@ object SummaryCmd extends SharedOpts {
           .makeCondition(opts.query, zone, currentTime)
           .fold(err => IO.raiseError(new CliError(err)), IO.pure)
 
-        summary <- log.activitySummary(query)
+        summary <- log.activitySummary(ActivityQuery(query, opts.page))
         _ <-
           opts.format.fold(
             printJson(summary)(zone),

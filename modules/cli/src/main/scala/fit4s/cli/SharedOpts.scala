@@ -72,7 +72,7 @@ trait SharedOpts {
       .withDefault(0)
       .validate(s"offset must be >= 0")(_ >= 0)
 
-    (limit, offset).mapN(Page.apply)
+    (limit, offset).mapN(Page.apply).withDefault(Page.unlimited)
   }
 
   val outputFormatOpts: Opts[OutputFormat] = {

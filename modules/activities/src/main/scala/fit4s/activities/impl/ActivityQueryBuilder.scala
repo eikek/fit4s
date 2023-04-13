@@ -3,7 +3,7 @@ package fit4s.activities.impl
 import doobie.implicits._
 import doobie.{ConnectionIO, Fragment, Query0}
 import fit4s.activities.ActivityQuery
-import fit4s.activities.ActivityQuery.{Condition, OrderBy}
+import fit4s.activities.ActivityQuery.Condition
 import fit4s.activities.data.{ActivityId, ActivitySessionSummary, Page, TagId, TagName}
 import fit4s.activities.records._
 import fs2.io.file.Path
@@ -33,10 +33,8 @@ object ActivityQueryBuilder {
     val select = fr"SELECT DISTINCT $cols"
     val from = join
     val where = makeWhere(q.condition)
-    val order = q.order match {
-      case OrderBy.Distance  => fr"ORDER BY act.distance, act.id"
-      case OrderBy.StartTime => fr"ORDER BY act.start_time desc, act.id"
-    }
+    val order = fr"ORDER BY act.start_time desc, act.id"
+
     val limit =
       if (q.page == Page.unlimited) Fragment.empty
       else fr"LIMIT ${q.page.limit} OFFSET ${q.page.offset}"
@@ -44,10 +42,10 @@ object ActivityQueryBuilder {
     select ++ from ++ where ++ order ++ limit
   }
 
-  def buildSummary(q: Option[ActivityQuery.Condition]): Query0[ActivitySessionSummary] =
+  def buildSummary(q: ActivityQuery): Query0[ActivitySessionSummary] =
     summaryFragment(q).query[ActivitySessionSummary]
 
-  def summaryFragment(q: Option[ActivityQuery.Condition]): Fragment = {
+  def summaryFragment(q: ActivityQuery): Fragment = {
     val selectGrouped =
       fr"""SELECT act.sport, min(act.start_time), max(act.end_time),
            sum(act.moving_time), sum(act.elapsed_time), sum(act.distance),
@@ -69,10 +67,13 @@ object ActivityQueryBuilder {
            act.avg_cadence, act.avg_grade, act.iff, act.tss
         """
 
-    val where = makeWhere(q)
+    val where = makeWhere(q.condition)
+    val page =
+      if (q.page == Page.unlimited) Fragment.empty
+      else sql"LIMIT ${q.page.limit} OFFSET ${q.page.offset}"
 
     sql"""WITH
-              session as ($select $join $where)
+              session as ($select $join $where $page)
             $selectGrouped
             FROM session act
             GROUP BY act.sport

@@ -4,7 +4,6 @@ import doobie.Meta
 import fit4s.data._
 import fit4s.profile.types.{LapTrigger, Sport, SubSport, SwimStroke}
 import fs2.io.file.Path
-import doobie.implicits.javatimedrivernative
 import fit4s.activities.data._
 
 import java.time.{Duration, Instant}
@@ -56,7 +55,7 @@ trait DoobieMeta {
     Meta[Long].timap(SubSport.unsafeByRawValue)(_.rawValue)
 
   implicit val instantMeta: Meta[Instant] =
-    javatimedrivernative.JavaTimeInstantMeta
+    doobie.implicits.legacy.instant.JavaTimeInstantMeta
 
   implicit val durationMeta: Meta[Duration] =
     Meta[Long].timap(Duration.ofMillis)(_.toMillis)
