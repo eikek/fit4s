@@ -48,7 +48,7 @@ object RTag {
         .map(t => sql"${t.name.toLowerCase}")
         .foldSmash1(Fragment.empty, sql",", Fragment.empty)
 
-      sql"""SELECD id, name FROM table WHERE lower(name) in ($values)"""
+      sql"""SELECT id, name FROM table WHERE lower(name) in ($values)"""
         .query[RTag]
         .to[List]
     }
