@@ -13,17 +13,26 @@ final class TagRepoDb[F[_]: Sync](xa: Transactor[F]) extends TagRepo[F] {
   def linkTags(
       cond: Option[ActivityQuery.Condition],
       tags: NonEmptyList[TagName]
-  ): F[Unit] =
+  ): F[Int] =
     for {
       tags <- RTag.getOrCreate(tags.toList).transact(xa)
       tagNel = NonEmptyList.fromListUnsafe(tags)
 
       recreateTags = for {
         _ <- RActivityTag.removeTags(cond, tags.map(_.id))
-        _ <- RActivityTag.insertAll(cond, tagNel.map(_.id))
-      } yield ()
-      _ <- recreateTags.transact(xa)
-    } yield ()
+        n <- RActivityTag.insertAll(cond, tagNel.map(_.id))
+      } yield n
+      n <- recreateTags.transact(xa)
+    } yield n
+
+  def unlinkTags(
+      cond: Option[ActivityQuery.Condition],
+      tags: NonEmptyList[TagName]
+  ): F[Int] =
+    for {
+      tags <- RTag.findAll(tags.toList).transact(xa)
+      n <- RActivityTag.removeTags(cond, tags.map(_.id)).transact(xa)
+    } yield n
 
   def listTags(contains: Option[TagName], page: Page) =
     RTag

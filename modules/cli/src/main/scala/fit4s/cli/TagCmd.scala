@@ -12,6 +12,7 @@ object TagCmd extends SharedOpts {
     case class List(list: ListCmd.Options) extends SubOpts
     case class Rename(rename: RenameCmd.Options) extends SubOpts
     case class Remove(remove: RemoveCmd.Options) extends SubOpts
+    case class Unlink(unlink: UnlinkCmd.Options) extends SubOpts
   }
 
   val addCmd: Opts[AddCmd.Options] =
@@ -26,12 +27,16 @@ object TagCmd extends SharedOpts {
   val removeCmd: Opts[RemoveCmd.Options] =
     Opts.subcommand("remove", "Completely remove a tag")(RemoveCmd.opts)
 
+  val unlinkCmd: Opts[UnlinkCmd.Options] =
+    Opts.subcommand("unlink", "Unlink tags from selected activities")(UnlinkCmd.opts)
+
   val options: Opts[SubOpts] =
     addCmd
       .map(SubOpts.Add)
       .orElse(listCmd.map(SubOpts.List))
       .orElse(renameCmd.map(SubOpts.Rename))
       .orElse(removeCmd.map(SubOpts.Remove))
+      .orElse(unlinkCmd.map(SubOpts.Unlink))
 
   def apply(cliConfig: CliConfig, opts: SubOpts): IO[ExitCode] =
     opts match {
@@ -39,5 +44,6 @@ object TagCmd extends SharedOpts {
       case SubOpts.List(c)   => ListCmd(cliConfig, c)
       case SubOpts.Rename(c) => RenameCmd(cliConfig, c)
       case SubOpts.Remove(c) => RemoveCmd(cliConfig, c)
+      case SubOpts.Unlink(c) => UnlinkCmd(cliConfig, c)
     }
 }

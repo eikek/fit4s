@@ -41,6 +41,18 @@ object RTag {
       .query[RTag]
       .option
 
+  def findAll(names: List[TagName]): ConnectionIO[List[RTag]] =
+    if (names.isEmpty) List.empty[RTag].pure[ConnectionIO]
+    else {
+      val values = names
+        .map(t => sql"${t.name.toLowerCase}")
+        .foldSmash1(Fragment.empty, sql",", Fragment.empty)
+
+      sql"""SELECD id, name FROM table WHERE lower(name) in ($values)"""
+        .query[RTag]
+        .to[List]
+    }
+
   def exists(name: TagName): ConnectionIO[Boolean] =
     fr"SELECT count(id) FROM $table WHERE name = $name"
       .query[Int]
