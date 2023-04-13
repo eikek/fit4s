@@ -48,6 +48,11 @@ object Dependencies {
   val flyway = Seq(
     "org.flywaydb" % "flyway-core" % V.flyway
 //    "org.flywaydb" % "flyway-mysql" % FlywayVersion
+  ).map(
+    _.excludeAll(
+      ExclusionRule("com.fasterxml.jackson.core"),
+      ExclusionRule("com.fasterxml.jackson.dataformat")
+    )
   )
 
   val h2 = Seq(

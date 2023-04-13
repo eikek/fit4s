@@ -7,6 +7,7 @@ addCommandAlias(
   "; scalafmtSbtCheck; scalafmtCheckAll; Compile/scalafix --check; Test/scalafix --check"
 )
 addCommandAlias("fix", "; Compile/scalafix; Test/scalafix; scalafmtSbt; scalafmtAll")
+addCommandAlias("make-package", "; cli/Universal/packageBin")
 
 val sharedSettings = Seq(
   organization := "com.github.eikek",
@@ -38,7 +39,7 @@ val sharedSettings = Seq(
   Compile / console / scalacOptions := Seq(),
   Test / console / scalacOptions := Seq(),
   licenses := Seq("MIT" -> url("http://spdx.org/licenses/MIT")),
-  homepage := Some(url("https://github.com/eikek/emil")),
+  homepage := Some(url("https://github.com/eikek/fit4s")),
   versionScheme := Some("early-semver")
 ) ++ publishSettings
 
@@ -87,7 +88,7 @@ val buildInfoSettings = Seq(
   ),
   buildInfoOptions += BuildInfoOption.ToJson,
   buildInfoOptions += BuildInfoOption.BuildTime,
-  buildInfoPackage := "emil"
+  buildInfoPackage := "fit4s"
 )
 
 lazy val core = project
@@ -144,12 +145,13 @@ lazy val activities = project
 
 lazy val cli = project
   .in(file("modules/cli"))
+  .enablePlugins(JavaAppPackaging, ClasspathJarPlugin)
   .settings(sharedSettings)
   .settings(testSettings)
   .settings(scalafixSettings)
   .settings(
     name := "fit4s-cli",
-    description := "A simple command line interface to inspect fit files",
+    description := "A command line interface to look at your fit files",
     libraryDependencies ++=
       Dependencies.fs2Core ++
         Dependencies.decline ++

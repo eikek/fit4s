@@ -29,8 +29,8 @@ trait SharedOpts {
   implicit val activityIdArgument: Argument[ActivityId] =
     Argument.readLong.map(ActivityId.apply)
 
-  val parallel: Opts[Boolean] =
-    Opts.flag("parallel", "Whether to import using multiple threads").orFalse
+  val sequential: Opts[Boolean] =
+    Opts.flag("sequential", "Whether to import using a single threads").orFalse
 
   val initialTags: Opts[List[TagName]] =
     Opts

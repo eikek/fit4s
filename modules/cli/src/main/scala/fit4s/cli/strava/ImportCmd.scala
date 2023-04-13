@@ -20,8 +20,10 @@ object ImportCmd extends SharedOpts {
       bikeTagPrefix: TagName,
       shoeTagPrefix: TagName,
       commuteTag: TagName,
-      parallel: Boolean
-  )
+      sequential: Boolean
+  ) {
+    val parallel = !sequential
+  }
 
   val opts: Opts[Options] = {
     val tags =
@@ -37,7 +39,7 @@ object ImportCmd extends SharedOpts {
       .option[TagName]("commute-tag", "Tag used to mark commutes.")
       .withDefault(TagName.unsafeFromString("Commute"))
 
-    (file, tags, btp, stp, commTag, parallel).mapN(Options)
+    (file, tags, btp, stp, commTag, sequential).mapN(Options)
   }
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
@@ -50,7 +52,7 @@ object ImportCmd extends SharedOpts {
           opts.shoeTagPrefix.some,
           opts.commuteTag.some,
           printFile,
-          if (opts.parallel) maxConcurrent else 1
+          if (opts.sequential) 1 else maxConcurrent
         )
         .evalTap(res => if (opts.parallel) IO.unit else IO.println(res.show))
         .map(Result.apply)

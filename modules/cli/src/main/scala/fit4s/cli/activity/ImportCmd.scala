@@ -20,14 +20,16 @@ object ImportCmd extends SharedOpts {
   final case class Options(
       fileOrDirectories: NonEmptyList[Path],
       tags: List[TagName],
-      parallel: Boolean
-  )
+      sequential: Boolean
+  ) {
+    val parallel = !sequential
+  }
 
   val opts: Opts[Options] = {
     val fileOrDirArgs: Opts[NonEmptyList[Path]] =
       Opts.arguments[Path](metavar = "fileOrDirs")
 
-    (fileOrDirArgs, initialTags, parallel).mapN(Options)
+    (fileOrDirArgs, initialTags, sequential).mapN(Options)
   }
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =

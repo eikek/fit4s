@@ -25,6 +25,11 @@ object CliConfig {
   def load[F[_]: Async]: F[CliConfig] =
     cfg[F].load[F]
 
+  object Defaults {
+    val timezone: ZoneId = ZoneId.of("Europe/Berlin")
+    val nominatimConfig: NominatimConfig = NominatimConfig()
+  }
+
   private object Env {
     private val envPrefix = "FIT4S_ACTIVITIES"
     private val propPrefix = "fit4s.activities"
@@ -36,7 +41,7 @@ object CliConfig {
       }
 
     def nominatimCfg = {
-      val defcfg = NominatimConfig()
+      val defcfg = Defaults.nominatimConfig
       val baseUrl =
         env(s"${envPrefix}_NOMINATIM_URL")
           .or(prop(s"$propPrefix.nominatim.url"))
@@ -83,7 +88,7 @@ object CliConfig {
     val zone =
       env(s"${envPrefix}_TIMEZONE")
         .or(prop(s"$propPrefix.timezone"))
-        .default("Europe/Berlin")
         .as[ZoneId]
+        .default(Defaults.timezone)
   }
 }

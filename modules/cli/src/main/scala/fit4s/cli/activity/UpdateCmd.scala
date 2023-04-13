@@ -15,11 +15,13 @@ object UpdateCmd extends SharedOpts {
 
   final case class Options(
       tags: List[TagName],
-      parallel: Boolean
-  )
+      sequential: Boolean
+  ) {
+    val parallel = !sequential
+  }
 
   val opts: Opts[Options] =
-    (initialTags, parallel).mapN(Options)
+    (initialTags, sequential).mapN(Options)
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
     activityLog(cliCfg).use { log =>
