@@ -3,7 +3,7 @@ package fit4s.activities.records
 import doobie._
 import doobie.implicits._
 import fit4s.activities.data.{ActivityId, ActivitySessionId}
-import fit4s.activities.records.DoobieMeta._
+import fit4s.activities.records.DoobieImplicits._
 import fit4s.data._
 import fit4s.profile.types._
 
@@ -48,11 +48,8 @@ final case class RActivitySession(
 
 object RActivitySession {
   private[activities] val table = fr"activity_session"
-  private val columns = columnList(None).tail
-    .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
-
-  private val columnsWithId =
-    columnList(None).foldSmash1(Fragment.empty, sql", ", Fragment.empty)
+  private val columns = columnList(None).tail.commas
+  private val columnsWithId = columnList(None).commas
 
   private[activities] def columnList(alias: Option[String]): List[Fragment] = {
     def c(name: String) = Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))

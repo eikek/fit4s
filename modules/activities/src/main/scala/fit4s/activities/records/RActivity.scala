@@ -3,7 +3,7 @@ package fit4s.activities.records
 import fit4s.activities.data.{ActivityId, LocationId}
 import doobie.implicits._
 import doobie._
-import DoobieMeta._
+import DoobieImplicits._
 import cats.data.NonEmptyList
 import cats.effect.kernel.Clock
 import fit4s.activities.impl.ActivityName
@@ -70,11 +70,8 @@ object RActivity {
       c("import_time")
     )
   }
-  private val columnsWithId =
-    columnList(None).foldSmash1(Fragment.empty, sql",", Fragment.empty)
-
-  private val columnsNoId =
-    columnList(None).tail.foldSmash1(Fragment.empty, sql",", Fragment.empty)
+  private val columnsWithId = columnList(None).commas
+  private val columnsNoId = columnList(None).tail.commas
 
   def insert(r: RActivity): ConnectionIO[ActivityId] =
     (sql"INSERT INTO $table ($columnsNoId) VALUES " ++
@@ -112,8 +109,7 @@ object RActivity {
     sql"UPDATE $table SET notes = $desc WHERE id = $id".update.run
 
   def delete(ids: NonEmptyList[ActivityId]): ConnectionIO[Int] = {
-    val in =
-      ids.toList.map(id => sql"$id").foldSmash1(Fragment.empty, sql",", Fragment.empty)
+    val in = ids.toList.map(id => sql"$id").commas
     sql"DELETE FROM $table WHERE id in ($in)".update.run
   }
 }

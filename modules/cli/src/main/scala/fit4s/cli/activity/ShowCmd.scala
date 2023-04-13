@@ -35,7 +35,7 @@ object ShowCmd extends SharedOpts with FormatDefinition {
             opts.format match {
               case OutputFormat.Text => showResults(r)(cliCfg.timezone)
               case OutputFormat.Json =>
-                IO.println(ActivityListResultJson.encodeDetail(r).spaces2)
+                IO.println(RecordJsonEncoder.encodeDetail(r).spaces2)
             }
 
           case None =>

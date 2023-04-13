@@ -5,7 +5,7 @@ import cats.effect.{IO, Resource}
 import cats.syntax.all._
 import com.monovore.decline.{Argument, Opts}
 import fit4s.activities.ActivityLog
-import fit4s.activities.data.{ActivityId, Page, TagName}
+import fit4s.activities.data.{ActivityId, LocationId, Page, TagName}
 import fit4s.profile.types.Sport
 import fs2.io.file.Path
 
@@ -28,6 +28,9 @@ trait SharedOpts {
 
   implicit val activityIdArgument: Argument[ActivityId] =
     Argument.readLong.map(ActivityId.apply)
+
+  implicit val locationIdArgument: Argument[LocationId] =
+    Argument.readLong.map(LocationId.apply)
 
   val sequential: Opts[Boolean] =
     Opts.flag("sequential", "Whether to import using a single threads").orFalse

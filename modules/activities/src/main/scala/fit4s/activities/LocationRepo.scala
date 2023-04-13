@@ -1,19 +1,33 @@
 package fit4s.activities
 
-import fit4s.activities.data.Page
+import fit4s.activities.LocationRepo.MoveResult
+import fit4s.activities.data.{LocationId, Page}
 import fit4s.activities.records.RActivityLocation
-import fs2.io.file.Path
 import fs2.Stream
+import fs2.io.file.Path
 
 trait LocationRepo[F[_]] {
-  def createLocation(name: Path): F[ImportResult[RActivityLocation]]
-
-  def deleteLocation(id: Path): F[Int]
-
-  def updateLocation(location: RActivityLocation): F[Int]
 
   def listLocations(
       contains: Option[String],
       page: Page
-  ): Stream[F, RActivityLocation]
+  ): Stream[F, (RActivityLocation, Long)]
+
+  def move(
+      idOrPath: Either[LocationId, Path],
+      target: Path,
+      withFs: Boolean
+  ): F[MoveResult]
+}
+
+object LocationRepo {
+
+  sealed trait MoveResult extends Product {
+    def widen: MoveResult = this
+  }
+  object MoveResult {
+    case object Success extends MoveResult
+    case class FsFailure(ex: Throwable) extends MoveResult
+    case object NotFound extends MoveResult
+  }
 }

@@ -3,7 +3,7 @@ package fit4s.activities.records
 import doobie._
 import doobie.implicits._
 import fit4s.activities.data.{ActivityId, ActivityTagId, TagId}
-import DoobieMeta._
+import DoobieImplicits._
 import cats.data.NonEmptyList
 import cats.effect.kernel.Sync
 import fit4s.activities.ActivityQuery
@@ -25,12 +25,10 @@ object RActivityTag {
   }
 
   private val colsNoId =
-    columnList(None).tail.foldSmash1(Fragment.empty, sql",", Fragment.empty)
+    columnList(None).tail.commas
 
   def insert1(activityId: ActivityId, tagIds: NonEmptyList[TagId]): ConnectionIO[Int] = {
-    val values = tagIds.toList
-      .map(tagId => fr"($activityId, $tagId)")
-      .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
+    val values = tagIds.toList.map(tagId => fr"($activityId, $tagId)").commas
 
     fr"INSERT INTO $table ($colsNoId) VALUES $values".update.run
   }
@@ -38,7 +36,7 @@ object RActivityTag {
   def insert2(tagId: TagId, activityIds: NonEmptyList[ActivityId]): ConnectionIO[Int] = {
     val values = activityIds.toList
       .map(activityId => fr"($activityId, $tagId)")
-      .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
+      .commas
 
     fr"INSERT INTO $table ($colsNoId) VALUES $values".update.run
   }
@@ -55,15 +53,13 @@ object RActivityTag {
     if (tags.isEmpty) Sync[ConnectionIO].pure(0)
     else {
       val actSql = ActivityQueryBuilder.activityIdFragment(actQuery)
-      val tagIds = tags.map(id => sql"$id").foldSmash1(sql"(", sql", ", sql")")
-      sql"DELETE FROM $table WHERE tag_id in $tagIds AND activity_id in ($actSql)".update.run
+      val tagIds = tags.map(id => sql"$id").commas
+      sql"DELETE FROM $table WHERE tag_id in ($tagIds) AND activity_id in ($actSql)".update.run
     }
 
   def insertAll(actQuery: Option[ActivityQuery.Condition], tags: NonEmptyList[TagId]) = {
     val actSql = ActivityQueryBuilder.activityIdFragment(actQuery)
-    val tids = tags.toList
-      .map(id => sql"($id)")
-      .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
+    val tids = tags.toList.map(id => sql"($id)").commas
 
     sql"""
       INSERT INTO $table ($colsNoId)

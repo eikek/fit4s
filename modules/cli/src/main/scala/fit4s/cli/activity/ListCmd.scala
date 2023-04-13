@@ -53,7 +53,7 @@ object ListCmd extends SharedOpts {
 
   def printJson(filesOnly: Boolean): ActivityListResult => IO[Unit] = {
     if (filesOnly) (filePathString _).andThen(_.asJson).andThen(IO.println)
-    (ActivityListResultJson.encodeList _).andThen(_.spaces2).andThen(IO.println)
+    (RecordJsonEncoder.encodeList _).andThen(_.spaces2).andThen(IO.println)
   }
 
   def printText(zoneId: ZoneId, filesOnly: Boolean): ActivityListResult => IO[Unit] =

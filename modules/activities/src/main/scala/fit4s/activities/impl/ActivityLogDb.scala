@@ -139,6 +139,6 @@ final class ActivityLogDb[F[_]: Async: Files](
 
   val strava: StravaSupport[F] = new StravaImpl[F](zoneId, xa, placeAttach)
 
-  override def locationRepository: LocationRepo[F] = ???
+  val locationRepository: LocationRepo[F] = new LocationRepoDb[F](xa)
 
 }

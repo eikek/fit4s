@@ -9,7 +9,7 @@ import fit4s.geocode.{BoundingBox, NominatimOsmId, NominatimPlaceId}
 import fit4s.profile.types.LapTrigger
 import io.circe.generic.semiauto.deriveEncoder
 
-object ActivityListResultJson {
+object RecordJsonEncoder {
 
   def encodeList(r: ActivityListResult): Json =
     Json.obj(
@@ -29,6 +29,17 @@ object ActivityListResultJson {
       "endPlace" -> r.endPlace.asJson,
       "startEndDistance" -> r.startEndDistance.asJson
     )
+
+  implicit val locationAndCountEncoder: Encoder[(RActivityLocation, Long)] =
+    Encoder.instance { case (loc, count) =>
+      Json.obj(
+        "location" -> Json.obj(
+          "id" -> loc.id.asJson,
+          "path" -> loc.location.asJson
+        ),
+        "count" -> count.asJson
+      )
+    }
 
   implicit val geoPlaceEncoder: Encoder[RGeoPlace] =
     Encoder.instance { p =>
@@ -167,4 +178,7 @@ object ActivityListResultJson {
 
   implicit val boundingBoxEncoder: Encoder[BoundingBox] =
     deriveEncoder
+
+  implicit val locationIdEncoder: Encoder[LocationId] =
+    Encoder.encodeLong.contramap(_.id)
 }

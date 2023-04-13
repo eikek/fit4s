@@ -20,7 +20,7 @@ class RActivityLocationTest extends DatabaseTest {
         _ = assertEquals(record.id, LocationId(1L))
         _ = assertEquals(record.location, location)
 
-        found <- RActivityLocation.find(location).transact(xa)
+        found <- RActivityLocation.findByPath(location).transact(xa)
         _ = assertEquals(found, Some(record))
 
         exists <- RActivityLocation.exists(location).transact(xa)

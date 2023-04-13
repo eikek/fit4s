@@ -27,6 +27,9 @@ object App
   private val tagOpts: Opts[TagCmd.SubOpts] =
     Opts.subcommand("tags", "Manage tags on activities")(TagCmd.options)
 
+  private val locationOpts: Opts[LocationCmd.SubOpts] =
+    Opts.subcommand("location", "Manage locations")(LocationCmd.opts)
+
   private val stravaOpts: Opts[StravaCmd.SubCmdOpts] =
     Opts.subcommand("strava", "Interface to strava")(StravaCmd.opts)
 
@@ -36,6 +39,7 @@ object App
       .orElse(activityOpts.map(SubCommandOpts.Activity))
       .orElse(tagOpts.map(SubCommandOpts.Tag))
       .orElse(stravaOpts.map(SubCommandOpts.Strava))
+      .orElse(locationOpts.map(SubCommandOpts.Location))
       .orElse(initArgs.map(_ => SubCommandOpts.Init))
 
   def main: Opts[IO[ExitCode]] =
@@ -48,6 +52,7 @@ object App
         case SubCommandOpts.Activity(c) => ActivityCmd(cliCfg, c)
         case SubCommandOpts.Tag(c)      => TagCmd(cliCfg, c)
         case SubCommandOpts.Strava(c)   => StravaCmd(cliCfg, c)
+        case SubCommandOpts.Location(c) => LocationCmd(cliCfg, c)
         case SubCommandOpts.Init        => InitCmd.init(cliCfg)
       }
     }
@@ -58,6 +63,7 @@ object App
     case class Activity(opts: ActivityCmd.Options) extends SubCommandOpts
     case class Tag(opts: TagCmd.SubOpts) extends SubCommandOpts
     case class Strava(opts: StravaCmd.SubCmdOpts) extends SubCommandOpts
+    case class Location(opts: LocationCmd.SubOpts) extends SubCommandOpts
     case object Init extends SubCommandOpts
   }
 

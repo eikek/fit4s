@@ -3,10 +3,10 @@ package fit4s.activities.records
 import cats.syntax.all._
 import doobie._
 import doobie.implicits._
+import DoobieImplicits._
 import fit4s.activities.data.{CountryCode, GeoPlaceId, PostCode}
 import fit4s.data.Position
 import fit4s.geocode.{BoundingBox, NominatimOsmId, NominatimPlaceId, Place}
-import DoobieMeta._
 
 final case class RGeoPlace(
     id: GeoPlaceId,
@@ -65,10 +65,8 @@ object RGeoPlace {
     )
   }
 
-  private val colsNoId = columnList(None).tail
-    .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
-  private val cols = columnList(None)
-    .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
+  private val colsNoId = columnList(None).tail.commas
+  private val cols = columnList(None).commas
 
   def insert(r: RGeoPlace): ConnectionIO[GeoPlaceId] =
     (sql"INSERT INTO $table ($colsNoId) VALUES (" ++

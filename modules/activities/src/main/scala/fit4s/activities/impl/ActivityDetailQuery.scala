@@ -5,14 +5,9 @@ import cats.effect._
 import cats.syntax.all._
 import doobie._
 import doobie.implicits._
-import fit4s.activities.data.{
-  ActivityDetailResult,
-  ActivityId,
-  ActivitySessionId,
-  PositionName
-}
+import fit4s.activities.records.DoobieImplicits._
+import fit4s.activities.data._
 import fit4s.activities.records._
-import DoobieMeta._
 
 object ActivityDetailQuery {
   private[this] val activityT = RActivity.table
@@ -53,7 +48,7 @@ object ActivityDetailQuery {
   private def laps(id: ActivitySessionId): ConnectionIO[List[RActivityLap]] = {
     val cols = RActivityLap
       .columnList(Some("lap"))
-      .foldSmash1(Fragment.empty, sql",", Fragment.empty)
+      .commas
     sql"""SELECT $cols
           FROM ${RActivityLap.table} lap
           WHERE lap.activity_session_id = $id
@@ -63,8 +58,7 @@ object ActivityDetailQuery {
   }
 
   private def places(id: ActivityId) = {
-    val placeCols =
-      RGeoPlace.columnList(Some("p")).foldSmash1(Fragment.empty, sql",", Fragment.empty)
+    val placeCols = RGeoPlace.columnList(Some("p")).commas
     sql"""SELECT a.activity_session_id, a.position_name, $placeCols
           FROM ${RActivityGeoPlace.table} a
           INNER JOIN ${RGeoPlace.table} p ON a.geo_place_id = p.id
@@ -78,9 +72,7 @@ object ActivityDetailQuery {
   private def activitySessions(
       id: ActivityId
   ): ConnectionIO[NonEmptyList[RActivitySession]] = {
-    val actCols = RActivitySession
-      .columnList(Some("act"))
-      .foldSmash1(Fragment.empty, sql",", Fragment.empty)
+    val actCols = RActivitySession.columnList(Some("act")).commas
     sql"""SELECT $actCols
           FROM $sessionT act
           WHERE act.activity_id = $id
@@ -96,9 +88,7 @@ object ActivityDetailQuery {
   }
 
   private def activityTags(id: ActivityId) = {
-    val tagCols = RTag
-      .columnList(Some("tag"))
-      .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
+    val tagCols = RTag.columnList(Some("tag")).commas
     sql"""SELECT DISTINCT $tagCols
           FROM $tagT tag
           INNER JOIN $actTagT at ON tag.id = at.tag_id
@@ -109,11 +99,8 @@ object ActivityDetailQuery {
   }
 
   private def activityAndLocation(id: ActivityId) = {
-    val colsAT =
-      RActivity.columnList(Some("at")).foldSmash1(Fragment.empty, sql",", Fragment.empty)
-    val colsLoc = RActivityLocation
-      .columnList(Some("loc"))
-      .foldSmash1(Fragment.empty, sql",", Fragment.empty)
+    val colsAT = RActivity.columnList(Some("at")).commas
+    val colsLoc = RActivityLocation.columnList(Some("loc")).commas
 
     sql"""SELECT $colsAT, $colsLoc
           FROM $activityT at

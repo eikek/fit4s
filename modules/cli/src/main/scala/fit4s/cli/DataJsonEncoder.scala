@@ -3,21 +3,13 @@ package fit4s.cli
 import cats.Show
 import cats.syntax.all._
 import fit4s.activities.data._
+import fit4s.cli.FormatDefinition._
 import fit4s.data._
-import fit4s.profile.types.{
-  DateTime,
-  File,
-  Manufacturer,
-  Sport,
-  SubSport,
-  SwimStroke,
-  TypedValue
-}
+import fit4s.profile.types._
 import fs2.io.file.Path
 import io.circe._
 import io.circe.generic.semiauto.deriveEncoder
 import io.circe.syntax._
-import FormatDefinition._
 
 import java.time.{Duration, ZoneId}
 

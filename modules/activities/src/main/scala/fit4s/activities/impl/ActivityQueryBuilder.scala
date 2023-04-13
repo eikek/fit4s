@@ -1,13 +1,13 @@
 package fit4s.activities.impl
 
 import doobie.implicits._
-import doobie.{ConnectionIO, Fragment, Query0}
+import doobie._
+import fit4s.activities.records.DoobieImplicits._
 import fit4s.activities.ActivityQuery
 import fit4s.activities.ActivityQuery.Condition
 import fit4s.activities.data.{ActivityId, ActivitySessionSummary, Page, TagId, TagName}
 import fit4s.activities.records._
 import fs2.io.file.Path
-import DoobieMeta._
 import cats.data.NonEmptyList
 
 object ActivityQueryBuilder {
@@ -28,8 +28,7 @@ object ActivityQueryBuilder {
     val cols =
       (RActivity.columnList(Some("pa")) :::
         RActivityLocation.columnList(Some("loc")) :::
-        RActivitySession.columnList(Some("act")))
-        .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
+        RActivitySession.columnList(Some("act"))).commas
     val select = fr"SELECT DISTINCT $cols"
     val from = join
     val where = makeWhere(q.condition)
@@ -87,8 +86,7 @@ object ActivityQueryBuilder {
   }
 
   def tagsForActivity(id: ActivityId): ConnectionIO[Vector[RTag]] = {
-    val cols =
-      RTag.columnList(Some("t")).foldSmash1(Fragment.empty, sql", ", Fragment.empty)
+    val cols = RTag.columnList(Some("t")).commas
     sql"""SELECT DISTINCT $cols
           FROM ${RTag.table} t
           INNER JOIN ${RActivityTag.table} at ON at.tag_id = t.id
@@ -225,7 +223,7 @@ object ActivityQueryBuilder {
       tags.toList
         .map(_.toLowerCase)
         .map(name => sql"$name")
-        .foldSmash1(Fragment.empty, sql",", Fragment.empty)
+        .commas
     fr"""SELECT DISTINCT ta.activity_id
       FROM $activityTagT ta
       INNER JOIN $tagT tag ON ta.tag_id = tag.id

@@ -3,7 +3,7 @@ package fit4s.activities.records
 import doobie._
 import doobie.implicits._
 import fit4s.activities.data._
-import fit4s.activities.records.DoobieMeta._
+import fit4s.activities.records.DoobieImplicits._
 import fit4s.data.Distance
 
 final case class RActivityGeoPlace(
@@ -26,8 +26,7 @@ object RActivityGeoPlace {
     )
   }
 
-  private val colsNoId = columnList(None).tail
-    .foldSmash1(Fragment.empty, sql", ", Fragment.empty)
+  private val colsNoId = columnList(None).tail.commas
 
   def insert(r: RActivityGeoPlace): ConnectionIO[ActivityGeoPlaceId] =
     sql"INSERT INTO $table ($colsNoId) VALUES (${r.activityId}, ${r.placeId}, ${r.name})".update
@@ -55,7 +54,7 @@ object RActivityGeoPlace {
       .map(_ > 0)
 
   def findByActivity(id: ActivityId): ConnectionIO[List[RActivityGeoPlace]] = {
-    val c = columnList(Some("gp")).foldSmash1(Fragment.empty, sql",", Fragment.empty)
+    val c = columnList(Some("gp")).commas
     sql"""SELECT $c FROM $table gp
           INNER JOIN ${RActivitySession.table} act
              ON act.id = gp.activity_session_id

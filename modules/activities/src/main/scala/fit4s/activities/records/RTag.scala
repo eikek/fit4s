@@ -5,7 +5,7 @@ import doobie._
 import doobie.implicits._
 import fit4s.activities.data.{Page, TagId, TagName}
 import fs2.Stream
-import DoobieMeta._
+import DoobieImplicits._
 import cats.effect.kernel.Sync
 
 final case class RTag(id: TagId, name: TagName)
@@ -44,9 +44,7 @@ object RTag {
   def findAll(names: List[TagName]): ConnectionIO[List[RTag]] =
     if (names.isEmpty) List.empty[RTag].pure[ConnectionIO]
     else {
-      val values = names
-        .map(t => sql"${t.name.toLowerCase}")
-        .foldSmash1(Fragment.empty, sql",", Fragment.empty)
+      val values = names.map(t => sql"${t.name.toLowerCase}").commas
 
       sql"""SELECT id, name FROM $table WHERE lower(name) in ($values)"""
         .query[RTag]

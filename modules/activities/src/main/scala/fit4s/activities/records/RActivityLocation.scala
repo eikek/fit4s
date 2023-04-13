@@ -5,10 +5,9 @@ import cats.syntax.all._
 import fs2.io.file.Path
 import doobie._
 import doobie.implicits._
+import DoobieImplicits._
 import fs2.{Chunk, Stream}
-import DoobieMeta._
-
-import fit4s.activities.data.LocationId
+import fit4s.activities.data.{LocationId, Page}
 
 final case class RActivityLocation(id: LocationId, location: Path)
 
@@ -23,7 +22,7 @@ object RActivityLocation {
   def getOrCreateLocations(dir: List[Path]): ConnectionIO[Map[Path, LocationId]] =
     dir
       .traverse { p =>
-        find(p).flatMap {
+        findByPath(p).flatMap {
           case Some(r) => Sync[ConnectionIO].pure(p -> r.id)
           case None    => insert(p).map(p -> _.id)
         }
@@ -35,10 +34,18 @@ object RActivityLocation {
       .withUniqueGeneratedKeys[LocationId]("id")
       .map(id => RActivityLocation(id, location))
 
-  def find(location: Path): ConnectionIO[Option[RActivityLocation]] =
+  def findByPath(location: Path): ConnectionIO[Option[RActivityLocation]] =
     fr"SELECT id, location FROM $table WHERE location = $location"
       .query[RActivityLocation]
       .option
+
+  def findById(id: LocationId): ConnectionIO[Option[RActivityLocation]] =
+    sql"SELECT id, location FROM $table WHERE id = $id"
+      .query[RActivityLocation]
+      .option
+
+  def setLocation(id: LocationId, path: Path): ConnectionIO[Int] =
+    sql"UPDATE $table SET location = $path WHERE id = $id".update.run
 
   def exists(location: Path): ConnectionIO[Boolean] =
     fr"SELECT count(id) FROM $table WHERE location = $location"
@@ -56,7 +63,25 @@ object RActivityLocation {
   }
 
   def listAll: ConnectionIO[Vector[RActivityLocation]] =
-    fr"SELECT id, location FROM $table ORDER BY location"
+    fr"SELECT id, location FROM $table ORDER BY id ASC"
       .query[RActivityLocation]
       .to[Vector]
+
+  def listSream(
+      contains: Option[String],
+      page: Page
+  ): Stream[ConnectionIO, (RActivityLocation, Long)] = {
+    val where =
+      contains.map(c => sql"WHERE loc.location ilike $c").getOrElse(Fragment.empty)
+
+    sql"""SELECT loc.id,loc.location, count(pa.id)
+          FROM $table loc
+          INNER JOIN ${RActivity.table} pa ON pa.location_id = loc.id
+          $where
+          GROUP BY loc.id, loc.location
+          ORDER BY id
+          ${page.asFragment}"""
+      .query[(RActivityLocation, Long)]
+      .streamWithChunkSize(100)
+  }
 }
