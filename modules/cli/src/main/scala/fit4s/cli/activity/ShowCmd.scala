@@ -6,31 +6,40 @@ import cats.syntax.all._
 import com.monovore.decline.Opts
 import fit4s.activities.data.{ActivityDetailResult, ActivityId}
 import fit4s.activities.records.{RActivityLap, RActivitySession}
-import fit4s.cli.{CliConfig, FormatDefinition, SharedOpts, Styles}
+import fit4s.cli._
 import fit4s.data.Distance
 import fit4s.profile.types.Sport
 
-import java.time.{Instant, ZoneId}
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
+import java.time.{Instant, ZoneId}
 import scala.math.Ordering.Implicits.infixOrderingOps
 
 object ShowCmd extends SharedOpts with FormatDefinition {
 
-  final case class Options(id: ActivityId)
+  final case class Options(id: ActivityId, format: OutputFormat)
 
-  val opts: Opts[Options] =
-    Opts
+  val opts: Opts[Options] = {
+    val id = Opts
       .argument[ActivityId]("activity-id")
-      .map(Options)
+
+    (id, outputFormatOpts).mapN(Options)
+  }
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
     activityLog(cliCfg).use { log =>
       for {
         result <- log.activityDetails(opts.id)
         _ <- result match {
-          case Some(r) => showResults(r)(cliCfg.timezone)
-          case None    => IO.println(s"No activity found.")
+          case Some(r) =>
+            opts.format match {
+              case OutputFormat.Text => showResults(r)(cliCfg.timezone)
+              case OutputFormat.Json =>
+                IO.println(ActivityListResultJson.encodeDetail(r).spaces2)
+            }
+
+          case None =>
+            IO.println(s"No activity found.")
         }
       } yield ExitCode.Error
     }

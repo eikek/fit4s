@@ -1,19 +1,87 @@
 package fit4s.cli
 
-import fit4s.activities.data.ActivityListResult
+import fit4s.activities.data._
 import fit4s.activities.records._
 import io.circe.syntax._
-import io.circe.{Encoder, Json}
+import io.circe.{Encoder, Json, KeyEncoder}
 import DataJsonEncoder._
+import fit4s.geocode.{BoundingBox, NominatimOsmId, NominatimPlaceId}
+import fit4s.profile.types.LapTrigger
+import io.circe.generic.semiauto.deriveEncoder
 
 object ActivityListResultJson {
 
-  def encode(r: ActivityListResult): Json =
+  def encodeList(r: ActivityListResult): Json =
     Json.obj(
       "activity" -> (r.activity -> r.location).asJson,
       "sessions" -> r.sessions.asJson,
       "tags" -> r.tags.asJson
     )
+
+  def encodeDetail(r: ActivityDetailResult): Json =
+    Json.obj(
+      "activity" -> (r.activity -> r.location).asJson,
+      "sessions" -> r.sessions.asJson,
+      "tags" -> r.tags.asJson,
+      "stravaId" -> r.stravaId.asJson,
+      "laps" -> r.laps.asJson,
+      "startPlace" -> r.startPlace.asJson,
+      "endPlace" -> r.endPlace.asJson,
+      "startEndDistance" -> r.startEndDistance.asJson
+    )
+
+  implicit val geoPlaceEncoder: Encoder[RGeoPlace] =
+    Encoder.instance { p =>
+      Json.obj(
+        "osmPlaceId" -> p.osmPlaceId.asJson,
+        "osmId" -> p.osmId.asJson,
+        "position" -> p.position.asJson,
+        "road" -> p.road.asJson,
+        "location" -> p.location.asJson,
+        "country" -> p.country.asJson,
+        "countryCode" -> p.countryCode.asJson,
+        "postCode" -> p.postCode.asJson,
+        "boundingBox" -> p.boundingBox.asJson
+      )
+    }
+
+  implicit def lapEncoder: Encoder[RActivityLap] =
+    Encoder.instance { l =>
+      implicit val sport = l.sport
+      Json.obj(
+        "sport" -> l.sport.asJson,
+        "subSport" -> l.subSport.asJson,
+        "trigger" -> l.trigger.asJson,
+        "startTime" -> l.startTime.asJson,
+        "endTime" -> l.endTime.asJson,
+        "movingTime" -> l.movingTime.asJson,
+        "elapsedTime" -> l.elapsedTime.asJson,
+        "distance" -> l.distance.asJson,
+        "startPosition" -> l.startPosition.asJson,
+        "endPosition" -> l.endPosition.asJson,
+        "calories" -> l.calories.asJson,
+        "totalAscend" -> l.totalAscend.asJson,
+        "totalDescend" -> l.totalDescend.asJson,
+        "minTemp" -> l.minTemp.asJson,
+        "maxTemp" -> l.maxTemp.asJson,
+        "avgTemp" -> l.avgTemp.asJson,
+        "minHr" -> l.minHr.asJson,
+        "maxHr" -> l.maxHr.asJson,
+        "avgHr" -> l.avgHr.asJson,
+        "maxSpeed" -> l.maxSpeed.asJson,
+        "avgSpeed" -> l.avgSpeed.asJson,
+        "maxPower" -> l.maxPower.asJson,
+        "avgPower" -> l.avgPower.asJson,
+        "normPower" -> l.normPower.asJson,
+        "maxCadence" -> l.maxCadence.asJson,
+        "avgCadence" -> l.avgCadence.asJson,
+        "numPoolLengths" -> l.numPoolLength.asJson,
+        "swimStroke" -> l.swimStroke.asJson,
+        "avgStrokeDistance" -> l.avgStrokeDistance.asJson,
+        "avgStrokeCount" -> l.strokeCount.asJson,
+        "avgGrade" -> l.avgGrade.asJson
+      )
+    }
 
   implicit def sessionEncoder: Encoder[RActivitySession] =
     Encoder.instance { s =>
@@ -73,4 +141,30 @@ object ActivityListResultJson {
   implicit def tagEncoder: Encoder[RTag] =
     Encoder.encodeString.contramap(_.name.name)
 
+  implicit val stravaIdEncoder: Encoder[StravaExternalId] =
+    Encoder.encodeLong.contramap(_.id)
+
+  implicit val triggerEncoder: Encoder[LapTrigger] =
+    typedValueEncoder[LapTrigger]
+
+  implicit val activitySessionIdEncoder: Encoder[ActivitySessionId] =
+    Encoder.encodeLong.contramap(_.id)
+
+  implicit val activitySessionIdKeyEncoder: KeyEncoder[ActivitySessionId] =
+    KeyEncoder.instance(_.id.toString)
+
+  implicit val nominatimPlaceIdEncoder: Encoder[NominatimPlaceId] =
+    Encoder.encodeLong.contramap(_.id)
+
+  implicit val nominatimOsmIdEncoder: Encoder[NominatimOsmId] =
+    Encoder.encodeLong.contramap(_.id)
+
+  implicit val countryCodeEncoder: Encoder[CountryCode] =
+    Encoder.encodeString.contramap(_.cc)
+
+  implicit val postCodeEncoder: Encoder[PostCode] =
+    Encoder.encodeString.contramap(_.zip)
+
+  implicit val boundingBoxEncoder: Encoder[BoundingBox] =
+    deriveEncoder
 }
