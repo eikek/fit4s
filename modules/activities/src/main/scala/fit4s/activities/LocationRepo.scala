@@ -18,6 +18,8 @@ trait LocationRepo[F[_]] {
       target: Path,
       withFs: Boolean
   ): F[MoveResult]
+
+  def delete(idOrPath: Either[LocationId, Path], withFs: Boolean): F[MoveResult]
 }
 
 object LocationRepo {

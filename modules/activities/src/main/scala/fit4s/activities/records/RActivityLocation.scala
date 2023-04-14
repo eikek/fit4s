@@ -53,6 +53,9 @@ object RActivityLocation {
       .unique
       .map(_ > 0)
 
+  def delete(id: LocationId): ConnectionIO[Int] =
+    sql"DELETE FROM $table WHERE id = $id".update.run
+
   def insertAll(
       records: Chunk[Path]
   ): Stream[ConnectionIO, RActivityLocation] = {

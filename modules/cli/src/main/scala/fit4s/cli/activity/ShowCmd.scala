@@ -32,19 +32,17 @@ object ShowCmd extends SharedOpts with FormatDefinition {
         result <- log.activityDetails(opts.id)
         _ <- result match {
           case Some(r) =>
-            opts.format match {
-              case OutputFormat.Text => showResults(r)(cliCfg.timezone)
-              case OutputFormat.Json =>
-                IO.println(RecordJsonEncoder.encodeDetail(r).spaces2)
-            }
-
+            opts.format.fold(
+              IO.println(RecordJsonEncoder.encodeDetail(r).spaces2),
+              showResults(r)(cliCfg.timezone)
+            )
           case None =>
             IO.println(s"No activity found.")
         }
       } yield ExitCode.Error
     }
 
-  def showResults(r: ActivityDetailResult)(implicit zoneId: ZoneId): IO[Unit] = {
+  private def showResults(r: ActivityDetailResult)(implicit zoneId: ZoneId): IO[Unit] = {
     val header = show"${r.activity.name}"
     val stravaLink =
       r.stravaId
@@ -73,10 +71,10 @@ object ShowCmd extends SharedOpts with FormatDefinition {
 
   }
 
-  def fileId(r: ActivityDetailResult) =
+  private def fileId(r: ActivityDetailResult): String =
     s"File-Id: ${r.activity.activityFileId.asString}".in(Styles.device)
 
-  def showSession(r: ActivityDetailResult, s: RActivitySession)(implicit
+  private def showSession(r: ActivityDetailResult, s: RActivitySession)(implicit
       zoneId: ZoneId
   ): String = {
     implicit val sport: Sport = s.sport
@@ -170,7 +168,7 @@ object ShowCmd extends SharedOpts with FormatDefinition {
     show"${s.distance.show.in(Styles.bold)}$fromTo in ${s.movingTime.show.in(Styles.bold)}"
   }
 
-  def notes(r: ActivityDetailResult) =
+  private def notes(r: ActivityDetailResult): String =
     r.activity.notes.map(_.trim) match {
       case Some(n) =>
         n.split("\r?\n")
@@ -179,14 +177,14 @@ object ShowCmd extends SharedOpts with FormatDefinition {
       case None => ""
     }
 
-  def tags(r: ActivityDetailResult) =
+  private def tags(r: ActivityDetailResult): String =
     if (r.tags.isEmpty) ""
     else {
       val str = r.tags.map(_.name.name.in(Styles.tags)).mkString(" * ")
       s"\n  $str"
     }
 
-  def avgMaxTable(s: RActivitySession) = {
+  private def avgMaxTable(s: RActivitySession): String = {
     implicit val sport: Sport = s.sport
     val data = List(
       ("", "Avg", "Max"),
@@ -218,7 +216,7 @@ object ShowCmd extends SharedOpts with FormatDefinition {
       .mkString("\n")
   }
 
-  def propertiesTable(s: RActivitySession) = {
+  private def propertiesTable(s: RActivitySession): String = {
     val data = List(
       ("Elapsed", s.elapsedTime.show),
       ("Elevation", s.totalAscend.show),
@@ -240,12 +238,12 @@ object ShowCmd extends SharedOpts with FormatDefinition {
       .mkString("\n")
   }
 
-  def filePath(r: ActivityDetailResult) = {
+  private def filePath(r: ActivityDetailResult): String = {
     val path = r.location.location / r.activity.path
     path.show.in(Styles.device)
   }
 
-  def device(r: ActivityDetailResult) =
+  private def device(r: ActivityDetailResult): String =
     show"Device: ${r.activity.device}".in(Styles.device)
 
   implicit override def instantShow(implicit zoneId: ZoneId): Show[Instant] =

@@ -24,17 +24,14 @@ object ListCmd extends SharedOpts {
     activityLog(cliConfig).use { log =>
       (for {
         location <- log.locationRepository.listLocations(opts.contains, opts.page)
-        _ <- opts.format match {
-          case OutputFormat.Text =>
-            Stream.eval(
-              IO.println(
-                f"${location._1.id.id}%4d ${location._1.location} ${location._2}"
-              )
+        _ <- Stream.eval {
+          opts.format.fold(
+            IO.println(location.asJson.spaces2),
+            IO.println(
+              f"${location._1.id.id}%4d ${location._1.location} ${location._2}"
             )
-          case OutputFormat.Json =>
-            Stream.eval(IO.println(location.asJson.spaces2))
+          )
         }
-
       } yield ()).compile.drain.as(ExitCode.Success)
     }
 

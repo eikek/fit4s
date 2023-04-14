@@ -156,7 +156,8 @@ lazy val cli = project
       Dependencies.fs2Core ++
         Dependencies.decline ++
         Dependencies.circeCore ++
-        Dependencies.ciris
+        Dependencies.ciris ++
+        Dependencies.scribe
   )
   .dependsOn(core % "compile->compile;test->test", activities)
 

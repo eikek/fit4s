@@ -24,7 +24,15 @@ object Dependencies {
     val scalaCheck = "1.17.0"
     val scalaCsv = "1.3.10"
     val organizeImports = "0.6.0"
+    val scribeSlf4j = "3.11.1"
+    val scribe = "3.11.1"
   }
+
+  val scribe = Seq(
+    "com.outr" %% "scribe" % V.scribe,
+    "com.outr" %% "scribe-slf4j" % V.scribeSlf4j,
+    "com.outr" %% "scribe-cats" % V.scribe
+  )
 
   val http4sClient = Seq(
     "org.http4s" %% "http4s-ember-client" % V.http4sClient

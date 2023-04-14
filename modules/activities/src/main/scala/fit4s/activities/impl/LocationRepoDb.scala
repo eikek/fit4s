@@ -26,14 +26,6 @@ final class LocationRepoDb[F[_]: Sync: Files](xa: Transactor[F]) extends Locatio
       target: Path,
       withFs: Boolean
   ): F[MoveResult] = {
-    val noop: EitherT[F, MoveResult, Unit] = EitherT.right(().pure[F])
-    val loadLocation: EitherT[F, MoveResult, RActivityLocation] =
-      OptionT(
-        idOrPath
-          .fold(RActivityLocation.findById, RActivityLocation.findByPath)
-          .transact(xa)
-      ).toRight(MoveResult.NotFound.widen)
-
     def moveFs(current: RActivityLocation): EitherT[F, MoveResult, Unit] =
       if (!withFs) noop
       else
@@ -48,7 +40,7 @@ final class LocationRepoDb[F[_]: Sync: Files](xa: Transactor[F]) extends Locatio
             MoveResult.NotFound.widen.asLeft[Unit].pure[F]
         }
 
-    loadLocation
+    loadLocation(idOrPath)
       .flatTap(moveFs)
       .semiflatTap { current =>
         RActivityLocation.setLocation(current.id, target).transact(xa)
@@ -56,4 +48,40 @@ final class LocationRepoDb[F[_]: Sync: Files](xa: Transactor[F]) extends Locatio
       .as(MoveResult.Success)
       .merge
   }
+
+  def delete(idOrPath: Either[LocationId, Path], withFs: Boolean): F[MoveResult] = {
+    def deleteFs(current: RActivityLocation) =
+      if (!withFs) noop
+      else
+        EitherT.right(Files[F].exists(current.location)).flatMapF {
+          case true =>
+            Files[F]
+              .deleteRecursively(current.location)
+              .attempt
+              .map(_.leftMap(ex => MoveResult.FsFailure(ex).widen))
+
+          case false =>
+            MoveResult.NotFound.widen.asLeft[Unit].pure[F]
+        }
+
+    loadLocation(idOrPath)
+      .flatTap(deleteFs)
+      .semiflatTap { current =>
+        RActivityLocation.delete(current.id).transact(xa)
+      }
+      .as(MoveResult.Success)
+      .merge
+  }
+
+  private val noop: EitherT[F, MoveResult, Unit] = EitherT.right(().pure[F])
+
+  private def loadLocation(
+      idOrPath: Either[LocationId, Path]
+  ): EitherT[F, MoveResult, RActivityLocation] =
+    OptionT(
+      idOrPath
+        .fold(RActivityLocation.findById, RActivityLocation.findByPath)
+        .transact(xa)
+    ).toRight(MoveResult.NotFound.widen)
+
 }

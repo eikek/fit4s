@@ -3,7 +3,7 @@ package fit4s.activities.impl
 import cats.data.NonEmptyList
 import fit4s.activities.ActivityQuery
 import fit4s.activities.ActivityQuery.Condition._
-import fit4s.activities.ActivityQuery.{Condition, OrderBy}
+import fit4s.activities.ActivityQuery.Condition
 import fit4s.activities.data.{ActivityId, Page, TagName}
 import fit4s.data.{DeviceProduct, Distance, FileId}
 import fit4s.profile.types._
@@ -17,12 +17,8 @@ object ActivityQueryGenerator {
   def generator: Gen[ActivityQuery] =
     for {
       c <- Gen.option(conditionGenerator)
-      o <- orderByGenerator
       p <- pageGen
-    } yield ActivityQuery(c, o, p)
-
-  def orderByGenerator: Gen[OrderBy] =
-    Gen.oneOf(OrderBy.Distance, OrderBy.StartTime)
+    } yield ActivityQuery(c, p)
 
   def pageGen: Gen[Page] =
     for {
