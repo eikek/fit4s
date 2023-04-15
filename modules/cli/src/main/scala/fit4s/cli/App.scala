@@ -33,6 +33,9 @@ object App
   private val stravaOpts: Opts[StravaCmd.SubCmdOpts] =
     Opts.subcommand("strava", "Interface to strava")(StravaCmd.opts)
 
+  private val configOpts: Opts[ConfigCmd.SubOpts] =
+    Opts.subcommand("config", "Look at the configuration")(ConfigCmd.opts)
+
   val subCommandOpts: Opts[SubCommandOpts] =
     inspectOpts
       .map(SubCommandOpts.Inspect)
@@ -41,6 +44,7 @@ object App
       .orElse(stravaOpts.map(SubCommandOpts.Strava))
       .orElse(locationOpts.map(SubCommandOpts.Location))
       .orElse(initArgs.map(_ => SubCommandOpts.Init))
+      .orElse(configOpts.map(SubCommandOpts.Config))
 
   def main: Opts[IO[ExitCode]] =
     subCommandOpts.map(run).map(printError)
@@ -54,6 +58,7 @@ object App
         case SubCommandOpts.Strava(c)   => StravaCmd(cliCfg, c)
         case SubCommandOpts.Location(c) => LocationCmd(cliCfg, c)
         case SubCommandOpts.Init        => InitCmd.init(cliCfg)
+        case SubCommandOpts.Config(c)   => ConfigCmd(cliCfg, c)
       }
     }
 
@@ -65,6 +70,7 @@ object App
     case class Strava(opts: StravaCmd.SubCmdOpts) extends SubCommandOpts
     case class Location(opts: LocationCmd.SubOpts) extends SubCommandOpts
     case object Init extends SubCommandOpts
+    case class Config(opts: ConfigCmd.SubOpts) extends SubCommandOpts
   }
 
   private def printError(io: IO[ExitCode]): IO[ExitCode] =

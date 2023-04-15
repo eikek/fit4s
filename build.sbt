@@ -35,6 +35,7 @@ val sharedSettings = Seq(
          )
        else
          Nil),
+  addCompilerPlugin(Dependencies.betterMonadicFor),
   crossScalaVersions := Seq(V.scala2, V.scala3),
   Compile / console / scalacOptions := Seq(),
   Test / console / scalacOptions := Seq(),
@@ -136,7 +137,9 @@ lazy val activities = project
       Dependencies.h2 ++
       Dependencies.doobie ++
       Dependencies.flyway ++
-      Dependencies.scalaCsv
+      Dependencies.scalaCsv ++
+      Dependencies.http4sServer ++
+      Dependencies.scribe
   )
   .dependsOn(
     core % "compile->compile;test->test",

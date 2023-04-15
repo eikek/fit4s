@@ -9,6 +9,9 @@ import fit4s.activities.data._
 import java.time.{Duration, Instant}
 
 trait DoobieMeta {
+  implicit val stravaScopeMeta: Meta[StravaScope] =
+    Meta[String].timap(StravaScope.apply)(_.asString)
+
   implicit val positionNameMeta: Meta[PositionName] =
     Meta[String].timap(PositionName.unsafeFromString)(_.name)
 

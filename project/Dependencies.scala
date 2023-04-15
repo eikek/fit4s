@@ -11,7 +11,7 @@ object Dependencies {
     val ciris = "3.1.0"
     val decline = "2.4.1"
     val doobie = "1.0.0-RC2"
-    val http4sClient = "0.23.18"
+    val http4s = "0.23.18"
     val flyway = "9.16.1"
     val h2 = "2.1.214"
     val munit = "0.7.29"
@@ -28,6 +28,9 @@ object Dependencies {
     val scribe = "3.11.1"
   }
 
+  val betterMonadicFor =
+    "com.olegpy" %% "better-monadic-for" % "0.3.1"
+
   val scribe = Seq(
     "com.outr" %% "scribe" % V.scribe,
     "com.outr" %% "scribe-slf4j" % V.scribeSlf4j,
@@ -35,10 +38,14 @@ object Dependencies {
   )
 
   val http4sClient = Seq(
-    "org.http4s" %% "http4s-ember-client" % V.http4sClient
+    "org.http4s" %% "http4s-ember-client" % V.http4s
   )
   val http4sCirce = Seq(
-    "org.http4s" %% "http4s-circe" % V.http4sClient
+    "org.http4s" %% "http4s-circe" % V.http4s
+  )
+  val http4sServer = Seq(
+    "org.http4s" %% "http4s-ember-server" % V.http4s,
+    "org.http4s" %% "http4s-dsl" % V.http4s
   )
 
   val scalaCsv = Seq(

@@ -8,17 +8,43 @@ import doobie.implicits._
 import fit4s.activities.data.{ActivityId, TagId, TagName}
 import fit4s.activities.impl.StravaExportExtract.ExportData
 import fit4s.activities.records._
-import fit4s.activities.{ImportCallback, ImportResult, StravaSupport}
+import fit4s.activities.{ImportCallback, ImportResult, StravaOAuthConfig, StravaSupport}
 import fs2.Stream
 import fs2.io.file.Path
 
 import java.time.ZoneId
+import scala.concurrent.duration.FiniteDuration
+import scala.math.Ordering.Implicits.infixOrderingOps
 
 final class StravaImpl[F[_]: Async](
     zoneId: ZoneId,
+    oauth: StravaOAuth[F],
     xa: Transactor[F],
     placeAttach: GeoPlaceAttach[F]
 ) extends StravaSupport[F] {
+
+  private[this] val logger = scribe.cats.effect[F]
+
+  def initOAuth(
+      cfg: StravaOAuthConfig,
+      timeout: FiniteDuration
+  ): F[Option[RStravaToken]] =
+    Clock[F].realTimeInstant.flatMap { now =>
+      RStravaToken.findLatest.transact(xa).flatMap {
+        case Some(t) if t.expiresAt.plusSeconds(20) > now =>
+          logger.debug(s"Latest token is still valid.").as(Option(t))
+
+        case t =>
+          oauth.refresh(cfg, t).flatMap {
+            case Some(t) => Option(t).pure[F]
+            case None    => oauth.init(cfg, timeout)
+          }
+      }
+    }
+
+  def deleteTokens: F[Int] =
+    RStravaToken.deleteAll.transact(xa)
+
   override def loadExport(
       stravaExport: Path,
       tagged: Set[TagName],

@@ -17,7 +17,8 @@ final class ActivityLogDb[F[_]: Async: Files](
     jdbcConfig: JdbcConfig,
     zoneId: ZoneId,
     xa: Transactor[F],
-    geoLookup: GeoLookup[F]
+    geoLookup: GeoLookup[F],
+    stravaSupport: StravaSupport[F]
 ) extends ActivityLog[F] {
   private[this] val placeAttach = new GeoPlaceAttach[F](xa, geoLookup)
 
@@ -137,7 +138,7 @@ final class ActivityLogDb[F[_]: Async: Files](
 
   val tagRepository: TagRepo[F] = new TagRepoDb[F](xa)
 
-  val strava: StravaSupport[F] = new StravaImpl[F](zoneId, xa, placeAttach)
+  val strava: StravaSupport[F] = stravaSupport
 
   val locationRepository: LocationRepo[F] = new LocationRepoDb[F](xa)
 

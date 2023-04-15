@@ -234,3 +234,18 @@ add constraint "activity_geo_place_place_activity_session_uniq"
 unique ("geo_place_id", "activity_session_id", "position_name");
 
 CREATE ALIAS HAVSC FOR "fit4s.activities.h2.Functions.hav";
+
+-- strava token
+create table "strava_token"(
+  "id" bigserial not null primary key,
+  "token_type" varchar(255) not null,
+  "access_token" text not null,
+  "refresh_token" text not null,
+  "expires_at" timestamp not null,
+  "expires_in" bigint not null,
+  "scope" text not null,
+  "created_at" timestamp not null
+);
+
+create index if not exists "strava_token_expires_at_idx" on "strava_token"("expires_at");
+create index if not exists "strava_token_created_at_idx" on "strava_token"("created_at");

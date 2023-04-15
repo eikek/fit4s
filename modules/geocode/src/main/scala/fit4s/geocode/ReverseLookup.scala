@@ -1,8 +1,9 @@
 package fit4s.geocode
 
 import cats.Applicative
-import cats.effect.{Async, Resource}
+import cats.effect.Async
 import fit4s.data.Position
+import org.http4s.client.Client
 
 trait ReverseLookup[F[_]] {
 
@@ -20,7 +21,7 @@ object ReverseLookup {
       override def lookupRaw(position: Position) = Applicative[F].pure(None)
     }
 
-  def osm[F[_]: Async](cfg: NominatimConfig): Resource[F, ReverseLookup[F]] =
-    if (cfg.maxReqPerSecond <= 0) Resource.pure(empty[F])
-    else NominatimOSM.resource(cfg)
+  def osm[F[_]: Async](client: Client[F], cfg: NominatimConfig): F[ReverseLookup[F]] =
+    if (cfg.maxReqPerSecond <= 0) Async[F].pure(empty[F])
+    else NominatimOSM(client, cfg)
 }

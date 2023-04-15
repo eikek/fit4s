@@ -10,6 +10,7 @@ import fit4s.geocode.{NominatimConfig, ReverseLookup}
 import fs2._
 import fs2.io.file.Path
 import org.h2.jdbcx.JdbcConnectionPool
+import org.http4s.ember.client.EmberClientBuilder
 
 import java.time.ZoneId
 
@@ -67,8 +68,10 @@ object ActivityLog {
       ec <- ExecutionContexts.fixedThreadPool(10)
       ds <- Resource.make(Sync[F].delay(pool))(cp => Sync[F].delay(cp.dispose()))
       xa = Transactor.fromDataSource[F](ds, ec)
-      revLookup <- ReverseLookup.osm[F](nominatimCfg)
+      client <- EmberClientBuilder.default[F].build
+      revLookup <- Resource.eval(ReverseLookup.osm[F](client, nominatimCfg))
+      strava <- Resource.eval(StravaSupport[F](zoneId, revLookup, xa, client))
       geoLookup <- Resource.eval(GeoLookupDb(revLookup, xa))
-    } yield new ActivityLogDb[F](jdbcConfig, zoneId, xa, geoLookup)
+    } yield new ActivityLogDb[F](jdbcConfig, zoneId, xa, geoLookup, strava)
   }
 }
