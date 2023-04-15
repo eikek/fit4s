@@ -70,7 +70,10 @@ object ConfigValues {
       config("STRAVA_TOKEN_URL", StravaOAuthConfig.Defaults.tokenUrl.renderString)
         .as[Uri]
 
-    (clientId, clientSecret, authUrl, tokenUrl).mapN(StravaOAuthConfig.apply)
+    val apiUrl =
+      config("STRAVA_API_URL", StravaOAuthConfig.Defaults.apiUrl.renderString).as[Uri]
+
+    (clientId, clientSecret, authUrl, tokenUrl, apiUrl).mapN(StravaOAuthConfig.apply)
   }.option
 
   implicit private def zoneDecoder: ConfigDecoder[String, ZoneId] =

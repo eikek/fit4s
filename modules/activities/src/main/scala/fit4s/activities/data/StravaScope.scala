@@ -12,5 +12,9 @@ final class StravaScope(raw: String) {
   override def toString = s"Scopes($asString)"
 }
 object StravaScope {
+  val activityReadAndWrite =
+    StravaScope("activity:read,activity:read_all,activity:write")
+
   def apply(scopes: String): StravaScope = new StravaScope(scopes)
+
 }

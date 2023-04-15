@@ -8,6 +8,7 @@ object Dependencies {
 
     val catsParse = "0.3.9"
     val circe = "0.14.5"
+    val circeGenericExtra = "0.14.3"
     val ciris = "3.1.0"
     val decline = "2.4.1"
     val doobie = "1.0.0-RC2"
@@ -87,6 +88,9 @@ object Dependencies {
   val circeCore = Seq(
     "io.circe" %% "circe-core" % V.circe,
     "io.circe" %% "circe-generic" % V.circe
+  )
+  val circeGenericExtra = Seq(
+    "io.circe" %% "circe-generic-extras" % V.circeGenericExtra
   )
   val circeParser = Seq(
     "io.circe" %% "circe-parser" % V.circe

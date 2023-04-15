@@ -44,7 +44,7 @@ final class StravaOAuth[F[_]: Async](
               .withQueryParam("response_type", "code")
               .withQueryParam("redirect_uri", uri)
               .withQueryParam("state", "1")
-              .withQueryParam("scope", "activity:read,activity:write")
+              .withQueryParam("scope", StravaScope.activityReadAndWrite.asString)
 
           println(s"\nOpen in a browser to complete:\n${authRequestUri.renderString}")
             .flatMap(_ =>

@@ -11,6 +11,7 @@ object StravaCmd {
     case class Import(opts: ImportCmd.Options) extends SubCmdOpts
     case class Authorize(opts: AuthorizeCmd.Options) extends SubCmdOpts
     case object Logout extends SubCmdOpts
+    case class Publish(opts: PublishCmd.Options) extends SubCmdOpts
   }
 
   private val importOpts: Opts[ImportCmd.Options] =
@@ -26,16 +27,21 @@ object StravaCmd {
   private val logoutOpts: Opts[Unit] =
     Opts.subcommand("logout", "Remove all strava OAuth tokens")(Opts.unit)
 
+  private val publishOpts: Opts[PublishCmd.Options] =
+    Opts.subcommand("publish", "Upload activities to strava")(PublishCmd.opts)
+
   val opts: Opts[SubCmdOpts] =
     importOpts
       .map(SubCmdOpts.Import)
       .orElse(authorizeOpts.map(SubCmdOpts.Authorize))
       .orElse(logoutOpts.map(_ => SubCmdOpts.Logout))
+      .orElse(publishOpts.map(SubCmdOpts.Publish))
 
   def apply(cliConfig: CliConfig, opts: SubCmdOpts): IO[ExitCode] =
     opts match {
       case SubCmdOpts.Import(c)    => ImportCmd(cliConfig, c)
       case SubCmdOpts.Authorize(c) => AuthorizeCmd(cliConfig, c)
       case SubCmdOpts.Logout       => LogoutCmd(cliConfig)
+      case SubCmdOpts.Publish(c)   => PublishCmd(cliConfig, c)
     }
 }

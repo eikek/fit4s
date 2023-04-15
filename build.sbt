@@ -139,7 +139,9 @@ lazy val activities = project
       Dependencies.flyway ++
       Dependencies.scalaCsv ++
       Dependencies.http4sServer ++
-      Dependencies.scribe
+      Dependencies.scribe ++
+      Dependencies.circe ++
+      Dependencies.circeGenericExtra
   )
   .dependsOn(
     core % "compile->compile;test->test",

@@ -7,13 +7,15 @@ case class StravaOAuthConfig(
     clientId: String,
     clientSecret: String,
     authUrl: Uri,
-    tokenUri: Uri
+    tokenUri: Uri,
+    apiUrl: Uri
 )
 
 object StravaOAuthConfig {
   object Defaults {
     val authUrl = uri"https://www.strava.com/oauth/authorize"
-    val tokenUrl = uri"https://www.strava.com/api/v3/oauth/token"
+    val apiUrl = uri"https://www.strava.com/api/v3"
+    val tokenUrl = apiUrl / "oauth" / "token"
   }
 
   def default(clientId: String, clientSecret: String) =
@@ -21,6 +23,7 @@ object StravaOAuthConfig {
       clientId,
       clientSecret,
       Defaults.authUrl,
-      Defaults.tokenUrl
+      Defaults.tokenUrl,
+      Defaults.apiUrl
     )
 }
