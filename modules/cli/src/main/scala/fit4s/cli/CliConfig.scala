@@ -3,7 +3,7 @@ package fit4s.cli
 import cats.Monad
 import cats.effect.Async
 import cats.syntax.all._
-import fit4s.activities.{JdbcConfig, StravaOAuthConfig}
+import fit4s.activities.{JdbcConfig, StravaAuthConfig, StravaConfig}
 import fit4s.geocode.NominatimConfig
 import fs2.io.file.Files
 
@@ -13,7 +13,8 @@ case class CliConfig(
     timezone: ZoneId,
     jdbcConfig: JdbcConfig,
     nominatimConfig: NominatimConfig,
-    stravaOAuthConfig: Option[StravaOAuthConfig]
+    stravaConfig: StravaConfig,
+    stravaAuthConfig: Option[StravaAuthConfig]
 )
 
 object CliConfig {
@@ -23,6 +24,7 @@ object CliConfig {
       ConfigValues.timeZone,
       ConfigValues.jdbc[F],
       ConfigValues.nominatim,
+      ConfigValues.strava,
       ConfigValues.stravaOAuth
     ).mapN(CliConfig.apply)
 

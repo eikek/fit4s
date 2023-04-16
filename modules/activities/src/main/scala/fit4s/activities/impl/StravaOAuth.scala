@@ -6,7 +6,7 @@ import cats.syntax.all._
 import com.comcast.ip4s.{Host, Port}
 import doobie._
 import doobie.implicits._
-import fit4s.activities.StravaOAuthConfig
+import fit4s.activities.{StravaAuthConfig, StravaConfig}
 import fit4s.activities.data.{StravaScope, StravaTokenResponse}
 import fit4s.activities.records.RStravaToken
 import org.http4s.Method.POST
@@ -21,13 +21,14 @@ import java.net.ServerSocket
 import scala.concurrent.duration._
 
 final class StravaOAuth[F[_]: Async](
+    config: StravaConfig,
     client: Client[F],
     xa: Transactor[F]
 ) {
 
   private[this] val logger = scribe.cats[F]
 
-  def init(cfg: StravaOAuthConfig, timeout: FiniteDuration): F[Option[RStravaToken]] =
+  def init(cfg: StravaAuthConfig, timeout: FiniteDuration): F[Option[RStravaToken]] =
     for {
       whenDone <- Deferred[F, Option[RStravaToken]]
       _ <- Async[F].start(
@@ -39,7 +40,7 @@ final class StravaOAuth[F[_]: Async](
       _ <-
         server.use { _ =>
           val authRequestUri =
-            cfg.authUrl
+            config.authUrl
               .withQueryParam("client_id", cfg.clientId)
               .withQueryParam("response_type", "code")
               .withQueryParam("redirect_uri", uri)
@@ -61,7 +62,7 @@ final class StravaOAuth[F[_]: Async](
     } yield token
 
   def refresh(
-      cfg: StravaOAuthConfig,
+      cfg: StravaAuthConfig,
       recentToken: Option[RStravaToken]
   ): F[Option[RStravaToken]] =
     (for {
@@ -83,7 +84,7 @@ final class StravaOAuth[F[_]: Async](
       }
 
   private def createServer(
-      cfg: StravaOAuthConfig,
+      cfg: StravaAuthConfig,
       whenDone: Deferred[F, Option[RStravaToken]]
   ) =
     for {
@@ -106,7 +107,7 @@ final class StravaOAuth[F[_]: Async](
     } yield (uri, server)
 
   private def tokenRoute(
-      cfg: StravaOAuthConfig,
+      cfg: StravaAuthConfig,
       whenDone: Deferred[F, Option[RStravaToken]]
   ): HttpRoutes[F] = {
     val dsl = new Http4sDsl[F] {}
@@ -148,12 +149,12 @@ final class StravaOAuth[F[_]: Async](
     }
   }
 
-  private def tokenExchange(code: String, cfg: StravaOAuthConfig) = {
+  private def tokenExchange(code: String, cfg: StravaAuthConfig) = {
     val dsl = Http4sClientDsl[F]
     import dsl._
 
     val req =
-      POST(cfg.tokenUri)
+      POST(config.tokenUri)
         .withEntity(
           UrlForm(
             "client_id" -> cfg.clientId,
@@ -163,7 +164,7 @@ final class StravaOAuth[F[_]: Async](
           )
         )
 
-    logger.debug(s"Issue token exchange request to ${cfg.tokenUri}") *>
+    logger.debug(s"Issue token exchange request to ${config.tokenUri}") *>
       client
         .expect[StravaTokenResponse](req)
         .attempt
@@ -181,12 +182,12 @@ final class StravaOAuth[F[_]: Async](
         .flatMap(RStravaToken.insert)
         .transact(xa)
 
-  private def tokenRefresh(cfg: StravaOAuthConfig, refreshToken: String) = {
+  private def tokenRefresh(cfg: StravaAuthConfig, refreshToken: String) = {
     val dsl = Http4sClientDsl[F]
     import dsl._
 
     val req =
-      POST(cfg.tokenUri)
+      POST(config.tokenUri)
         .withEntity(
           UrlForm(
             "client_id" -> cfg.clientId,
@@ -196,7 +197,7 @@ final class StravaOAuth[F[_]: Async](
           )
         )
 
-    logger.debug(s"Issue refresh token request to ${cfg.tokenUri}") *>
+    logger.debug(s"Issue refresh token request to ${config.tokenUri}") *>
       client
         .expect[StravaTokenResponse](req)
         .attempt

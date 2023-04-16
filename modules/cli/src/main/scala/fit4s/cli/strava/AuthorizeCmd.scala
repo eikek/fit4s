@@ -25,7 +25,7 @@ object AuthorizeCmd extends SharedOpts {
 
   def apply(cliConfig: CliConfig, opts: Options): IO[ExitCode] =
     activityLog(cliConfig).use { log =>
-      IO(cliConfig.stravaOAuthConfig).flatMap {
+      IO(cliConfig.stravaAuthConfig).flatMap {
         case Some(oauthCfg) =>
           log.strava
             .initOAuth(oauthCfg, opts.timeout)

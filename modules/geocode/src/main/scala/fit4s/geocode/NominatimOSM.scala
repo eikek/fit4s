@@ -67,7 +67,7 @@ object NominatimOSM {
   def apply[F[_]: Async](client: Client[F], cfg: NominatimConfig): F[ReverseLookup[F]] =
     for {
       state <- Ref.of[F, State](State.empty)
-      cache <- PlaceCache[F](100)
+      cache <- PlaceCache[F](cfg.cacheSize)
     } yield new NominatimOSM[F](client, cfg, state, cache)
 
   def resource[F[_]: Async](cfg: NominatimConfig): Resource[F, ReverseLookup[F]] =

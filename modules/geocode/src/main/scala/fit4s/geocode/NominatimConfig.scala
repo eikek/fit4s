@@ -5,13 +5,16 @@ import org.http4s.implicits._
 
 case class NominatimConfig(
     baseUrl: Uri,
-    maxReqPerSecond: Float
+    maxReqPerSecond: Float,
+    cacheSize: Int
 )
 
 object NominatimConfig {
   object Defaults {
     val baseUrl = uri"https://nominatim.openstreetmap.org/reverse"
     val maxReqPerSecond = 1f
+    val cacheSize = 100
   }
-  val default = NominatimConfig(Defaults.baseUrl, Defaults.maxReqPerSecond)
+  val default =
+    NominatimConfig(Defaults.baseUrl, Defaults.maxReqPerSecond, Defaults.cacheSize)
 }

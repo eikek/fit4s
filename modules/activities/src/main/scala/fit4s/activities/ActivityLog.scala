@@ -56,6 +56,7 @@ object ActivityLog {
   def apply[F[_]: Async](
       jdbcConfig: JdbcConfig,
       nominatimCfg: NominatimConfig,
+      stravaConfig: StravaConfig,
       zoneId: ZoneId
   ): Resource[F, ActivityLog[F]] = {
     val pool = JdbcConnectionPool.create(
@@ -70,7 +71,9 @@ object ActivityLog {
       xa = Transactor.fromDataSource[F](ds, ec)
       client <- EmberClientBuilder.default[F].build
       revLookup <- Resource.eval(ReverseLookup.osm[F](client, nominatimCfg))
-      strava <- Resource.eval(StravaSupport[F](zoneId, revLookup, xa, client))
+      strava <- Resource.eval(
+        StravaSupport[F](zoneId, stravaConfig, revLookup, xa, client)
+      )
       geoLookup <- Resource.eval(GeoLookupDb(revLookup, xa))
     } yield new ActivityLogDb[F](jdbcConfig, zoneId, xa, geoLookup, strava)
   }

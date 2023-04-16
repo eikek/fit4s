@@ -3,7 +3,7 @@ package fit4s.cli
 import cats.Monad
 import cats.syntax.all._
 import ciris._
-import fit4s.activities.{JdbcConfig, StravaOAuthConfig}
+import fit4s.activities.{JdbcConfig, StravaAuthConfig, StravaConfig}
 import fit4s.geocode.NominatimConfig
 import fs2.io.file.{Files, Path}
 import org.http4s.Uri
@@ -31,9 +31,12 @@ object ConfigValues {
 
     val maxReq =
       config("NOMINATIM_MAX_REQPS", cfg.maxReqPerSecond.toString)
-        .map(_.toFloat)
+        .as[Float]
 
-    (baseUrl, maxReq).mapN(NominatimConfig.apply)
+    val cacheSize =
+      config("NOMINATIM_PLACE_CACHE_SIZE", cfg.cacheSize.toString).as[Int]
+
+    (baseUrl, maxReq, cacheSize).mapN(NominatimConfig.apply)
   }
 
   def jdbc[F[_]: Files: Monad] = {
@@ -59,21 +62,30 @@ object ConfigValues {
   val timeZone =
     config("TIMEZONE", "Europe/Berlin").as[ZoneId]
 
-  val stravaOAuth = {
-    val clientId = config("STRAVA_CLIENT_ID")
-    val clientSecret = config("STRAVA_CLIENT_SECRET")
+  val strava = {
     val authUrl =
-      config("STRAVA_AUTH_URL", StravaOAuthConfig.Defaults.authUrl.renderString)
+      config("STRAVA_AUTH_URL", StravaConfig.Defaults.authUrl.renderString)
         .as[Uri]
 
     val tokenUrl =
-      config("STRAVA_TOKEN_URL", StravaOAuthConfig.Defaults.tokenUrl.renderString)
+      config("STRAVA_TOKEN_URL", StravaConfig.Defaults.tokenUrl.renderString)
         .as[Uri]
 
     val apiUrl =
-      config("STRAVA_API_URL", StravaOAuthConfig.Defaults.apiUrl.renderString).as[Uri]
+      config("STRAVA_API_URL", StravaConfig.Defaults.apiUrl.renderString).as[Uri]
 
-    (clientId, clientSecret, authUrl, tokenUrl, apiUrl).mapN(StravaOAuthConfig.apply)
+    val gearCacheSize =
+      config("STRAVA_GEAR_CACHE_SIZE", StravaConfig.Defaults.gearCacheSize.toString)
+        .as[Int]
+
+    (authUrl, tokenUrl, apiUrl, gearCacheSize).mapN(StravaConfig.apply)
+  }
+
+  val stravaOAuth = {
+    val clientId = config("STRAVA_CLIENT_ID")
+    val clientSecret = config("STRAVA_CLIENT_SECRET")
+
+    (clientId, clientSecret).mapN(StravaAuthConfig.apply)
   }.option
 
   implicit private def zoneDecoder: ConfigDecoder[String, ZoneId] =

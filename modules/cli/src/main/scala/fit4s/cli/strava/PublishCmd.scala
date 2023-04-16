@@ -22,7 +22,7 @@ object PublishCmd extends SharedOpts {
         after = Instant.parse("2023-04-14T10:00:00Z")
         before = Instant.now()
         res <- log.strava.listActivities(
-          cliConfig.stravaOAuthConfig.get,
+          cliConfig.stravaAuthConfig.get,
           after,
           before,
           1,

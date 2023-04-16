@@ -87,7 +87,12 @@ trait SharedOpts {
   }
 
   def activityLog(cliConfig: CliConfig): Resource[IO, ActivityLog[IO]] =
-    ActivityLog[IO](cliConfig.jdbcConfig, cliConfig.nominatimConfig, cliConfig.timezone)
+    ActivityLog[IO](
+      cliConfig.jdbcConfig,
+      cliConfig.nominatimConfig,
+      cliConfig.stravaConfig,
+      cliConfig.timezone
+    )
 }
 
 object SharedOpts extends SharedOpts

@@ -4,7 +4,7 @@ import cats.effect._
 import cats.syntax.all._
 import doobie.util.transactor.Transactor
 import fit4s.activities.data.{ActivityId, StravaActivity, StravaGear, TagName}
-import fit4s.activities.impl.{GeoLookupDb, GeoPlaceAttach, StravaImpl, StravaOAuth}
+import fit4s.activities.impl.{Cache, GeoLookupDb, GeoPlaceAttach, StravaImpl, StravaOAuth}
 import fit4s.activities.records.RStravaToken
 import fit4s.geocode.ReverseLookup
 import fs2.Stream
@@ -16,12 +16,12 @@ import scala.concurrent.duration.FiniteDuration
 
 trait StravaSupport[F[_]] {
 
-  def initOAuth(cfg: StravaOAuthConfig, timeout: FiniteDuration): F[Option[RStravaToken]]
+  def initOAuth(cfg: StravaAuthConfig, timeout: FiniteDuration): F[Option[RStravaToken]]
 
   def deleteTokens: F[Int]
 
   def listActivities(
-      cfg: StravaOAuthConfig,
+      cfg: StravaAuthConfig,
       after: Instant,
       before: Instant,
       page: Int,
@@ -29,7 +29,7 @@ trait StravaSupport[F[_]] {
   ): F[List[StravaActivity]]
 
   final def listAllActivities(
-      cfg: StravaOAuthConfig,
+      cfg: StravaAuthConfig,
       after: Instant,
       before: Instant
   ): Stream[F, StravaActivity] =
@@ -40,7 +40,7 @@ trait StravaSupport[F[_]] {
       .takeWhile(_.nonEmpty)
       .flatMap(Stream.emits)
 
-  def findGear(cfg: StravaOAuthConfig, gearId: String): F[Option[StravaGear]]
+  def findGear(cfg: StravaAuthConfig, gearId: String): F[Option[StravaGear]]
 
   def loadExport(
       stravaExport: Path,
@@ -57,16 +57,18 @@ object StravaSupport {
 
   def apply[F[_]: Async](
       zoneId: ZoneId,
+      stravaCfg: StravaConfig,
       reverseLookup: ReverseLookup[F],
       xa: Transactor[F],
       client: Client[F]
   ): F[StravaSupport[F]] =
     for {
       lookup <- GeoLookupDb(reverseLookup, xa)
-      oauth = new StravaOAuth[F](client, xa)
-      gearCache <- Ref.of(Map.empty[String, Option[StravaGear]])
+      oauth = new StravaOAuth[F](stravaCfg, client, xa)
+      gearCache <- Cache.memory[F, String, StravaGear](stravaCfg.gearCacheSize)
       strava = new StravaImpl[F](
         zoneId,
+        stravaCfg,
         client,
         oauth,
         xa,
