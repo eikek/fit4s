@@ -30,12 +30,7 @@ object ListCmd extends SharedOpts {
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
     activityLog(cliCfg).use { log =>
       for {
-        currentTime <- Clock[IO].realTimeInstant
-        zone = cliCfg.timezone
-
-        query <- ActivitySelection
-          .makeCondition(opts.query, zone, currentTime)
-          .fold(err => IO.raiseError(new CliError(err)), IO.pure)
+        query <- resolveQuery(opts.query, cliCfg.timezone)
 
         list = log.activityList(ActivityQuery(query, opts.page))
 
@@ -43,7 +38,7 @@ object ListCmd extends SharedOpts {
           .evalMap(
             opts.format.fold(
               printJson(opts.filePathOnly),
-              printText(zone, opts.filePathOnly)
+              printText(cliCfg.timezone, opts.filePathOnly)
             )
           )
           .compile

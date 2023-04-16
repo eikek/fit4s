@@ -21,7 +21,7 @@ object ActivityDetailQuery {
       al <- OptionT(activityAndLocation(id))
       tt <- OptionT.liftF(activityTags(id))
       ses <- OptionT.liftF(activitySessions(id))
-      stravaId <- OptionT.liftF(RActivityStrava.find(id))
+      stravaId <- OptionT.liftF(RActivityStrava.findByActivityId(id))
       places <- OptionT.liftF(places(id))
       dist <- OptionT.liftF(
         ses.toList.traverse(s =>

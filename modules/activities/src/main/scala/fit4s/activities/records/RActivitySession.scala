@@ -1,5 +1,6 @@
 package fit4s.activities.records
 
+import cats.syntax.all._
 import doobie._
 import doobie.implicits._
 import fit4s.activities.data.{ActivityId, ActivitySessionId}
@@ -106,6 +107,29 @@ object RActivitySession {
     fr"SELECT $columnsWithId FROM $table WHERE id = $id"
       .query[RActivitySession]
       .option
+
+  def findByStartTime(
+      startTime: Instant,
+      withinSecs: Int,
+      sport: Option[Sport],
+      limit: Option[Int]
+  ): ConnectionIO[List[RActivitySession]] = {
+    val sportFrag = sport.map(s => sql"sport = $s")
+    val startFrag =
+      if (withinSecs <= 0) sql"start_time = $startTime".some
+      else {
+        val lowerBound = startTime.minusSeconds(withinSecs / 2)
+        val upperBound = startTime.plusSeconds(withinSecs / 2)
+        sql"start_time >= $lowerBound AND start_time <= $upperBound".some
+      }
+    val limitFrag = limit.map(l => sql"LIMIT $l").getOrElse(Fragment.empty)
+    val cond = List(startFrag, sportFrag).flatten
+      .foldSmash1(Fragment.empty, sql" AND ", Fragment.empty)
+
+    sql"SELECT $columnsWithId FROM $table WHERE $cond $limitFrag"
+      .query[RActivitySession]
+      .to[List]
+  }
 
   def countAll =
     sql"SELECT count(*) FROM $table".query[Long].unique

@@ -1,14 +1,23 @@
 package fit4s.activities.impl
 
-import cats.data.NonEmptyList
+import cats.data.{EitherT, NonEmptyList, OptionT}
 import cats.effect._
 import cats.syntax.all._
 import doobie._
 import doobie.implicits._
-import fit4s.activities.data.{ActivityId, StravaActivity, StravaGear, TagId, TagName}
+import fit4s.activities.StravaSupport.PublishResult
+import fit4s.activities.data.{
+  ActivityId,
+  StravaActivity,
+  StravaGear,
+  TagId,
+  TagName,
+  UnlinkedStravaStats
+}
 import fit4s.activities.impl.StravaExportExtract.ExportData
 import fit4s.activities.records._
 import fit4s.activities.{
+  ActivityQuery,
   ImportCallback,
   ImportResult,
   StravaAuthConfig,
@@ -115,7 +124,42 @@ final class StravaImpl[F[_]: Async](
     } yield result
   }
 
-  override def loadExport(
+  def unlinkedActivities(query: ActivityQuery): F[Option[UnlinkedStravaStats]] =
+    NonStravaActivities.stats(query).transact(xa)
+
+  def linkActivities(
+      cfg: StravaAuthConfig,
+      query: ActivityQuery,
+      bikeTagPrefix: Option[TagName],
+      shoeTagPrefix: Option[TagName],
+      commuteTag: Option[TagName]
+  ): F[PublishResult] =
+    (for {
+      nonStravaActs <- OptionT(
+        NonStravaActivities
+          .stats(query)
+          .transact(xa)
+      ).toRight(PublishResult.NoActivitiesFound.widen)
+
+      stravaSync = new StravaSync[F](xa, findGear(cfg, _))
+
+      result <- EitherT.right[PublishResult](
+        listAllActivities(
+          cfg,
+          nonStravaActs.lowestStart.minusSeconds(60),
+          nonStravaActs.recentStart.plusSeconds(60)
+        ).chunks
+          .evalMap(stravaSync.sync(bikeTagPrefix, shoeTagPrefix, commuteTag))
+          .compile
+          .foldMonoid
+      )
+
+    } yield result.widen).merge
+
+  def unlink(aq: ActivityQuery): F[Int] =
+    RActivityStrava.removeAll(aq).transact(xa)
+
+  def loadExport(
       stravaExport: Path,
       tagged: Set[TagName],
       bikeTagPrefix: Option[TagName],

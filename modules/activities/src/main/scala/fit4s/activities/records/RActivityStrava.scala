@@ -2,8 +2,10 @@ package fit4s.activities.records
 
 import doobie._
 import doobie.implicits._
-import DoobieImplicits._
+import fit4s.activities.ActivityQuery
 import fit4s.activities.data._
+import fit4s.activities.impl.ActivityQueryBuilder
+import fit4s.activities.records.DoobieImplicits._
 
 final case class RActivityStrava(
     id: ActivityStravaId,
@@ -24,8 +26,8 @@ object RActivityStrava {
     )
   }
 
-  // private val columnsWithId =
-  //  columnList(None).commas
+  private val columnsWithId =
+    columnList(None).commas
 
   private val columnsNoId =
     columnList(None).tail.commas
@@ -42,8 +44,18 @@ object RActivityStrava {
   def removeForStravaId(stravaId: StravaExternalId): ConnectionIO[Int] =
     sql"DELETE FROM $table WHERE strava_id = $stravaId".update.run
 
-  def find(id: ActivityId): ConnectionIO[Option[StravaExternalId]] =
+  def removeAll(query: ActivityQuery): ConnectionIO[Int] = {
+    val subq = ActivityQueryBuilder.activityIdFragment(query.condition)
+    sql"DELETE FROM $table WHERE activity_id in ($subq) ${query.page.asFragment}".update.run
+  }
+
+  def findByActivityId(id: ActivityId): ConnectionIO[Option[StravaExternalId]] =
     sql"SELECT strava_id FROM $table WHERE activity_id = $id"
       .query[StravaExternalId]
+      .option
+
+  def findByStravaId(id: StravaExternalId): ConnectionIO[Option[RActivityStrava]] =
+    sql"SELECT $columnsWithId FROM $table WHERE strava_id = $id "
+      .query[RActivityStrava]
       .option
 }

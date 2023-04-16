@@ -1,13 +1,15 @@
 package fit4s.cli
 
 import cats.data.Validated
-import cats.effect.{IO, Resource}
+import cats.effect.{Clock, IO, Resource}
 import cats.syntax.all._
 import com.monovore.decline.{Argument, Opts}
 import fit4s.activities.ActivityLog
 import fit4s.activities.data.{ActivityId, LocationId, Page, TagName}
 import fit4s.profile.types.Sport
 import fs2.io.file.Path
+
+import java.time.ZoneId
 
 trait SharedOpts {
   implicit val sportArgument: Argument[Sport] =
@@ -85,6 +87,34 @@ trait SharedOpts {
 
     json.orElse(text).withDefault(OutputFormat.Text)
   }
+
+  val bikeTagPrefix = Opts
+    .option[TagName]("bike-tag", "Prefix for tagging the used bike")
+    .withDefault(TagName.unsafeFromString("Bike"))
+
+  val shoeTagPrefix = Opts
+    .option[TagName]("shoe-tag", "Prefix for tagging used shoes")
+    .withDefault(TagName.unsafeFromString("Shoe"))
+
+  val commuteTag = Opts
+    .option[TagName]("commute-tag", "Tag used to mark commutes.")
+    .withDefault(TagName.unsafeFromString("Commute"))
+
+  def resolveQuery(selection: ActivitySelection, zoneId: ZoneId) =
+    for {
+      currentTime <- Clock[IO].realTimeInstant
+
+      query <- ActivitySelection
+        .makeCondition(selection, zoneId, currentTime)
+        .fold(err => IO.raiseError(new CliError(err)), IO.pure)
+    } yield query
+
+  def resolveStravaAuth(cliConfig: CliConfig) =
+    IO(cliConfig.stravaAuthConfig).flatMap {
+      case Some(c) => IO.pure(c)
+      case None =>
+        IO.raiseError(new Exception(s"No strava client_id and client_secret configured!"))
+    }
 
   def activityLog(cliConfig: CliConfig): Resource[IO, ActivityLog[IO]] =
     ActivityLog[IO](

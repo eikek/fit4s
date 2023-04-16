@@ -1,14 +1,14 @@
 package fit4s.activities.impl
 
-import doobie.implicits._
+import cats.data.NonEmptyList
 import doobie._
-import fit4s.activities.records.DoobieImplicits._
+import doobie.implicits._
 import fit4s.activities.ActivityQuery
 import fit4s.activities.ActivityQuery.Condition
-import fit4s.activities.data.{ActivityId, ActivitySessionSummary, Page, TagId, TagName}
+import fit4s.activities.data.{ActivityId, ActivitySessionSummary, TagId, TagName}
+import fit4s.activities.records.DoobieImplicits._
 import fit4s.activities.records._
 import fs2.io.file.Path
-import cats.data.NonEmptyList
 
 object ActivityQueryBuilder {
 
@@ -34,9 +34,7 @@ object ActivityQueryBuilder {
     val where = makeWhere(q.condition)
     val order = fr"ORDER BY act.start_time desc, act.id"
 
-    val limit =
-      if (q.page == Page.unlimited) Fragment.empty
-      else fr"LIMIT ${q.page.limit} OFFSET ${q.page.offset}"
+    val limit = q.page.asFragment
 
     select ++ from ++ where ++ order ++ limit
   }
@@ -67,9 +65,7 @@ object ActivityQueryBuilder {
         """
 
     val where = makeWhere(q.condition)
-    val page =
-      if (q.page == Page.unlimited) Fragment.empty
-      else sql"LIMIT ${q.page.limit} OFFSET ${q.page.offset}"
+    val page = q.page.asFragment
 
     sql"""WITH
               session as ($select $join $where $page)

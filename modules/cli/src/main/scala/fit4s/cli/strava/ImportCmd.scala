@@ -29,17 +29,8 @@ object ImportCmd extends SharedOpts {
     val tags =
       Opts.options[TagName]("tag", "Add these tags to all imported activities").orEmpty
     val file = Opts.argument[Path]("strava-export")
-    val btp = Opts
-      .option[TagName]("bike-tag", "Prefix for tagging the used bike")
-      .withDefault(TagName.unsafeFromString("Bike"))
-    val stp = Opts
-      .option[TagName]("shoe-tag", "Prefix for tagging used shoes")
-      .withDefault(TagName.unsafeFromString("Shoe"))
-    val commTag = Opts
-      .option[TagName]("commute-tag", "Tag used to mark commutes.")
-      .withDefault(TagName.unsafeFromString("Commute"))
 
-    (file, tags, btp, stp, commTag, sequential).mapN(Options)
+    (file, tags, bikeTagPrefix, shoeTagPrefix, commuteTag, sequential).mapN(Options)
   }
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
