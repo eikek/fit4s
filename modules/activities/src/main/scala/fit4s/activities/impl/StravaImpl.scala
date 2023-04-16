@@ -6,24 +6,10 @@ import cats.syntax.all._
 import doobie._
 import doobie.implicits._
 import fit4s.activities.StravaSupport.PublishResult
-import fit4s.activities.data.{
-  ActivityId,
-  StravaActivity,
-  StravaGear,
-  TagId,
-  TagName,
-  UnlinkedStravaStats
-}
+import fit4s.activities.data._
 import fit4s.activities.impl.StravaExportExtract.ExportData
 import fit4s.activities.records._
-import fit4s.activities.{
-  ActivityQuery,
-  ImportCallback,
-  ImportResult,
-  StravaAuthConfig,
-  StravaConfig,
-  StravaSupport
-}
+import fit4s.activities._
 import fs2.Stream
 import fs2.io.file.Path
 import org.http4s.circe.CirceEntityCodec._
@@ -124,7 +110,26 @@ final class StravaImpl[F[_]: Async](
     } yield result
   }
 
-  def unlinkedActivities(query: ActivityQuery): F[Option[UnlinkedStravaStats]] =
+  def getAthlete(cfg: StravaAuthConfig): F[StravaAthlete] = {
+    val dsl = new Http4sClientDsl[F] {}
+    import dsl._
+
+    for {
+      token <- nonInteractiveOAuth(cfg)
+        .map(_.toRight(new Exception(s"No authentication token available.")))
+        .rethrow
+
+      uri = config.apiUrl / "athlete"
+
+      credentials = Credentials.Token(AuthScheme.Bearer, token.accessToken)
+
+      result <- client.expect[StravaAthlete](
+        Method.GET(uri).withHeaders(Authorization(credentials))
+      )
+    } yield result
+  }
+
+  def getUnlinkedActivities(query: ActivityQuery): F[Option[UnlinkedStravaStats]] =
     NonStravaActivities.stats(query).transact(xa)
 
   def linkActivities(
@@ -147,7 +152,8 @@ final class StravaImpl[F[_]: Async](
         listAllActivities(
           cfg,
           nonStravaActs.lowestStart.minusSeconds(60),
-          nonStravaActs.recentStart.plusSeconds(60)
+          nonStravaActs.recentStart.plusSeconds(60),
+          150
         ).chunks
           .evalMap(stravaSync.sync(bikeTagPrefix, shoeTagPrefix, commuteTag))
           .compile
@@ -158,6 +164,67 @@ final class StravaImpl[F[_]: Async](
 
   def unlink(aq: ActivityQuery): F[Int] =
     RActivityStrava.removeAll(aq).transact(xa)
+
+  def uploadActivities(
+      cfg: StravaAuthConfig,
+      query: ActivityQuery,
+      bikeTagPrefix: Option[TagName],
+      shoeTagPrefix: Option[TagName],
+      commuteTag: Option[TagName]
+  ): Stream[F, StravaExternalId] = for {
+    athlete <- Stream.eval(getAthlete(cfg))
+    getToken = nonInteractiveOAuth(cfg)
+      .map(_.toRight(new Exception(s"No authentication token available.")))
+      .rethrow
+    strava = new StravaUpload[F](client, config, getToken)
+    stravaId <- NonStravaActivities
+      .list(query)
+      .transact(xa)
+      .evalMap { activityData =>
+        val commute = commuteTag.exists(ct => activityData.tags.exists(_.name === ct))
+        val gearId =
+          findGearInTags(bikeTagPrefix, activityData.tags, athlete.bikes)
+            .orElse(findGearInTags(shoeTagPrefix, activityData.tags, athlete.shoes))
+            .map(_.id)
+
+        strava
+          .uploadFit(
+            activityData.id,
+            activityData.location / activityData.file,
+            activityData.name,
+            activityData.notes,
+            commute
+          )
+          .flatTap { stravaId =>
+            RActivityStrava.insert(activityData.id, stravaId).transact(xa)
+          }
+          .flatTap { stravaId =>
+            gearId match {
+              case Some(gId) =>
+                val updateData =
+                  StravaUpdatableActivity.empty
+                    .copy(gearId = gId.some)
+
+                strava.updateActivity(stravaId, updateData)
+
+              case None => ().pure[F]
+            }
+          }
+      }
+  } yield stravaId
+
+  private def findGearInTags(
+      tagPrefix: Option[TagName],
+      tags: Set[RTag],
+      gears: List[StravaGear]
+  ): Option[StravaGear] =
+    tagPrefix.flatMap { prefix =>
+      tags
+        .find(_.name.startsWith(prefix))
+        .flatMap(tag =>
+          gears.find(_.name.equalsIgnoreCase(tag.name.stripPrefix(prefix).name))
+        )
+    }
 
   def loadExport(
       stravaExport: Path,

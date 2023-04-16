@@ -85,6 +85,11 @@ final class ConditionParser(val zoneId: ZoneId, currentTime: Instant)
   val deviceMatchCondition: Parser[Condition] =
     (Parser.stringIn(List("device=", "dev=")) *> device).map(DeviceMatch)
 
+  val stravaLinkCondition: Parser[Condition] =
+    (Parser.string("strava-link=") *>
+      Parser.ignoreCase("yes").as(true).orElse(Parser.ignoreCase("no").as(false)))
+      .map(StravaLink.apply)
+
   def andCondition(inner: Parser[Condition]): Parser[Condition] =
     inner
       .repSep(BasicParser.ws)
@@ -113,6 +118,7 @@ final class ConditionParser(val zoneId: ZoneId, currentTime: Instant)
         notesCondition ::
         nameCondition ::
         deviceMatchCondition ::
+        stravaLinkCondition ::
         idCondition :: Nil
     )
 

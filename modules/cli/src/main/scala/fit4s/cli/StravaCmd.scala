@@ -13,6 +13,7 @@ object StravaCmd {
     case object Logout extends SubCmdOpts
     case class Publish(opts: LinkCmd.Options) extends SubCmdOpts
     case class Unlink(opts: UnlinkCmd.Options) extends SubCmdOpts
+    case class Upload(opts: UploadCmd.Options) extends SubCmdOpts
   }
 
   private val importOpts: Opts[ImportCmd.Options] =
@@ -36,6 +37,11 @@ object StravaCmd {
       UnlinkCmd.opts
     )
 
+  private val uploadOpts: Opts[UploadCmd.Options] =
+    Opts.subcommand("upload", "Upload activities without a strava link to strava")(
+      UploadCmd.opts
+    )
+
   val opts: Opts[SubCmdOpts] =
     importOpts
       .map(SubCmdOpts.Import)
@@ -43,6 +49,7 @@ object StravaCmd {
       .orElse(logoutOpts.map(_ => SubCmdOpts.Logout))
       .orElse(linkOpts.map(SubCmdOpts.Publish))
       .orElse(unlinkOpts.map(SubCmdOpts.Unlink))
+      .orElse(uploadOpts.map(SubCmdOpts.Upload))
 
   def apply(cliConfig: CliConfig, opts: SubCmdOpts): IO[ExitCode] =
     opts match {
@@ -51,5 +58,6 @@ object StravaCmd {
       case SubCmdOpts.Logout       => LogoutCmd(cliConfig)
       case SubCmdOpts.Publish(c)   => LinkCmd(cliConfig, c)
       case SubCmdOpts.Unlink(c)    => UnlinkCmd(cliConfig, c)
+      case SubCmdOpts.Upload(c)    => UploadCmd(cliConfig, c)
     }
 }

@@ -61,6 +61,8 @@ object ActivityQuery {
 
     case class NameContains(text: String) extends Condition
 
+    case class StravaLink(flag: Boolean) extends Condition
+
     case class And(elements: Nel[Condition]) extends Condition
 
     case class Or(elements: Nel[Condition]) extends Condition

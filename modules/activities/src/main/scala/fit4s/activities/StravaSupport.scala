@@ -35,16 +35,19 @@ trait StravaSupport[F[_]] {
   final def listAllActivities(
       cfg: StravaAuthConfig,
       after: Instant,
-      before: Instant
+      before: Instant,
+      chunkSize: Int
   ): Stream[F, StravaActivity] =
     Stream
       .iterate(1)(_ + 1)
-      .evalMap(page => listActivities(cfg, after, before, page, 130))
+      .evalMap(page => listActivities(cfg, after, before, page, chunkSize))
       // strava docs say that pages could be less than per_page, so check for empty result
       .takeWhile(_.nonEmpty)
       .flatMap(page => Stream.chunk(Chunk.seq(page)))
 
   def findGear(cfg: StravaAuthConfig, gearId: String): F[Option[StravaGear]]
+
+  def getAthlete(cfg: StravaAuthConfig): F[StravaAthlete]
 
   def linkActivities(
       cfg: StravaAuthConfig,
@@ -54,7 +57,18 @@ trait StravaSupport[F[_]] {
       commuteTag: Option[TagName]
   ): F[PublishResult]
 
-  def unlinkedActivities(query: ActivityQuery): F[Option[UnlinkedStravaStats]]
+  def getUnlinkedActivities(query: ActivityQuery): F[Option[UnlinkedStravaStats]]
+
+  /** Before this, the `linkActivities` method should run to avoid uploading duplicates or
+    * make sure to select correct activities using the query.
+    */
+  def uploadActivities(
+      cfg: StravaAuthConfig,
+      query: ActivityQuery,
+      bikeTagPrefix: Option[TagName],
+      shoeTagPrefix: Option[TagName],
+      commuteTag: Option[TagName]
+  ): Stream[F, StravaExternalId]
 
   def loadExport(
       stravaExport: Path,

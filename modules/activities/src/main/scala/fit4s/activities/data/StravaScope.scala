@@ -13,7 +13,7 @@ final class StravaScope(raw: String) {
 }
 object StravaScope {
   val activityReadAndWrite =
-    StravaScope("activity:read,activity:read_all,activity:write")
+    StravaScope("activity:read,activity:read_all,activity:write,profile:read_all")
 
   def apply(scopes: String): StravaScope = new StravaScope(scopes)
 

@@ -40,9 +40,6 @@ object StravaActivity {
     implicit val instantDecoder: Decoder[Instant] =
       Decoder.decodeInstant
 
-    implicit val stravaIdDecoder: Decoder[StravaExternalId] =
-      Decoder.decodeLong.map(StravaExternalId.apply)
-
     implicit val distanceDecoder: Decoder[Distance] =
       Decoder.decodeDouble.map(Distance.meter)
 

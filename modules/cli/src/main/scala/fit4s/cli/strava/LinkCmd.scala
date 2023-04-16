@@ -22,13 +22,11 @@ object LinkCmd extends SharedOpts {
       commuteTag: TagName
   )
 
-  val defaultNoStravaTag = TagName.unsafeFromString("No-Strava")
-
   val opts: Opts[Options] = {
     val noStrava = Opts
       .option[TagName](
         "no-strava-tag",
-        s"Activities with this tag are not considered when uploading to strava. Default: ${defaultNoStravaTag.name}"
+        s"Activities with this tag are not considered when linking to strava. Default: ${defaultNoStravaTag.name}"
       )
       .withDefault(defaultNoStravaTag)
 
@@ -56,7 +54,7 @@ object LinkCmd extends SharedOpts {
         cond = amendNoStravaTag(query_, opts.noStravaTag)
         query = ActivityQuery(cond, opts.page)
 
-        stats <- log.strava.unlinkedActivities(query)
+        stats <- log.strava.getUnlinkedActivities(query)
 
         _ <- stats match {
           case Some(data) =>

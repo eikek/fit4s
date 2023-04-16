@@ -50,6 +50,7 @@ object ActivityQueryGenerator {
       nelGen(activityIdGen).map(ActivityIdMatch),
       fileIdGen.map(_.asString).map(FileIdMatch),
       deviceMatchGen,
+      Gen.oneOf(true, false).map(StravaLink),
       Gen.oneOf(Sport.all).map(SportMatch),
       Gen.oneOf(SubSport.all).map(SubSportMatch),
       instantGen.map(StartedAfter),

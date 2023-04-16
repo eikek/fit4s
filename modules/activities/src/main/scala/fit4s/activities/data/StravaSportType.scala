@@ -183,5 +183,4 @@ object StravaSportType {
 
   def fromString(str: String): Either[String, StravaSportType] =
     all.find(_.name.equalsIgnoreCase(str)).toRight(s"Invalid strava sport: $str")
-
 }

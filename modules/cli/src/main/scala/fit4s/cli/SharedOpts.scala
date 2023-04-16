@@ -12,6 +12,8 @@ import fs2.io.file.Path
 import java.time.ZoneId
 
 trait SharedOpts {
+  final val defaultNoStravaTag = TagName.unsafeFromString("No-Strava")
+
   implicit val sportArgument: Argument[Sport] =
     Argument.from[Sport]("sport") { str =>
       Sport.all.find(_.typeName.equalsIgnoreCase(str)) match {
@@ -89,15 +91,15 @@ trait SharedOpts {
   }
 
   val bikeTagPrefix = Opts
-    .option[TagName]("bike-tag", "Prefix for tagging the used bike")
+    .option[TagName]("bike-tag", "Prefix for tagging the used bike. Default: Bike")
     .withDefault(TagName.unsafeFromString("Bike"))
 
   val shoeTagPrefix = Opts
-    .option[TagName]("shoe-tag", "Prefix for tagging used shoes")
+    .option[TagName]("shoe-tag", "Prefix for tagging used shoes. Default: Shoes")
     .withDefault(TagName.unsafeFromString("Shoe"))
 
   val commuteTag = Opts
-    .option[TagName]("commute-tag", "Tag used to mark commutes.")
+    .option[TagName]("commute-tag", "Tag used to mark commutes. Default: Commute")
     .withDefault(TagName.unsafeFromString("Commute"))
 
   def resolveQuery(selection: ActivitySelection, zoneId: ZoneId) =

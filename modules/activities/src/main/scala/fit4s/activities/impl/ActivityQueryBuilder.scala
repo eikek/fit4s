@@ -190,6 +190,11 @@ object ActivityQueryBuilder {
       case Condition.DeviceMatch(device) =>
         fr"pa.device = $device"
 
+      case Condition.StravaLink(flag) =>
+        val ast = RActivityStrava.table
+        if (flag) fr"pa.id IN (SELECT activity_id FROM $ast)"
+        else fr"pa.id NOT IN (SELECT activity_id FROM $ast)"
+
       case Condition.And(elements) =>
         val inner = elements.map(condition).toList
         combineFragments(inner, fr" AND ")
