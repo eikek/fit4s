@@ -33,7 +33,7 @@ final class DefaultStravaClient[F[_]: Async](
 
   def getAthlete(accessToken: StravaAccessToken): F[StravaAthlete] =
     client.expect[StravaAthlete](
-      Method.GET(config.apiUrl / "athlete").withAuth(accessToken)
+      Method.GET(config.apiUrl / "athlete").putAuth(accessToken)
     )
 
   def listActivities(
@@ -50,7 +50,7 @@ final class DefaultStravaClient[F[_]: Async](
       .withQueryParam("per_page", perPage)
 
     client.expect[List[StravaActivity]](
-      Method.GET(uri).withAuth(accessToken)
+      Method.GET(uri).putAuth(accessToken)
     )
   }
 
@@ -63,7 +63,7 @@ final class DefaultStravaClient[F[_]: Async](
   ): F[Option[StravaGear]] = {
     val uri = config.apiUrl / "gear" / gearId
     client.expectOption[StravaGear](
-      Method.GET(uri).withAuth(accessToken)
+      Method.GET(uri).putAuth(accessToken)
     )
   }
 
@@ -75,7 +75,7 @@ final class DefaultStravaClient[F[_]: Async](
     val uri = config.apiUrl / "activities" / id
     client
       .successful(
-        Method.PUT(data, uri).withAuth(accessToken)
+        Method.PUT(data, uri).putAuth(accessToken)
       )
       .flatMap {
         case true => ().pure[F]

@@ -51,8 +51,8 @@ final class StravaUpload[F[_]: Async](config: StravaClientConfig, client: Client
 
       req = Method
         .POST(body, uri)
-        .withAuth(accessToken)
-        .withHeaders(
+        .putAuth(accessToken)
+        .putHeaders(
           `Content-Type`(
             MediaType.multipart.`form-data`
               .withExtensions(Map("boundary" -> body.boundary.value))
@@ -110,7 +110,7 @@ final class StravaUpload[F[_]: Async](config: StravaClientConfig, client: Client
     val uri = config.apiUrl / "uploads" / uploadId
 
     client.expect[StravaUploadStatus](
-      Method.GET(uri).withAuth(accessToken)
+      Method.GET(uri).putAuth(accessToken)
     )
   }
 }

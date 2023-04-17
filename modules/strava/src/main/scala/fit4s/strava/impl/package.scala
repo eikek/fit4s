@@ -7,8 +7,8 @@ import org.http4s.headers.Authorization
 package object impl {
 
   implicit final class RequestOps[F[_]](val self: Request[F]) {
-    def withAuth(accessToken: StravaAccessToken) =
-      self.withHeaders(
+    def putAuth(accessToken: StravaAccessToken) =
+      self.putHeaders(
         Authorization(Credentials.Token(AuthScheme.Bearer, accessToken.token))
       )
   }
