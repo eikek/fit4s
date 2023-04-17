@@ -6,23 +6,14 @@ import fit4s.activities.StravaConfig
 import fit4s.activities.data._
 import fit4s.activities.records.RStravaToken
 import fs2.Stream
-import fs2.io.file.{Files, Flags, Path}
+import fs2.io.file.Path
 import io.circe.Json
+import org.http4s._
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
-import org.http4s.headers.{Authorization, `Content-Disposition`, `Content-Type`}
-import org.http4s.multipart.Part
-import org.http4s.{
-  AuthScheme,
-  Credentials,
-  EntityBody,
-  Header,
-  Headers,
-  MediaType,
-  Method
-}
-import org.typelevel.ci.CIStringSyntax
+import org.http4s.headers._
+import org.http4s.multipart.{Multiparts, Part}
 
 import scala.concurrent.duration._
 
@@ -48,7 +39,7 @@ final class StravaUpload[F[_]: Async](
       dataType =
         if (fitFile.extName == ".gz") "fit.gz" else "fit"
 
-      mps <- MyMultiparts.forSync[F]
+      mps <- Multiparts.forSync[F]
       body <- mps.multipart(
         Vector(
           Part.formData[F]("name", name).some,
@@ -56,22 +47,27 @@ final class StravaUpload[F[_]: Async](
           Option.when(commute)(Part.formData[F]("commute", "1")),
           Part.formData[F]("data_type", dataType).some,
           Part.formData[F]("external_id", s"fit4s_${activityId.id}").some,
-          // Part
-          fileData(
-            "file",
-            fitFile.fileName.toString,
-            Files[F].readAll(fitFile, 8192, Flags.Read),
-            `Content-Type`(MediaType.application.`octet-stream`)
-          ).some
+          Part
+            .fileData(
+              "file",
+              fitFile,
+              `Content-Type`(MediaType.application.`octet-stream`)
+            )
+            .some
         ).flatten
       )
 
-      req = Method.POST(body, uri).withHeaders(Authorization(credentials))
-      _ <- req.body
-        .through(fs2.text.utf8.decode)
-        .compile
-        .string
-        .map(println)
+      req = Method
+        .POST(body, uri)
+        .withHeaders(
+          Authorization(credentials),
+          `Content-Type`(
+            MediaType.multipart.`form-data`
+              .withExtensions(Map("boundary" -> body.boundary.value))
+          ),
+          `User-Agent`(ProductId("fit4s", Some("0.0.1")))
+        )
+
       upload <- client.expectOr[StravaUploadStatus](req)(resp =>
         resp
           .as[Json]
@@ -141,20 +137,4 @@ final class StravaUpload[F[_]: Async](
             new Exception(s"Activity $id update returned with a failure")
           )
     } yield ()
-
-  def fileData(
-      name: String,
-      filename: String,
-      entityBody: EntityBody[F],
-      headers: Header.ToRaw*
-  ): Part[F] =
-    Part(
-      Headers(
-        `Content-Disposition`(
-          "form-data",
-          Map(ci"name" -> name, ci"filename" -> filename)
-        )
-      ).put(headers: _*),
-      entityBody
-    )
 }
