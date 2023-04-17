@@ -24,7 +24,7 @@ jobs:
         run: sbt make-package
 
       - name: Set current version
-        run:  echo "VERSION=$(sbt 'show cli/version' | tail -n -1 | sed 's/^.* //g' | xargs" >> $GITHUB_ENV
+        run:  echo "VERSION=$(sbt 'show cli/version' | tail -n -1 | sed 's/^.* //g' | xargs)" >> $GITHUB_ENV
 
       - name: Publish Release ($VERSION)
         uses: softprops/action-gh-release@v1
