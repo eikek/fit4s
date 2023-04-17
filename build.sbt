@@ -124,6 +124,25 @@ lazy val geocode = project
   )
   .dependsOn(core)
 
+lazy val strava = project
+  .in(file("modules/strava"))
+  .settings(sharedSettings)
+  .settings(testSettings)
+  .settings(scalafixSettings)
+  .settings(
+    name := "fit4s-strava",
+    description := "Strava client supporting fit4s",
+    libraryDependencies ++=
+      Dependencies.http4sClient ++
+        Dependencies.http4sServer ++
+        Dependencies.http4sCirce ++
+        Dependencies.circe ++
+        Dependencies.circeGenericExtra ++
+        Dependencies.fs2 ++
+        Dependencies.scribe
+  )
+  .dependsOn(core)
+
 lazy val activities = project
   .in(file("modules/activities"))
   .settings(sharedSettings)
@@ -145,7 +164,8 @@ lazy val activities = project
   )
   .dependsOn(
     core % "compile->compile;test->test",
-    geocode % "compile->compile;test->test"
+    geocode % "compile->compile;test->test",
+    strava % "compile->compile;test->test"
   )
 
 lazy val cli = project
@@ -172,4 +192,4 @@ lazy val root = project
   .settings(
     name := "fit4s-root"
   )
-  .aggregate(core, geocode, activities, cli)
+  .aggregate(core, geocode, strava, activities, cli)

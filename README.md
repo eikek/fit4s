@@ -1,6 +1,8 @@
-# fit4s - encode and decode ANT FIT files with Scala
+# fit4s - look at your ANT FIT files with Scala
 
-This is a library for Scala 2.13 and 3.
+This is a library for Scala 2.13 and 3. On top of that a CLI
+application is provided for managing your fit files locally and
+optional integration into Strava.
 
 Examples:
 
@@ -14,10 +16,10 @@ Examples:
 
 - [ ] move h2 function into migration files (so it is stored inside
       the db and not in code)
-- [ ] publish to strava 
 - [ ] web server and leaflet map view (same features, just web, scalajs)
 - [ ] mima for the libraries
 - [ ] cleanup test cases/resources and personal data in code
+- [x] publish to strava 
 - [x] convert "indoor" from strava into a tag
   - unfortunately, this information is not in the export dump data :/
 - [x] implement location manage (move, delete, list)
