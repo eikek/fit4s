@@ -7,8 +7,9 @@ import com.monovore.decline.Opts
 import fit4s.activities.ActivityQuery.Condition
 import fit4s.activities.ActivityQuery.Condition.TagAnyMatch
 import fit4s.activities.data.{Page, TagName}
-import fit4s.activities.{ActivityLog, ActivityQuery, StravaAuthConfig}
+import fit4s.activities.{ActivityLog, ActivityQuery}
 import fit4s.cli.{ActivitySelection, CliConfig, CliError, SharedOpts}
+import fit4s.strava.StravaAppCredentials
 
 object UploadCmd extends SharedOpts {
 
@@ -66,7 +67,7 @@ object UploadCmd extends SharedOpts {
 
   def linkAndUpload(
       log: ActivityLog[IO],
-      authCfg: StravaAuthConfig,
+      authCfg: StravaAppCredentials,
       query: ActivityQuery,
       opts: Options
   ) =

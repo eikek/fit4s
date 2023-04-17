@@ -1,25 +1,40 @@
 package fit4s.activities.records
 
+import cats.effect.kernel.Clock
 import doobie._
 import doobie.implicits._
-import fit4s.activities.data.{StravaScope, StravaTokenId, StravaTokenResponse}
-import DoobieImplicits._
-import cats.effect.kernel.Clock
+import fit4s.activities.records.DoobieImplicits._
+import fit4s.strava.data._
 
 import java.time.{Duration, Instant}
 
 final case class RStravaToken(
     id: StravaTokenId,
     tokenType: String,
-    accessToken: String,
+    accessToken: StravaAccessToken,
     expiresAt: Instant,
     expiresIn: Duration,
-    refreshToken: String,
+    refreshToken: StravaRefreshToken,
     scope: StravaScope,
     createdAt: Instant
-)
+) {
+  def toTokenAndScope: TokenAndScope =
+    TokenAndScope(
+      StravaTokenResponse(
+        tokenType = tokenType,
+        accessToken = accessToken,
+        expiresAt = expiresAt,
+        expiresIn = expiresIn,
+        refreshToken = refreshToken,
+        athlete = None
+      ),
+      scope
+    )
+}
 
 object RStravaToken {
+  def fromResponse(tr: TokenAndScope): ConnectionIO[RStravaToken] =
+    fromResponse(tr.tokenResponse, tr.scope)
 
   def fromResponse(
       r: StravaTokenResponse,
@@ -28,11 +43,11 @@ object RStravaToken {
     Clock[ConnectionIO].realTimeInstant.map(now =>
       RStravaToken(
         id = StravaTokenId(-1),
-        tokenType = r.token_type,
-        accessToken = r.access_token,
+        tokenType = r.tokenType,
+        accessToken = r.accessToken,
         expiresAt = r.expiresAt,
         expiresIn = r.expiresIn,
-        refreshToken = r.refresh_token,
+        refreshToken = r.refreshToken,
         scope = scope,
         createdAt = now
       )

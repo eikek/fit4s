@@ -139,6 +139,7 @@ lazy val strava = project
         Dependencies.circe ++
         Dependencies.circeGenericExtra ++
         Dependencies.fs2 ++
+        Dependencies.scalaCsv ++
         Dependencies.scribe
   )
   .dependsOn(core)
@@ -156,8 +157,6 @@ lazy val activities = project
       Dependencies.h2 ++
       Dependencies.doobie ++
       Dependencies.flyway ++
-      Dependencies.scalaCsv ++
-      Dependencies.http4sServer ++
       Dependencies.scribe ++
       Dependencies.circe ++
       Dependencies.circeGenericExtra

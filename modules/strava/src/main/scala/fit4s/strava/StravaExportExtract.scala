@@ -1,11 +1,12 @@
-package fit4s.activities.impl
+package fit4s.strava
 
 import cats.effect.{Async, Resource}
 import cats.syntax.all._
 import com.github.tototoshi.csv.CSVReader
-import fit4s.activities.data.StravaActivityId
-import fs2.io.file.{Files, Path}
+import fit4s.strava.data.StravaActivityId
+import fit4s.strava.impl.Zip
 import fs2.Stream
+import fs2.io.file.{Files, Path}
 
 /** Extract activities from a strava export. */
 object StravaExportExtract {

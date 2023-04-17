@@ -6,17 +6,14 @@ import cats.syntax.all._
 import doobie._
 import doobie.implicits._
 import fit4s.activities.StravaSupport.PublishResult
-import fit4s.activities.data._
-import fit4s.activities.impl.StravaExportExtract.ExportData
-import fit4s.activities.records._
 import fit4s.activities._
+import fit4s.activities.data._
+import fit4s.activities.records._
+import fit4s.strava.StravaExportExtract.ExportData
+import fit4s.strava.data._
+import fit4s.strava.{StravaAppCredentials, StravaClient, StravaExportExtract}
 import fs2.Stream
 import fs2.io.file.Path
-import org.http4s.circe.CirceEntityCodec._
-import org.http4s.client.Client
-import org.http4s.client.dsl.Http4sClientDsl
-import org.http4s.headers.Authorization
-import org.http4s.{AuthScheme, Credentials, Method}
 
 import java.time.{Instant, ZoneId}
 import scala.concurrent.duration.FiniteDuration
@@ -24,27 +21,27 @@ import scala.math.Ordering.Implicits.infixOrderingOps
 
 final class StravaImpl[F[_]: Async](
     zoneId: ZoneId,
-    config: StravaConfig,
-    client: Client[F],
-    oauth: StravaOAuth[F],
+    stravaClient: StravaClient[F],
     xa: Transactor[F],
-    placeAttach: GeoPlaceAttach[F],
-    gearCache: Cache[F, String, StravaGear]
+    placeAttach: GeoPlaceAttach[F]
 ) extends StravaSupport[F] {
 
   private[this] val logger = scribe.cats.effect[F]
 
   def initOAuth(
-      cfg: StravaAuthConfig,
+      cfg: StravaAppCredentials,
       timeout: FiniteDuration
   ): F[Option[RStravaToken]] =
     nonInteractiveOAuth(cfg).flatMap {
       case Some(t) => Option(t).pure[F]
-      case None    => oauth.init(cfg, timeout)
+      case None =>
+        stravaClient
+          .initAuth(cfg, timeout)
+          .flatMap(storeTokenResponse)
     }
 
   def nonInteractiveOAuth(
-      cfg: StravaAuthConfig
+      cfg: StravaAppCredentials
   ): F[Option[RStravaToken]] =
     Clock[F].realTimeInstant.flatMap { now =>
       RStravaToken.findLatest.transact(xa).flatMap {
@@ -52,88 +49,73 @@ final class StravaImpl[F[_]: Async](
           logger.debug(s"Latest token is still valid.").as(Option(t))
 
         case t =>
-          oauth.refresh(cfg, t)
+          stravaClient
+            .refreshAuth(cfg, t.map(_.toTokenAndScope).pure[F])
+            .flatMap(storeTokenResponse)
       }
     }
+
+  private def storeTokenResponse(resp: Option[TokenAndScope]) =
+    resp match {
+      case Some(tr) =>
+        logger.debug(s"Got token response, storing to db") *>
+          RStravaToken
+            .fromResponse(tr)
+            .flatMap(RStravaToken.insert)
+            .transact(xa)
+            .map(_.some)
+      case None =>
+        Option.empty[RStravaToken].pure[F]
+    }
+
+  private def requireToken(cfg: StravaAppCredentials) =
+    nonInteractiveOAuth(cfg)
+      .map(_.toRight(new Exception(s"No authentication token available.")))
+      .rethrow
 
   def deleteTokens: F[Int] =
     RStravaToken.deleteAll.transact(xa)
 
   def listActivities(
-      cfg: StravaAuthConfig,
+      cfg: StravaAppCredentials,
       after: Instant,
       before: Instant,
       page: Int,
       perPage: Int
-  ): F[List[StravaActivity]] = {
-    val dsl = new Http4sClientDsl[F] {}
-    import dsl._
-
-    for {
-      token <- nonInteractiveOAuth(cfg)
-        .map(_.toRight(new Exception(s"No authentication token available.")))
-        .rethrow
-
-      uri = (config.apiUrl / "athlete" / "activities")
-        .withQueryParam("before", before.getEpochSecond)
-        .withQueryParam("after", after.getEpochSecond)
-        .withQueryParam("page", page)
-        .withQueryParam("per_page", perPage)
-
-      credentials = Credentials.Token(AuthScheme.Bearer, token.accessToken)
-
-      result <- client.expect[List[StravaActivity]](
-        Method.GET(uri).withHeaders(Authorization(credentials))
+  ): F[List[StravaActivity]] =
+    requireToken(cfg).flatMap(token =>
+      stravaClient.listActivities(
+        token.accessToken,
+        after,
+        before,
+        page,
+        perPage
       )
-    } yield result
-  }
+    )
 
-  def findGear(cfg: StravaAuthConfig, gearId: String): F[Option[StravaGear]] =
-    gearCache.cached(findGearRaw(cfg, _))(gearId)
-
-  def findGearRaw(cfg: StravaAuthConfig, gearId: String): F[Option[StravaGear]] = {
-    val dsl = new Http4sClientDsl[F] {}
-    import dsl._
-
-    for {
-      token <- nonInteractiveOAuth(cfg)
-        .map(_.toRight(new Exception(s"No authentication token available.")))
-        .rethrow
-
-      uri = config.apiUrl / "gear" / gearId
-
-      credentials = Credentials.Token(AuthScheme.Bearer, token.accessToken)
-
-      result <- client.expectOption[StravaGear](
-        Method.GET(uri).withHeaders(Authorization(credentials))
+  def listAllActivities(
+      cfg: StravaAppCredentials,
+      after: Instant,
+      before: Instant,
+      chunkSize: Int
+  ) =
+    Stream
+      .eval(requireToken(cfg))
+      .flatMap(token =>
+        stravaClient.listAllActivities(token.accessToken, after, before, chunkSize)
       )
-    } yield result
-  }
 
-  def getAthlete(cfg: StravaAuthConfig): F[StravaAthlete] = {
-    val dsl = new Http4sClientDsl[F] {}
-    import dsl._
+  def findGear(cfg: StravaAppCredentials, gearId: String): F[Option[StravaGear]] =
+    requireToken(cfg).flatMap(token => stravaClient.findGear(token.accessToken, gearId))
 
-    for {
-      token <- nonInteractiveOAuth(cfg)
-        .map(_.toRight(new Exception(s"No authentication token available.")))
-        .rethrow
-
-      uri = config.apiUrl / "athlete"
-
-      credentials = Credentials.Token(AuthScheme.Bearer, token.accessToken)
-
-      result <- client.expect[StravaAthlete](
-        Method.GET(uri).withHeaders(Authorization(credentials))
-      )
-    } yield result
-  }
+  def getAthlete(cfg: StravaAppCredentials): F[StravaAthlete] =
+    requireToken(cfg).flatMap(token => stravaClient.getAthlete(token.accessToken))
 
   def getUnlinkedActivities(query: ActivityQuery): F[Option[UnlinkedStravaStats]] =
     NonStravaActivities.stats(query).transact(xa)
 
   def linkActivities(
-      cfg: StravaAuthConfig,
+      cfg: StravaAppCredentials,
       query: ActivityQuery,
       bikeTagPrefix: Option[TagName],
       shoeTagPrefix: Option[TagName],
@@ -166,17 +148,15 @@ final class StravaImpl[F[_]: Async](
     RActivityStrava.removeAll(aq).transact(xa)
 
   def uploadActivities(
-      cfg: StravaAuthConfig,
+      cfg: StravaAppCredentials,
       query: ActivityQuery,
       bikeTagPrefix: Option[TagName],
       shoeTagPrefix: Option[TagName],
       commuteTag: Option[TagName]
   ): Stream[F, StravaActivityId] = for {
     athlete <- Stream.eval(getAthlete(cfg))
-    getToken = nonInteractiveOAuth(cfg)
-      .map(_.toRight(new Exception(s"No authentication token available.")))
-      .rethrow
-    strava = new StravaUpload[F](client, config, getToken)
+    token <- Stream.eval(requireToken(cfg).map(_.accessToken))
+    strava = new StravaUpload[F](stravaClient, requireToken(cfg).map(_.accessToken))
     stravaId <- NonStravaActivities
       .list(query)
       .transact(xa)
@@ -205,7 +185,7 @@ final class StravaImpl[F[_]: Async](
                   StravaUpdatableActivity.empty
                     .copy(gearId = gId.some)
 
-                strava.updateActivity(stravaId, updateData)
+                stravaClient.updateActivity(token, stravaId, updateData)
 
               case None => ().pure[F]
             }

@@ -1,4 +1,10 @@
-package fit4s.activities.impl
+package fit4s.strava.impl
+
+import cats.effect._
+import cats.syntax.all._
+import fit4s.strava.impl.Zip.NameFilter
+import fs2.io.file.{Files, Path}
+import fs2.{Chunk, Pipe, Stream}
 
 import java.io.BufferedInputStream
 import java.nio.charset.StandardCharsets
@@ -6,11 +12,6 @@ import java.util.zip.{ZipEntry, ZipFile, ZipOutputStream}
 import scala.jdk.CollectionConverters._
 import scala.util.Using
 import scala.util.Using.Releasable
-import cats.effect._
-import cats.syntax.all._
-import fit4s.activities.impl.Zip.NameFilter
-import fs2.io.file.{Files, Path}
-import fs2.{Chunk, Pipe, Stream}
 
 final private class ZipImpl[F[_]: Async](
     tempDir: Option[Path]

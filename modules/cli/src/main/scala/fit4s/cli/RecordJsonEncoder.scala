@@ -2,12 +2,12 @@ package fit4s.cli
 
 import fit4s.activities.data._
 import fit4s.activities.records._
-import io.circe.syntax._
-import io.circe.{Encoder, Json, KeyEncoder}
-import DataJsonEncoder._
+import fit4s.cli.DataJsonEncoder._
 import fit4s.geocode.{BoundingBox, NominatimOsmId, NominatimPlaceId}
 import fit4s.profile.types.LapTrigger
 import io.circe.generic.semiauto.deriveEncoder
+import io.circe.syntax._
+import io.circe.{Encoder, Json, KeyEncoder}
 
 object RecordJsonEncoder {
 
@@ -151,9 +151,6 @@ object RecordJsonEncoder {
 
   implicit def tagEncoder: Encoder[RTag] =
     Encoder.encodeString.contramap(_.name.name)
-
-  implicit val stravaIdEncoder: Encoder[StravaActivityId] =
-    Encoder.encodeLong.contramap(_.id)
 
   implicit val triggerEncoder: Encoder[LapTrigger] =
     typedValueEncoder[LapTrigger]

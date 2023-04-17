@@ -9,6 +9,7 @@ import fit4s.activities.StravaSupport.PublishResult
 import fit4s.activities.data._
 import fit4s.activities.records.{RActivitySession, RActivityStrava, RActivityTag, RTag}
 import fit4s.profile.types.Sport
+import fit4s.strava.data.{StravaActivity, StravaActivityId, StravaGear}
 import fs2.Chunk
 
 final class StravaSync[F[_]: Async](

@@ -6,6 +6,7 @@ import fit4s.activities.ActivityQuery
 import fit4s.activities.data._
 import fit4s.activities.impl.ActivityQueryBuilder
 import fit4s.activities.records.DoobieImplicits._
+import fit4s.strava.data.StravaActivityId
 
 final case class RActivityStrava(
     id: ActivityStravaId,

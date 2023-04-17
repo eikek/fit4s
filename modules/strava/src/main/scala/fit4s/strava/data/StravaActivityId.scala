@@ -1,6 +1,6 @@
 package fit4s.strava.data
 
-import io.circe.Decoder
+import io.circe.{Decoder, Encoder}
 import org.http4s.Uri
 
 final class StravaActivityId(val id: Long) extends AnyVal {
@@ -12,6 +12,9 @@ object StravaActivityId {
 
   implicit val stravaIdDecoder: Decoder[StravaActivityId] =
     Decoder.decodeLong.map(StravaActivityId.apply)
+
+  implicit val stravaIdEncoder: Encoder[StravaActivityId] =
+    Encoder.encodeLong.contramap(_.id)
 
   implicit val pathSegmentEncoder: Uri.Path.SegmentEncoder[StravaActivityId] =
     Uri.Path.SegmentEncoder.longSegmentEncoder.contramap(_.id)

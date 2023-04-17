@@ -10,8 +10,10 @@ import fit4s.activities.data._
 import fit4s.activities.impl._
 import fit4s.activities.records.RStravaToken
 import fit4s.geocode.ReverseLookup
+import fit4s.strava.data.{StravaActivity, StravaActivityId, StravaAthlete, StravaGear}
+import fit4s.strava.{StravaAppCredentials, StravaClient, StravaClientConfig}
+import fs2.Stream
 import fs2.io.file.Path
-import fs2.{Chunk, Stream}
 import org.http4s.client.Client
 
 import java.time.{Instant, ZoneId}
@@ -20,37 +22,34 @@ import scala.concurrent.duration.FiniteDuration
 trait StravaSupport[F[_]] {
   def unlink(aq: ActivityQuery): F[Int]
 
-  def initOAuth(cfg: StravaAuthConfig, timeout: FiniteDuration): F[Option[RStravaToken]]
+  def initOAuth(
+      cfg: StravaAppCredentials,
+      timeout: FiniteDuration
+  ): F[Option[RStravaToken]]
 
   def deleteTokens: F[Int]
 
   def listActivities(
-      cfg: StravaAuthConfig,
+      cfg: StravaAppCredentials,
       after: Instant,
       before: Instant,
       page: Int,
       perPage: Int
   ): F[List[StravaActivity]]
 
-  final def listAllActivities(
-      cfg: StravaAuthConfig,
+  def listAllActivities(
+      cfg: StravaAppCredentials,
       after: Instant,
       before: Instant,
       chunkSize: Int
-  ): Stream[F, StravaActivity] =
-    Stream
-      .iterate(1)(_ + 1)
-      .evalMap(page => listActivities(cfg, after, before, page, chunkSize))
-      // strava docs say that pages could be less than per_page, so check for empty result
-      .takeWhile(_.nonEmpty)
-      .flatMap(page => Stream.chunk(Chunk.seq(page)))
+  ): Stream[F, StravaActivity]
 
-  def findGear(cfg: StravaAuthConfig, gearId: String): F[Option[StravaGear]]
+  def findGear(cfg: StravaAppCredentials, gearId: String): F[Option[StravaGear]]
 
-  def getAthlete(cfg: StravaAuthConfig): F[StravaAthlete]
+  def getAthlete(cfg: StravaAppCredentials): F[StravaAthlete]
 
   def linkActivities(
-      cfg: StravaAuthConfig,
+      cfg: StravaAppCredentials,
       query: ActivityQuery,
       bikeTagPrefix: Option[TagName],
       shoeTagPrefix: Option[TagName],
@@ -63,7 +62,7 @@ trait StravaSupport[F[_]] {
     * make sure to select correct activities using the query.
     */
   def uploadActivities(
-      cfg: StravaAuthConfig,
+      cfg: StravaAppCredentials,
       query: ActivityQuery,
       bikeTagPrefix: Option[TagName],
       shoeTagPrefix: Option[TagName],
@@ -85,23 +84,19 @@ object StravaSupport {
 
   def apply[F[_]: Async](
       zoneId: ZoneId,
-      stravaCfg: StravaConfig,
+      stravaCfg: StravaClientConfig,
       reverseLookup: ReverseLookup[F],
       xa: Transactor[F],
       client: Client[F]
   ): F[StravaSupport[F]] =
     for {
       lookup <- GeoLookupDb(reverseLookup, xa)
-      oauth = new StravaOAuth[F](stravaCfg, client, xa)
-      gearCache <- Cache.memory[F, String, StravaGear](stravaCfg.gearCacheSize)
+      stravaClient <- StravaClient(stravaCfg, client)
       strava = new StravaImpl[F](
         zoneId,
-        stravaCfg,
-        client,
-        oauth,
+        stravaClient,
         xa,
-        new GeoPlaceAttach[F](xa, lookup),
-        gearCache
+        new GeoPlaceAttach[F](xa, lookup)
       )
     } yield strava
 

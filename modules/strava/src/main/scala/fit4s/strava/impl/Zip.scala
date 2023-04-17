@@ -1,7 +1,7 @@
-package fit4s.activities.impl
+package fit4s.strava.impl
 
 import cats.effect._
-import fit4s.activities.impl.Zip.NameFilter
+import fit4s.strava.impl.Zip.NameFilter
 import fs2.io.file.Path
 import fs2.{Pipe, Stream}
 

@@ -7,6 +7,7 @@ import doobie.util.transactor.Transactor
 import fit4s.activities.data._
 import fit4s.activities.impl.{ActivityLogDb, GeoLookupDb}
 import fit4s.geocode.{NominatimConfig, ReverseLookup}
+import fit4s.strava.StravaClientConfig
 import fs2._
 import fs2.io.file.Path
 import org.h2.jdbcx.JdbcConnectionPool
@@ -56,7 +57,7 @@ object ActivityLog {
   def apply[F[_]: Async](
       jdbcConfig: JdbcConfig,
       nominatimCfg: NominatimConfig,
-      stravaConfig: StravaConfig,
+      stravaConfig: StravaClientConfig,
       zoneId: ZoneId
   ): Resource[F, ActivityLog[F]] = {
     val pool = JdbcConnectionPool.create(

@@ -3,8 +3,9 @@ package fit4s.cli
 import cats.Monad
 import cats.syntax.all._
 import ciris._
-import fit4s.activities.{JdbcConfig, StravaAuthConfig, StravaConfig}
+import fit4s.activities.JdbcConfig
 import fit4s.geocode.NominatimConfig
+import fit4s.strava.{StravaAppCredentials, StravaClientConfig}
 import fs2.io.file.{Files, Path}
 import org.http4s.Uri
 
@@ -63,29 +64,30 @@ object ConfigValues {
     config("TIMEZONE", "Europe/Berlin").as[ZoneId]
 
   val strava = {
+    val defaults = StravaClientConfig.Defaults
     val authUrl =
-      config("STRAVA_AUTH_URL", StravaConfig.Defaults.authUrl.renderString)
+      config("STRAVA_AUTH_URL", defaults.authUrl.renderString)
         .as[Uri]
 
     val tokenUrl =
-      config("STRAVA_TOKEN_URL", StravaConfig.Defaults.tokenUrl.renderString)
+      config("STRAVA_TOKEN_URL", defaults.tokenUrl.renderString)
         .as[Uri]
 
     val apiUrl =
-      config("STRAVA_API_URL", StravaConfig.Defaults.apiUrl.renderString).as[Uri]
+      config("STRAVA_API_URL", defaults.apiUrl.renderString).as[Uri]
 
     val gearCacheSize =
-      config("STRAVA_GEAR_CACHE_SIZE", StravaConfig.Defaults.gearCacheSize.toString)
+      config("STRAVA_GEAR_CACHE_SIZE", defaults.gearCacheSize.toString)
         .as[Int]
 
-    (authUrl, tokenUrl, apiUrl, gearCacheSize).mapN(StravaConfig.apply)
+    (authUrl, tokenUrl, apiUrl, gearCacheSize).mapN(StravaClientConfig.apply)
   }
 
   val stravaOAuth = {
     val clientId = config("STRAVA_CLIENT_ID")
     val clientSecret = config("STRAVA_CLIENT_SECRET")
 
-    (clientId, clientSecret).mapN(StravaAuthConfig.apply)
+    (clientId, clientSecret).mapN(StravaAppCredentials.apply)
   }.option
 
   implicit private def zoneDecoder: ConfigDecoder[String, ZoneId] =
