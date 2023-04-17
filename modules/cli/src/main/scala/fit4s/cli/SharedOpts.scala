@@ -36,13 +36,20 @@ trait SharedOpts {
   implicit val locationIdArgument: Argument[LocationId] =
     Argument.readLong.map(LocationId.apply)
 
+  val noStravaTag = Opts
+    .option[TagName](
+      "no-strava-tag",
+      s"Activities with this tag are not considered when linking/uploading to strava. Default: ${defaultNoStravaTag.name}"
+    )
+    .withDefault(defaultNoStravaTag)
+
   val sequential: Opts[Boolean] =
     Opts.flag("sequential", "Whether to import using a single threads").orFalse
 
   val initialTags: Opts[List[TagName]] =
     Opts
       .options[TagName](
-        "tags",
+        "tag",
         help = "Associate these tags to all imported activities"
       )
       .orEmpty

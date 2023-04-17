@@ -36,10 +36,11 @@ val sharedSettings = Seq(
        else
          Nil),
   addCompilerPlugin(Dependencies.betterMonadicFor),
-  crossScalaVersions := Seq(V.scala2, V.scala3),
   Compile / console / scalacOptions := Seq(),
   Test / console / scalacOptions := Seq(),
-  licenses := Seq("MIT" -> url("http://spdx.org/licenses/MIT")),
+  licenses := Seq(
+    "GPL-3.0-or-later" -> url("https://spdx.org/licenses/GPL-3.0-or-later")
+  ),
   homepage := Some(url("https://github.com/eikek/fit4s")),
   versionScheme := Some("early-semver")
 ) ++ publishSettings
@@ -87,17 +88,18 @@ val buildInfoSettings = Seq(
     gitUncommittedChanges,
     gitDescribedVersion
   ),
-  buildInfoOptions += BuildInfoOption.ToJson,
-  buildInfoOptions += BuildInfoOption.BuildTime,
+  buildInfoOptions ++= Seq(BuildInfoOption.ToJson, BuildInfoOption.BuildTime),
   buildInfoPackage := "fit4s"
 )
 
 lazy val core = project
+  .enablePlugins(BuildInfoPlugin)
   .in(file("modules/core"))
   .enablePlugins(ProfileGeneratorPlugin)
   .settings(sharedSettings)
   .settings(testSettings)
   .settings(scalafixSettings)
+  .settings(buildInfoSettings)
   .settings(
     name := "fit4s-core",
     description := "Library for reading and writing FIT format",
@@ -113,6 +115,7 @@ lazy val geocode = project
   .settings(sharedSettings)
   .settings(testSettings)
   .settings(scalafixSettings)
+  .settings(noPublish)
   .settings(
     name := "fit4s-geocode",
     description := "Uses webservices to reverse lookup coordinates",
@@ -129,6 +132,7 @@ lazy val strava = project
   .settings(sharedSettings)
   .settings(testSettings)
   .settings(scalafixSettings)
+  .settings(noPublish)
   .settings(
     name := "fit4s-strava",
     description := "Strava client supporting fit4s",
@@ -149,6 +153,7 @@ lazy val activities = project
   .settings(sharedSettings)
   .settings(testSettings)
   .settings(scalafixSettings)
+  .settings(noPublish)
   .settings(
     name := "fit4s-activities",
     description := "A small database backed activity log",
@@ -173,6 +178,7 @@ lazy val cli = project
   .settings(sharedSettings)
   .settings(testSettings)
   .settings(scalafixSettings)
+  .settings(noPublish)
   .settings(
     name := "fit4s-cli",
     description := "A command line interface to look at your fit files",
@@ -188,6 +194,7 @@ lazy val cli = project
 lazy val root = project
   .in(file("."))
   .settings(sharedSettings)
+  .settings(noPublish)
   .settings(
     name := "fit4s-root"
   )

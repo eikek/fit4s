@@ -3,34 +3,22 @@ package fit4s.activities.records
 import cats.effect.IO
 import cats.syntax.all._
 import doobie.implicits._
-import fit4s.activities.data.{CountryCode, GeoPlaceId, PostCode}
 import fit4s.activities.{DatabaseTest, FlywayMigrate}
 import fit4s.data._
-import fit4s.geocode.{BoundingBox, NominatimOsmId, NominatimPlaceId}
+import fit4s.geocode.BoundingBox
 
 class RGeoPlaceTest extends DatabaseTest with TestData {
   override def munitFixtures = List(h2DataSource)
 
-  // TODO better data not leak
   test("test not in bounding box") {
     // sometimes the position is not completely in the reported bbox
     val place =
-      RGeoPlace(
-        id = GeoPlaceId(-1),
-        osmPlaceId = NominatimPlaceId(94115511),
-        osmId = NominatimOsmId(9056605070L),
-        position =
-          Position(Semicircle.semicircle(566560625), Semicircle.semicircle(104581107)),
-        road = Some("Arbergstrasse"),
-        location = "Winterthur",
-        country = Some("Schweiz/Suisse"),
-        countryCode = CountryCode("ch"),
-        postCode = Some(PostCode("8405")),
+      testPlace1.copy(
         boundingBox = BoundingBox(
-          Semicircle.semicircle(566560028),
-          Semicircle.semicircle(566561221),
-          Semicircle.semicircle(104544334),
-          Semicircle.semicircle(104551727)
+          Semicircle.degree(55),
+          Semicircle.degree(56),
+          Semicircle.degree(-3),
+          Semicircle.degree(-2)
         )
       )
 
@@ -38,6 +26,7 @@ class RGeoPlaceTest extends DatabaseTest with TestData {
     DatabaseTest.makeXA(ds).use { xa =>
       for {
         _ <- FlywayMigrate[IO](jdbc).run
+        _ <- deleteAllData(xa)
         _ <- List(place)
           .traverse_(RGeoPlace.insert)
           .transact(xa)
@@ -56,6 +45,7 @@ class RGeoPlaceTest extends DatabaseTest with TestData {
     DatabaseTest.makeXA(ds).use { xa =>
       for {
         _ <- FlywayMigrate[IO](jdbc).run
+        _ <- deleteAllData(xa)
         _ <- List(testPlace1, testPlace2, testPlace3)
           .traverse_(RGeoPlace.insert)
           .transact(xa)

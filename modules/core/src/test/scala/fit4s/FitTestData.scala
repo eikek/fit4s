@@ -15,7 +15,7 @@ object FitTestData {
   )
 
   val edge530CyclingActivity = fromURL(
-    getClass.getResource("/fit/activity/2023-03-16-06-25-37.fit")
+    getClass.getResource("/fit/2023-03-16-06-25-37.fit")
   )
 
   val indoorCyclingActivity = fromURL(
@@ -23,11 +23,11 @@ object FitTestData {
   )
 
   val fenix5Activity = fromURL(
-    getClass.getResource("/fit/activity/fenix5_1.fit")
+    getClass.getResource("/fit/fenix5_1.fit")
   )
 
   val garminSwimActivity = fromURL(
-    getClass.getResource("/fit/mine_12980500464.fit")
+    getClass.getResource("/fit/swim_12980500464.fit")
   )
 
   private def fromURL(url: URL): IO[ByteVector] =

@@ -14,11 +14,12 @@ Examples:
 
 ## TODO
 
-- [ ] move h2 function into migration files (so it is stored inside
-      the db and not in code)
+- [ ] cleanup test cases/resources and personal data in code
 - [ ] web server and leaflet map view (same features, just web, scalajs)
 - [ ] mima for the libraries
-- [ ] cleanup test cases/resources and personal data in code
+- [x] move h2 function into migration files (so it is stored inside
+      the db and not in code)
+  - no, works well like this
 - [x] publish to strava 
 - [x] convert "indoor" from strava into a tag
   - unfortunately, this information is not in the export dump data :/

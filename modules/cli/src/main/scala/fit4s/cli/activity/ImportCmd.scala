@@ -77,7 +77,7 @@ object ImportCmd extends SharedOpts {
       case false => IO.pure(options.fileOrDirectories)
     }
 
-  def printFile: ImportCallback[IO] = (file: Path) => IO.print(s"\r$file ... ")
+  def printFile: ImportCallback[IO] = (file: Path) => IO.print(s"\r$file ...          ")
 
   case class Result(success: Int, noActivity: Int, duplicates: Int, errors: Int) {
     def +(other: Result) = Result(

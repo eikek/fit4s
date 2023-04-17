@@ -10,9 +10,9 @@ import io.circe.Json
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
-import org.http4s.headers.{`Content-Type`, `User-Agent`}
+import org.http4s.headers.`Content-Type`
 import org.http4s.multipart.{Multiparts, Part}
-import org.http4s.{MediaType, Method, ProductId}
+import org.http4s.{MediaType, Method}
 
 import scala.concurrent.duration._
 
@@ -56,8 +56,7 @@ final class StravaUpload[F[_]: Async](config: StravaClientConfig, client: Client
           `Content-Type`(
             MediaType.multipart.`form-data`
               .withExtensions(Map("boundary" -> body.boundary.value))
-          ),
-          `User-Agent`(ProductId("fit4s", Some("0.1.0")))
+          )
         )
 
       upload <- client.expectOr[StravaUploadStatus](req)(resp =>

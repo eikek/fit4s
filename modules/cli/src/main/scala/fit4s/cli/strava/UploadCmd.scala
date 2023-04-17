@@ -22,23 +22,15 @@ object UploadCmd extends SharedOpts {
       commuteTag: TagName
   )
 
-  val opts: Opts[Options] = {
-    val noStrava = Opts
-      .option[TagName](
-        "no-strava-tag",
-        s"Activities with this tag are not considered when uploading to strava. Default: ${defaultNoStravaTag.name}"
-      )
-      .withDefault(defaultNoStravaTag)
-
+  val opts: Opts[Options] =
     (
       activitySelectionOps,
       pageOpts,
-      noStrava,
+      noStravaTag,
       bikeTagPrefix,
       shoeTagPrefix,
       commuteTag
     ).mapN(Options)
-  }
 
   def apply(cliConfig: CliConfig, opts: Options): IO[ExitCode] =
     activityLog(cliConfig).use { log =>

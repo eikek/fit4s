@@ -29,12 +29,14 @@ object AuthorizeCmd extends SharedOpts {
         case Some(oauthCfg) =>
           log.strava
             .initOAuth(oauthCfg, opts.timeout)
-            .flatTap {
+            .flatMap {
               case Some(token) =>
                 IO.println(s"Got token for scopes: ${token.scope.asString}")
-              case None => IO.println("No token received!")
+                  .as(ExitCode.Success)
+              case None =>
+                IO.println("No token received!").as(ExitCode.Error)
             }
-            .as(ExitCode.Success)
+
         case None =>
           IO.println(s"No strava client_id and client_secret configured!")
             .as(ExitCode.Error)

@@ -13,6 +13,9 @@ object App
     )
     with SharedOpts {
 
+  private val versionOpts: Opts[VersionCmd.Options] =
+    Opts.subcommand("version", "Show version information")(VersionCmd.opts)
+
   private val inspectOpts: Opts[InspectCmd.Options] =
     Opts.subcommand("inspect", "Inspect a FIT file by converting it to readable json.")(
       InspectCmd.opts
@@ -45,6 +48,7 @@ object App
       .orElse(locationOpts.map(SubCommandOpts.Location))
       .orElse(initArgs.map(_ => SubCommandOpts.Init))
       .orElse(configOpts.map(SubCommandOpts.Config))
+      .orElse(versionOpts.map(SubCommandOpts.Version))
 
   def main: Opts[IO[ExitCode]] =
     subCommandOpts.map(run).map(printError)
@@ -59,6 +63,7 @@ object App
         case SubCommandOpts.Location(c) => LocationCmd(cliCfg, c)
         case SubCommandOpts.Init        => InitCmd.init(cliCfg)
         case SubCommandOpts.Config(c)   => ConfigCmd(cliCfg, c)
+        case SubCommandOpts.Version(c)  => VersionCmd(c)
       }
     }
 
@@ -71,6 +76,7 @@ object App
     case class Location(opts: LocationCmd.SubOpts) extends SubCommandOpts
     case object Init extends SubCommandOpts
     case class Config(opts: ConfigCmd.SubOpts) extends SubCommandOpts
+    case class Version(opts: VersionCmd.Options) extends SubCommandOpts
   }
 
   private def printError(io: IO[ExitCode]): IO[ExitCode] =

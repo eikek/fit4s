@@ -40,6 +40,7 @@ trait DatabaseTest extends CatsEffectSuite {
   def deleteAllData(xa: Transactor[IO]): IO[Unit] =
     for {
       _ <- sql"DELETE FROM ${RActivityGeoPlace.table}".update.run.transact(xa)
+      _ <- sql"DELETE FROM ${RGeoPlace.table}".update.run.transact(xa)
       _ <- sql"DELETE FROM ${RActivitySessionData.table}".update.run.transact(xa)
       _ <- sql"DELETE FROM ${RActivitySession.table}".update.run.transact(xa)
       _ <- sql"DELETE FROM ${RActivity.table}".update.run.transact(xa)
