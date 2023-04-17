@@ -1,12 +1,13 @@
 package fit4s.activities.records
 
+import java.time.Instant
+
+import fit4s.activities.data.{ActivitySessionDataId, ActivitySessionId}
+import fit4s.activities.records.DoobieMeta._
+import fit4s.data._
+
 import doobie._
 import doobie.implicits._
-import fit4s.activities.data.{ActivitySessionDataId, ActivitySessionId}
-import fit4s.data._
-import DoobieMeta._
-
-import java.time.Instant
 
 final case class RActivitySessionData(
     id: ActivitySessionDataId,

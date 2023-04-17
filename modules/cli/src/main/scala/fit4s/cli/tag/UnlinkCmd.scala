@@ -3,9 +3,11 @@ package fit4s.cli.tag
 import cats.data.NonEmptyList
 import cats.effect._
 import cats.syntax.all._
-import com.monovore.decline.Opts
+
 import fit4s.activities.data.TagName
-import fit4s.cli.{ActivitySelection, CliConfig, CliError, SharedOpts}
+import fit4s.cli._
+
+import com.monovore.decline.Opts
 
 object UnlinkCmd extends SharedOpts {
 

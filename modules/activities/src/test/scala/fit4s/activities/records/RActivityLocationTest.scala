@@ -1,11 +1,13 @@
 package fit4s.activities.records
 
 import cats.effect.IO
-import doobie.implicits._
-import fit4s.activities.data.LocationId
-import fit4s.activities.{DatabaseTest, FlywayMigrate}
 import fs2.Chunk
 import fs2.io.file.Path
+
+import fit4s.activities.data.LocationId
+import fit4s.activities.{DatabaseTest, FlywayMigrate}
+
+import doobie.implicits._
 
 class RActivityLocationTest extends DatabaseTest {
   override def munitFixtures = List(h2DataSource)

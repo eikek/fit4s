@@ -1,9 +1,10 @@
 package fit4s.activities
 
 import cats.data.NonEmptyList
+import fs2.Stream
+
 import fit4s.activities.data.{Page, TagName}
 import fit4s.activities.records.RTag
-import fs2.Stream
 
 trait TagRepo[F[_]] {
   def linkTags(

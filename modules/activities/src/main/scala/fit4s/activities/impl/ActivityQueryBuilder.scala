@@ -1,14 +1,16 @@
 package fit4s.activities.impl
 
 import cats.data.NonEmptyList
-import doobie._
-import doobie.implicits._
+import fs2.io.file.Path
+
 import fit4s.activities.ActivityQuery
 import fit4s.activities.ActivityQuery.Condition
-import fit4s.activities.data.{ActivityId, ActivitySessionSummary, TagId, TagName}
+import fit4s.activities.data._
 import fit4s.activities.records.DoobieImplicits._
 import fit4s.activities.records._
-import fs2.io.file.Path
+
+import doobie._
+import doobie.implicits._
 
 object ActivityQueryBuilder {
 

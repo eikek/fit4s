@@ -1,6 +1,7 @@
 package fit4s.cli
 
 import cats.effect._
+
 import com.monovore.decline.Opts
 
 object VersionCmd extends SharedOpts {

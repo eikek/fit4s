@@ -1,10 +1,16 @@
 package fit4s.activities.impl
 
+import java.time.{Instant, ZoneId}
+
+import scala.concurrent.duration.FiniteDuration
+import scala.math.Ordering.Implicits.infixOrderingOps
+
 import cats.data.{EitherT, NonEmptyList, OptionT}
 import cats.effect._
 import cats.syntax.all._
-import doobie._
-import doobie.implicits._
+import fs2.Stream
+import fs2.io.file.Path
+
 import fit4s.activities.StravaSupport.PublishResult
 import fit4s.activities._
 import fit4s.activities.data._
@@ -12,12 +18,9 @@ import fit4s.activities.records._
 import fit4s.strava.StravaExportExtract.ExportData
 import fit4s.strava.data._
 import fit4s.strava.{StravaAppCredentials, StravaClient, StravaExportExtract}
-import fs2.Stream
-import fs2.io.file.Path
 
-import java.time.{Instant, ZoneId}
-import scala.concurrent.duration.FiniteDuration
-import scala.math.Ordering.Implicits.infixOrderingOps
+import doobie._
+import doobie.implicits._
 
 final class StravaImpl[F[_]: Async](
     zoneId: ZoneId,

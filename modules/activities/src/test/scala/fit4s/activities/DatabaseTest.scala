@@ -1,16 +1,18 @@
 package fit4s.activities
 
-import cats.effect._
-import cats.syntax.option._
-import doobie._
-import doobie.implicits._
-import fit4s.activities.records._
-import fs2.io.file.{Files, Path}
-import munit.CatsEffectSuite
-import org.h2.jdbcx.{JdbcConnectionPool, JdbcDataSource}
-
 import java.util.UUID
 import javax.sql.DataSource
+
+import cats.effect._
+import cats.syntax.option._
+import fs2.io.file.{Files, Path}
+
+import fit4s.activities.records._
+
+import doobie._
+import doobie.implicits._
+import munit.CatsEffectSuite
+import org.h2.jdbcx.{JdbcConnectionPool, JdbcDataSource}
 
 trait DatabaseTest extends CatsEffectSuite {
 

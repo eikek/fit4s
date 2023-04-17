@@ -1,15 +1,17 @@
 package fit4s.activities.impl
 
+import java.time.{Instant, ZoneId}
+
 import cats.effect._
 import cats.syntax.all._
-import doobie._
-import fit4s.activities.data.{ActivityId, LocationId, TagId}
-import fit4s.activities.records.RActivityLocation
-import fit4s.activities.{ImportCallback, ImportResult}
 import fs2.io.file.{Files, Path}
 import fs2.{Pipe, Stream}
 
-import java.time.{Instant, ZoneId}
+import fit4s.activities.data.{ActivityId, LocationId, TagId}
+import fit4s.activities.records.RActivityLocation
+import fit4s.activities.{ImportCallback, ImportResult}
+
+import doobie._
 
 object DirectoryImport {
 

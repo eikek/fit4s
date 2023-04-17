@@ -3,8 +3,9 @@ package fit4s
 import fit4s.decode.DataField.KnownField
 import fit4s.decode.{DataFields, DataMessageDecoder}
 import fit4s.json.JsonCodec
-import fit4s.profile.messages.{FileIdMsg, MonitoringMsg, Msg, RecordMsg}
+import fit4s.profile.messages._
 import fit4s.profile.types.{ActivityType, Manufacturer, TypedValue}
+
 import munit.FunSuite
 import scodec.bits.ByteVector
 

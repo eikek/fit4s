@@ -1,17 +1,19 @@
 package fit4s.activities.impl
 
+import java.time.temporal.ChronoUnit
+import java.time.{Duration, Instant, ZoneId}
+
 import cats.data.{NonEmptyList => Nel}
 import cats.parse.Parser
 import cats.syntax.all._
+import fs2.io.file.Path
+
 import fit4s.activities.ActivityQuery.Condition
 import fit4s.activities.ActivityQuery.Condition._
 import fit4s.activities.data.{ActivityId, TagName}
 import fit4s.data.Distance
-import fs2.io.file.Path
-import munit.FunSuite
 
-import java.time.{Duration, Instant, ZoneId}
-import java.time.temporal.ChronoUnit
+import munit.FunSuite
 
 class ConditionParserTest extends FunSuite {
 

@@ -1,17 +1,18 @@
 package fit4s.cli
 
+import java.time.format.TextStyle
+import java.time.temporal.ChronoUnit
+import java.time.{Duration, Instant, ZoneId}
+import java.util.Locale
+
 import cats.Show
 import cats.syntax.all._
+
 import fit4s.activities.data.ActivityId
 import fit4s.activities.records.RTag
 import fit4s.cli.FormatDefinition.{DateInstant, TimeInstant}
 import fit4s.data._
 import fit4s.profile.types.{Sport, SubSport, SwimStroke}
-
-import java.time.format.TextStyle
-import java.time.temporal.ChronoUnit
-import java.time.{Duration, Instant, ZoneId}
-import java.util.Locale
 
 trait FormatDefinition {
 

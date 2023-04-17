@@ -3,9 +3,10 @@ package fit4s
 import fit4s.FitMessage.DataMessage
 import fit4s.data.{FileId, Nel}
 import fit4s.profile.types.MesgNum
+
+import scodec._
 import scodec.bits.{BitVector, ByteVector}
 import scodec.codecs._
-import scodec.{Attempt, Codec, DecodeResult, Encoder, Err, SizeBound}
 
 final case class FitFile(
     header: FileHeader,

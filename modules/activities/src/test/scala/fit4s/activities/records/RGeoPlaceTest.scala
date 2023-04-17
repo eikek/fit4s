@@ -2,10 +2,12 @@ package fit4s.activities.records
 
 import cats.effect.IO
 import cats.syntax.all._
-import doobie.implicits._
+
 import fit4s.activities.{DatabaseTest, FlywayMigrate}
 import fit4s.data._
 import fit4s.geocode.BoundingBox
+
+import doobie.implicits._
 
 class RGeoPlaceTest extends DatabaseTest with TestData {
   override def munitFixtures = List(h2DataSource)

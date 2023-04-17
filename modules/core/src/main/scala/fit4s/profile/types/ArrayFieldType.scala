@@ -2,6 +2,7 @@ package fit4s.profile.types
 
 import fit4s.data.Nel
 import fit4s.profile.types.BaseTypedValue.{FloatBaseValue, LongBaseValue, StringBaseValue}
+
 import scodec.Codec
 import scodec.bits.ByteOrdering
 import scodec.codecs.{fixedSizeBytes, list}

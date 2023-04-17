@@ -1,17 +1,20 @@
 package fit4s.strava.impl
 
+import java.time.Instant
+
+import scala.concurrent.duration.FiniteDuration
+
 import cats.effect._
 import cats.syntax.all._
+import fs2.io.file.Path
+
 import fit4s.strava.data._
 import fit4s.strava.{StravaAppCredentials, StravaClient, StravaClientConfig}
-import fs2.io.file.Path
+
 import org.http4s.Method
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
-
-import java.time.Instant
-import scala.concurrent.duration.FiniteDuration
 
 final class DefaultStravaClient[F[_]: Async](
     client: Client[F],

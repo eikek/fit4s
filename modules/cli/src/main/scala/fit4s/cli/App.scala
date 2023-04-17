@@ -1,9 +1,11 @@
 package fit4s.cli
 
 import cats.effect.{ExitCode, IO}
+
+import fit4s.cli.FormatDefinition.StringOps
+
 import com.monovore.decline.Opts
 import com.monovore.decline.effect.CommandIOApp
-import fit4s.cli.FormatDefinition.StringOps
 
 object App
     extends CommandIOApp(

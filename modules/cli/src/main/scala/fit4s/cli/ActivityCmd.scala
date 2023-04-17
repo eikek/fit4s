@@ -1,8 +1,10 @@
 package fit4s.cli
 
 import cats.effect.{ExitCode, IO}
-import com.monovore.decline.Opts
+
 import fit4s.cli.activity._
+
+import com.monovore.decline.Opts
 
 object ActivityCmd extends SharedOpts {
 

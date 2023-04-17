@@ -3,6 +3,7 @@ package fit4s.data
 import fit4s.FitMessage.DataMessage
 import fit4s.profile.messages.FileIdMsg
 import fit4s.profile.types.{DateTime, File, Manufacturer}
+
 import scodec.Codec
 import scodec.bits.{Bases, ByteOrdering, ByteVector}
 import scodec.codecs._

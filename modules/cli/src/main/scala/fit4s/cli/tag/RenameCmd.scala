@@ -2,9 +2,11 @@ package fit4s.cli.tag
 
 import cats.effect.{ExitCode, IO}
 import cats.syntax.all._
-import com.monovore.decline.Opts
+
 import fit4s.activities.data.TagName
 import fit4s.cli.{CliConfig, SharedOpts}
+
+import com.monovore.decline.Opts
 
 object RenameCmd extends SharedOpts {
 

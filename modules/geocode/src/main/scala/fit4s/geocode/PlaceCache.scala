@@ -2,6 +2,7 @@ package fit4s.geocode
 
 import cats.effect._
 import cats.syntax.all._
+
 import fit4s.data.Position
 
 private[geocode] trait PlaceCache[F[_]] {

@@ -1,8 +1,9 @@
 package fit4s.strava
 
 import fit4s.strava.data.StravaAccessToken
-import org.http4s.{AuthScheme, Credentials, Request}
+
 import org.http4s.headers.Authorization
+import org.http4s.{AuthScheme, Credentials, Request}
 
 package object impl {
 

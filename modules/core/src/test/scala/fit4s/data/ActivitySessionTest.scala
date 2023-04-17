@@ -1,11 +1,12 @@
 package fit4s.data
 
+import java.time.Duration
+
 import fit4s.profile.messages.SessionMsg
 import fit4s.profile.types._
 import fit4s.{FieldDecodeResult, FitFile, FitTestData}
-import munit.CatsEffectSuite
 
-import java.time.Duration
+import munit.CatsEffectSuite
 
 class ActivitySessionTest extends CatsEffectSuite {
 

@@ -1,7 +1,8 @@
 package fit4s.activities.data
 
 import cats.{Monoid, Order, Semigroup}
-import fit4s.data.{Calories, Distance, HeartRate, Temperature}
+
+import fit4s.data._
 
 trait CatsInstances {
 

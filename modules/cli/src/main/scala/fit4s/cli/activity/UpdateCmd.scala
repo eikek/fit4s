@@ -2,11 +2,13 @@ package fit4s.cli.activity
 
 import cats.effect.{ExitCode, IO}
 import cats.syntax.all._
-import com.monovore.decline.Opts
+import fs2.io.file.Path
+
 import fit4s.activities.data.TagName
 import fit4s.activities.{ImportCallback, ImportResult}
 import fit4s.cli.{CliConfig, SharedOpts}
-import fs2.io.file.Path
+
+import com.monovore.decline.Opts
 
 object UpdateCmd extends SharedOpts {
 

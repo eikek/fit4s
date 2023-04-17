@@ -1,7 +1,10 @@
 package fit4s.activities.impl
 
+import java.time.{Instant, ZoneId}
+
 import cats.effect.IO
-import doobie.implicits._
+import fs2.io.file.Path
+
 import fit4s.activities.records.{
   RActivityLocation,
   RActivitySession,
@@ -9,9 +12,8 @@ import fit4s.activities.records.{
 }
 import fit4s.activities.{DatabaseTest, FlywayMigrate}
 import fit4s.{ActivityReader, FitFile, FitTestData}
-import fs2.io.file.Path
 
-import java.time.{Instant, ZoneId}
+import doobie.implicits._
 
 class ActivityImportTest extends DatabaseTest {
   override def munitFixtures = Seq(h2DataSource)

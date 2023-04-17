@@ -1,16 +1,18 @@
 package fit4s.activities.impl
 
+import java.time.{Duration, Instant}
+
 import cats.data.NonEmptyList
+import fs2.io.file.Path
+
 import fit4s.activities.ActivityQuery
-import fit4s.activities.ActivityQuery.Condition._
 import fit4s.activities.ActivityQuery.Condition
+import fit4s.activities.ActivityQuery.Condition._
 import fit4s.activities.data.{ActivityId, Page, TagName}
 import fit4s.data.{DeviceProduct, Distance, FileId}
 import fit4s.profile.types._
-import fs2.io.file.Path
-import org.scalacheck.Gen
 
-import java.time.{Duration, Instant}
+import org.scalacheck.Gen
 
 object ActivityQueryGenerator {
 

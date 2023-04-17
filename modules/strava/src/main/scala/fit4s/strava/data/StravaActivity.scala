@@ -1,13 +1,15 @@
 package fit4s.strava.data
 
+import java.time.Instant
+
 import cats.syntax.all._
+
 import fit4s.data.{Distance, Position, Semicircle}
 import fit4s.profile.types.Sport
+
 import io.circe.Decoder
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.deriveConfiguredDecoder
-
-import java.time.Instant
 
 final case class StravaActivity(
     name: String,

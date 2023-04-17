@@ -1,10 +1,11 @@
 package fit4s.activities.records
 
-import doobie._
-import doobie.implicits._
 import fit4s.activities.data._
 import fit4s.activities.records.DoobieImplicits._
 import fit4s.data.Distance
+
+import doobie._
+import doobie.implicits._
 
 final case class RActivityGeoPlace(
     id: ActivityGeoPlaceId,

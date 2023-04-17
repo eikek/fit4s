@@ -1,13 +1,15 @@
 package fit4s.activities.records
 
-import doobie.Meta
-import fit4s.data._
-import fit4s.profile.types.{LapTrigger, Sport, SubSport, SwimStroke}
+import java.time.{Duration, Instant}
+
 import fs2.io.file.Path
+
 import fit4s.activities.data._
+import fit4s.data._
+import fit4s.profile.types._
 import fit4s.strava.data._
 
-import java.time.{Duration, Instant}
+import doobie.Meta
 
 trait DoobieMeta {
   implicit val stravaScopeMeta: Meta[StravaScope] =

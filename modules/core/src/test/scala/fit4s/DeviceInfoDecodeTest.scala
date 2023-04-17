@@ -1,11 +1,13 @@
 package fit4s
 
 import cats.syntax.all._
+
 import fit4s.FitMessage.DataMessage
 import fit4s.data.DeviceProduct
 import fit4s.json.JsonCodec
 import fit4s.profile.messages.DeviceInfoMsg
 import fit4s.profile.types.{DeviceIndex, GarminProduct}
+
 import munit.FunSuite
 import scodec.bits.ByteVector
 

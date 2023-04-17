@@ -1,12 +1,14 @@
 package fit4s.activities.records
 
+import cats.effect.kernel.Sync
 import cats.syntax.all._
+import fs2.Stream
+
+import fit4s.activities.data.{Page, TagId, TagName}
+import fit4s.activities.records.DoobieImplicits._
+
 import doobie._
 import doobie.implicits._
-import fit4s.activities.data.{Page, TagId, TagName}
-import fs2.Stream
-import DoobieImplicits._
-import cats.effect.kernel.Sync
 
 final case class RTag(id: TagId, name: TagName)
 

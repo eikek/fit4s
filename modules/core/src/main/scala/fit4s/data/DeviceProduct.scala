@@ -3,8 +3,9 @@ package fit4s.data
 import fit4s.FitMessage.DataMessage
 import fit4s.profile.messages.{DeviceInfoMsg, FileIdMsg, Msg}
 import fit4s.profile.types.{FaveroProduct, GarminProduct}
-import scodec.{Codec, Err}
+
 import scodec.bits.ByteOrdering
+import scodec.{Codec, Err}
 
 sealed trait DeviceProduct extends Product {
   def name: String

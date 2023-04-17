@@ -1,15 +1,17 @@
 package fit4s.cli
 
+import java.time.ZoneId
+
 import cats.data.Validated
 import cats.effect.{Clock, IO, Resource}
 import cats.syntax.all._
-import com.monovore.decline.{Argument, Opts}
-import fit4s.activities.ActivityLog
-import fit4s.activities.data.{ActivityId, LocationId, Page, TagName}
-import fit4s.profile.types.Sport
 import fs2.io.file.Path
 
-import java.time.ZoneId
+import fit4s.activities.ActivityLog
+import fit4s.activities.data._
+import fit4s.profile.types.Sport
+
+import com.monovore.decline.{Argument, Opts}
 
 trait SharedOpts {
   final val defaultNoStravaTag = TagName.unsafeFromString("No-Strava")

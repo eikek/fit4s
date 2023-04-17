@@ -3,12 +3,14 @@ package fit4s.cli.strava
 import cats.effect.{ExitCode, IO}
 import cats.kernel.Monoid
 import cats.syntax.all._
-import com.monovore.decline.Opts
+import fs2.io.file.Path
+
 import fit4s.ActivityReader
 import fit4s.activities.data.{ActivityId, TagName}
 import fit4s.activities.{ImportCallback, ImportResult}
 import fit4s.cli.{CliConfig, SharedOpts}
-import fs2.io.file.Path
+
+import com.monovore.decline.Opts
 
 object ImportCmd extends SharedOpts {
   private val maxConcurrent =

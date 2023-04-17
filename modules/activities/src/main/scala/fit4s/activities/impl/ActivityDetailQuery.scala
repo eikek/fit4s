@@ -3,11 +3,13 @@ package fit4s.activities.impl
 import cats.data.{NonEmptyList, OptionT}
 import cats.effect._
 import cats.syntax.all._
+
+import fit4s.activities.data._
+import fit4s.activities.records.DoobieImplicits._
+import fit4s.activities.records._
+
 import doobie._
 import doobie.implicits._
-import fit4s.activities.records.DoobieImplicits._
-import fit4s.activities.data._
-import fit4s.activities.records._
 
 object ActivityDetailQuery {
   private[this] val activityT = RActivity.table

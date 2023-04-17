@@ -1,9 +1,10 @@
 package fit4s.strava.impl
 
 import cats.effect._
-import fit4s.strava.impl.Zip.NameFilter
 import fs2.io.file.Path
 import fs2.{Pipe, Stream}
+
+import fit4s.strava.impl.Zip.NameFilter
 
 trait Zip[F[_]] {
 

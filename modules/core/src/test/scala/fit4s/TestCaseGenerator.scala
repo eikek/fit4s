@@ -2,6 +2,7 @@ package fit4s
 
 import fit4s.FitMessage.DataMessage
 import fit4s.json.JsonCodec
+
 import io.circe.syntax._
 
 object TestCaseGenerator extends JsonCodec {

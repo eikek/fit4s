@@ -2,9 +2,11 @@ package fit4s.cli.activity
 
 import cats.effect._
 import cats.syntax.all._
-import com.monovore.decline.Opts
+
 import fit4s.activities.data.ActivityId
 import fit4s.cli.{CliConfig, SharedOpts}
+
+import com.monovore.decline.Opts
 
 object SetNameCmd extends SharedOpts {
 

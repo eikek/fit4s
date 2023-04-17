@@ -1,13 +1,14 @@
 package fit4s.cli
 
+import java.time._
+import java.time.temporal.ChronoUnit
+
 import cats.data.{NonEmptyList => Nel}
 import cats.syntax.all._
+
 import fit4s.activities.ActivityQuery
 import fit4s.activities.ActivityQuery.Condition.{And, StartedAfter, StartedBefore}
 import fit4s.activities.impl.ConditionParser
-
-import java.time._
-import java.time.temporal.ChronoUnit
 
 sealed trait ActivitySelection extends Product
 

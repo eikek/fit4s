@@ -1,15 +1,16 @@
 package fit4s.activities.impl
 
+import java.time._
+import java.time.temporal.ChronoUnit
+
 import cats.data.NonEmptyList
 import cats.parse.{Numbers, Parser}
+import fs2.io.file.Path
+
 import fit4s.activities.data.{ActivityId, TagName}
 import fit4s.activities.impl.BasicParser.ws
 import fit4s.data.{DeviceProduct, Distance}
 import fit4s.profile.types.{Sport, SubSport}
-import fs2.io.file.Path
-
-import java.time.temporal.ChronoUnit
-import java.time._
 
 abstract class BasicParser(zoneId: ZoneId, currentTime: Instant) {
   val instant: Parser[Instant] =

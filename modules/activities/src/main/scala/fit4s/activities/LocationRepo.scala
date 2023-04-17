@@ -1,10 +1,11 @@
 package fit4s.activities
 
+import fs2.Stream
+import fs2.io.file.Path
+
 import fit4s.activities.LocationRepo.MoveResult
 import fit4s.activities.data.{LocationId, Page}
 import fit4s.activities.records.RActivityLocation
-import fs2.Stream
-import fs2.io.file.Path
 
 trait LocationRepo[F[_]] {
 

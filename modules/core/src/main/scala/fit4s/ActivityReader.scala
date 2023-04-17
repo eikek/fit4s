@@ -1,12 +1,12 @@
 package fit4s
 
+import java.time.{Duration, ZoneId}
+
 import fit4s.ActivityReader.Failure.GeneralError
 import fit4s.data._
 import fit4s.profile.messages.{LapMsg, RecordMsg, SessionMsg}
 import fit4s.profile.types.{DateTime, LocalDateTime, MesgNum}
 import fit4s.util._
-
-import java.time.{Duration, ZoneId}
 
 object ActivityReader {
   sealed trait Failure extends Product

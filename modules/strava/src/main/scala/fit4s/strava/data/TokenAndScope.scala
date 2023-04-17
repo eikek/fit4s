@@ -1,7 +1,7 @@
 package fit4s.strava.data
 
-import io.circe.{Decoder, Encoder}
 import io.circe.generic.semiauto.{deriveDecoder, deriveEncoder}
+import io.circe.{Decoder, Encoder}
 
 final case class TokenAndScope(
     tokenResponse: StravaTokenResponse,

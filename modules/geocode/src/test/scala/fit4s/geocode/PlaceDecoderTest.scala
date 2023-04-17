@@ -1,8 +1,9 @@
 package fit4s.geocode
 
 import fit4s.data.Semicircle
-import munit.FunSuite
+
 import io.circe.parser
+import munit.FunSuite
 
 class PlaceDecoderTest extends FunSuite with NominatimDecoder {
 

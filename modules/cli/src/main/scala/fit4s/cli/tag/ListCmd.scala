@@ -1,9 +1,11 @@
 package fit4s.cli.tag
 
 import cats.effect.{ExitCode, IO}
-import com.monovore.decline.Opts
+
 import fit4s.activities.data.{Page, TagName}
 import fit4s.cli.{CliConfig, SharedOpts}
+
+import com.monovore.decline.Opts
 
 object ListCmd extends SharedOpts {
 

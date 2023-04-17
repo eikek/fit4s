@@ -1,6 +1,7 @@
 package fit4s.activities
 
 import cats.effect.IO
+
 import org.flywaydb.core.api.output.MigrateResult
 
 class MigrationTest extends DatabaseTest {

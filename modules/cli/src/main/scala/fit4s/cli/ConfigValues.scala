@@ -1,16 +1,18 @@
 package fit4s.cli
 
+import java.time.ZoneId
+import java.util.concurrent.atomic.AtomicReference
+
 import cats.Monad
 import cats.syntax.all._
-import ciris._
+import fs2.io.file.{Files, Path}
+
 import fit4s.activities.JdbcConfig
 import fit4s.geocode.NominatimConfig
 import fit4s.strava.{StravaAppCredentials, StravaClientConfig}
-import fs2.io.file.{Files, Path}
-import org.http4s.Uri
 
-import java.time.ZoneId
-import java.util.concurrent.atomic.AtomicReference
+import ciris._
+import org.http4s.Uri
 
 object ConfigValues {
   private[this] val envPrefix = "FIT4S"

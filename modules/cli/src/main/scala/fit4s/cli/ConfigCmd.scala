@@ -1,8 +1,10 @@
 package fit4s.cli
 
 import cats.effect._
-import com.monovore.decline.Opts
+
 import fit4s.cli.config._
+
+import com.monovore.decline.Opts
 
 object ConfigCmd {
 

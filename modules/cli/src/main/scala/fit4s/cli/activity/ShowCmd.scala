@@ -1,19 +1,22 @@
 package fit4s.cli.activity
 
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import java.time.{Instant, ZoneId}
+
+import scala.math.Ordering.Implicits.infixOrderingOps
+
 import cats.Show
 import cats.effect.{ExitCode, IO}
 import cats.syntax.all._
-import com.monovore.decline.Opts
+
 import fit4s.activities.data.{ActivityDetailResult, ActivityId}
 import fit4s.activities.records.{RActivityLap, RActivitySession}
 import fit4s.cli._
 import fit4s.data.Distance
 import fit4s.profile.types.Sport
 
-import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-import java.time.{Instant, ZoneId}
-import scala.math.Ordering.Implicits.infixOrderingOps
+import com.monovore.decline.Opts
 
 object ShowCmd extends SharedOpts with FormatDefinition {
 

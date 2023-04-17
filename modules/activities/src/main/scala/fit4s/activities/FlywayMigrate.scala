@@ -2,6 +2,7 @@ package fit4s.activities
 
 import cats.effect.Sync
 import cats.implicits._
+
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.output.MigrateResult
 

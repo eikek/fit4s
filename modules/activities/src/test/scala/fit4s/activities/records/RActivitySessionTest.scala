@@ -2,8 +2,10 @@ package fit4s.activities.records
 
 import cats.effect.IO
 import cats.syntax.all._
-import fit4s.activities.{DatabaseTest, FlywayMigrate}
 import fs2.io.file.Path
+
+import fit4s.activities.{DatabaseTest, FlywayMigrate}
+
 import doobie.implicits._
 
 class RActivitySessionTest extends DatabaseTest with TestData {

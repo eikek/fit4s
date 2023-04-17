@@ -1,16 +1,18 @@
 package fit4s.activities.impl
 
+import java.time.{Duration, Instant, ZoneId}
+
 import cats.data.{NonEmptyList, OptionT}
 import cats.effect.Sync
 import cats.syntax.all._
-import doobie._
+
 import fit4s.ActivityReader
 import fit4s.activities.ImportResult
 import fit4s.activities.data._
 import fit4s.activities.records._
 import fit4s.data._
 
-import java.time.{Duration, Instant, ZoneId}
+import doobie._
 
 object ActivityImport {
   def addActivity(

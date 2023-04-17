@@ -1,13 +1,15 @@
 package fit4s.activities.records
 
-import doobie._
-import doobie.implicits._
-import fit4s.activities.data.{ActivityId, ActivityTagId, TagId}
-import DoobieImplicits._
 import cats.data.NonEmptyList
 import cats.effect.kernel.Sync
+
 import fit4s.activities.ActivityQuery
+import fit4s.activities.data.{ActivityId, ActivityTagId, TagId}
 import fit4s.activities.impl.ActivityQueryBuilder
+import fit4s.activities.records.DoobieImplicits._
+
+import doobie._
+import doobie.implicits._
 
 final case class RActivityTag(
     id: ActivityTagId,

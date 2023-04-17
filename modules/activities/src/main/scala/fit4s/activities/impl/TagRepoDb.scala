@@ -3,11 +3,13 @@ package fit4s.activities.impl
 import cats.data.NonEmptyList
 import cats.effect.Sync
 import cats.syntax.all._
-import doobie._
-import doobie.implicits._
-import fit4s.activities.{ActivityQuery, TagRepo}
+
 import fit4s.activities.data.{Page, TagName}
 import fit4s.activities.records.{RActivityTag, RTag}
+import fit4s.activities.{ActivityQuery, TagRepo}
+
+import doobie._
+import doobie.implicits._
 
 final class TagRepoDb[F[_]: Sync](xa: Transactor[F]) extends TagRepo[F] {
   def linkTags(

@@ -1,8 +1,8 @@
 package fit4s.activities.impl
 
-import fit4s.profile.types.{DateTime, Sport}
-
 import java.time.{Instant, ZoneId}
+
+import fit4s.profile.types.{DateTime, Sport}
 
 object ActivityName {
   private val timeMap: Int => String = {

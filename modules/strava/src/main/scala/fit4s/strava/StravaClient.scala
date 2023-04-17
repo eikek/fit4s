@@ -1,15 +1,18 @@
 package fit4s.strava
 
+import java.time.Instant
+
+import scala.concurrent.duration.FiniteDuration
+
 import cats.effect._
 import cats.syntax.all._
-import fit4s.strava.data._
-import fit4s.strava.impl.{Cache, DefaultStravaClient}
 import fs2._
 import fs2.io.file.Path
-import org.http4s.client.Client
 
-import java.time.Instant
-import scala.concurrent.duration.FiniteDuration
+import fit4s.strava.data._
+import fit4s.strava.impl.{Cache, DefaultStravaClient}
+
+import org.http4s.client.Client
 
 trait StravaClient[F[_]] {
   def initAuth(

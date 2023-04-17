@@ -2,6 +2,7 @@ package fit4s
 
 import fit4s.profile.FieldValue
 import fit4s.profile.types.TypedValue
+
 import scodec.Err
 
 sealed trait FieldDecodeResult {

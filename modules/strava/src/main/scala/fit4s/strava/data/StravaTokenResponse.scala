@@ -1,10 +1,10 @@
 package fit4s.strava.data
 
+import java.time.{Duration, Instant}
+
 import io.circe.generic.extras.Configuration
 import io.circe.generic.extras.semiauto.{deriveConfiguredDecoder, deriveConfiguredEncoder}
 import io.circe.{Decoder, Encoder, Json}
-
-import java.time.{Duration, Instant}
 
 final case class StravaTokenResponse(
     tokenType: String,

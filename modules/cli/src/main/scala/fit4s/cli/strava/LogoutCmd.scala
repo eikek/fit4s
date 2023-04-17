@@ -1,6 +1,7 @@
 package fit4s.cli.strava
 
 import cats.effect.{ExitCode, IO}
+
 import fit4s.cli.{CliConfig, SharedOpts}
 
 object LogoutCmd extends SharedOpts {

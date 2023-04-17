@@ -1,17 +1,19 @@
 package fit4s.cli.activity
 
+import java.time.ZoneId
+
 import cats.effect._
 import cats.syntax.all._
-import com.monovore.decline.Opts
+
 import fit4s.activities.ActivityQuery
 import fit4s.activities.data.{ActivityListResult, Page}
 import fit4s.activities.records.RActivitySession
 import fit4s.cli.FormatDefinition._
 import fit4s.cli._
 import fit4s.profile.types.Sport
-import io.circe.syntax.EncoderOps
 
-import java.time.ZoneId
+import com.monovore.decline.Opts
+import io.circe.syntax.EncoderOps
 
 object ListCmd extends SharedOpts {
 

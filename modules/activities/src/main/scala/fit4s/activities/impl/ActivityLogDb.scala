@@ -1,17 +1,19 @@
 package fit4s.activities.impl
 
+import java.time.ZoneId
+
 import cats.data.NonEmptyList
 import cats.effect._
 import cats.syntax.all._
-import doobie.implicits._
-import doobie.{Query => _, _}
-import fit4s.activities._
-import fit4s.activities.data._
-import fit4s.activities.records.{RActivity, RActivityLocation, RActivityTag, RTag}
 import fs2.Stream
 import fs2.io.file.{Files, Path}
 
-import java.time.ZoneId
+import fit4s.activities._
+import fit4s.activities.data._
+import fit4s.activities.records._
+
+import doobie.implicits._
+import doobie.{Query => _, _}
 
 final class ActivityLogDb[F[_]: Async: Files](
     jdbcConfig: JdbcConfig,

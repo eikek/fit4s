@@ -2,11 +2,13 @@ package fit4s.activities
 
 import cats.Show
 import cats.syntax.all._
+
 import fit4s.ActivityReader
 import fit4s.activities.ImportResult.Failure
 import fit4s.activities.ImportResult.FailureReason.{ActivityDecodeError, FitReadError}
 import fit4s.activities.data.ActivityId
 import fit4s.data.FileId
+
 import scodec.Err
 
 trait ImportResult[+A] extends Product {

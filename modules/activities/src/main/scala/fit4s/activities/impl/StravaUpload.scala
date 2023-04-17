@@ -2,10 +2,12 @@ package fit4s.activities.impl
 
 import cats.effect._
 import cats.syntax.all._
+import fs2.io.file.Path
+
 import fit4s.activities.data._
 import fit4s.strava.StravaClient
 import fit4s.strava.data.{StravaAccessToken, StravaActivityId, StravaFileType}
-import fs2.io.file.Path
+
 import org.http4s.client.dsl.Http4sClientDsl
 
 final class StravaUpload[F[_]: Async](

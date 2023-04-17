@@ -1,12 +1,14 @@
 package fit4s.activities.records
 
+import java.time.{Duration, Instant}
+
 import cats.effect.kernel.Clock
-import doobie._
-import doobie.implicits._
+
 import fit4s.activities.records.DoobieImplicits._
 import fit4s.strava.data._
 
-import java.time.{Duration, Instant}
+import doobie._
+import doobie.implicits._
 
 final case class RStravaToken(
     id: StravaTokenId,

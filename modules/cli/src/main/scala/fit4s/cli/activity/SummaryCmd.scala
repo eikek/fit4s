@@ -1,20 +1,22 @@
 package fit4s.cli.activity
 
+import java.time.{Duration, ZoneId}
+
 import cats.Show
 import cats.effect.{Clock, ExitCode, IO}
 import cats.syntax.all._
-import com.monovore.decline.Opts
+
 import fit4s.activities.ActivityQuery
 import fit4s.activities.data.{ActivitySessionSummary, Page}
 import fit4s.cli.FormatDefinition._
 import fit4s.cli._
 import fit4s.data._
 import fit4s.profile.types.Sport
+
+import com.monovore.decline.Opts
 import io.circe.generic.semiauto.deriveEncoder
 import io.circe.syntax._
 import io.circe.{Encoder, Json}
-
-import java.time.{Duration, ZoneId}
 
 object SummaryCmd extends SharedOpts {
 

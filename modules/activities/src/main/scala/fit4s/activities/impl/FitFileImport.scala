@@ -1,17 +1,19 @@
 package fit4s.activities.impl
 
+import java.time.{Instant, ZoneId}
+
 import cats.effect._
 import cats.syntax.all._
-import doobie._
-import fit4s.activities.ImportResult
-import fit4s.activities.data.{ActivityId, LocationId, TagId}
-import fit4s.{ActivityReader, FitFile}
 import fs2.compression.Compression
 import fs2.io.file.{Files, Path}
 import fs2.{Chunk, Stream}
-import scodec.Attempt
 
-import java.time.{Instant, ZoneId}
+import fit4s.activities.ImportResult
+import fit4s.activities.data.{ActivityId, LocationId, TagId}
+import fit4s.{ActivityReader, FitFile}
+
+import doobie._
+import scodec.Attempt
 
 object FitFileImport {
 

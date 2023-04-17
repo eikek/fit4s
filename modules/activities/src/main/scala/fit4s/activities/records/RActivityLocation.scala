@@ -3,11 +3,13 @@ package fit4s.activities.records
 import cats.effect._
 import cats.syntax.all._
 import fs2.io.file.Path
+import fs2.{Chunk, Stream}
+
+import fit4s.activities.data.{LocationId, Page}
+import fit4s.activities.records.DoobieImplicits._
+
 import doobie._
 import doobie.implicits._
-import DoobieImplicits._
-import fs2.{Chunk, Stream}
-import fit4s.activities.data.{LocationId, Page}
 
 final case class RActivityLocation(id: LocationId, location: Path)
 

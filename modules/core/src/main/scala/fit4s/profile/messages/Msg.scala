@@ -1,12 +1,13 @@
 package fit4s.profile.messages
 
+import java.util.concurrent.atomic.AtomicReference
+
 import fit4s.FieldDefinition
 import fit4s.profile.FieldValue
 import fit4s.profile.types._
+
 import scodec.Codec
 import scodec.bits.ByteOrdering
-
-import java.util.concurrent.atomic.AtomicReference
 
 abstract class Msg {
   private[this] val fields: AtomicReference[Map[Int, Msg.Field[TypedValue[_]]]] =

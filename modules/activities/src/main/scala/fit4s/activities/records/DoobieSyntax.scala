@@ -1,9 +1,11 @@
 package fit4s.activities.records
 
 import cats.Foldable
+
+import fit4s.activities.data.Page
+
 import doobie._
 import doobie.implicits._
-import fit4s.activities.data.Page
 
 trait DoobieSyntax {
 

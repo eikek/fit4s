@@ -1,17 +1,19 @@
 package fit4s.cli
 
+import java.time.{Duration, ZoneId}
+
 import cats.Show
 import cats.syntax.all._
+import fs2.io.file.Path
+
 import fit4s.activities.data._
 import fit4s.cli.FormatDefinition._
 import fit4s.data._
 import fit4s.profile.types._
-import fs2.io.file.Path
+
 import io.circe._
 import io.circe.generic.semiauto.deriveEncoder
 import io.circe.syntax._
-
-import java.time.{Duration, ZoneId}
 
 trait DataJsonEncoder {
   def typedValueEncoder[A <: TypedValue[_]]: Encoder[A] =

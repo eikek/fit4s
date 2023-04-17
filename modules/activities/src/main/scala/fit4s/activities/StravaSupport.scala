@@ -1,23 +1,26 @@
 package fit4s.activities
 
+import java.time.{Instant, ZoneId}
+
+import scala.concurrent.duration.FiniteDuration
+
 import cats.data.NonEmptyList
 import cats.effect._
 import cats.kernel.Monoid
 import cats.syntax.all._
-import doobie.util.transactor.Transactor
+import fs2.Stream
+import fs2.io.file.Path
+
 import fit4s.activities.StravaSupport.PublishResult
 import fit4s.activities.data._
 import fit4s.activities.impl._
 import fit4s.activities.records.RStravaToken
 import fit4s.geocode.ReverseLookup
-import fit4s.strava.data.{StravaActivity, StravaActivityId, StravaAthlete, StravaGear}
+import fit4s.strava.data._
 import fit4s.strava.{StravaAppCredentials, StravaClient, StravaClientConfig}
-import fs2.Stream
-import fs2.io.file.Path
-import org.http4s.client.Client
 
-import java.time.{Instant, ZoneId}
-import scala.concurrent.duration.FiniteDuration
+import doobie.util.transactor.Transactor
+import org.http4s.client.Client
 
 trait StravaSupport[F[_]] {
   def unlink(aq: ActivityQuery): F[Int]

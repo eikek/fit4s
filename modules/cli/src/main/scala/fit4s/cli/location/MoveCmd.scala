@@ -2,11 +2,13 @@ package fit4s.cli.location
 
 import cats.effect._
 import cats.syntax.all._
-import com.monovore.decline.Opts
+import fs2.io.file.Path
+
 import fit4s.activities.LocationRepo.MoveResult
 import fit4s.activities.data.LocationId
 import fit4s.cli.{CliConfig, SharedOpts}
-import fs2.io.file.Path
+
+import com.monovore.decline.Opts
 
 object MoveCmd extends SharedOpts {
 

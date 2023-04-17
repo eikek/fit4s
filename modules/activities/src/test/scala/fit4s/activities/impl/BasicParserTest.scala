@@ -1,17 +1,19 @@
 package fit4s.activities.impl
 
+import java.time._
+import java.time.temporal.ChronoUnit
+
 import cats.data.NonEmptyList
 import cats.syntax.all._
+
 import fit4s.activities.data.TagName
 import fit4s.data.{DeviceProduct, Distance}
 import fit4s.profile.types.{Sport, SubSport}
+
 import munit.FunSuite
 import org.scalacheck.Prop.forAll
 import org.scalacheck.Test
 import org.scalacheck.Test.Parameters
-
-import java.time.temporal.ChronoUnit
-import java.time.{Duration, Instant, LocalDateTime, ZoneId}
 
 class BasicParserTest extends FunSuite {
   val current = Instant.parse("2023-04-02T10:05:00Z")

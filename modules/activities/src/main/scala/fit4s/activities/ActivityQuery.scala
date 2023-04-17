@@ -1,13 +1,14 @@
 package fit4s.activities
 
+import java.time.{Duration, Instant}
+
 import cats.data.{NonEmptyList => Nel}
+import fs2.io.file.Path
+
 import fit4s.activities.ActivityQuery.Condition
 import fit4s.activities.data.{ActivityId, Page, TagName}
 import fit4s.data.{DeviceProduct, Distance}
 import fit4s.profile.types.{Sport, SubSport}
-import fs2.io.file.Path
-
-import java.time.{Duration, Instant}
 
 final case class ActivityQuery(condition: Option[Condition], page: Page)
 

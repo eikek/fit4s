@@ -1,13 +1,14 @@
 package fit4s.activities.records
 
-import doobie._
-import doobie.implicits._
+import java.time.{Duration, Instant}
+
 import fit4s.activities.data.{ActivityLapId, ActivitySessionId}
 import fit4s.activities.records.DoobieImplicits._
 import fit4s.data._
 import fit4s.profile.types._
 
-import java.time.{Duration, Instant}
+import doobie._
+import doobie.implicits._
 
 final case class RActivityLap(
     id: ActivityLapId,

@@ -5,9 +5,10 @@ import fit4s.data.Nel
 import fit4s.profile.FieldValue
 import fit4s.profile.types.BaseTypedValue.{FloatBaseValue, LongBaseValue, StringBaseValue}
 import fit4s.profile.types._
+
+import io.circe._
 import io.circe.generic.semiauto._
 import io.circe.syntax._
-import io.circe.{Codec, Decoder, Encoder, Json}
 import scodec.bits.ByteOrdering
 
 trait JsonEncoder {

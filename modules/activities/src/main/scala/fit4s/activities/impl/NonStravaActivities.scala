@@ -1,16 +1,18 @@
 package fit4s.activities.impl
 
+import java.time.Instant
+
 import cats.syntax.all._
-import doobie._
-import doobie.implicits._
+import fs2.Stream
+import fs2.io.file.Path
+
 import fit4s.activities.ActivityQuery
 import fit4s.activities.data.{ActivityId, UnlinkedStravaStats}
 import fit4s.activities.records.DoobieImplicits._
 import fit4s.activities.records._
-import fs2.Stream
-import fs2.io.file.Path
 
-import java.time.Instant
+import doobie._
+import doobie.implicits._
 
 object NonStravaActivities {
 

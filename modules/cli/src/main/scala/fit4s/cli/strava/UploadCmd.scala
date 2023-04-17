@@ -3,13 +3,15 @@ package fit4s.cli.strava
 import cats.data.NonEmptyList
 import cats.effect._
 import cats.syntax.all._
-import com.monovore.decline.Opts
+
 import fit4s.activities.ActivityQuery.Condition
 import fit4s.activities.ActivityQuery.Condition.TagAnyMatch
 import fit4s.activities.data.{Page, TagName}
 import fit4s.activities.{ActivityLog, ActivityQuery}
-import fit4s.cli.{ActivitySelection, CliConfig, CliError, SharedOpts}
+import fit4s.cli._
 import fit4s.strava.StravaAppCredentials
+
+import com.monovore.decline.Opts
 
 object UploadCmd extends SharedOpts {
 

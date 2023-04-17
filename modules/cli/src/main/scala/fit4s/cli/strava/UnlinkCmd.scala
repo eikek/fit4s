@@ -2,10 +2,12 @@ package fit4s.cli.strava
 
 import cats.effect._
 import cats.syntax.all._
-import com.monovore.decline.Opts
+
 import fit4s.activities.ActivityQuery
 import fit4s.activities.data.Page
 import fit4s.cli.{ActivitySelection, CliConfig, SharedOpts}
+
+import com.monovore.decline.Opts
 
 object UnlinkCmd extends SharedOpts {
 

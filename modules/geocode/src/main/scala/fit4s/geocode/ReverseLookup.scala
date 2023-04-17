@@ -2,7 +2,9 @@ package fit4s.geocode
 
 import cats.Applicative
 import cats.effect.Async
+
 import fit4s.data.Position
+
 import org.http4s.client.Client
 
 trait ReverseLookup[F[_]] {

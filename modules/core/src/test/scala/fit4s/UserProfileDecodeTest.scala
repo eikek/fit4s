@@ -5,6 +5,7 @@ import fit4s.data.Distance
 import fit4s.json.JsonCodec
 import fit4s.profile.messages.UserProfileMsg
 import fit4s.profile.types.Gender
+
 import munit.FunSuite
 import scodec.bits.ByteVector
 

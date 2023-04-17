@@ -1,11 +1,14 @@
 package fit4s.cli.strava
 
+import java.util.concurrent.TimeUnit
+
+import scala.concurrent.duration.FiniteDuration
+
 import cats.effect._
-import com.monovore.decline.Opts
+
 import fit4s.cli.{CliConfig, SharedOpts}
 
-import java.util.concurrent.TimeUnit
-import scala.concurrent.duration.FiniteDuration
+import com.monovore.decline.Opts
 
 object AuthorizeCmd extends SharedOpts {
 

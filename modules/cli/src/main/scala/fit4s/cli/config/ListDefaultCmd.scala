@@ -1,9 +1,11 @@
 package fit4s.cli.config
 
 import cats.effect._
-import com.monovore.decline.Opts
-import fit4s.cli.{ConfigValues, OutputFormat, SharedOpts}
 import fs2.Stream
+
+import fit4s.cli.{ConfigValues, OutputFormat, SharedOpts}
+
+import com.monovore.decline.Opts
 
 @annotation.nowarn
 object ListDefaultCmd extends SharedOpts {

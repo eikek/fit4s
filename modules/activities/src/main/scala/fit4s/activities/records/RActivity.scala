@@ -1,15 +1,17 @@
 package fit4s.activities.records
 
-import fit4s.activities.data.{ActivityId, LocationId}
-import doobie.implicits._
-import doobie._
-import DoobieImplicits._
+import java.time.{Duration, Instant, ZoneId}
+
 import cats.data.NonEmptyList
 import cats.effect.kernel.Clock
+
+import fit4s.activities.data.{ActivityId, LocationId}
 import fit4s.activities.impl.ActivityName
+import fit4s.activities.records.DoobieImplicits._
 import fit4s.data.{DeviceProduct, FileId}
 
-import java.time.{Duration, Instant, ZoneId}
+import doobie._
+import doobie.implicits._
 
 case class RActivity(
     id: ActivityId,

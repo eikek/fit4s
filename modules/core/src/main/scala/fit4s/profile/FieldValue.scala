@@ -1,12 +1,12 @@
 package fit4s.profile
 
+import java.time.Duration
+
 import fit4s.data._
 import fit4s.profile.messages.Msg
 import fit4s.profile.types.BaseTypedValue.LongBaseValue
 import fit4s.profile.types._
 import fit4s.util._
-
-import java.time.Duration
 
 final case class FieldValue[A <: TypedValue[_]](
     field: Msg.FieldAttributes,

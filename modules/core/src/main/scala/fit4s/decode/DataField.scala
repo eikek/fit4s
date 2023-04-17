@@ -4,8 +4,9 @@ import fit4s.decode.DataField.{KnownField, UnknownField}
 import fit4s.profile.messages.Msg
 import fit4s.profile.types.TypedValue
 import fit4s.{FieldDecodeResult, FieldDefinition}
-import scodec.{Attempt, Decoder}
+
 import scodec.bits.{ByteOrdering, ByteVector}
+import scodec.{Attempt, Decoder}
 
 trait DataField {
   def local: FieldDefinition

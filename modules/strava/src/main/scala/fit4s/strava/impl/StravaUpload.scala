@@ -1,11 +1,15 @@
 package fit4s.strava.impl
 
+import scala.concurrent.duration._
+
 import cats.effect._
 import cats.syntax.all._
-import fit4s.strava.StravaClientConfig
-import fit4s.strava.data._
 import fs2.Stream
 import fs2.io.file.Path
+
+import fit4s.strava.StravaClientConfig
+import fit4s.strava.data._
+
 import io.circe.Json
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.client.Client
@@ -13,8 +17,6 @@ import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.headers.`Content-Type`
 import org.http4s.multipart.{Multiparts, Part}
 import org.http4s.{MediaType, Method}
-
-import scala.concurrent.duration._
 
 final class StravaUpload[F[_]: Async](config: StravaClientConfig, client: Client[F])
     extends Http4sClientDsl[F] {

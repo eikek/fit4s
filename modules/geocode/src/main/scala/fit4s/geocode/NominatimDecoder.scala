@@ -1,6 +1,7 @@
 package fit4s.geocode
 
 import fit4s.data.Semicircle
+
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 

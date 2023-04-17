@@ -1,6 +1,7 @@
 package fit4s.strava.data
 
 import cats.data.NonEmptyList
+
 import fit4s.profile.types.Sport
 
 sealed trait StravaSportType extends Product {

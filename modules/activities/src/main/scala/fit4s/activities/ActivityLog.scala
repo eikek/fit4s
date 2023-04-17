@@ -1,19 +1,21 @@
 package fit4s.activities
 
+import java.time.ZoneId
+
 import cats.data.NonEmptyList
 import cats.effect._
-import doobie.util.ExecutionContexts
-import doobie.util.transactor.Transactor
+import fs2._
+import fs2.io.file.Path
+
 import fit4s.activities.data._
 import fit4s.activities.impl.{ActivityLogDb, GeoLookupDb}
 import fit4s.geocode.{NominatimConfig, ReverseLookup}
 import fit4s.strava.StravaClientConfig
-import fs2._
-import fs2.io.file.Path
+
+import doobie.util.ExecutionContexts
+import doobie.util.transactor.Transactor
 import org.h2.jdbcx.JdbcConnectionPool
 import org.http4s.ember.client.EmberClientBuilder
-
-import java.time.ZoneId
 
 trait ActivityLog[F[_]] {
 

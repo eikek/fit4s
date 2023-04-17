@@ -1,9 +1,10 @@
 package fit4s.profile.types
 
-import scodec.Codec
-import scodec.codecs._
-import scodec.bits._
 import fit4s.util.Codecs._
+
+import scodec.Codec
+import scodec.bits._
+import scodec.codecs._
 
 trait BaseTypeCodec[T <: FitBaseType, R] {
   def codec(byteOrdering: ByteOrdering): Codec[R]

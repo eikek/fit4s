@@ -5,6 +5,7 @@ import fit4s.activities.records._
 import fit4s.cli.DataJsonEncoder._
 import fit4s.geocode.{BoundingBox, NominatimOsmId, NominatimPlaceId}
 import fit4s.profile.types.LapTrigger
+
 import io.circe.generic.semiauto.deriveEncoder
 import io.circe.syntax._
 import io.circe.{Encoder, Json, KeyEncoder}

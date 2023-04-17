@@ -2,12 +2,14 @@ package fit4s.cli.location
 
 import cats.effect._
 import cats.syntax.all._
-import io.circe.syntax._
-import com.monovore.decline.Opts
 import fs2.Stream
+
 import fit4s.activities.data.Page
-import fit4s.cli.{CliConfig, OutputFormat, SharedOpts}
 import fit4s.cli.RecordJsonEncoder._
+import fit4s.cli.{CliConfig, OutputFormat, SharedOpts}
+
+import com.monovore.decline.Opts
+import io.circe.syntax._
 
 object ListCmd extends SharedOpts {
 

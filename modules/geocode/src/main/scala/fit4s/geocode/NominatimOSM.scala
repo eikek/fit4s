@@ -1,17 +1,20 @@
 package fit4s.geocode
 
+import java.util.concurrent.TimeUnit
+
+import scala.concurrent.duration.{Duration, FiniteDuration}
+
 import cats.effect._
 import cats.syntax.all._
+
 import fit4s.data.Position
 import fit4s.geocode.NominatimOSM.State
+
 import org.http4s.Method.GET
+import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
-import org.http4s.circe.CirceEntityDecoder._
 import org.http4s.ember.client.EmberClientBuilder
-
-import java.util.concurrent.TimeUnit
-import scala.concurrent.duration.{Duration, FiniteDuration}
 
 final class NominatimOSM[F[_]: Async](
     client: Client[F],

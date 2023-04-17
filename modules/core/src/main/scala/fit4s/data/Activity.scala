@@ -1,11 +1,11 @@
 package fit4s.data
 
+import java.time.Duration
+
 import fit4s.FitMessage.DataMessage
 import fit4s.profile.messages.ActivityMsg
-import fit4s.profile.types.{DateTime, LocalDateTime}
 import fit4s.profile.types
-
-import java.time.Duration
+import fit4s.profile.types.{DateTime, LocalDateTime}
 
 final case class Activity(
     timestamp: DateTime,

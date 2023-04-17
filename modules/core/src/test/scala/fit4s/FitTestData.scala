@@ -1,9 +1,10 @@
 package fit4s
 
-import cats.effect.IO
-
 import java.net.URL
+
+import cats.effect.IO
 import fs2._
+
 import scodec.bits.ByteVector
 
 object FitTestData {

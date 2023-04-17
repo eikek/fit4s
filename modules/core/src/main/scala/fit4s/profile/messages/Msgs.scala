@@ -1,8 +1,8 @@
 package fit4s.profile.messages
 
-import fit4s.profile.types.MesgNum
-
 import java.util.concurrent.atomic.AtomicReference
+
+import fit4s.profile.types.MesgNum
 
 abstract protected class Msgs {
 

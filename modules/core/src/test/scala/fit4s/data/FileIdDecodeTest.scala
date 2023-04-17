@@ -1,14 +1,15 @@
 package fit4s.data
 
+import scala.util.Random
+
 import fit4s.FitMessage
 import fit4s.FitMessage.DataMessage
 import fit4s.json.JsonCodec
 import fit4s.profile.messages.FileIdMsg
-import fit4s.profile.types.{DateTime, File, GarminProduct, Manufacturer}
+import fit4s.profile.types._
+
 import munit.FunSuite
 import scodec.bits.ByteVector
-
-import scala.util.Random
 
 class FileIdDecodeTest extends FunSuite with JsonCodec {
 

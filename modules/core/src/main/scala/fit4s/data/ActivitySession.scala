@@ -1,11 +1,12 @@
 package fit4s.data
 
+import java.time.Duration
+
+import scala.math.Ordering.Implicits._
+
 import fit4s.FitMessage.DataMessage
 import fit4s.profile.messages.SessionMsg
-import fit4s.profile.types.{DateTime, Sport, SubSport, SwimStroke}
-
-import java.time.Duration
-import scala.math.Ordering.Implicits._
+import fit4s.profile.types._
 
 final case class ActivitySession(
     sport: Sport,

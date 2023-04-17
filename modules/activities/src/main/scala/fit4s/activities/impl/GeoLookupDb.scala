@@ -3,13 +3,15 @@ package fit4s.activities.impl
 import cats.effect._
 import cats.effect.std.Semaphore
 import cats.syntax.all._
-import doobie._
-import doobie.implicits._
+
 import fit4s.activities.GeoLookup
 import fit4s.activities.data.GeoPlaceId
 import fit4s.activities.records.RGeoPlace
 import fit4s.data.Position
 import fit4s.geocode.{Place, ReverseLookup}
+
+import doobie._
+import doobie.implicits._
 
 class GeoLookupDb[F[_]: Sync](
     reverseLookup: ReverseLookup[F],

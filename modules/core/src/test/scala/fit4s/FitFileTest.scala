@@ -1,10 +1,12 @@
 package fit4s
 
-import fit4s.profile.messages.{FileIdMsg, HrMsg}
-import munit.CatsEffectSuite
-
 import java.util.concurrent.TimeUnit
+
 import scala.concurrent.duration.FiniteDuration
+
+import fit4s.profile.messages.{FileIdMsg, HrMsg}
+
+import munit.CatsEffectSuite
 
 class FitFileTest extends CatsEffectSuite {
   override def munitTimeout = FiniteDuration(3, TimeUnit.MINUTES)

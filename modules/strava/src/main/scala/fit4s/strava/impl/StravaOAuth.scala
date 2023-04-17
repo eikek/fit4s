@@ -1,12 +1,18 @@
 package fit4s.strava.impl
 
+import java.net.ServerSocket
+
+import scala.concurrent.duration._
+
 import cats.data.OptionT
 import cats.effect._
 import cats.effect.std.Random
 import cats.syntax.all._
-import com.comcast.ip4s.{Host, Port}
+
 import fit4s.strava.data._
 import fit4s.strava.{StravaAppCredentials, StravaClientConfig}
+
+import com.comcast.ip4s.{Host, Port}
 import org.http4s.Method.POST
 import org.http4s.circe.CirceEntityCodec._
 import org.http4s.client.Client
@@ -15,9 +21,6 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.{HttpRoutes, Response, UrlForm}
 import scodec.bits.ByteVector
-
-import java.net.ServerSocket
-import scala.concurrent.duration._
 
 final class StravaOAuth[F[_]: Async](
     config: StravaClientConfig,

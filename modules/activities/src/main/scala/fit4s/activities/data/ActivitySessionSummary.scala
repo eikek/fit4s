@@ -1,9 +1,9 @@
 package fit4s.activities.data
 
+import java.time.{Duration, Instant}
+
 import fit4s.data._
 import fit4s.profile.types._
-
-import java.time.{Duration, Instant}
 
 final case class ActivitySessionSummary(
     sport: Sport,

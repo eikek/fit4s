@@ -1,12 +1,14 @@
 package fit4s.activities.records
 
 import cats.syntax.all._
+
+import fit4s.activities.data.{CountryCode, GeoPlaceId, PostCode}
+import fit4s.activities.records.DoobieImplicits._
+import fit4s.data.Position
+import fit4s.geocode._
+
 import doobie._
 import doobie.implicits._
-import DoobieImplicits._
-import fit4s.activities.data.{CountryCode, GeoPlaceId, PostCode}
-import fit4s.data.Position
-import fit4s.geocode.{BoundingBox, NominatimOsmId, NominatimPlaceId, Place}
 
 final case class RGeoPlace(
     id: GeoPlaceId,

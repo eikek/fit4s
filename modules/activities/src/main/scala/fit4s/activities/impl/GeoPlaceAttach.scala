@@ -2,12 +2,14 @@ package fit4s.activities.impl
 
 import cats.effect._
 import cats.syntax.all._
-import doobie._
-import doobie.implicits._
-import fit4s.activities.{GeoLookup, ImportResult}
+
 import fit4s.activities.data._
 import fit4s.activities.records.{RActivityGeoPlace, RActivitySession}
+import fit4s.activities.{GeoLookup, ImportResult}
 import fit4s.data.Position
+
+import doobie._
+import doobie.implicits._
 
 final class GeoPlaceAttach[F[_]: Async](xa: Transactor[F], geoLookup: GeoLookup[F]) {
 

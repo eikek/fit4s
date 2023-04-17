@@ -4,12 +4,14 @@ import cats.Monoid
 import cats.data.NonEmptyList
 import cats.effect.{ExitCode, IO}
 import cats.syntax.all._
-import com.monovore.decline.Opts
+import fs2.io.file.{Files, Path}
+
 import fit4s.ActivityReader
 import fit4s.activities.data.{ActivityId, TagName}
 import fit4s.activities.{ImportCallback, ImportResult}
 import fit4s.cli.{CliConfig, CliError, SharedOpts}
-import fs2.io.file.{Files, Path}
+
+import com.monovore.decline.Opts
 
 object ImportCmd extends SharedOpts {
   private val maxConcurrent =

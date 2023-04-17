@@ -1,8 +1,10 @@
 package fit4s.activities.impl
 
 import cats.effect.IO
-import doobie.implicits._
+
 import fit4s.activities.{DatabaseTest, FlywayMigrate}
+
+import doobie.implicits._
 import org.scalacheck.Prop.forAll
 import org.scalacheck.Test
 import org.scalacheck.Test.Parameters

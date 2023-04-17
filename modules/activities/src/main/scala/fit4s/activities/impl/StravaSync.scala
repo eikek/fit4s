@@ -3,14 +3,16 @@ package fit4s.activities.impl
 import cats.data.NonEmptyList
 import cats.effect._
 import cats.syntax.all._
-import doobie._
-import doobie.implicits._
+import fs2.Chunk
+
 import fit4s.activities.StravaSupport.PublishResult
 import fit4s.activities.data._
-import fit4s.activities.records.{RActivitySession, RActivityStrava, RActivityTag, RTag}
+import fit4s.activities.records._
 import fit4s.profile.types.Sport
 import fit4s.strava.data.{StravaActivity, StravaActivityId, StravaGear}
-import fs2.Chunk
+
+import doobie._
+import doobie.implicits._
 
 final class StravaSync[F[_]: Async](
     xa: Transactor[F],
