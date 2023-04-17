@@ -10,7 +10,7 @@ import fit4s.activities.records.DoobieImplicits._
 final case class RActivityStrava(
     id: ActivityStravaId,
     activityId: ActivityId,
-    stravaId: StravaExternalId
+    stravaId: StravaActivityId
 )
 
 object RActivityStrava {
@@ -35,13 +35,13 @@ object RActivityStrava {
   def insert(r: RActivityStrava): ConnectionIO[Int] =
     insert(r.activityId, r.stravaId)
 
-  def insert(activityId: ActivityId, stravaId: StravaExternalId): ConnectionIO[Int] =
+  def insert(activityId: ActivityId, stravaId: StravaActivityId): ConnectionIO[Int] =
     sql"INSERT INTO $table ($columnsNoId) VALUES (${activityId}, ${stravaId})".update.run
 
   def removeForActivity(activityId: ActivityId): ConnectionIO[Int] =
     sql"DELETE FROM $table WHERE activity_id = $activityId".update.run
 
-  def removeForStravaId(stravaId: StravaExternalId): ConnectionIO[Int] =
+  def removeForStravaId(stravaId: StravaActivityId): ConnectionIO[Int] =
     sql"DELETE FROM $table WHERE strava_id = $stravaId".update.run
 
   def removeAll(query: ActivityQuery): ConnectionIO[Int] = {
@@ -49,12 +49,12 @@ object RActivityStrava {
     sql"DELETE FROM $table WHERE activity_id in ($subq) ${query.page.asFragment}".update.run
   }
 
-  def findByActivityId(id: ActivityId): ConnectionIO[Option[StravaExternalId]] =
+  def findByActivityId(id: ActivityId): ConnectionIO[Option[StravaActivityId]] =
     sql"SELECT strava_id FROM $table WHERE activity_id = $id"
-      .query[StravaExternalId]
+      .query[StravaActivityId]
       .option
 
-  def findByStravaId(id: StravaExternalId): ConnectionIO[Option[RActivityStrava]] =
+  def findByStravaId(id: StravaActivityId): ConnectionIO[Option[RActivityStrava]] =
     sql"SELECT $columnsWithId FROM $table WHERE strava_id = $id "
       .query[RActivityStrava]
       .option

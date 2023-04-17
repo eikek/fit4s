@@ -171,7 +171,7 @@ final class StravaImpl[F[_]: Async](
       bikeTagPrefix: Option[TagName],
       shoeTagPrefix: Option[TagName],
       commuteTag: Option[TagName]
-  ): Stream[F, StravaExternalId] = for {
+  ): Stream[F, StravaActivityId] = for {
     athlete <- Stream.eval(getAthlete(cfg))
     getToken = nonInteractiveOAuth(cfg)
       .map(_.toRight(new Exception(s"No authentication token available.")))

@@ -13,7 +13,7 @@ final case class StravaActivity(
     name: String,
     distance: Distance,
     sportType: String,
-    id: StravaExternalId,
+    id: StravaActivityId,
     startDate: Instant,
     trainer: Boolean,
     commute: Boolean,

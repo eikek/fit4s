@@ -4,8 +4,8 @@ import cats.effect.IO
 import doobie.implicits._
 import fit4s.activities.records.{
   RActivityLocation,
-  RActivitySessionData,
-  RActivitySession
+  RActivitySession,
+  RActivitySessionData
 }
 import fit4s.activities.{DatabaseTest, FlywayMigrate}
 import fit4s.{ActivityReader, FitFile, FitTestData}

@@ -152,7 +152,7 @@ object RecordJsonEncoder {
   implicit def tagEncoder: Encoder[RTag] =
     Encoder.encodeString.contramap(_.name.name)
 
-  implicit val stravaIdEncoder: Encoder[StravaExternalId] =
+  implicit val stravaIdEncoder: Encoder[StravaActivityId] =
     Encoder.encodeLong.contramap(_.id)
 
   implicit val triggerEncoder: Encoder[LapTrigger] =

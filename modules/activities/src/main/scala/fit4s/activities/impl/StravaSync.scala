@@ -21,11 +21,11 @@ final class StravaSync[F[_]: Async](
   private val linked = PublishResult.Success.empty.copy(linked = 1)
   private val notFound = PublishResult.Success.empty.copy(notFound = 1)
 
-  private def ambiguous(strava: StravaExternalId, activities: NonEmptyList[ActivityId]) =
+  private def ambiguous(strava: StravaActivityId, activities: NonEmptyList[ActivityId]) =
     PublishResult.Success.empty
       .copy(ambiguous = List(PublishResult.Ambiguous(strava, activities)))
 
-  private def alreadyLinked(activityId: ActivityId, stravaId: StravaExternalId) =
+  private def alreadyLinked(activityId: ActivityId, stravaId: StravaActivityId) =
     PublishResult.Success.empty
       .copy(alreadyLinked = List(PublishResult.AlreadyLinked(activityId, stravaId)))
 
@@ -81,7 +81,7 @@ final class StravaSync[F[_]: Async](
           }
     }
 
-  def link(local: ActivityId, strava: StravaExternalId): F[PublishResult.Success] =
+  def link(local: ActivityId, strava: StravaActivityId): F[PublishResult.Success] =
     RActivityStrava.findByActivityId(local).transact(xa).flatMap {
       case Some(otherStravaId) => alreadyLinked(local, otherStravaId).pure[F]
       case None =>

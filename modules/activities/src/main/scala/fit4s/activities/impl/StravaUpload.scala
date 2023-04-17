@@ -29,7 +29,7 @@ final class StravaUpload[F[_]: Async](
       name: String,
       description: Option[String],
       commute: Boolean
-  ): F[StravaExternalId] =
+  ): F[StravaActivityId] =
     for {
       token <- getToken
       credentials = Credentials.Token(AuthScheme.Bearer, token.accessToken)
@@ -121,7 +121,7 @@ final class StravaUpload[F[_]: Async](
 
     } yield result
 
-  def updateActivity(id: StravaExternalId, data: StravaUpdatableActivity): F[Unit] =
+  def updateActivity(id: StravaActivityId, data: StravaUpdatableActivity): F[Unit] =
     for {
       token <- getToken
       credentials = Credentials.Token(AuthScheme.Bearer, token.accessToken)

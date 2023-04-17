@@ -9,7 +9,7 @@ final case class ActivityDetailResult(
     location: RActivityLocation,
     sessions: NonEmptyList[RActivitySession],
     tags: Vector[RTag],
-    stravaId: Option[StravaExternalId],
+    stravaId: Option[StravaActivityId],
     laps: Map[ActivitySessionId, List[RActivityLap]],
     startPlace: Map[ActivitySessionId, RGeoPlace],
     endPlace: Map[ActivitySessionId, RGeoPlace],

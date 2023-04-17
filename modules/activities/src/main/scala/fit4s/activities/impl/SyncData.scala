@@ -3,7 +3,7 @@ package fit4s.activities.impl
 import cats.syntax.all._
 import doobie._
 import doobie.implicits._
-import fit4s.activities.records.{RActivityLocation, RActivity}
+import fit4s.activities.records.{RActivity, RActivityLocation}
 
 import java.time.Instant
 

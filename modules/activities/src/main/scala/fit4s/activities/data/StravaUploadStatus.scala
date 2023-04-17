@@ -9,7 +9,7 @@ final case class StravaUploadStatus(
     externalId: Option[String],
     error: Option[String],
     status: String,
-    activityId: Option[StravaExternalId]
+    activityId: Option[StravaActivityId]
 )
 
 object StravaUploadStatus {

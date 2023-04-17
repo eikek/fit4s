@@ -3,7 +3,7 @@ package fit4s.activities.impl
 import cats.effect.{Async, Resource}
 import cats.syntax.all._
 import com.github.tototoshi.csv.CSVReader
-import fit4s.activities.data.StravaExternalId
+import fit4s.activities.data.StravaActivityId
 import fs2.io.file.{Files, Path}
 import fs2.Stream
 
@@ -14,7 +14,7 @@ object StravaExportExtract {
       fitFile: Path,
       relativePath: String,
       exportFile: Path,
-      id: Option[StravaExternalId],
+      id: Option[StravaActivityId],
       name: Option[String],
       description: Option[String],
       bike: Option[String],
@@ -74,7 +74,7 @@ object StravaExportExtract {
           fitFile = dir / fn,
           relativePath = fn,
           exportFile = dir,
-          id = m.get("Activity ID").flatMap(_.toLongOption).map(StravaExternalId.apply),
+          id = m.get("Activity ID").flatMap(_.toLongOption).map(StravaActivityId.apply),
           name = m.get("Activity Name").asNonBlank,
           description = m.get("Activity Description").asNonBlank,
           bike = bike.asNonBlank,

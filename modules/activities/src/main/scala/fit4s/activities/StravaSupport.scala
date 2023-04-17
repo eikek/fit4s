@@ -68,7 +68,7 @@ trait StravaSupport[F[_]] {
       bikeTagPrefix: Option[TagName],
       shoeTagPrefix: Option[TagName],
       commuteTag: Option[TagName]
-  ): Stream[F, StravaExternalId]
+  ): Stream[F, StravaActivityId]
 
   def loadExport(
       stravaExport: Path,
@@ -110,8 +110,8 @@ object StravaSupport {
     def fold[A](success: PublishResult.Success => A, notFound: => A): A
   }
   object PublishResult {
-    case class AlreadyLinked(activityId: ActivityId, stravaId: StravaExternalId)
-    case class Ambiguous(stravaId: StravaExternalId, activities: NonEmptyList[ActivityId])
+    case class AlreadyLinked(activityId: ActivityId, stravaId: StravaActivityId)
+    case class Ambiguous(stravaId: StravaActivityId, activities: NonEmptyList[ActivityId])
 
     case object NoActivitiesFound extends PublishResult {
       def fold[A](success: PublishResult.Success => A, notFound: => A): A = notFound
