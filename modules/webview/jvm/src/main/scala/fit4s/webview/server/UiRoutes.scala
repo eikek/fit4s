@@ -1,0 +1,65 @@
+package fit4s.webview.server
+
+import java.time.ZoneId
+
+import cats.data.{Kleisli, OptionT}
+import cats.effect.*
+import cats.syntax.all.*
+
+import fit4s.activities.ActivityLog
+import fit4s.http.borer.BorerEntityCodec.Implicits.*
+import fit4s.webview.data.{TagAndQuery, TagRename}
+import fit4s.webview.json.BasicJsonCodec
+import fit4s.webview.server.util.*
+
+import org.http4s.*
+import org.http4s.dsl.Http4sDsl
+
+final class UiRoutes[F[_]: Async] extends Http4sDsl[F] with MoreHttp4sDsl[F] {
+
+  private[this] val suffixes = List(
+    ".css",
+    ".eot",
+    ".html",
+    ".ico",
+    ".jpg",
+    ".js",
+    ".json",
+    ".otf",
+    ".png",
+    ".svg",
+    ".ttf",
+    ".woff",
+    ".woff2",
+    ".xml",
+    ".yml"
+  )
+
+  def appRoutes[F[_]: Async]: HttpRoutes[F] =
+    Kleisli {
+      case req if req.method == Method.GET =>
+        println(s"path: ${req.pathInfo.segments} -> ${req.pathInfo.renderString}")
+        val p = req.pathInfo.segments match
+          case Vector() => "/index.html"
+          case _        => req.pathInfo.renderString
+        val last = req.pathInfo.segments.lastOption.map(_.encoded).getOrElse("")
+        val containsUp = req.pathInfo.segments.exists(_.encoded.contains(".."))
+        if (
+          req.pathInfo.segments.nonEmpty && (containsUp || !suffixes.exists(
+            last.endsWith(_)
+          ))
+        )
+          OptionT.pure(Response.notFound[F])
+        else
+          StaticFile
+            .fromResource(
+              s"/META-INF/resources/webjars/fit4s-webview$p",
+              Some(req),
+              true
+            )
+      case _ =>
+        OptionT.none
+    }
+
+  def routes: HttpRoutes[F] = appRoutes[F]
+}
