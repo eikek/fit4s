@@ -15,7 +15,7 @@ addCommandAlias("make-stage", "; cli/Universal/stage")
 // this causes a timestamp suffix and then it's just harder to find
 // the resulting file from the github action yaml
 def versionFmt(out: sbtdynver.GitDescribeOutput): String =
-  if (out.ref.isTag) out.ref.dropPrefix
+  if (out.ref.isTag && out.commitSuffix.isEmpty) out.ref.dropPrefix
   else out.ref.dropPrefix + out.commitSuffix.mkString("-", "-", "")
 
 def fallbackVersion(d: java.util.Date): String = s"HEAD-${sbtdynver.DynVer.timestamp(d)}"
