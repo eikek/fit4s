@@ -10,6 +10,7 @@ import fit4s.profile.types.Sport
 
 import io.bullet.borer._
 import io.bullet.borer.derivation.MapBasedCodecs._
+import io.bullet.borer.NullOptions._
 
 final case class StravaActivity(
     name: String,
