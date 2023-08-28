@@ -1,9 +1,11 @@
 package fit4s.tcx
 
-import scala.xml.Node
-import fit4s.data.*
-import java.time.Instant
 import java.time.Duration
+import java.time.Instant
+
+import scala.xml.Node
+
+import fit4s.data.*
 import fit4s.profile.types.Sport
 
 object TcxReader {

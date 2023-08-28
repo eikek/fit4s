@@ -5,9 +5,10 @@ import cats.effect.*
 import cats.syntax.all.*
 import fs2.concurrent.SignallingRef
 
-import calico.html.io.{*, given}
-import fit4s.webview.client.cmd.*
 import fit4s.activities.data.ActivityId
+import fit4s.webview.client.cmd.*
+
+import calico.html.io.{*, given}
 
 object NotesEdit {
 

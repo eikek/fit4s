@@ -1,10 +1,10 @@
 package fit4s.tcx
 
 import java.time.{Duration, Instant}
-import fit4s.profile.types.*
-import fit4s.data.*
 
-import TcxActivity.Agg
+import fit4s.data.*
+import fit4s.profile.types.*
+import fit4s.tcx.TcxActivity.Agg
 
 final case class TcxActivity(
     id: Instant,

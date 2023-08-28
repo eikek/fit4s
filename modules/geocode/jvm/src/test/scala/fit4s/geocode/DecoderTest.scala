@@ -1,9 +1,11 @@
 package fit4s.geocode
 
 import cats.syntax.all.*
-import munit.*
-import io.bullet.borer.Json
+
 import fit4s.geocode.data.Address
+
+import io.bullet.borer.Json
+import munit.*
 
 class DecoderTest extends FunSuite with NominatimDecoder {
 

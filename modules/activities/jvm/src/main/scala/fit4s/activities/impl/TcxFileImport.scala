@@ -1,5 +1,6 @@
 package fit4s.activities.impl
 
+import java.io.ByteArrayInputStream
 import java.time.{Instant, ZoneId}
 
 import cats.effect._
@@ -10,13 +11,12 @@ import fs2.{Chunk, Stream}
 
 import fit4s.activities.ImportResult
 import fit4s.activities.data.{ActivityId, LocationId, TagId}
+import fit4s.tcx.TcxActivity
+import fit4s.tcx.TcxReader
 import fit4s.{ActivityReader, FitFile}
 
 import doobie._
 import scodec.Attempt
-import fit4s.tcx.TcxActivity
-import java.io.ByteArrayInputStream
-import fit4s.tcx.TcxReader
 
 object TcxFileImport {
 

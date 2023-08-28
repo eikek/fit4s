@@ -1,6 +1,7 @@
 package fit4s.tcx
 
 import java.time.Instant
+
 import fit4s.data.*
 
 final case class TcxTrackpoint(

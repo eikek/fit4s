@@ -1,6 +1,7 @@
 package fit4s.activities.data
 
 import cats.Show
+
 import fit4s.data.DeviceProduct
 
 enum DeviceInfo:
