@@ -24,7 +24,7 @@ enum Result:
   case UpdateNameResult(id: ActivityId, notes: String, success: Boolean)
   case SetTagsResult(id: ActivityId, tag: Tag, success: Boolean)
   case RemoveTagsResult(id: ActivityId, tag: Tag, success: Boolean)
-  case CreateTagResult(id: ActivityId,name: TagName, success: Boolean)
+  case CreateTagResult(id: ActivityId, name: TagName, success: Boolean)
   case SearchRefresh
 
 object Result:

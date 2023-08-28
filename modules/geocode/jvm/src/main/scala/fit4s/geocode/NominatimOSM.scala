@@ -50,7 +50,8 @@ final class NominatimOSM[F[_]: Async](
         case Some(d) if d == Duration.Zero =>
           client.expectOption[Place](GET(url)).attempt.flatMap {
             case Right(v) => v.pure[F]
-            case Left(ex) => logger.warn(s"Nominatim lookup failed for position $position!", ex).as(None)
+            case Left(ex) =>
+              logger.warn(s"Nominatim lookup failed for position $position!", ex).as(None)
           }
         case Some(d) =>
           Async[F].sleep(d).flatMap(_ => lookup(position))

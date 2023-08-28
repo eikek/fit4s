@@ -15,5 +15,5 @@ object DeviceInfo:
 
   extension (delegate: DeviceInfo)
     def name: String = delegate match
-      case DeviceInfo.Name(n) => n
+      case DeviceInfo.Name(n)    => n
       case DeviceInfo.Product(p) => p.name

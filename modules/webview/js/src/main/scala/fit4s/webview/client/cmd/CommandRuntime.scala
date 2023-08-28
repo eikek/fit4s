@@ -93,31 +93,36 @@ object CommandRuntime {
 
         case Cmd.UpdateNotes(id, notes) =>
           val n = Option(notes).map(_.trim).filter(_.nonEmpty)
-          fit4sClient.setActivityNotes(id, n)
+          fit4sClient
+            .setActivityNotes(id, n)
             .map(Result.UpdateNotesResult(id, notes, _))
             .flatMap(topic.publish1)
             .void
 
         case Cmd.UpdateName(id, name) =>
-          fit4sClient.setActivityName(id, name)
+          fit4sClient
+            .setActivityName(id, name)
             .map(Result.UpdateNameResult(id, name, _))
             .flatMap(topic.publish1)
             .void
 
         case Cmd.SetTag(id, tag) =>
-          fit4sClient.setTags(id, tag)
+          fit4sClient
+            .setTags(id, tag)
             .map(Result.SetTagsResult(id, tag, _))
             .flatMap(topic.publish1)
             .void
 
         case Cmd.CreateTag(id, name) =>
-          fit4sClient.createTag(id, name)
+          fit4sClient
+            .createTag(id, name)
             .map(Result.CreateTagResult(id, name, _))
             .flatMap(topic.publish1)
             .void
 
         case Cmd.RemoveTag(id, tag) =>
-          fit4sClient.removeTags(id, tag)
+          fit4sClient
+            .removeTags(id, tag)
             .map(Result.RemoveTagsResult(id, tag, _))
             .flatMap(topic.publish1)
             .void

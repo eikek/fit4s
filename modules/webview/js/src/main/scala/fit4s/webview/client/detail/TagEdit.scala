@@ -39,7 +39,8 @@ object TagEdit {
       "absolute left-0 top-8 max-h-64 w-full overflow-y-auto z-1500 border shadow-lg transition duration-200 bg-slate-50 dark:bg-stone-800 dark:border-stone-800 dark:text-stone-200"
     val buttonStyle =
       "text-xs h-8 w-8 hover:border dark:border-stone-400 hover:bg-slate-100 hover:dark:bg-stone-700  flex flex-row items-center px-2 py-0.5 rounded cursor-pointer"
-    val disabledButton = "text-xs h-8 w-8 dark:border-stone-400 flex flex-row items-center px-2 py-0.5 rounded opacity-50 cursor-not-allowed"
+    val disabledButton =
+      "text-xs h-8 w-8 dark:border-stone-400 flex flex-row items-center px-2 py-0.5 rounded opacity-50 cursor-not-allowed"
 
     final case class TagSelection(
         active: Set[Tag],
@@ -174,7 +175,7 @@ object TagEdit {
                 ),
                 calico.html.io.a(
                   cls <-- model.map(m => TagName.fromString(m.query.text)).changes.map {
-                    case Left(_) => Model.disabledButton :: Nil
+                    case Left(_)  => Model.disabledButton :: Nil
                     case Right(_) => Model.buttonStyle :: Nil
                   },
                   i(cls := "fa fa-plus"),

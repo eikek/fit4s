@@ -33,7 +33,8 @@ object TcxFileImport {
       .flatMap {
         case Right(fits) =>
           Stream.emits(
-            fits.map(addTcxActivity(tags, notes, locationId, zoneId, now)(_, relativePath))
+            fits
+              .map(addTcxActivity(tags, notes, locationId, zoneId, now)(_, relativePath))
           )
 
         case Left(err) =>
@@ -52,14 +53,18 @@ object TcxFileImport {
   ): ConnectionIO[ImportResult[ActivityId]] =
     TcxActivityImport.addActivity(tags, locationId, relativePath, notes, zoneId, now)(act)
 
-  def readTcxFile[F[_]: Sync: Files: Compression](file: Path): F[Either[Throwable, Seq[TcxActivity]]] =
+  def readTcxFile[F[_]: Sync: Files: Compression](
+      file: Path
+  ): F[Either[Throwable, Seq[TcxActivity]]] =
     readFileOrGz[F](file).compile
       .foldChunks[Chunk[Byte]](Chunk.empty[Byte])(_ ++ _)
-      .flatMap(ch => Sync[F].delay {
-        val in = new ByteArrayInputStream(ch.toArray)
-        val node = scala.xml.XML.load(in)
-        TcxReader.activities(node)
-      })
+      .flatMap(ch =>
+        Sync[F].delay {
+          val in = new ByteArrayInputStream(ch.toArray)
+          val node = scala.xml.XML.load(in)
+          TcxReader.activities(node)
+        }
+      )
       .attempt
 
   private def readFileOrGz[F[_]: Files: Compression](file: Path): Stream[F, Byte] =

@@ -58,7 +58,8 @@ object TcxReader {
     )
 
   private def sport(s: String): Sport =
-    Sport.all.find(e => e.typeName.equalsIgnoreCase(s))
+    Sport.all
+      .find(e => e.typeName.equalsIgnoreCase(s))
       .orElse(Option.when("biking".equalsIgnoreCase(s))(Sport.Cycling))
       .getOrElse(Sport.Generic)
 }
