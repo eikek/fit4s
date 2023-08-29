@@ -1,7 +1,7 @@
 package fit4s.webview.data
 
-import io.bullet.borer.{Decoder, Encoder}
 import io.bullet.borer.derivation.MapBasedCodecs.*
+import io.bullet.borer.{Decoder, Encoder}
 
 case class Name(name: String)
 object Name:

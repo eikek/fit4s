@@ -34,7 +34,6 @@ trait DataJsonCodec extends CoreJsonCodec {
   implicit val fileIdDecoder: Decoder[FileId] =
     deriveDecoder
 
-
   implicit val deviceProductEncoder: Encoder[DeviceProduct] =
     Encoder.forString.contramap(_.name)
 

@@ -8,15 +8,15 @@ import cats.syntax.all._
 
 import fit4s.ActivityReader
 import fit4s.activities.ImportResult
+import fit4s.activities.ImportResult.tcxError
 import fit4s.activities.data.Activity
 import fit4s.activities.data._
 import fit4s.activities.records._
 import fit4s.data._
+import fit4s.profile.types.SubSport
 import fit4s.tcx.{TcxActivity, TcxLap}
 
 import doobie._
-import fit4s.profile.types.SubSport
-import fit4s.activities.ImportResult.tcxError
 
 object TcxActivityImport {
   def addActivity(

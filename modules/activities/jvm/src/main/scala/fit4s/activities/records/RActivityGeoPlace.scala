@@ -83,7 +83,8 @@ object RActivityGeoPlace {
   def findMissingActivities(ids: List[ActivityId]): Stream[ConnectionIO, ActivityId] = {
     val cond = ids match {
       case Nil => Fragment.empty
-      case nn => fr"AND act.activity_id IN (${nn.map(_.id.toString).map(Fragment.const(_)).commas})"
+      case nn =>
+        fr"AND act.activity_id IN (${nn.map(_.id.toString).map(Fragment.const(_)).commas})"
     }
     sql"""WITH
             gstart as (select * from $table where position_name = 'start'),

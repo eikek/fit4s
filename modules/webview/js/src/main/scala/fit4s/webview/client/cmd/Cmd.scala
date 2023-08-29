@@ -1,6 +1,7 @@
 package fit4s.webview.client.cmd
 
 import cats.data.NonEmptyList
+
 import fit4s.activities.data.*
 
 enum Cmd:

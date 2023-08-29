@@ -32,12 +32,14 @@ final class ActivityLogDb[F[_]: Async: Files: Compression](
       else Sync[F].raiseError(new Exception(s"Database initialization failed! $result"))
     }
 
-  override def geoLookup(ids: List[ActivityId], onId: ActivityId => F[Unit]): F[Unit] = {
-    RActivityGeoPlace.findMissingActivities(ids).transact(xa)
+  override def geoLookup(ids: List[ActivityId], onId: ActivityId => F[Unit]): F[Unit] =
+    RActivityGeoPlace
+      .findMissingActivities(ids)
+      .transact(xa)
       .evalTap(onId)
       .evalMap(placeAttach.attachGeoPlace)
-      .compile.drain
-  }
+      .compile
+      .drain
 
   override def importFromDirectories(
       zoneId: ZoneId,
