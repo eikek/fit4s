@@ -5,9 +5,10 @@ import cats.effect.*
 import cats.syntax.all.*
 import fs2.concurrent.SignallingRef
 
-import calico.html.io.{*, given}
-import fit4s.webview.client.cmd.*
 import fit4s.activities.data.ActivityId
+import fit4s.webview.client.cmd.*
+
+import calico.html.io.{*, given}
 
 object NotesEdit {
 
@@ -68,7 +69,7 @@ object NotesEdit {
               m.copy(state = Model.EditState.Updating),
               cr.send(Cmd.UpdateNotes(m.activityId, m.text))
             )
-         case m => (m, IO.unit)
+          case m => (m, IO.unit)
         }
 
       case Msg.ToView(text) =>
@@ -81,7 +82,7 @@ object NotesEdit {
               m.copy(state = Model.EditState.Failure),
               IO.unit
             )
-         case m => (m, IO.unit)
+          case m => (m, IO.unit)
         }
     }
 
@@ -131,8 +132,10 @@ object NotesEdit {
             disabled <-- state.map(_ == Model.EditState.Updating),
             state.map {
               case Model.EditState.Init => span("Save")
-              case Model.EditState.Updating => span(i(cls := "fa fa-circle-notch animate-spin"))
-              case Model.EditState.Failure => span(cls := "text-rose-500", "Updating notes failed!")
+              case Model.EditState.Updating =>
+                span(i(cls := "fa fa-circle-notch animate-spin"))
+              case Model.EditState.Failure =>
+                span(cls := "text-rose-500", "Updating notes failed!")
             }
           ),
           calico.html.io.a(

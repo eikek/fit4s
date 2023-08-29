@@ -1,6 +1,7 @@
 package fit4s.activities.data
 
 import cats.Show
+
 import fit4s.data.DeviceProduct
 
 enum DeviceInfo:
@@ -15,5 +16,5 @@ object DeviceInfo:
 
   extension (delegate: DeviceInfo)
     def name: String = delegate match
-      case DeviceInfo.Name(n) => n
+      case DeviceInfo.Name(n)    => n
       case DeviceInfo.Product(p) => p.name

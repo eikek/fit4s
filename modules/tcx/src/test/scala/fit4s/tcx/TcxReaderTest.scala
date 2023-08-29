@@ -1,9 +1,11 @@
 package fit4s.tcx
 
-import munit.*
 import java.time.Instant
-import fit4s.profile.types.Sport
+
 import fit4s.data.*
+import fit4s.profile.types.Sport
+
+import munit.*
 
 class TcxReaderTest extends FunSuite {
 

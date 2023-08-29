@@ -1,22 +1,22 @@
 package fit4s.webview.client.detail
 
 import cats.Eq
+import cats.data.NonEmptyList
 import cats.effect.*
 import cats.syntax.all.*
-
-import fit4s.activities.data.{Tag, TagName}
-import fit4s.activities.data.ActivityId
-import fit4s.webview.data.RequestFailure
-import fit4s.webview.client.cmd.*
 import fs2.concurrent.SignallingRef
+
+import fit4s.activities.data.ActivityId
+import fit4s.activities.data.{Tag, TagName}
+import fit4s.webview.client.FetchResult
+import fit4s.webview.client.cmd.*
+import fit4s.webview.client.shared.ClickAction
+import fit4s.webview.client.shared.Styles
 import fit4s.webview.client.shared.TagList
 import fit4s.webview.client.shared.TextField
+import fit4s.webview.data.RequestFailure
 
 import calico.html.io.{*, given}
-import fit4s.webview.client.shared.ClickAction
-import fit4s.webview.client.FetchResult
-import fit4s.webview.client.shared.Styles
-import cats.data.NonEmptyList
 
 object TagEdit {
 
@@ -39,7 +39,8 @@ object TagEdit {
       "absolute left-0 top-8 max-h-64 w-full overflow-y-auto z-1500 border shadow-lg transition duration-200 bg-slate-50 dark:bg-stone-800 dark:border-stone-800 dark:text-stone-200"
     val buttonStyle =
       "text-xs h-8 w-8 hover:border dark:border-stone-400 hover:bg-slate-100 hover:dark:bg-stone-700  flex flex-row items-center px-2 py-0.5 rounded cursor-pointer"
-    val disabledButton = "text-xs h-8 w-8 dark:border-stone-400 flex flex-row items-center px-2 py-0.5 rounded opacity-50 cursor-not-allowed"
+    val disabledButton =
+      "text-xs h-8 w-8 dark:border-stone-400 flex flex-row items-center px-2 py-0.5 rounded opacity-50 cursor-not-allowed"
 
     final case class TagSelection(
         active: Set[Tag],
@@ -174,7 +175,7 @@ object TagEdit {
                 ),
                 calico.html.io.a(
                   cls <-- model.map(m => TagName.fromString(m.query.text)).changes.map {
-                    case Left(_) => Model.disabledButton :: Nil
+                    case Left(_)  => Model.disabledButton :: Nil
                     case Right(_) => Model.buttonStyle :: Nil
                   },
                   i(cls := "fa fa-plus"),

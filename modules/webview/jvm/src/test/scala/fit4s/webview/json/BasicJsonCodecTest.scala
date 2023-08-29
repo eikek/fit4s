@@ -1,6 +1,7 @@
 package fit4s.webview.json
 
 import fit4s.activities.data.ActivityListResult
+
 import io.bullet.borer.Json
 import munit.FunSuite
 
