@@ -38,7 +38,8 @@ object SearchField {
       set = a => b => a.copy(text = b)
     )
     val searchAction = model.get.map(_.text.text).flatMap(on)
-    val queryInputR = TextField.render(textModel, TextField.Config.default.copy(onEnter = searchAction))
+    val queryInputR =
+      TextField.render(textModel, TextField.Config.default.copy(onEnter = searchAction))
     val btn = button(
       typ := "submit",
       onClick --> ClickAction(searchAction),

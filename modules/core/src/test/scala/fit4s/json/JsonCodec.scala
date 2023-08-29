@@ -5,8 +5,8 @@ import fit4s.profile.messages.{FitMessages, Msg}
 import fit4s.profile.types.{FitBaseType, MesgNum}
 import fit4s.{FieldDefinition, FitMessage}
 
-import io.bullet.borer.*
 import io.bullet.borer.NullOptions.*
+import io.bullet.borer.*
 import io.bullet.borer.derivation.MapBasedCodecs.*
 import scodec.bits.ByteOrdering
 

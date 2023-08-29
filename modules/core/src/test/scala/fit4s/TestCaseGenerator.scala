@@ -2,6 +2,7 @@ package fit4s
 
 import fit4s.FitMessage.DataMessage
 import fit4s.json.JsonCodec
+
 import io.bullet.borer.Json
 
 object TestCaseGenerator extends JsonCodec {

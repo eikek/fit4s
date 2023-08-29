@@ -158,7 +158,6 @@ lazy val common = crossProject(JSPlatform, JVMPlatform)
 lazy val commonJs = common.js
 lazy val commonJvm = common.jvm
 
-
 lazy val tcx = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Pure)
   .withoutSuffixFor(JVMPlatform)
@@ -177,7 +176,6 @@ lazy val tcx = crossProject(JSPlatform, JVMPlatform)
 
 lazy val tcxJs = tcx.js
 lazy val tcxJvm = tcx.jvm
-
 
 lazy val http4sBorer = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
