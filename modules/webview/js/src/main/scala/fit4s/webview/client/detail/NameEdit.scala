@@ -5,9 +5,10 @@ import cats.effect.*
 import cats.syntax.all.*
 import fs2.concurrent.SignallingRef
 
-import calico.html.io.{*, given}
-import fit4s.webview.client.cmd.*
 import fit4s.activities.data.ActivityId
+import fit4s.webview.client.cmd.*
+
+import calico.html.io.{*, given}
 
 object NameEdit {
 
@@ -68,7 +69,7 @@ object NameEdit {
               m.copy(state = Model.EditState.Updating),
               cr.send(Cmd.UpdateName(m.activityId, m.name))
             )
-         case m => (m, IO.unit)
+          case m => (m, IO.unit)
         }
 
       case Msg.ToView(text) =>
@@ -81,7 +82,7 @@ object NameEdit {
               m.copy(state = Model.EditState.Failure),
               IO.unit
             )
-         case m => (m, IO.unit)
+          case m => (m, IO.unit)
         }
     }
 
@@ -131,8 +132,10 @@ object NameEdit {
             disabled <-- state.map(_ == Model.EditState.Updating),
             state.map {
               case Model.EditState.Init => span("Save")
-              case Model.EditState.Updating => span(i(cls := "fa fa-circle-notch animate-spin"))
-              case Model.EditState.Failure => span(cls := "text-rose-500", "Updating notes failed!")
+              case Model.EditState.Updating =>
+                span(i(cls := "fa fa-circle-notch animate-spin"))
+              case Model.EditState.Failure =>
+                span(cls := "text-rose-500", "Updating notes failed!")
             }
           ),
           calico.html.io.a(
@@ -162,7 +165,10 @@ object NameEdit {
       cls <-- model
         .map(_.editMode)
         .changes
-        .map(m => if (!m) "flex flex-row items-center font-bold text-3xl mb-2" :: Nil else "hidden" :: Nil),
+        .map(m =>
+          if (!m) "flex flex-row items-center font-bold text-3xl mb-2" :: Nil
+          else "hidden" :: Nil
+        ),
       div(
         cls := "pr-2 py-1 flex-grow text-center",
         model.map(_.name)

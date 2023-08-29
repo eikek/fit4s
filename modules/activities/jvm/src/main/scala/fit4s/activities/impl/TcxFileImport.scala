@@ -1,5 +1,6 @@
 package fit4s.activities.impl
 
+import java.io.ByteArrayInputStream
 import java.time.{Instant, ZoneId}
 
 import cats.effect._
@@ -10,13 +11,12 @@ import fs2.{Chunk, Stream}
 
 import fit4s.activities.ImportResult
 import fit4s.activities.data.{ActivityId, LocationId, TagId}
+import fit4s.tcx.TcxActivity
+import fit4s.tcx.TcxReader
 import fit4s.{ActivityReader, FitFile}
 
 import doobie._
 import scodec.Attempt
-import fit4s.tcx.TcxActivity
-import java.io.ByteArrayInputStream
-import fit4s.tcx.TcxReader
 
 object TcxFileImport {
 
@@ -33,7 +33,8 @@ object TcxFileImport {
       .flatMap {
         case Right(fits) =>
           Stream.emits(
-            fits.map(addTcxActivity(tags, notes, locationId, zoneId, now)(_, relativePath))
+            fits
+              .map(addTcxActivity(tags, notes, locationId, zoneId, now)(_, relativePath))
           )
 
         case Left(err) =>
@@ -52,14 +53,18 @@ object TcxFileImport {
   ): ConnectionIO[ImportResult[ActivityId]] =
     TcxActivityImport.addActivity(tags, locationId, relativePath, notes, zoneId, now)(act)
 
-  def readTcxFile[F[_]: Sync: Files: Compression](file: Path): F[Either[Throwable, Seq[TcxActivity]]] =
+  def readTcxFile[F[_]: Sync: Files: Compression](
+      file: Path
+  ): F[Either[Throwable, Seq[TcxActivity]]] =
     readFileOrGz[F](file).compile
       .foldChunks[Chunk[Byte]](Chunk.empty[Byte])(_ ++ _)
-      .flatMap(ch => Sync[F].delay {
-        val in = new ByteArrayInputStream(ch.toArray)
-        val node = scala.xml.XML.load(in)
-        TcxReader.activities(node)
-      })
+      .flatMap(ch =>
+        Sync[F].delay {
+          val in = new ByteArrayInputStream(ch.toArray)
+          val node = scala.xml.XML.load(in)
+          TcxReader.activities(node)
+        }
+      )
       .attempt
 
   private def readFileOrGz[F[_]: Files: Compression](file: Path): Stream[F, Byte] =

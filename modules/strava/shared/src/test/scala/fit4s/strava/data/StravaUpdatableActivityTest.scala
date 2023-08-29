@@ -1,7 +1,7 @@
 package fit4s.strava.data
 
-import munit.*
 import io.bullet.borer.*
+import munit.*
 
 class StravaUpdatableActivityTest extends FunSuite {
 

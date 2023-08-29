@@ -9,11 +9,11 @@ import fs2.concurrent.SignallingRef
 
 import fit4s.activities.data.ActivityDetailResult
 import fit4s.profile.types.Sport
+import fit4s.webview.client.cmd.CommandRuntime
 import fit4s.webview.client.shared.*
 import fit4s.webview.client.util.*
 
 import calico.html.io.{*, given}
-import fit4s.webview.client.cmd.CommandRuntime
 
 object ActivityOverviewPanel {
 

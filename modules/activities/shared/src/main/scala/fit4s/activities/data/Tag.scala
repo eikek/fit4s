@@ -1,6 +1,7 @@
 package fit4s.activities.data
 
 import cats.Eq
+
 import io.bullet.borer.*
 import io.bullet.borer.derivation.MapBasedCodecs._
 

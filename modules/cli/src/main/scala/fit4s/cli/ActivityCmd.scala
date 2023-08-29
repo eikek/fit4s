@@ -36,7 +36,9 @@ object ActivityCmd extends SharedOpts:
     Opts.subcommand("set-notes", "Set activity notes")(SetNotesCmd.opts)
 
   val geoLookupArgs: Opts[GeoLookupCmd.Options] =
-    Opts.subcommand("geo-lookup", "Do geo lookup again for some activities")(GeoLookupCmd.opts)
+    Opts.subcommand("geo-lookup", "Do geo lookup again for some activities")(
+      GeoLookupCmd.opts
+    )
 
   val opts = importArgs
     .map(Options.Import.apply)
@@ -62,12 +64,12 @@ object ActivityCmd extends SharedOpts:
 
   def apply(cliCfg: CliConfig, cfg: Options): IO[ExitCode] =
     cfg match
-      case Options.Import(c)   => ImportCmd(cliCfg, c)
-      case Options.Summary(c)  => SummaryCmd(cliCfg, c)
-      case Options.List(c)     => ListCmd(cliCfg, c)
-      case Options.Update(c)   => UpdateCmd(cliCfg, c)
-      case Options.Delete(c)   => DeleteCmd(cliCfg, c)
-      case Options.Show(c)     => ShowCmd(cliCfg, c)
-      case Options.SetName(c)  => SetNameCmd(cliCfg, c)
-      case Options.SetNotes(c) => SetNotesCmd(cliCfg, c)
+      case Options.Import(c)    => ImportCmd(cliCfg, c)
+      case Options.Summary(c)   => SummaryCmd(cliCfg, c)
+      case Options.List(c)      => ListCmd(cliCfg, c)
+      case Options.Update(c)    => UpdateCmd(cliCfg, c)
+      case Options.Delete(c)    => DeleteCmd(cliCfg, c)
+      case Options.Show(c)      => ShowCmd(cliCfg, c)
+      case Options.SetName(c)   => SetNameCmd(cliCfg, c)
+      case Options.SetNotes(c)  => SetNotesCmd(cliCfg, c)
       case Options.GeoLookup(c) => GeoLookupCmd(cliCfg, c)
