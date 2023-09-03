@@ -62,6 +62,7 @@ val sharedSettings = Seq(
      else Seq(compilerPlugin(Dependencies.betterMonadicFor))),
   Compile / console / scalacOptions := Seq(),
   Test / console / scalacOptions := Seq(),
+  Compile / packageDoc / publishArtifact := false, // deactivate until typelevel/fs2#3293 is resolved
   licenses := Seq(
     "GPL-3.0-or-later" -> url("https://spdx.org/licenses/GPL-3.0-or-later")
   ),

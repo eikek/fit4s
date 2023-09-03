@@ -48,7 +48,7 @@ trait StravaClient[F[_]] {
       .evalMap(page => listActivities(accessToken, after, before, page, chunkSize))
       // strava docs say that pages could be less than per_page, so check for empty result
       .takeWhile(_.nonEmpty)
-      .flatMap(page => Stream.chunk(Chunk.seq(page)))
+      .flatMap(page => Stream.chunk(Chunk.from(page)))
 
   def findGear(accessToken: StravaAccessToken, gearId: String): F[Option[StravaGear]]
 
