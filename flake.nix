@@ -75,17 +75,27 @@
       devShells = forAllSystems(system:
         { default =
             let
-              pkgs = import nixpkgs { inherit system; };
+              overlays = import ./nix/overlays.nix;
+              pkgs = import nixpkgs {
+                inherit system;
+                overlays = [
+                  overlays.sbt
+                  overlays.postgres-fg
+                ];
+              };
             in
               pkgs.mkShell {
                 buildInputs = [
                   pkgs.sbt
                   pkgs.openjdk
                   pkgs.nodejs
+                  pkgs.postgres-fg
                 ];
                 nativeBuildInputs =
                   [
                   ];
+
+                JAVA_HOME = "${pkgs.openjdk19}/lib/openjdk";
               };
         });
     };
