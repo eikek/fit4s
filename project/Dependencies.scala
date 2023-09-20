@@ -29,7 +29,7 @@ object Dependencies {
     val scalaCsv = "1.3.10"
     val organizeImports = "0.6.0"
     val postgres = "42.6.0"
-    val scalaJsDom = "2.6.0"
+    val scalaJsDom = "2.7.0"
     val scalaJsTime = "2.5.0"
     val scalaXML = "2.2.0"
     val scribeSlf4j = "3.12.2"
