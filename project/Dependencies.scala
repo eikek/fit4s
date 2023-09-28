@@ -9,7 +9,7 @@ object Dependencies {
     val scala3 = "3.3.0"
 
     val borer = "1.11.0"
-    val catsEffect = "3.5.1"
+    val catsEffect = "3.5.2"
     val catsParse = "0.3.10"
     val calico = "0.2.1"
     val ciris = "3.2.0"
