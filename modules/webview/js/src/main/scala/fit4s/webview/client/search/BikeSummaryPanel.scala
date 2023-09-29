@@ -90,6 +90,10 @@ object BikeSummaryPanel {
         div(
           cls := "flex flex-row space-x-1",
           div(
+            i(cls := Styles.countIcon :: List("mr-1")),
+            sum.count.show
+          ),
+          div(
             i(cls := Styles.distanceIcon :: List("mr-1")),
             sum.distance.show
           ),

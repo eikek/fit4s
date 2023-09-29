@@ -27,7 +27,6 @@ object Dependencies {
     val fs2 = "3.9.2"
     val scalaCheck = "1.17.0"
     val scalaCsv = "1.3.10"
-    val organizeImports = "0.6.0"
     val postgres = "42.6.0"
     val scalaJsDom = "2.8.0"
     val scalaJsTime = "2.5.0"
@@ -174,10 +173,6 @@ object Dependencies {
       "io.bullet" %%% "borer-compat-cats" % V.borer,
       "io.bullet" %%% "borer-compat-scodec" % V.borer
     )
-  )
-
-  val organizeImports = Seq(
-    "com.github.liancheng" %% "organize-imports" % V.organizeImports
   )
 
   // https://github.com/typelevel/cats
