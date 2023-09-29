@@ -97,8 +97,7 @@ val testSettings = Seq(
 
 val scalafixSettings = Seq(
   semanticdbEnabled := true, // enable SemanticDB
-  semanticdbVersion := scalafixSemanticdb.revision, // use Scalafix compatible version
-  ThisBuild / scalafixDependencies ++= Dependencies.organizeImports
+  semanticdbVersion := scalafixSemanticdb.revision // use Scalafix compatible version
 )
 
 val buildInfoSettings = Seq(

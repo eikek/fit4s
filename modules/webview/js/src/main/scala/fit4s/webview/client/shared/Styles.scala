@@ -2,6 +2,7 @@ package fit4s.webview.client.shared
 
 object Styles {
 
+  val countIcon = "fa fa-hashtag text-sky-400"
   val distanceIcon = "fa fa-right-long text-sky-400"
   val elevationIcon = "fa fa-up-long text-sky-400"
   val speedIcon = "fa fa-gauge text-sky-400"

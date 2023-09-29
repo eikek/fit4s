@@ -49,7 +49,7 @@ object SearchPage {
         cls := "flex flex-row space-x-2",
         ActivityListPanel.render(listModel, cr, zone),
         div(
-          cls := "flex flex-col space-y-2 aaaaaa",
+          cls := "flex flex-col space-y-2 min-w-fit",
           ActivitySummaryPanel.render(summaryModel, cr, zone),
           BikeSummaryPanel.render(bikesModel, cr)
         )
