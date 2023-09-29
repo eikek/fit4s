@@ -3,6 +3,8 @@ package fit4s.activities.impl
 import java.io.ByteArrayInputStream
 import java.time.{Instant, ZoneId}
 
+import scala.collection.immutable.Seq
+
 import cats.effect._
 import cats.syntax.all._
 import fs2.compression.Compression

@@ -1,5 +1,7 @@
 package fit4s.activities.records
 
+import scala.collection.immutable.Seq
+
 import cats.syntax.all._
 import fs2.Stream
 

@@ -2,6 +2,8 @@ package fit4s.activities.records
 
 import java.time.{Duration, Instant}
 
+import scala.collection.immutable.Seq
+
 import cats.effect.kernel.Clock
 import cats.syntax.all.*
 import fs2.Stream

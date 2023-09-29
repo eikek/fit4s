@@ -2,6 +2,8 @@ package fit4s.tcx
 
 import java.time.{Duration, Instant}
 
+import scala.collection.immutable.Seq
+
 import fit4s.data.*
 import fit4s.profile.types.*
 import fit4s.tcx.TcxActivity.Agg
