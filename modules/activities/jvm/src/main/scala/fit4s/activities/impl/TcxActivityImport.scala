@@ -2,6 +2,8 @@ package fit4s.activities.impl
 
 import java.time.{Duration, Instant, ZoneId}
 
+import scala.collection.immutable.Seq
+
 import cats.data.{NonEmptyList, OptionT}
 import cats.effect.Sync
 import cats.syntax.all._

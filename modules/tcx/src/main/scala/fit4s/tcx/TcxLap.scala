@@ -3,6 +3,8 @@ package fit4s.tcx
 import java.time.Duration
 import java.time.Instant
 
+import scala.collection.immutable.Seq
+
 import fit4s.data.*
 
 final case class TcxLap(

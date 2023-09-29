@@ -1,5 +1,7 @@
 package fit4s.activities.records
 
+import scala.collection.immutable.Seq
+
 import fs2.Stream
 
 import fit4s.activities.data.{ActivityLap, ActivityLapId}
