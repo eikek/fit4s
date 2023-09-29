@@ -13,7 +13,7 @@ object ActivityNotes {
 
   def apply(a: Activity): Resource[IO, HtmlDivElement[IO]] =
     div(
-      cls := "notes text-md opacity-50 mb-4 dark:border-stone-700",
+      cls := "notes break-word text-md opacity-50 mb-4 dark:border-stone-700",
       a.notes.getOrElse("")
     )
 }
