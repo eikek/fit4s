@@ -3,6 +3,8 @@ package fit4s.cli
 import java.time.ZoneId
 import java.util.concurrent.atomic.AtomicReference
 
+import scala.concurrent.duration.*
+
 import cats.MonadThrow
 import cats.syntax.all._
 import fs2.io.file.{Files, Path}
@@ -69,6 +71,9 @@ object ConfigValues {
   val timeZone =
     config("TIMEZONE", "Europe/Berlin").as[ZoneId]
 
+  val httpTimeout =
+    config("HTTP_TIMEOUT", "60s").as[Duration]
+
   val strava = {
     val defaults = StravaClientConfig.Defaults
     val authUrl =
@@ -105,6 +110,11 @@ object ConfigValues {
   implicit private def uriDecoder: ConfigDecoder[String, Uri] =
     ConfigDecoder[String].mapOption("uri") { s =>
       Uri.fromString(s).toOption
+    }
+
+  implicit private def durationDecoder: ConfigDecoder[String, Duration] =
+    ConfigDecoder[String].mapOption("duration") { s =>
+      Duration.unapply(s).map(Duration.apply.tupled)
     }
 
   private[this] def addName(name: String, defaultValue: Option[String]) =

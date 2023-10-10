@@ -1,5 +1,7 @@
 package fit4s.webview.client
 
+import scala.concurrent.duration.Duration
+
 import cats.data.NonEmptyList
 import cats.effect.*
 import cats.syntax.all.*
@@ -154,8 +156,15 @@ class Fit4sClient[F[_]: Async](client: Client[F], baseUrl: Uri) {
 }
 
 object Fit4sClient {
-  def apply[F[_]: Network: Async](baseUrl: Uri): Resource[F, Fit4sClient[F]] =
-    EmberClientBuilder.default[F].build.map(new Fit4sClient[F](_, baseUrl))
+  def apply[F[_]: Network: Async](
+      baseUrl: Uri,
+      httpTimeout: Duration
+  ): Resource[F, Fit4sClient[F]] =
+    EmberClientBuilder
+      .default[F]
+      .withTimeout(httpTimeout)
+      .build
+      .map(new Fit4sClient[F](_, baseUrl))
 
   def create[F[_]: Async](baseUrl: Uri) =
     new Fit4sClient[F](FetchClientBuilder[F].create, baseUrl)
