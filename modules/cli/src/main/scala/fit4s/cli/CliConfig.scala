@@ -2,6 +2,8 @@ package fit4s.cli
 
 import java.time.ZoneId
 
+import scala.concurrent.duration.*
+
 import cats.MonadThrow
 import cats.effect.Async
 import cats.syntax.all._
@@ -20,6 +22,7 @@ case class CliConfig(
     jdbcConfig: JdbcConfig,
     nominatimConfig: NominatimConfig,
     stravaConfig: StravaClientConfig,
+    httpTimeout: Duration,
     stravaAuthConfig: Option[StravaAppCredentials]
 )
 
@@ -31,11 +34,14 @@ object CliConfig {
       ConfigValues.jdbc[F],
       ConfigValues.nominatim,
       ConfigValues.strava,
+      ConfigValues.httpTimeout,
       ConfigValues.stravaOAuth
     ).mapN(CliConfig.apply)
 
   def load[F[_]: Async: Files]: F[CliConfig] =
     cfg[F].load[F]
+
+  given Encoder[Duration] = Encoder.forString.contramap(_.toString)
 
   given Encoder[ZoneId] = Encoder.forString.contramap(_.getId())
   given Encoder[CliConfig] = deriveEncoder

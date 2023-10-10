@@ -2,6 +2,8 @@ package fit4s.activities
 
 import java.time.ZoneId
 
+import scala.concurrent.duration.*
+
 import cats.data.NonEmptyList
 import cats.effect.*
 import fs2.*
@@ -73,7 +75,8 @@ object ActivityLog {
   def apply[F[_]: Async: Network: Files: Compression](
       jdbcConfig: JdbcConfig,
       nominatimCfg: NominatimConfig,
-      stravaConfig: StravaClientConfig
+      stravaConfig: StravaClientConfig,
+      httpTimeout: Duration
   ): Resource[F, ActivityLog[F]] = {
     val pool =
       jdbcConfig.dbms match
@@ -94,7 +97,7 @@ object ActivityLog {
       ec <- ExecutionContexts.fixedThreadPool(10)
       ds <- Resource.make(Sync[F].delay(pool))(cp => Sync[F].delay(cp.dispose()))
       xa = Transactor.fromDataSource[F](ds, ec)
-      client <- EmberClientBuilder.default[F].build
+      client <- EmberClientBuilder.default[F].withTimeout(httpTimeout).build
       revLookup <- Resource.eval(ReverseLookup.osm[F](client, nominatimCfg))
       strava <- Resource.eval(
         StravaSupport[F](stravaConfig, revLookup, xa, client)

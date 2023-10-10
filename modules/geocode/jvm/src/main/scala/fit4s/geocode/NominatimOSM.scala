@@ -83,7 +83,8 @@ object NominatimOSM {
     } yield new NominatimOSM[F](client, cfg, state, cache)
 
   def resource[F[_]: Async: Network](
-      cfg: NominatimConfig
+      cfg: NominatimConfig,
+      httpTimeout: Duration
   ): Resource[F, ReverseLookup[F]] =
-    EmberClientBuilder.default[F].build.evalMap(apply(_, cfg))
+    EmberClientBuilder.default[F].withTimeout(httpTimeout).build.evalMap(apply(_, cfg))
 }

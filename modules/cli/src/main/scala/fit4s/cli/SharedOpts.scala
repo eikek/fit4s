@@ -143,7 +143,8 @@ trait SharedOpts {
     ActivityLog[IO](
       cliConfig.jdbcConfig,
       cliConfig.nominatimConfig,
-      cliConfig.stravaConfig
+      cliConfig.stravaConfig,
+      cliConfig.httpTimeout
     )
 }
 
