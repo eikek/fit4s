@@ -150,8 +150,9 @@ When syncing with Strava, tags starting with `Bike/` and `Shoe/`,
 respectively, are used to associate Strava gear to activities. The tag
 `Commute` is used to mark activites as commute when uploading to
 strava. This works the other way around as well, when linking
-activities from Strava to existing local activities. These are
-defaults that can be changed on the respective commands.
+activities from Strava to existing local activities. Activities tagged
+with `No-Strava` are discarded. These are defaults that can be changed
+on the respective commands.
 
 
 ## Using the query
