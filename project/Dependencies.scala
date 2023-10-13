@@ -17,7 +17,7 @@ object Dependencies {
     val doobie = "1.0.0-RC4"
     val http4s = "0.23.23"
     val http4sDom = "0.2.10"
-    val flyway = "9.22.2"
+    val flyway = "9.22.3"
     val h2 = "2.2.224"
     val munit = "0.7.29"
     val munitCatsEffect = "1.0.7"
