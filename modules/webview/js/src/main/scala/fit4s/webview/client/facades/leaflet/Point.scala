@@ -6,6 +6,7 @@ import scala.scalajs.js.annotation.{JSGlobal, JSName}
 
 @JSGlobal("L.Point")
 @js.native
+@annotation.nowarn
 class Point(x: Double, y: Double, round: UndefOr[Boolean] = js.undefined)
     extends js.Object {
   def this(coords: js.Array[Double]) = this(coords(0), coords(1))

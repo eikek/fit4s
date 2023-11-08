@@ -1,6 +1,6 @@
 package fit4s.webview.client
 
-import cats.{Applicative, Functor, Semigroupal}
+import cats.{Applicative, Functor}
 
 import fit4s.webview.data.RequestFailure
 

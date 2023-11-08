@@ -20,10 +20,11 @@ object SearchPanel {
       search: SearchField.Model,
       paging: PagingDiv.Model,
       errors: Option[RequestFailure],
-      bikeTags: List[Tag]
+      bikeTags: List[Tag],
+      shoeTags: List[Tag]
   )
   object Model:
-    val empty = Model(SearchField.Model.empty, PagingDiv.Model.empty, None, Nil)
+    val empty = Model(SearchField.Model.empty, PagingDiv.Model.empty, None, Nil, Nil)
     def makeEmpty: IO[SignallingRef[IO, Model]] = SignallingRef[IO].of(empty)
 
   enum Msg:
@@ -32,6 +33,7 @@ object SearchPanel {
     case Search(query: String)
     case SetSearch(query: String)
     case SetBikeTags(tags: FetchResult[List[Tag]])
+    case SetShoeTags(tags: FetchResult[List[Tag]])
     case RefreshSearch
 
   def update(cr: CommandRuntime[IO], msg: Msg)(model: Model): (Model, IO[Unit]) =
@@ -67,14 +69,16 @@ object SearchPanel {
       case Msg.SetSearch(q) =>
         val cmd1 = cr.send(Cmd.SearchCmd(q, PagingDiv.Model.empty.page))
         val cmd2 = cr.send(Cmd.SearchTagSummary(q, model.bikeTags))
-        (model.copy(search = model.search.setText(q).setBusy), cmd1 >> cmd2)
+        val cmd3 = cr.send(Cmd.SearchTagSummary(q, model.shoeTags))
+        (model.copy(search = model.search.setText(q).setBusy), cmd1 >> cmd2 >> cmd3)
 
       case Msg.Search(q) =>
         val cmd1 = cr.send(Cmd.SearchCmd(q, PagingDiv.Model.empty.page))
         val cmd2 = cr.send(Cmd.SearchTagSummary(q, model.bikeTags))
+        val cmd3 = cr.send(Cmd.SearchTagSummary(q, model.shoeTags))
         (
           model.copy(search = model.search.setBusy, paging = PagingDiv.Model.empty),
-          cmd1 >> cmd2
+          cmd1 >> cmd2 >> cmd3
         )
 
       case Msg.RefreshSearch =>
@@ -91,6 +95,16 @@ object SearchPanel {
         )
         (next, IO.unit)
 
+      case Msg.SetShoeTags(result) =>
+        val next = result.fold(
+          r => model.copy(shoeTags = r),
+          errs => {
+            scribe.error(s"Error getting shoe tags: $errs")
+            model
+          }
+        )
+        (next, IO.unit)
+
   def subscribe(model: SignallingRef[IO, Model], cr: CommandRuntime[IO]) =
     cr.subscribe.evalMap {
       case Result.SearchResult(cmd, results) =>
@@ -101,6 +115,9 @@ object SearchPanel {
 
       case Result.GetBikeTagsResult(result) =>
         model.flatModify(update(cr, Msg.SetBikeTags(result)))
+
+      case Result.GetShoeTagsResult(result) =>
+        model.flatModify(update(cr, Msg.SetShoeTags(result)))
 
       case Result.SetSearchQueryResult(q) =>
         model.flatModify(update(cr, Msg.SetSearch(q)))
@@ -122,6 +139,7 @@ object SearchPanel {
     )
     Resource.eval(subscribe(model, cr).compile.drain.start) *>
       Resource.eval(cr.send(Cmd.GetBikeTags)) *>
+      Resource.eval(cr.send(Cmd.GetShoeTags)) *>
       div(
         cls := "flex flex-col space-y-2",
         SearchField(

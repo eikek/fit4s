@@ -16,6 +16,6 @@ object Power {
 
   def watts(watts: Int): Power = new Power(watts)
 
-  implicit val ordering: Ordering[Power] =
-    Ordering.by(_.watts)
+  given Numeric[Power] =
+    NumericFrom[Power, Int](_.watts, Power.watts)
 }

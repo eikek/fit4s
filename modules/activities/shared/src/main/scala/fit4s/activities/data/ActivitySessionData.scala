@@ -4,7 +4,6 @@ import java.time.Instant
 
 import cats.syntax.all.*
 
-import fit4s.activities.data.{ActivitySessionDataId, ActivitySessionId}
 import fit4s.data.*
 
 final case class ActivitySessionData(

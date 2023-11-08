@@ -1,6 +1,6 @@
 package fit4s.webview.json
 
-import java.time.{Instant, ZoneId}
+import java.time.Instant
 
 import cats.data.NonEmptyList
 import cats.syntax.all.*

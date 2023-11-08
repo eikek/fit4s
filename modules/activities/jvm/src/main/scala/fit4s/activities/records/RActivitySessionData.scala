@@ -12,7 +12,6 @@ import fit4s.activities.data.{
   ActivitySessionId
 }
 import fit4s.activities.records.DoobieImplicits._
-import fit4s.activities.records.DoobieMeta._
 import fit4s.data._
 
 import doobie._

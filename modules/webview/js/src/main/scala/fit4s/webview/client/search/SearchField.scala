@@ -1,7 +1,6 @@
 package fit4s.webview.client.search
 
 import cats.effect.*
-import fs2.Stream
 import fs2.concurrent.Signal
 import fs2.concurrent.SignallingRef
 import fs2.dom.HtmlDivElement

@@ -8,7 +8,7 @@ import cats.effect.*
 import cats.syntax.all.*
 import fs2.io.net.Network
 
-import fit4s.cats.util.Cache
+import fit4s.common.util.Cache
 import fit4s.data.Position
 import fit4s.geocode.NominatimOSM.State
 import fit4s.geocode.data.Place

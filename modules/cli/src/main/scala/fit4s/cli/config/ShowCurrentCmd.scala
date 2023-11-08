@@ -1,9 +1,8 @@
 package fit4s.cli.config
 
-import cats.effect._
-import fs2.Stream
+import cats.effect.*
 
-import fit4s.cli._
+import fit4s.cli.*
 
 import com.monovore.decline.Opts
 import io.bullet.borer.Json
@@ -16,11 +15,10 @@ object ShowCurrentCmd extends SharedOpts {
     outputFormatOpts.map(Options.apply)
 
   def apply(cliCfg: CliConfig, opts: Options): IO[ExitCode] =
-    Stream
-      .emit(Json.encode(cliCfg).toUtf8String)
-      .evalMap(IO.println)
-      .compile
-      .drain
-      .as(ExitCode.Success)
-
+    val out =
+      opts.format.fold(
+        Json.encode(cliCfg).toUtf8String,
+        cliCfg.toString
+      )
+    IO.println(out).as(ExitCode.Success)
 }

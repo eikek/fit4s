@@ -8,7 +8,6 @@ import fs2.concurrent.SignallingRef
 import fs2.dom.HtmlDivElement
 
 import fit4s.activities.data.*
-import fit4s.cats.instances.all.*
 import fit4s.webview.client.FetchResult
 import fit4s.webview.client.cmd.*
 import fit4s.webview.client.shared.*

@@ -2,28 +2,21 @@ package fit4s.webview.client
 
 import scala.concurrent.duration.Duration
 
-import cats.data.NonEmptyList
 import cats.effect.*
 import cats.syntax.all.*
 import fs2.io.net.Network
 
-import fit4s.activities.data.ActivityDetailResult
-import fit4s.activities.data.ActivityId
-import fit4s.activities.data.{ActivityListResult, Page}
-import fit4s.activities.data.{ActivitySessionSummary, Tag, TagName}
+import fit4s.activities.data.*
 import fit4s.http.borer.BorerEntityCodec.Implicits.*
 import fit4s.webview.data.TagQueryParamEncoder.*
 import fit4s.webview.data.{Name, Notes, RequestFailure}
 import fit4s.webview.json.BasicJsonCodec.*
 
-import org.http4s.Uri
 import org.http4s.*
-import org.http4s.client.Client
-import org.http4s.client.UnexpectedStatus
+import org.http4s.client.{Client, UnexpectedStatus}
 import org.http4s.dom.FetchClientBuilder
 import org.http4s.ember.client.EmberClientBuilder
-import org.http4s.headers.Accept
-import org.http4s.headers.MediaRangeAndQValue
+import org.http4s.headers.{Accept, MediaRangeAndQValue}
 
 class Fit4sClient[F[_]: Async](client: Client[F], baseUrl: Uri) {
   private[this] val logger = scribe.cats.effect[F]

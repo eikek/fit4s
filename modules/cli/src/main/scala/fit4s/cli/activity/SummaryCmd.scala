@@ -7,10 +7,10 @@ import cats.effect.{Clock, ExitCode, IO}
 import cats.syntax.all._
 
 import fit4s.activities.data.{ActivityQuery, ActivitySessionSummary, Page}
-import fit4s.cats.syntax.all._
-import fit4s.cats.util.DateInstant
 import fit4s.cli.FormatDefinition._
 import fit4s.cli._
+import fit4s.common.syntax.all._
+import fit4s.common.util.DateInstant
 import fit4s.data._
 import fit4s.profile.types.Sport
 

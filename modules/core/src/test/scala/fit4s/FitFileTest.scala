@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import scala.concurrent.duration.FiniteDuration
 
-import fit4s.profile.messages.{FileIdMsg, HrMsg}
+import fit4s.profile.messages.FileIdMsg
 
 import munit.CatsEffectSuite
 

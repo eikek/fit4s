@@ -1,19 +1,15 @@
 package fit4s.webview.client.shared
 
-import java.time.Instant
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 import cats.effect.*
 import fs2.dom.*
 
-import fit4s.activities.data.Activity
 import fit4s.activities.data.ActivityListResult
 import fit4s.webview.client.util.FormatTimestamp
 
 import calico.*
 import calico.html.io.{*, given}
-import calico.syntax.*
 
 object ActivityDateHeader {
 

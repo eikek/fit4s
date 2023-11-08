@@ -1,16 +1,12 @@
 package fit4s.webview.client.shared
 
 import cats.effect.*
-import cats.syntax.all.*
-import fs2.Stream
 import fs2.dom.*
 
 import fit4s.activities.data.Activity
-import fit4s.webview.client.shared.ClickAction
 
 import calico.*
 import calico.html.io.{*, given}
-import calico.syntax.*
 
 object ActivityTitle {
 

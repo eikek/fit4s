@@ -1,4 +1,4 @@
-package fit4s.cats.util
+package fit4s.common.util
 
 import cats.effect._
 import cats.syntax.all._

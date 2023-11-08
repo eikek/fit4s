@@ -2,7 +2,7 @@ package fit4s.geocode
 
 import cats.effect.*
 
-import fit4s.cats.util.Cache
+import fit4s.common.util.Cache
 import fit4s.data.Position
 import fit4s.geocode.data.Place
 

@@ -3,8 +3,7 @@ package fit4s.webview.server.util
 import fit4s.http.borer.BorerEntityCodec.Implicits.*
 
 import io.bullet.borer.*
-import org.http4s._
-import org.http4s.dsl.Http4sDsl
+import org.http4s.*
 import org.http4s.headers.`Content-Length`
 
 object ErrorResponse {

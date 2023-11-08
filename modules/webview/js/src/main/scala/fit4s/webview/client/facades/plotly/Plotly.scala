@@ -3,7 +3,7 @@ package fit4s.webview.client.facades.plotly
 import scala.scalajs.js
 import scala.scalajs.js.annotation.JSImport
 
-import org.scalajs.dom.{Element, HTMLElement}
+import org.scalajs.dom.HTMLElement
 
 @js.native
 @JSImport("plotly.js-dist/plotly.js", JSImport.Namespace)

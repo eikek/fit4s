@@ -5,13 +5,12 @@ import cats.effect.*
 import cats.syntax.all.*
 import fs2.dom.*
 
-import _root_.fit4s.activities.data.{Activity, ActivitySession}
-import _root_.fit4s.cats.instances.all.*
+import _root_.fit4s.activities.data.ActivitySession
+import _root_.fit4s.common.instances.all.*
 import _root_.fit4s.profile.types.Sport
 import _root_.fit4s.webview.client.shared.Styles
 import calico.*
 import calico.html.io.{*, given}
-import calico.syntax.*
 
 object ActivitySessionDataDiv {
   val distanceIcon = Styles.distanceIcon

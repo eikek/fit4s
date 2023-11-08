@@ -1,17 +1,17 @@
-package fit4s.cats.instances
+package fit4s.common.instances
 
 import cats.Monoid
 
 import fit4s.data._
 
 trait MonoidInstances {
-  implicit val distanceMonoid: Monoid[Distance] =
+  given Monoid[Distance] =
     Monoid.instance(Distance.zero, _ + _)
 
-  implicit val caloriesMonoid: Monoid[Calories] =
+  given Monoid[Calories] =
     Monoid.instance(Calories.zero, _ + _)
 
-  implicit val temperatureSemigroup: Monoid[Temperature] =
+  given Monoid[Temperature] =
     Monoid.instance(Temperature.zero, _ + _)
 }
 

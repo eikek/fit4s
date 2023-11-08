@@ -8,6 +8,7 @@ import org.scalajs.dom.HTMLElement
 
 @JSGlobal("L.Map")
 @js.native
+@annotation.nowarn
 class LeafletMap(id: String, options: UndefOr[LeafletMap.Options] = js.undefined)
     extends js.Object {
   def setView(

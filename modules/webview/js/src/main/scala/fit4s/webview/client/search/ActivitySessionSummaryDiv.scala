@@ -4,21 +4,17 @@ import java.time.ZoneId
 
 import cats.effect.*
 import cats.syntax.all.*
-import fs2.concurrent.Signal
 import fs2.dom.*
 
-import fit4s.activities.data.ActivityListResult
 import fit4s.activities.data.ActivitySessionSummary
-import fit4s.cats.instances.all.*
+import fit4s.common.instances.all.*
 import fit4s.data.Temperature
-import fit4s.profile.types.ExdQualifiers.Moving
 import fit4s.profile.types.Sport
 import fit4s.webview.client.shared.SportIcon
 import fit4s.webview.client.util.FormatDate
 
 import calico.*
 import calico.html.io.{*, given}
-import calico.syntax.*
 
 object ActivitySessionSummaryDiv {
   val cardStyle =

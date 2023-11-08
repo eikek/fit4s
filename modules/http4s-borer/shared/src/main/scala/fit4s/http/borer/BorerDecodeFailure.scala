@@ -6,12 +6,6 @@ import org.http4s._
 
 final case class BorerDecodeFailure(respString: String, error: Borer.Error[_])
     extends DecodeFailure {
-  private val errorBody: Map[String, String] =
-    Map(
-      "error" -> "JsonDecodeError",
-      "message" -> error.getMessage,
-      "rawString" -> respString
-    )
 
   override val message: String = s"${error.getMessage}: $respString"
 

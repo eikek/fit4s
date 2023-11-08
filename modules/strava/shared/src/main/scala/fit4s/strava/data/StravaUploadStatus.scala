@@ -1,10 +1,8 @@
 package fit4s.strava.data
 
-import fs2.io.file.Path
-
-import io.bullet.borer.NullOptions._
-import io.bullet.borer._
-import io.bullet.borer.derivation.MapBasedCodecs._
+import io.bullet.borer.NullOptions.*
+import io.bullet.borer.*
+import io.bullet.borer.derivation.MapBasedCodecs.*
 
 final case class StravaUploadStatus(
     id: StravaUploadId,

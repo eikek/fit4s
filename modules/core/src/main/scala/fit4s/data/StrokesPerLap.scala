@@ -8,6 +8,6 @@ object StrokesPerLap {
   def strokesPerLap(spl: Double): StrokesPerLap = new StrokesPerLap(spl)
   def spl(spl: Double) = strokesPerLap(spl)
 
-  implicit val ordering: Ordering[StrokesPerLap] =
-    Ordering.by[StrokesPerLap, Double](_.spl)(Ordering.Double.TotalOrdering)
+  given Numeric[StrokesPerLap] =
+    NumericFrom[StrokesPerLap, Double](_.spl, StrokesPerLap.strokesPerLap)
 }

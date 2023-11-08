@@ -31,6 +31,6 @@ object Speed {
   def kmh(kmh: Double): Speed =
     meterPerSecond(kmh / 3.6)
 
-  implicit val ordering: Ordering[Speed] =
-    Ordering.by[Speed, Double](_.meterPerSecond)(Ordering.Double.TotalOrdering)
+  given Numeric[Speed] =
+    NumericFrom[Speed, Double](_.meterPerSecond, Speed.meterPerSecond)
 }

@@ -12,8 +12,8 @@ import fit4s.webview.server.util.ErrorResponse
 import com.comcast.ip4s.{Host, Port}
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.server.Server
-import org.http4s.server.middleware.{CORS, CORSPolicy, Logger}
-import org.http4s.{HttpRoutes, Response, Status}
+import org.http4s.server.middleware.{CORS, Logger}
+import org.http4s.{HttpRoutes, Response}
 
 object Fit4sServer {
 
