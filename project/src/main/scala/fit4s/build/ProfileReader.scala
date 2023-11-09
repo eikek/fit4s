@@ -12,16 +12,16 @@ import scala.util.{Try, Using}
 
 object ProfileReader {
 
-  def readFile(xlsx: File)(implicit logger: Logger) =
-    Using(new XSSFWorkbook(xlsx)) { wb =>
-      val sheetCount = wb.getNumberOfSheets
-      logger.info(s"Found $sheetCount sheets in the xlsx file")
-      if (sheetCount != 2) sys.error(s"Unexpected sheet count $sheetCount")
-      val types = wb.getSheetAt(0)
-      val messages = wb.getSheetAt(1)
+  def readFile(xlsx: File)(implicit logger: Logger) = this.synchronized {
+    val wb = new XSSFWorkbook(xlsx)
+    val sheetCount = wb.getNumberOfSheets
+    logger.info(s"Found $sheetCount sheets in the xlsx file")
+    if (sheetCount != 2) sys.error(s"Unexpected sheet count $sheetCount")
+    val types = wb.getSheetAt(0)
+    val messages = wb.getSheetAt(1)
 
-      (readTypes(types), readMessages(messages))
-    }
+    (readTypes(types), readMessages(messages))
+  }
 
   def readMessages(sheet: XSSFSheet): List[MessageDef] = {
     // skip header
