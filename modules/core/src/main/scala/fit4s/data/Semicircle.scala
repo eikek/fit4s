@@ -21,6 +21,6 @@ object Semicircle {
   def degree(deg: Double): Semicircle =
     semicircle((deg / scToDegFactor).toLong)
 
-  implicit val ordering: Ordering[Semicircle] =
-    Ordering.by(_.semicircle)
+  given Numeric[Semicircle] =
+    NumericFrom[Semicircle, Long](_.semicircle, Semicircle.semicircle)
 }

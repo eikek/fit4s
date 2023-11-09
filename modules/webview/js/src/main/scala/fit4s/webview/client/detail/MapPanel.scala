@@ -1,8 +1,7 @@
 package fit4s.webview.client.detail
 
-import scala.concurrent.duration.*
 import scala.scalajs.js
-import scala.scalajs.js.JSConverters._
+import scala.scalajs.js.JSConverters.*
 
 import cats.Eq
 import cats.effect.*
@@ -10,15 +9,12 @@ import cats.syntax.all.*
 import fs2.concurrent.SignallingRef
 
 import fit4s.activities.data.ActivityDetailResult
-import fit4s.cats.instances.all.*
-import fit4s.data.Distance
 import fit4s.webview.client.facades.leaflet.*
 import fit4s.webview.client.facades.plotly.*
 import fit4s.webview.client.shared.ClickAction
 
 import calico.html.io.{*, given}
-import org.scalajs.dom.ResizeObserver
-import org.scalajs.dom.document
+import org.scalajs.dom.{ResizeObserver, document}
 
 object MapPanel {
 
@@ -131,6 +127,7 @@ object MapPanel {
     data.exists(_.temperature.isDefined)
   }
 
+  @annotation.nowarn
   private def debug[A](msg: String, a: A): A = {
     scribe.warn(s"$msg: $a")
     a
@@ -160,7 +157,7 @@ object MapPanel {
         .addTo(leafletMap)
 
       // invalidateSize refreshes the map when its container changes size
-      val obs = new ResizeObserver((_, _) => {
+      new ResizeObserver((_, _) => {
         leafletMap.invalidateSize()
         leafletMap.fitBounds(Leaflet.latLngBounds(track))
       }).observe(leafletMap.getContainer())

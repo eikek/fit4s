@@ -1,9 +1,9 @@
-package fit4s.cats.syntax
+package fit4s.common.syntax
 
 import java.time.Instant
 
-import fit4s.cats.instances
-import fit4s.cats.util.{DateInstant, TimeInstant}
+import fit4s.common.instances
+import fit4s.common.util.{DateInstant, TimeInstant}
 
 object all extends instances.all {
 

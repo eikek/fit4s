@@ -6,11 +6,8 @@ import cats.effect.*
 import cats.syntax.all.*
 import fs2.dom.HtmlElement
 
-import fit4s.activities.data.ActivityDetailResult
-import fit4s.activities.data.ActivityLap
-import fit4s.cats.instances.all.*
-import fit4s.cats.syntax.all.*
-import fit4s.profile.messages.LapMsg.avgCadence
+import fit4s.activities.data.{ActivityDetailResult, ActivityLap}
+import fit4s.common.syntax.all.*
 import fit4s.profile.types.Sport
 
 import calico.html.io.{*, given}

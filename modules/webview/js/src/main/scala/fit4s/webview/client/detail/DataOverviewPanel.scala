@@ -1,12 +1,11 @@
 package fit4s.webview.client.detail
 
-import cats.Eq
 import cats.effect.{IO, Resource}
 import cats.syntax.all.*
 import fs2.dom.HtmlElement
 
 import fit4s.activities.data.{ActivityDetailResult, ActivitySession}
-import fit4s.cats.instances.all.*
+import fit4s.common.instances.all.*
 import fit4s.profile.types.Sport
 import fit4s.webview.client.shared.*
 

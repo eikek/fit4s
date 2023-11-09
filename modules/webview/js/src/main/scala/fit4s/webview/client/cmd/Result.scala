@@ -3,7 +3,8 @@ package fit4s.webview.client.cmd
 import cats.Eq
 
 import fit4s.activities.data.*
-import fit4s.webview.client.{FetchResult, Fit4sClient}
+import fit4s.webview.client.FetchResult
+import fit4s.webview.client.cmd.Cmd.SearchTagSummary
 
 enum Result:
   case SearchResult(
@@ -15,8 +16,12 @@ enum Result:
       activites: FetchResult[List[ActivityListResult]]
   )
   case GetBikeTagsResult(tags: FetchResult[List[Tag]])
+  case GetShoeTagsResult(tags: FetchResult[List[Tag]])
   case GetTagsResult(tags: FetchResult[List[Tag]])
-  case TagSummaryResult(result: FetchResult[List[(Tag, List[ActivitySessionSummary])]])
+  case TagSummaryResult(
+      req: SearchTagSummary,
+      result: FetchResult[List[(Tag, List[ActivitySessionSummary])]]
+  )
   case DetailResult(result: FetchResult[Option[ActivityDetailResult]])
   case SetSearchPageResult
   case SetSearchQueryResult(q: String)

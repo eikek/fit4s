@@ -2,13 +2,9 @@ package fit4s.common.borer
 
 import java.time.{Duration, Instant, ZoneId}
 
-import cats.Show
-import cats.syntax.all.*
-
-import fit4s.cats.syntax.all.*
-import fit4s.cats.util.DateInstant
-import fit4s.common.borer.CoreJsonCodec
 import fit4s.common.borer.syntax.all.*
+import fit4s.common.syntax.all.*
+import fit4s.common.util.DateInstant
 import fit4s.data.*
 import fit4s.profile.types.Sport
 

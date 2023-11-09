@@ -1,15 +1,9 @@
 package fit4s.webview.server
 
-import java.time.ZoneId
-
 import cats.data.{Kleisli, OptionT}
 import cats.effect.*
 import cats.syntax.all.*
 
-import fit4s.activities.ActivityLog
-import fit4s.http.borer.BorerEntityCodec.Implicits.*
-import fit4s.webview.data.{TagAndQuery, TagRename}
-import fit4s.webview.json.BasicJsonCodec
 import fit4s.webview.server.util.*
 
 import org.http4s.*

@@ -1,8 +1,8 @@
 package fit4s.webview.client.cmd
 
+import cats.Parallel
 import cats.effect.*
 import cats.syntax.all.*
-import cats.{Eq, Parallel}
 import fs2.Stream
 import fs2.concurrent.Topic
 
@@ -63,7 +63,14 @@ object CommandRuntime {
             .flatMap(topic.publish1)
             .void
 
-        case Cmd.SearchTagSummary(query, tags) =>
+        case Cmd.GetShoeTags =>
+          fit4sClient
+            .tagList("Shoe/".some, Page.one(20))
+            .map(Result.GetShoeTagsResult.apply)
+            .flatMap(topic.publish1)
+            .void
+
+        case req @ Cmd.SearchTagSummary(query, tags) =>
           if (tags.isEmpty) logger.info(s"No tags provided for search-tags-summary")
           else {
             val results: F[List[(Tag, FetchResult[List[ActivitySessionSummary]])]] =
@@ -73,7 +80,7 @@ object CommandRuntime {
               }
             results
               .map(_.traverse { case (t, fr) => fr.map(r => t -> r) })
-              .map(Result.TagSummaryResult.apply)
+              .map(Result.TagSummaryResult(req, _))
               .flatMap(topic.publish1)
               .void
           }

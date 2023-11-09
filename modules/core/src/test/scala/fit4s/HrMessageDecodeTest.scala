@@ -1,9 +1,5 @@
 package fit4s
 
-import cats.effect.IO
-
-import fit4s.profile.messages.HrMsg
-
 import munit.CatsEffectSuite
 
 class HrMessageDecodeTest extends CatsEffectSuite {

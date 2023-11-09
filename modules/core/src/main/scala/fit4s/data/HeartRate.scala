@@ -16,6 +16,6 @@ object HeartRate {
 
   def bpm(bpm: Int): HeartRate = new HeartRate(bpm)
 
-  implicit val ordering: Ordering[HeartRate] =
-    Ordering.by(_.bpm)
+  implicit val numeric: Numeric[HeartRate] =
+    NumericFrom[HeartRate, Int](_.bpm, HeartRate.bpm)
 }

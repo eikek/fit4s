@@ -14,7 +14,6 @@ import fit4s.webview.client.search.SearchPage
 
 import calico.IOWebApp
 import calico.html.io.{*, given}
-import org.http4s.implicits.*
 
 object Fit4sApp extends IOWebApp {
   private[this] val logger = scribe.Logger("Fit4sApp")

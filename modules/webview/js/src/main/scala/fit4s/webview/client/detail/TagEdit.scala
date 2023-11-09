@@ -1,19 +1,14 @@
 package fit4s.webview.client.detail
 
 import cats.Eq
-import cats.data.NonEmptyList
 import cats.effect.*
 import cats.syntax.all.*
 import fs2.concurrent.SignallingRef
 
-import fit4s.activities.data.ActivityId
-import fit4s.activities.data.{Tag, TagName}
+import fit4s.activities.data.{ActivityId, Tag, TagName}
 import fit4s.webview.client.FetchResult
 import fit4s.webview.client.cmd.*
-import fit4s.webview.client.shared.ClickAction
-import fit4s.webview.client.shared.Styles
-import fit4s.webview.client.shared.TagList
-import fit4s.webview.client.shared.TextField
+import fit4s.webview.client.shared._
 import fit4s.webview.data.RequestFailure
 
 import calico.html.io.{*, given}

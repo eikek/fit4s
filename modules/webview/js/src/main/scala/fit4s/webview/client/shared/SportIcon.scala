@@ -4,13 +4,12 @@ import cats.data.NonEmptyList
 import cats.effect.*
 import fs2.dom.*
 
-import fit4s.cats.instances.all.*
+import fit4s.common.instances.all.given
 import fit4s.profile.types.Sport
 
 import calico.*
 import calico.html.Modifier
 import calico.html.io.{*, given}
-import calico.syntax.*
 
 object SportIcon {
   private[this] val fa = "fa"

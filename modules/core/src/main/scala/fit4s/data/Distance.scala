@@ -26,6 +26,6 @@ object Distance {
   def km(km: Double): Distance =
     new Distance(km * 1000)
 
-  implicit val ordering: Ordering[Distance] =
-    Ordering.by[Distance, Double](_.meter)(Ordering.Double.TotalOrdering)
+  given Numeric[Distance] =
+    NumericFrom[Distance, Double](_.meter, Distance.meter)
 }

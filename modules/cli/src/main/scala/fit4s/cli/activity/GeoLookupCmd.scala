@@ -1,8 +1,7 @@
 package fit4s.cli.activity
 
-import cats.data.NonEmptyList
 import cats.effect.{ExitCode, IO}
-import cats.syntax.all._
+import cats.syntax.all.*
 
 import fit4s.activities.data.ActivityId
 import fit4s.cli.*

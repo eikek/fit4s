@@ -2,7 +2,7 @@ package fit4s.activities.data
 
 import java.time.{Duration, Instant}
 
-import fit4s.data.{DeviceProduct, FileId}
+import fit4s.data.FileId
 
 final case class Activity(
     id: ActivityId,

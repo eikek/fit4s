@@ -9,7 +9,6 @@ import fs2.io.file.Path
 
 import fit4s.activities.ActivityLog
 import fit4s.activities.data.*
-import fit4s.activities.dump.ExportData
 import fit4s.profile.types.Sport
 
 import com.comcast.ip4s.{Host, Port}

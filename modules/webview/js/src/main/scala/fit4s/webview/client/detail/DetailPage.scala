@@ -4,7 +4,6 @@ import java.time.ZoneId
 
 import cats.Eq
 import cats.effect.{IO, Resource}
-import cats.syntax.all.*
 import fs2.concurrent.SignallingRef
 
 import fit4s.activities.data.ActivityDetailResult

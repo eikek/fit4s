@@ -43,23 +43,12 @@ val sharedSettings = Seq(
       "-unchecked",
       "-encoding",
       "UTF-8",
-      "-language:higherKinds"
-    ) ++
-      (if (scalaBinaryVersion.value.startsWith("2.13"))
-         List("-Werror", "-Wdead-code", "-Wunused", "-Wvalue-discard")
-       else if (scalaBinaryVersion.value.startsWith("3"))
-         List(
-           "-indent",
-           "-print-lines",
-           "-Ykind-projector",
-           "-Xmigration",
-           "-Xfatal-warnings"
-         )
-       else
-         Nil),
-  libraryDependencies ++=
-    (if (scalaBinaryVersion.value.startsWith("3")) Seq.empty
-     else Seq(compilerPlugin(Dependencies.betterMonadicFor))),
+      "-language:higherKinds",
+      "-Werror",
+      "-indent",
+      "-print-lines",
+      "-Wunused:all"
+    ),
   Compile / console / scalacOptions := Seq(),
   Test / console / scalacOptions := Seq(),
   Compile / packageDoc / publishArtifact := false, // deactivate until typelevel/fs2#3293 is resolved
@@ -189,7 +178,8 @@ lazy val http4sBorer = crossProject(JSPlatform, JVMPlatform)
     description := "Use borer codecs with http4s",
     libraryDependencies ++=
       Dependencies.borerJs.value ++
-        Dependencies.http4sCore.value
+        Dependencies.http4sCore.value ++
+        Dependencies.fs2Core.value
   )
 lazy val http4sBorerJs = http4sBorer.js
 lazy val http4sBorerJvm = http4sBorer.jvm
@@ -233,6 +223,7 @@ lazy val strava = crossProject(JSPlatform, JVMPlatform)
   .jvmSettings(
     libraryDependencies ++=
       Dependencies.http4sServer ++
+        Dependencies.fs2Jvm ++
         Dependencies.scalaCsv ++
         Dependencies.scribe
   )

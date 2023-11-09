@@ -1,4 +1,4 @@
-package fit4s.cats.util
+package fit4s.common.util
 
 import java.time.Instant
 

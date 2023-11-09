@@ -1,24 +1,15 @@
 package fit4s.webview.client.search
 
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.ZonedDateTime
+import java.time.{Instant, LocalDate, ZoneId}
 
-import cats.Show
 import cats.effect.*
 import cats.syntax.all.*
 import fs2.dom.*
 
-import _root_.fit4s.activities.data.Activity
-import _root_.fit4s.activities.data.ActivitySession
-import _root_.fit4s.cats.instances.all.*
 import _root_.fit4s.common.util.DateUtil
-import _root_.fit4s.profile.types.Sport
 import _root_.fit4s.webview.client.shared.{Anchor, ClickAction}
 import calico.*
 import calico.html.io.{*, given}
-import calico.syntax.*
 
 object DefinedQueries {
 

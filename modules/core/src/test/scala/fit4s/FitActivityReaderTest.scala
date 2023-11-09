@@ -1,8 +1,7 @@
 package fit4s
 
-import java.time.{Duration, Instant, ZoneId}
+import java.time.ZoneId
 
-import fit4s.data.{HeartRate, Speed}
 import fit4s.profile.messages.RecordMsg
 
 import munit.CatsEffectSuite

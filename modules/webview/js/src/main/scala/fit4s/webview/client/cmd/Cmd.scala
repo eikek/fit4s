@@ -1,7 +1,5 @@
 package fit4s.webview.client.cmd
 
-import cats.data.NonEmptyList
-
 import fit4s.activities.data.*
 
 enum Cmd:
@@ -9,6 +7,7 @@ enum Cmd:
   case SearchListOnlyCmd(query: String, page: Page)
   case SearchRefresh
   case GetBikeTags
+  case GetShoeTags
   case GetTags(filter: String)
   case SearchTagSummary(query: String, tags: List[Tag])
   case SetDetailPage(id: ActivityId)
@@ -19,3 +18,8 @@ enum Cmd:
   case SetTag(id: ActivityId, tag: Tag)
   case RemoveTag(id: ActivityId, tag: Tag)
   case CreateTag(id: ActivityId, name: TagName)
+
+object Cmd:
+  extension (self: SearchTagSummary)
+    def hasBikeTags = self.tags.exists(_.name.startsWith1("Bike/"))
+    def hasShoeTags = self.tags.exists(_.name.startsWith1("Shoe/"))
