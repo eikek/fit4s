@@ -17,7 +17,7 @@ object Dependencies {
     val doobie = "1.0.0-RC4"
     val http4s = "0.23.23"
     val http4sDom = "0.2.10"
-    val flyway = "9.22.2"
+    val flyway = "10.0.0"
     val h2 = "2.2.224"
     val munit = "0.7.29"
     val munitCatsEffect = "1.0.7"
@@ -114,13 +114,9 @@ object Dependencies {
   )
 
   val flyway = Seq(
-    "org.flywaydb" % "flyway-core" % V.flyway
+    "org.flywaydb" % "flyway-core" % V.flyway,
+    "org.flywaydb" % "flyway-database-postgresql" % V.flyway
 //    "org.flywaydb" % "flyway-mysql" % FlywayVersion
-  ).map(
-    _.excludeAll(
-      ExclusionRule("com.fasterxml.jackson.core"),
-      ExclusionRule("com.fasterxml.jackson.dataformat")
-    )
   )
 
   val h2 = Seq(
