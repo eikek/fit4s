@@ -2,7 +2,7 @@ import Dependencies.V
 import com.github.sbt.git.SbtGit.GitKeys._
 import org.scalajs.linker.interface.ModuleSplitStyle
 
-addCommandAlias("ci", "; lint; +test; +publishLocal")
+addCommandAlias("ci", "; lint; test; publishLocal")
 addCommandAlias(
   "lint",
   "; scalafmtSbtCheck; scalafmtCheckAll; Compile/scalafix --check; Test/scalafix --check"
