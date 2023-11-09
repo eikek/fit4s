@@ -2,7 +2,7 @@ import Dependencies.V
 import com.github.sbt.git.SbtGit.GitKeys._
 import org.scalajs.linker.interface.ModuleSplitStyle
 
-addCommandAlias("ci", "; lint; +test; +publishLocal")
+addCommandAlias("ci", "; lint; test; publishLocal")
 addCommandAlias(
   "lint",
   "; scalafmtSbtCheck; scalafmtCheckAll; Compile/scalafix --check; Test/scalafix --check"
@@ -11,25 +11,9 @@ addCommandAlias("fix", "; Compile/scalafix; Test/scalafix; scalafmtSbt; scalafmt
 addCommandAlias("make-package", "; cli/Universal/packageBin")
 addCommandAlias("make-stage", "; cli/Universal/stage")
 
-// remove dirt suffix, bc the build apparently touches the xslx file
-// this causes a timestamp suffix and then it's just harder to find
-// the resulting file from the github action yaml
-def versionFmt(out: sbtdynver.GitDescribeOutput): String =
-  if (out.ref.isTag && out.commitSuffix.isEmpty) out.ref.dropPrefix
-  else out.ref.dropPrefix + out.commitSuffix.mkString("-", "-", "")
-
-def fallbackVersion(d: java.util.Date): String = s"HEAD-${sbtdynver.DynVer.timestamp(d)}"
-
 inThisBuild(
   List(
-    dynverSeparator := "-",
-    dynverSonatypeSnapshots := true,
-    version := dynverGitDescribeOutput.value
-      .mkVersion(versionFmt, fallbackVersion(dynverCurrentDate.value)),
-    dynver := {
-      val d = new java.util.Date
-      sbtdynver.DynVer.getGitDescribeOutput(d).mkVersion(versionFmt, fallbackVersion(d))
-    }
+    dynverSeparator := "-"
   )
 )
 
@@ -51,7 +35,6 @@ val sharedSettings = Seq(
     ),
   Compile / console / scalacOptions := Seq(),
   Test / console / scalacOptions := Seq(),
-  Compile / packageDoc / publishArtifact := false, // deactivate until typelevel/fs2#3293 is resolved
   licenses := Seq(
     "GPL-3.0-or-later" -> url("https://spdx.org/licenses/GPL-3.0-or-later")
   ),
