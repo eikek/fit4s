@@ -1,7 +1,5 @@
 package fit4s.webview.server.util
 
-import cats.data.ValidatedNel
-
 import fit4s.activities.data.ActivityId
 
 object ActivityIdVar {

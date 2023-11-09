@@ -1,25 +1,19 @@
 package fit4s.activities.dump
 
-import cats.Applicative
-import cats.Apply
 import cats.effect.*
 import cats.syntax.all.*
-import fs2.io.file.Path
+import cats.{Applicative, Apply}
 import fs2.{Chunk, Pipe, Stream}
 
 import fit4s.activities.JdbcConfig
 import fit4s.activities.data.Location
-import fit4s.activities.data.Page
-import fit4s.activities.data.Tag
 import fit4s.activities.dump.ExportData.ProgressObserve
-import fit4s.activities.records.RTag
 import fit4s.activities.records.*
 import fit4s.http.borer.StreamDecode
 
-import doobie._
-import doobie.implicits._
+import doobie.*
+import doobie.implicits.*
 import io.bullet.borer.*
-import io.bullet.borer.derivation.MapBasedCodecs.*
 
 trait ExportData[F[_]] {
 

@@ -2,7 +2,7 @@ package fit4s.http.borer
 
 import cats.effect.*
 import cats.syntax.all.*
-import fs2.{Chunk, Stream}
+import fs2.Stream
 
 import io.bullet.borer.*
 import scodec.bits.ByteVector

@@ -2,7 +2,7 @@ package fit4s.webview.client.facades.leaflet
 
 import scala.scalajs.js
 import scala.scalajs.js.UndefOr
-import scala.scalajs.js.annotation.{JSGlobal, JSName}
+import scala.scalajs.js.annotation.JSGlobal
 
 @JSGlobal("L.Marker")
 @js.native

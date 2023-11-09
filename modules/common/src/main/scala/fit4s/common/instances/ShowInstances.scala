@@ -1,4 +1,4 @@
-package fit4s.cats.instances
+package fit4s.common.instances
 
 import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
@@ -8,7 +8,7 @@ import java.util.Locale
 import cats.Show
 import cats.syntax.all._
 
-import fit4s.cats.util.{DateInstant, TimeInstant}
+import fit4s.common.util.{DateInstant, TimeInstant}
 import fit4s.data._
 import fit4s.profile.types.{Sport, SubSport, SwimStroke}
 

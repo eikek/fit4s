@@ -15,6 +15,6 @@ object Calories {
   def kcal(n: Double): Calories = new Calories(n)
   def cal(n: Double): Calories = new Calories(n / 1000.0)
 
-  implicit val ordering: Ordering[Calories] =
-    Ordering.by[Calories, Double](_.kcal)(Ordering.Double.TotalOrdering)
+  given numeric: Numeric[Calories] =
+    NumericFrom[Calories, Double](_.kcal, Calories.kcal)
 }

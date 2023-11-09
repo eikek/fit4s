@@ -4,13 +4,10 @@ import cats.effect.*
 import cats.syntax.all.*
 import fs2.dom.*
 
-import fit4s.activities.data.Activity
-import fit4s.activities.data.ActivityListResult
 import fit4s.activities.data.Tag
 
 import calico.*
 import calico.html.io.{*, given}
-import calico.syntax.*
 
 object TagList {
   val skyTagStyle =

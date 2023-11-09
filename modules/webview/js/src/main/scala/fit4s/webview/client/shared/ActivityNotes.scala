@@ -7,7 +7,6 @@ import fit4s.activities.data.Activity
 
 import calico.*
 import calico.html.io.{*, given}
-import calico.syntax.*
 
 object ActivityNotes {
 

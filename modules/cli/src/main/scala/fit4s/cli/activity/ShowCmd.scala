@@ -9,8 +9,8 @@ import cats.effect.{ExitCode, IO}
 import cats.syntax.all.*
 
 import fit4s.activities.data._
-import fit4s.cats.syntax.all._
 import fit4s.cli._
+import fit4s.common.syntax.all._
 import fit4s.data.Distance
 import fit4s.profile.types.Sport
 

@@ -7,7 +7,6 @@ import fit4s.activities.data.ActivitySession
 
 import calico.*
 import calico.html.io.{*, given}
-import calico.syntax.*
 
 object SportAndDate {
 

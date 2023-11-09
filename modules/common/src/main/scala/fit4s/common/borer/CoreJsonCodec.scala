@@ -11,9 +11,7 @@ import cats.syntax.all.*
 import fit4s.common.borer.syntax.all.*
 import fit4s.profile.types.*
 
-import io.bullet.borer.NullOptions.*
 import io.bullet.borer.*
-import io.bullet.borer.derivation.MapBasedCodecs.{deriveDecoder, deriveEncoder}
 
 /** Codecs for fit4s.profile */
 trait CoreJsonCodec {

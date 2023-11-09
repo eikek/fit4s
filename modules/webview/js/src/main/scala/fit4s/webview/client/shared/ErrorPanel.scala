@@ -1,9 +1,5 @@
 package fit4s.webview.client.shared
 
-import java.time.Instant
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-
 import cats.effect.*
 import fs2.dom.*
 
@@ -11,7 +7,6 @@ import fit4s.webview.data.RequestFailure
 
 import calico.*
 import calico.html.io.{*, given}
-import calico.syntax.*
 
 object ErrorPanel {
 

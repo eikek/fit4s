@@ -7,7 +7,7 @@ import cats.effect.*
 import cats.syntax.all.*
 
 import fit4s.activities.ActivityLog
-import fit4s.activities.data.{Page, QueryCondition}
+import fit4s.activities.data.QueryCondition
 import fit4s.http.borer.BorerEntityCodec.Implicits.*
 import fit4s.webview.data.*
 import fit4s.webview.json.BasicJsonCodec

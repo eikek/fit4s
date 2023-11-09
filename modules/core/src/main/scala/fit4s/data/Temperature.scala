@@ -16,6 +16,6 @@ object Temperature {
 
   def celcius(celcius: Double): Temperature = new Temperature(celcius)
 
-  implicit val ordering: Ordering[Temperature] =
-    Ordering.by[Temperature, Double](_.celcius)(Ordering.Double.TotalOrdering)
+  given Numeric[Temperature] =
+    NumericFrom[Temperature, Double](_.celcius, Temperature.celcius)
 }

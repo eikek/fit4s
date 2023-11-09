@@ -1,7 +1,6 @@
 package fit4s.http.borer
 
 import io.bullet.borer.*
-import io.bullet.borer.derivation.MapBasedCodecs.*
 import org.http4s.*
 
 trait Http4sCodec:

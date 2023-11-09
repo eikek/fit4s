@@ -5,7 +5,6 @@ import fit4s.common.borer.syntax.all.*
 import fit4s.data.Semicircle
 import fit4s.geocode.data.{Address, BoundingBox, Place}
 
-import io.bullet.borer.NullOptions.*
 import io.bullet.borer.*
 import io.bullet.borer.derivation.MapBasedCodecs.*
 

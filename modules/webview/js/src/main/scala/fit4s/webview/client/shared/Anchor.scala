@@ -4,12 +4,10 @@ import cats.effect.*
 import cats.syntax.all.*
 import fs2.dom.*
 
-import fit4s.activities.data.Activity
 import fit4s.strava.data.StravaActivityId
 
 import calico.*
 import calico.html.io.{*, given}
-import calico.syntax.*
 
 object Anchor {
   val style =

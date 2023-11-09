@@ -1,11 +1,9 @@
 package fit4s.http.borer
 
-import cats.effect.*
 import fs2.Pull
 import fs2.RaiseThrowable
 import fs2.{Chunk, Stream}
 
-import io.bullet.borer.DecodingSetup.Api
 import io.bullet.borer.*
 
 /** Caveat: the buffersize must be large enough to decode at least one A */
@@ -28,7 +26,7 @@ object StreamDecode {
         case Some((hd, tl)) =>
           decodeCont[A](decode)(hd) match {
             case Right((v, remain)) =>
-              Pull.output(Chunk.vector(v)).as(Some(Stream.chunk(remain) ++ tl))
+              Pull.output(Chunk.from(v)).as(Some(Stream.chunk(remain) ++ tl))
             case Left(ex) =>
               Pull.raiseError(ex)
           }
@@ -40,7 +38,6 @@ object StreamDecode {
   private def decodeCont[A](
       decode: Input[Array[Byte]] => DecodingSetup.Sealed[A]
   )(input: Chunk[Byte]): Either[Throwable, (Vector[A], Chunk[Byte])] = {
-    val len = input.size
     @annotation.tailrec
     def go(
         in: Input[Array[Byte]],

@@ -1,11 +1,11 @@
 package fit4s.webview.client.facades.leaflet
 
 import scala.scalajs.js
-import scala.scalajs.js.UndefOr
 import scala.scalajs.js.annotation.{JSGlobal, JSName}
 
 @JSGlobal("L.LatLngBounds")
 @js.native
+@annotation.nowarn
 class LatLngBounds(southWest: LatLng, northEast: LatLng) extends js.Object {
   def isValid(): Boolean = js.native
 

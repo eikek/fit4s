@@ -5,20 +5,17 @@ import java.time.{Instant, ZoneId}
 
 import scala.collection.immutable.Seq
 
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
+import cats.syntax.all.*
 import fs2.compression.Compression
 import fs2.io.file.{Files, Path}
 import fs2.{Chunk, Stream}
 
 import fit4s.activities.ImportResult
 import fit4s.activities.data.{ActivityId, LocationId, TagId}
-import fit4s.tcx.TcxActivity
-import fit4s.tcx.TcxReader
-import fit4s.{ActivityReader, FitFile}
+import fit4s.tcx.{TcxActivity, TcxReader}
 
-import doobie._
-import scodec.Attempt
+import doobie.*
 
 object TcxFileImport {
 
@@ -77,6 +74,4 @@ object TcxFileImport {
         .flatMap(_.content)
     else Files[F].readAll(file)
 
-  private def isMain(fit: FitFile) =
-    fit.findFileId.isRight
 }

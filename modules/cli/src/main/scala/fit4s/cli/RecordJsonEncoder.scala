@@ -5,7 +5,6 @@ import fs2.io.file.Path
 import fit4s.activities.data.*
 import fit4s.common.borer.DataJsonCodec.*
 import fit4s.geocode.data.{BoundingBox, NominatimOsmId, NominatimPlaceId}
-import fit4s.profile.types.LapTrigger
 
 import io.bullet.borer.NullOptions.*
 import io.bullet.borer.*

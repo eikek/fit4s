@@ -10,7 +10,7 @@ import fs2.io.file.Files
 import fs2.io.file.Path
 import fs2.io.net.Network
 
-import fit4s.cats.util.Cache
+import fit4s.common.util.Cache
 import fit4s.http.borer.BorerEntityCodec.Implicits.*
 import fit4s.strava.data.*
 import fit4s.strava.{StravaAppCredentials, StravaClient, StravaClientConfig}

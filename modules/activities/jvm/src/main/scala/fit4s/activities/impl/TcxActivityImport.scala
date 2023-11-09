@@ -1,24 +1,21 @@
 package fit4s.activities.impl
 
-import java.time.{Duration, Instant, ZoneId}
+import java.time.{Instant, ZoneId}
 
 import scala.collection.immutable.Seq
 
 import cats.data.{NonEmptyList, OptionT}
 import cats.effect.Sync
-import cats.syntax.all._
+import cats.syntax.all.*
 
-import fit4s.ActivityReader
 import fit4s.activities.ImportResult
-import fit4s.activities.ImportResult.tcxError
-import fit4s.activities.data.Activity
-import fit4s.activities.data._
-import fit4s.activities.records._
-import fit4s.data._
+import fit4s.activities.data.*
+import fit4s.activities.records.*
+import fit4s.data.*
 import fit4s.profile.types.SubSport
-import fit4s.tcx.{TcxActivity, TcxLap}
+import fit4s.tcx.TcxActivity
 
-import doobie._
+import doobie.*
 
 object TcxActivityImport {
   def addActivity(

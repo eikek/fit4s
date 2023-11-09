@@ -10,7 +10,7 @@ import fs2.io.file.{Files, Path}
 import fs2.io.net.Network
 import fs2.{Chunk, Stream}
 
-import fit4s.cats.util.Cache
+import fit4s.common.util.Cache
 import fit4s.strava.data.*
 import fit4s.strava.impl.DefaultStravaClient
 

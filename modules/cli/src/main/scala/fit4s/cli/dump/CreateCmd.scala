@@ -1,14 +1,11 @@
 package fit4s.cli.dump
 
-import cats.effect._
+import cats.effect.*
 import cats.syntax.all.*
-import fs2.Stream
 import fs2.compression.Compression
 import fs2.io.file.{Files, Path}
 
-import fit4s.activities.dump.ExportData
-import fit4s.cli.CliConfig
-import fit4s.cli.{ConfigValues, SharedOpts}
+import fit4s.cli.{CliConfig, SharedOpts}
 
 import com.monovore.decline.Opts
 

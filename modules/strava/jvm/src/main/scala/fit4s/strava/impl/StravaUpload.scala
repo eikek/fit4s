@@ -18,7 +18,6 @@ import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl
 import org.http4s.headers.`Content-Type`
 import org.http4s.multipart.{Multiparts, Part}
-import scodec.bits.ByteVector
 
 final class StravaUpload[F[_]: Async: Files](
     config: StravaClientConfig,
