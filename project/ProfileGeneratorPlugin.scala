@@ -37,7 +37,7 @@ object ProfileGeneratorPlugin extends AutoPlugin {
     logger.info(s"Generating profile sources to $target")
     IO.deleteFilesEmptyDirs(List(target))
 
-    val (typeDefs, messageDefs) = ProfileReader.readFile(input)(logger).get
+    val (typeDefs, messageDefs) = ProfileReader.readFile(input)(logger)
     val typeSources = TypesGenerator.generate(pkg, typeDefs)
     val msgSources = MessagesGenerator.generate(pkg, messageDefs, typeDefs)
 
