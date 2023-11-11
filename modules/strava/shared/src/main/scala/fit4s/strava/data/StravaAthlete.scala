@@ -1,5 +1,6 @@
 package fit4s.strava.data
 
+import io.bullet.borer.NullOptions.*
 import io.bullet.borer._
 import io.bullet.borer.derivation.MapBasedCodecs._
 
