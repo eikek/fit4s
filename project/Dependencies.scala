@@ -14,7 +14,7 @@ object Dependencies {
     val calico = "0.2.1"
     val ciris = "3.4.0"
     val decline = "2.4.1"
-    val doobie = "1.0.0-RC4"
+    val doobie = "1.0.0-RC5"
     val http4s = "0.23.24"
     val http4sDom = "0.2.10"
     val flyway = "10.0.1"
