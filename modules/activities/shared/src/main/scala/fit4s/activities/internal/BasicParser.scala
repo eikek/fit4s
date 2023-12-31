@@ -14,7 +14,7 @@ import fit4s.profile.types.{Sport, SubSport}
 
 abstract class BasicParser(zoneId: ZoneId, currentTime: Instant) {
   val instant: Parser[Instant] =
-    BasicParser.localDateTime.map(_.atZone(zoneId).toInstant)
+    BasicParser.timestamp(zoneId).backtrack | BasicParser.epochSeconds
 
   val lastWeeks: Parser[Instant] =
     BasicParser.lastNDays(currentTime, 7, NonEmptyList.of("week", "weeks", "w"))
@@ -128,6 +128,26 @@ object BasicParser {
   val digit4 = Numbers.digit.repAs[String](4, 4).map(_.toInt)
   val digits = Numbers.digits.map(_.toInt)
 
+  val month: Parser[Int] =
+    digit2
+      .filter(n => 1 <= n && n <= 12)
+      .withContext("Invalid month digits")
+
+  val day: Parser[Int] =
+    digit2
+      .filter(n => 1 <= n && n <= 31)
+      .withContext("Invalid day digits")
+
+  val hour: Parser[Int] =
+    digit2
+      .filter(n => 0 <= n && n <= 23)
+      .withContext("Invalid hour digits")
+
+  val minsec: Parser[Int] =
+    digit2
+      .filter(n => 0 <= n && n <= 59)
+      .withContext("Invalid minute or second digits")
+
   val commaSep: Parser[Unit] = ws.?.with1 *> Parser.char(',') <* ws.?
 
   val plusSep: Parser[Unit] = ws.?.with1 *> Parser.char('+') <* ws.?
@@ -165,30 +185,37 @@ object BasicParser {
 
   val localDate: Parser[LocalDate] = {
     val year = digit4
-    val d2 = digit2
     val minus = Parser.char('-').void
 
-    val date = year ~ (minus.? *> d2).? ~ (minus.? *> d2).?
+    val date = year ~ (minus.? *> month).? ~ (minus.? *> day).?
     date.map { case ((year, mm), md) =>
       LocalDate.of(year, mm.getOrElse(1), md.getOrElse(1))
     }
   }
 
+  val utc = (Parser.char('Z') | Parser.char('z')).as(ZoneOffset.UTC)
+
   val localTime: Parser[LocalTime] = {
-    val d2 = digit2
     val col = Parser.char(':').void
 
-    val time = d2 ~ (col.? *> d2).?
-    time.map { case (hour, min) =>
-      LocalTime.of(hour, min.getOrElse(0))
+    val time = hour ~ (col.? *> minsec).? ~ (col.? *> minsec).?
+    time.map { case ((hour, min), sec) =>
+      LocalTime.of(hour, min.getOrElse(0), sec.getOrElse(0))
     }
   }
 
-  val localDateTime: Parser[LocalDateTime] = {
+  def timestamp(zone: ZoneId): Parser[Instant] = {
     val T = Parser.char('T').void
-    val dt = localDate ~ (T.? *> localTime).?
-    dt.map { case (ld, lt) =>
-      LocalDateTime.of(ld, lt.getOrElse(LocalTime.MIDNIGHT))
+    val dt = localDate ~ (T.? *> localTime).? ~ utc.?
+    dt.map { case ((ld, lt), z) =>
+      val tz = z.getOrElse(zone)
+      LocalDateTime
+        .of(ld, lt.getOrElse(LocalTime.MIDNIGHT))
+        .atZone(tz)
+        .toInstant
     }
   }
+
+  val epochSeconds: Parser[Instant] =
+    Numbers.signedIntString.map(_.toLong).map(Instant.ofEpochSecond)
 }

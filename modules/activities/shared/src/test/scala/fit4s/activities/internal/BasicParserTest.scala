@@ -118,7 +118,11 @@ class BasicParserTest extends FunSuite {
     "2020-04-15" -> dt(2020, 4, 15),
     "2021-6-30T12" -> dt(2021, 6, 30, 12),
     "2021-6-30T1215" -> dt(2021, 6, 30, 12, 15),
-    "202211051310" -> dt(2022, 11, 5, 13, 10)
+    "202211051310" -> dt(2022, 11, 5, 13, 10),
+    "2022-12-10T12:15Z" -> dt(2022, 12, 10, 13, 15),
+    "2022-12-10T12:15:15Z" -> dt(2022, 12, 10, 13, 15, 15),
+    "1670674500" -> dt(2022, 12, 10, 13, 15),
+    "1670674515" -> dt(2022, 12, 10, 13, 15, 15)
   ).foreach { case (in, out) =>
     test(s"parsing date: $in -> $out") {
       val dateTime = parser.instant
@@ -159,8 +163,15 @@ class BasicParserTest extends FunSuite {
     }
   }
 
-  def dt(year: Int, month: Int = 1, day: Int = 1, hour: Int = 0, min: Int = 0): Instant =
-    LocalDateTime.of(year, month, day, hour, min).atZone(parser.zoneId).toInstant
+  def dt(
+      year: Int,
+      month: Int = 1,
+      day: Int = 1,
+      hour: Int = 0,
+      min: Int = 0,
+      secs: Int = 0
+  ): Instant =
+    LocalDateTime.of(year, month, day, hour, min, secs).atZone(parser.zoneId).toInstant
 
   def tag(name: String): TagName = TagName.unsafeFromString(name)
 }
