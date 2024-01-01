@@ -14,7 +14,7 @@ import fit4s.profile.types.{Sport, SubSport}
 
 abstract class BasicParser(zoneId: ZoneId, currentTime: Instant) {
   val instant: Parser[Instant] =
-    BasicParser.timestamp(zoneId).backtrack | BasicParser.epochSeconds
+    BasicParser.epochSeconds.backtrack | BasicParser.timestamp(zoneId)
 
   val lastWeeks: Parser[Instant] =
     BasicParser.lastNDays(currentTime, 7, NonEmptyList.of("week", "weeks", "w"))
@@ -217,5 +217,5 @@ object BasicParser {
   }
 
   val epochSeconds: Parser[Instant] =
-    Numbers.signedIntString.map(_.toLong).map(Instant.ofEpochSecond)
+    (Numbers.signedIntString.map(_.toLong) <* Parser.char('s')).map(Instant.ofEpochSecond)
 }
