@@ -265,7 +265,7 @@ date time value. The date time can be given in various ways:
 - `<n>week|weeks` for `n` weeks back, like `4weeks`
 - a partial timestamp, like `2022-10` or even `2022` - all missing
   parts are filled to be the minimal value.
-- Epoch seconds, like `1670674515`
+- Epoch seconds, like `1670674515s` - they must end with an `s`
   
 Datetime values are treated in the configured timezone or a final `Z`
 can be used to specify UTC.
