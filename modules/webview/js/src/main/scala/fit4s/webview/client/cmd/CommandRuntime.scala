@@ -31,8 +31,12 @@ object CommandRuntime {
     override def send(cmd: Cmd): F[Unit] =
       cmd match {
         case c @ Cmd.SearchCmd(q, page) =>
-          val query = q.some.map(_.trim).filter(_.nonEmpty)
-          (fit4sClient.activities(query, page), fit4sClient.summary(query))
+          val query = q.some
+            .map(_.trim)
+            .filter(_.nonEmpty)(
+              fit4sClient.activities(query, page),
+              fit4sClient.summary(query)
+            )
             .parMapN { (list, sum) =>
               val r = (list, sum).mapN(_ -> _)
               Result.SearchResult(c, r)

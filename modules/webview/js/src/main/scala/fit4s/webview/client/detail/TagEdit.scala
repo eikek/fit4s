@@ -66,8 +66,10 @@ object TagEdit {
       case Msg.ToggleMenu =>
         val cmd =
           if (model.menuOpen || model.results.nonEmpty) IO.unit
-          else cr.send(Cmd.GetTags(model.query.text))
-        (model.copy(menuOpen = !model.menuOpen), cmd)
+          else cr.send(Cmd.GetTags(model.query.text))(
+            model.copy(menuOpen = !model.menuOpen),
+            cmd
+          )
 
       case Msg.CloseMenu =>
         (model.copy(menuOpen = false), IO.unit)
@@ -80,20 +82,17 @@ object TagEdit {
           r.fold(
             tags => model.copy(results = tags, error = None),
             err => model.copy(error = err.some)
-          )
-        (next, IO.unit)
+          )(next, IO.unit)
 
       case Msg.ToggleTag(tag) =>
         val cmd =
           if (model.tags.isActive(tag)) Cmd.RemoveTag(model.id, tag)
-          else Cmd.SetTag(model.id, tag)
-        (model, cr.send(cmd))
+          else Cmd.SetTag(model.id, tag)(model, cr.send(cmd))
 
       case Msg.CreateTag =>
         TagName.fromString(model.query.text) match {
           case Right(tn) =>
-            val cmd = Cmd.CreateTag(model.id, tn)
-            (model, cr.send(cmd))
+            val cmd = Cmd.CreateTag(model.id, tn)(model, cr.send(cmd))
           case Left(_) =>
             (model, IO.unit)
         }
