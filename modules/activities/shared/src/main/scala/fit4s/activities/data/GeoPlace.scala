@@ -4,9 +4,9 @@ import fit4s.common.borer.DataJsonCodec.*
 import fit4s.data.Position
 import fit4s.geocode.data._
 
-import io.bullet.borer.NullOptions.*
+import io.bullet.borer.NullOptions.given
 import io.bullet.borer.*
-import io.bullet.borer.derivation.MapBasedCodecs.*
+import io.bullet.borer.derivation.MapBasedCodecs
 
 final case class GeoPlace(
     id: GeoPlaceId,
@@ -22,8 +22,6 @@ final case class GeoPlace(
 )
 
 object GeoPlace {
-  implicit val jsonEncoder: Encoder[GeoPlace] =
-    deriveEncoder[GeoPlace]
-
-  given Decoder[GeoPlace] = deriveDecoder
+  given Encoder[GeoPlace] = MapBasedCodecs.deriveEncoder
+  given Decoder[GeoPlace] = MapBasedCodecs.deriveDecoder
 }
