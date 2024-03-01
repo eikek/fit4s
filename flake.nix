@@ -96,6 +96,7 @@
                   [
                   ];
 
+                SBT_OPTS = "-Xmx2G";
                 JAVA_HOME = "${pkgs.openjdk19}/lib/openjdk";
               };
         });
