@@ -8,9 +8,9 @@ import fit4s.common.borer.syntax.all.*
 import fit4s.data.{Distance, Position, Semicircle}
 import fit4s.profile.types.Sport
 
-import io.bullet.borer.NullOptions._
+import io.bullet.borer.NullOptions.given
 import io.bullet.borer._
-import io.bullet.borer.derivation.MapBasedCodecs._
+import io.bullet.borer.derivation.MapBasedCodecs
 
 final case class StravaActivity(
     name: String,
@@ -57,6 +57,6 @@ object StravaActivity {
       }
 
     val activityDecoder: Decoder[StravaActivity] =
-      deriveDecoder
+      MapBasedCodecs.deriveDecoder
   }
 }

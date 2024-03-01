@@ -65,13 +65,13 @@ trait CoreJsonCodec {
     }
 
   implicit def instantCodec: Codec[Instant] =
-    Codec.of(
+    Codec(
       Encoder.forString.contramap(_.toString),
       Decoder.forString.emap(s => Try(Instant.parse(s)).toEither.left.map(_.getMessage))
     )
 
   implicit def durationCodec: Codec[Duration] =
-    Codec.of(
+    Codec(
       Encoder.forLong.contramap(_.toSeconds),
       Decoder.forLong.map(Duration.ofSeconds)
     )

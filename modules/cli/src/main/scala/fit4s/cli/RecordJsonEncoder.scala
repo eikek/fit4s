@@ -6,7 +6,7 @@ import fit4s.activities.data.*
 import fit4s.common.borer.DataJsonCodec.*
 import fit4s.geocode.data.{BoundingBox, NominatimOsmId, NominatimPlaceId}
 
-import io.bullet.borer.NullOptions.*
+import io.bullet.borer.NullOptions.given
 import io.bullet.borer.*
 
 object RecordJsonEncoder {

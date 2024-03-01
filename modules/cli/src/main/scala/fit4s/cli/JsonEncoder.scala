@@ -6,7 +6,6 @@ import fit4s.profile.types.BaseTypedValue.{FloatBaseValue, LongBaseValue, String
 import fit4s.profile.types.*
 import fit4s.util.Nel
 
-import io.bullet.borer.NullOptions.*
 import io.bullet.borer.*
 import io.bullet.borer.derivation.MapBasedCodecs.{deriveCodec, deriveEncoder}
 import scodec.bits.ByteOrdering
@@ -16,7 +15,7 @@ trait JsonEncoder {
     Encoder.forString.contramap(_.toString)
 
   implicit val byteOrderingCodec: Codec[ByteOrdering] =
-    Codec.of(
+    Codec(
       Encoder.forString.contramap(_.toString),
       Decoder.forString.map(s =>
         if (s.equalsIgnoreCase("little_endian")) ByteOrdering.LittleEndian

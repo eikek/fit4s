@@ -8,27 +8,27 @@ import fit4s.common.util.DateInstant
 import fit4s.data.*
 import fit4s.profile.types.Sport
 
-import io.bullet.borer.NullOptions.*
+import io.bullet.borer.NullOptions.given
 import io.bullet.borer.*
-import io.bullet.borer.derivation.MapBasedCodecs.*
+import io.bullet.borer.derivation.MapBasedCodecs
 
 trait DataJsonCodec extends CoreJsonCodec {
   implicit def deviceProductCodec: Codec[DeviceProduct] =
-    Codec.of(
+    Codec(
       Encoder.forString.contramap(_.name),
       Decoder.forString.emap(DeviceProduct.fromString)
     )
 
   // implicit def fileIdCodec: Codec[FileId] =
-  //   Codec.of(
+  //   Codec(
   //     Encoder.forString.contramap(_.asString),
   //     Decoder.forString.emap(FileId.fromString)
   //   )
   implicit val fileIdEncoder: Encoder[FileId] =
-    deriveEncoder
+    MapBasedCodecs.deriveEncoder
 
   implicit val fileIdDecoder: Decoder[FileId] =
-    deriveDecoder
+    MapBasedCodecs.deriveDecoder
 
   implicit val deviceProductEncoder: Encoder[DeviceProduct] =
     Encoder.forString.contramap(_.name)
@@ -52,10 +52,10 @@ trait DataJsonCodec extends CoreJsonCodec {
     valueDecoder[Double]("meter").map(Distance.meter)
 
   implicit val positionEncoder: Encoder[Position] =
-    deriveEncoder
+    MapBasedCodecs.deriveEncoder
 
   implicit val positionDecoder: Decoder[Position] =
-    deriveDecoder
+    MapBasedCodecs.deriveDecoder
 
   implicit val caloriesEncoder: Encoder[Calories] =
     valueEncoder("kcal", _.kcal)
