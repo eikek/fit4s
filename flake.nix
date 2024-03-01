@@ -1,7 +1,7 @@
 {
   description = "fit4s flake";
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-23.05";
+    nixpkgs.url = "nixpkgs/nixos-23.11";
     sbt.url = "github:zaninime/sbt-derivation";
     sbt.inputs.nixpkgs.follows = "nixpkgs";
   };
@@ -90,6 +90,7 @@
                   pkgs.openjdk
                   pkgs.nodejs
                   pkgs.postgres-fg
+                  pkgs.scala-cli
                 ];
                 nativeBuildInputs =
                   [
