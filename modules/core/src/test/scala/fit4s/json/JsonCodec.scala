@@ -5,7 +5,7 @@ import fit4s.profile.messages.{FitMessages, Msg}
 import fit4s.profile.types.{FitBaseType, MesgNum}
 import fit4s.{FieldDefinition, FitMessage}
 
-import io.bullet.borer.NullOptions.*
+import io.bullet.borer.NullOptions.given
 import io.bullet.borer.*
 import io.bullet.borer.derivation.MapBasedCodecs.*
 import scodec.bits.ByteOrdering
@@ -16,7 +16,7 @@ trait JsonCodec {
       delegate.mapWithReader((r, a) => f(a).fold(r.validationFailure, identity))
 
   implicit val byteOrderCodec: Codec[ByteOrdering] =
-    Codec.of(
+    Codec(
       Encoder.forString.contramap(_.toJava.toString),
       Decoder.forString.map(n =>
         if (n.equalsIgnoreCase("big_endian")) ByteOrdering.BigEndian
@@ -25,13 +25,13 @@ trait JsonCodec {
     )
 
   implicit val mesgNumCodec: Codec[MesgNum] =
-    Codec.of(
+    Codec(
       Encoder.forLong.contramap(_.rawValue),
       Decoder.forLong.emap(n => MesgNum.byRawValue(n).toRight(s"Invalid MesgNum: $n"))
     )
 
   implicit val fitBaseTypeCodec: Codec[FitBaseType] =
-    Codec.of(
+    Codec(
       Encoder.forLong.contramap(_.rawValue),
       Decoder.forLong.emap(n =>
         FitBaseType.byRawValue(n).toRight(s"Invalid FitBaseType: $n")
@@ -57,7 +57,7 @@ trait JsonCodec {
     )
 
   implicit val eitherIntMesgNumCodec: Codec[Either[Int, MesgNum]] =
-    Codec.of(
+    Codec(
       Encoder.forLong.contramap(_.fold(_.toLong, _.rawValue)),
       Decoder.forLong.map(n => MesgNum.byRawValue(n).toRight(n.toInt))
     )

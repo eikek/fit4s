@@ -13,7 +13,7 @@ import fit4s.activities.JdbcConfig
 import fit4s.geocode.NominatimConfig
 import fit4s.strava.{StravaAppCredentials, StravaClientConfig}
 
-import io.bullet.borer.NullOptions.*
+import io.bullet.borer.NullOptions.given
 import io.bullet.borer.*
 import io.bullet.borer.derivation.MapBasedCodecs.*
 

@@ -1,8 +1,8 @@
 package fit4s.strava.data
 
-import io.bullet.borer.NullOptions.*
+import io.bullet.borer.NullOptions.given
 import io.bullet.borer.*
-import io.bullet.borer.derivation.MapBasedCodecs.*
+import io.bullet.borer.derivation.MapBasedCodecs
 
 final case class StravaUploadStatus(
     id: StravaUploadId,
@@ -21,9 +21,9 @@ object StravaUploadStatus {
 
   private object JsonCodec {
     val decoder: Decoder[StravaUploadStatus] =
-      deriveDecoder
+      MapBasedCodecs.deriveDecoder
 
     val encoder: Encoder[StravaUploadStatus] =
-      deriveEncoder
+      MapBasedCodecs.deriveEncoder
   }
 }
