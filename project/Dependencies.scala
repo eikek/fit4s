@@ -22,7 +22,7 @@ object Dependencies {
     val munit = "0.7.29"
     val munitCatsEffect = "1.0.7"
     val scodec1 = "1.11.10"
-    val scodec2 = "2.2.2"
+    val scodec2 = "2.3.0"
     val catsCore = "2.9.0"
     val fs2 = "3.10.2"
     val scalaCheck = "1.17.0"
