@@ -19,7 +19,7 @@ object Dependencies {
     val http4sDom = "0.2.11"
     val flyway = "10.13.0"
     val h2 = "2.2.224"
-    val munit = "0.7.29"
+    val munit = "1.0.0"
     val munitCatsEffect = "1.0.7"
     val scodec1 = "1.11.10"
     val scodec2 = "2.2.2"
