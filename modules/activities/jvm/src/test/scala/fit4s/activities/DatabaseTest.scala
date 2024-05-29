@@ -14,7 +14,7 @@ import doobie.implicits._
 import munit.CatsEffectSuite
 import org.h2.jdbcx.{JdbcConnectionPool, JdbcDataSource}
 
-trait DatabaseTest extends CatsEffectSuite {
+trait DatabaseTest extends CatsEffectSuite:
 
   val cio: Sync[ConnectionIO] = Sync[ConnectionIO]
 
@@ -50,9 +50,8 @@ trait DatabaseTest extends CatsEffectSuite {
       _ <- sql"DELETE FROM ${RActivityTag.table}".update.run.transact(xa)
       _ <- sql"DELETE FROM ${RTag.table}".update.run.transact(xa)
     } yield ()
-}
 
-object DatabaseTest {
+object DatabaseTest:
 
   def memoryDB(dbname: String): JdbcConfig =
     JdbcConfig(
@@ -68,21 +67,18 @@ object DatabaseTest {
       ""
     )
 
-  def dataSource(jdbc: JdbcConfig): Resource[IO, JdbcConnectionPool] = {
-    val jdbcConnPool = {
+  def dataSource(jdbc: JdbcConfig): Resource[IO, JdbcConnectionPool] =
+    val jdbcConnPool =
       val ds = new JdbcDataSource()
       ds.setURL(jdbc.url)
       ds.setUser(jdbc.user)
       ds.setPassword(jdbc.password)
       JdbcConnectionPool.create(ds)
-    }
 
     Resource.make(IO(jdbcConnPool))(cp => IO(cp.dispose()))
-  }
 
   def makeXA(ds: DataSource): Resource[IO, Transactor[IO]] =
     for {
       ec <- ExecutionContexts.cachedThreadPool[IO]
       xa = Transactor.fromDataSource[IO](ds, ec)
     } yield xa
-}

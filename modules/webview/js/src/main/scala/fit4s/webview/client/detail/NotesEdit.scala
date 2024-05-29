@@ -10,29 +10,24 @@ import fit4s.webview.client.cmd.*
 
 import calico.html.io.{*, given}
 
-object NotesEdit {
+object NotesEdit:
 
-  sealed trait Model {
+  sealed trait Model:
     def activityId: ActivityId
     def text: String
     def editMode: Boolean
-  }
   object Model:
-    enum EditState {
+    enum EditState:
       case Init
       case Updating
       case Failure
-    }
-    object EditState {
+    object EditState:
       given Eq[EditState] = Eq.fromUniversalEquals
-    }
-    case class View(activityId: ActivityId, text: String) extends Model {
+    case class View(activityId: ActivityId, text: String) extends Model:
       val editMode = false
-    }
     case class Edit(activityId: ActivityId, text: String, prev: String, state: EditState)
-        extends Model {
+        extends Model:
       val editMode = true
-    }
     def of(activityId: ActivityId, text: Option[String]): Model =
       View(activityId, text.getOrElse(""))
 
@@ -45,7 +40,7 @@ object NotesEdit {
     case ToEditFailed
 
   def update(cr: CommandRuntime[IO], msg: Msg)(model: Model): (Model, IO[Unit]) =
-    msg match {
+    msg match
       case Msg.ToEdit =>
         (
           Model.Edit(model.activityId, model.text, model.text, Model.EditState.Init),
@@ -63,44 +58,39 @@ object NotesEdit {
           case m             => (m, IO.unit)
 
       case Msg.SaveEdit =>
-        model match {
+        model match
           case m: Model.Edit =>
             (
               m.copy(state = Model.EditState.Updating),
               cr.send(Cmd.UpdateNotes(m.activityId, m.text))
             )
           case m => (m, IO.unit)
-        }
 
       case Msg.ToView(text) =>
         (Model.View(model.activityId, text), cr.send(Cmd.SearchRefresh))
 
       case Msg.ToEditFailed =>
-        model match {
+        model match
           case m: Model.Edit =>
             (
               m.copy(state = Model.EditState.Failure),
               IO.unit
             )
           case m => (m, IO.unit)
-        }
-    }
 
   def subscribe(model: SignallingRef[IO, Model], cr: CommandRuntime[IO]) =
-    cr.subscribe.evalMap {
+    cr.subscribe.evalMap:
       case Result.UpdateNotesResult(id, text, success) =>
-        model.get.flatMap {
+        model.get.flatMap:
           case m: Model.Edit if m.activityId == id =>
             if (success) model.flatModify(update(cr, Msg.ToView(text)))
             else model.flatModify(update(cr, Msg.ToEditFailed))
 
           case _ =>
             IO.unit
-        }
 
       case _ =>
         IO.unit
-    }
 
   def render(model: SignallingRef[IO, Model], cr: CommandRuntime[IO]) =
     Resource
@@ -179,4 +169,3 @@ object NotesEdit {
         model.map(_.text)
       )
     )
-}

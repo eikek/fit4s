@@ -8,7 +8,7 @@ import fit4s.webview.data.RequestFailure
 import calico.*
 import calico.html.io.{*, given}
 
-object ErrorPanel {
+object ErrorPanel:
 
   def apply(errs: RequestFailure): Resource[IO, HtmlDivElement[IO]] =
     div(
@@ -22,4 +22,3 @@ object ErrorPanel {
         errs.errors.map(m => li(m))
       )
     )
-}

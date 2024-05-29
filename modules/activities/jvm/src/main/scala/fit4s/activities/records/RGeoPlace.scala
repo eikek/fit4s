@@ -13,7 +13,7 @@ import fit4s.geocode.data._
 import doobie._
 import doobie.implicits._
 
-object RGeoPlace {
+object RGeoPlace:
   def fromPlace(id: GeoPlaceId, place: Place): Option[GeoPlace] =
     (
       place.address.city
@@ -37,7 +37,7 @@ object RGeoPlace {
 
   private[activities] val table = fr"geo_place"
 
-  private[activities] def columnList(alias: Option[String]): List[Fragment] = {
+  private[activities] def columnList(alias: Option[String]): List[Fragment] =
     def c(name: String) = Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))
     List(
       c("id"),
@@ -55,12 +55,11 @@ object RGeoPlace {
       c("bbox_lng1"),
       c("bbox_lng2")
     )
-  }
 
   private val colsNoId = columnList(None).tail.commas
   private val cols = columnList(None).commas
 
-  object insertMany {
+  object insertMany:
     val cols = columnList(None).map(_.internals.sql).mkString(",")
     val ph = columnList(None).map(_ => "?").mkString(",")
     val tn = table.internals.sql
@@ -68,7 +67,6 @@ object RGeoPlace {
 
     def apply(tags: Seq[GeoPlace]): ConnectionIO[Int] =
       Update[GeoPlace](sql).updateMany(tags)
-  }
 
   def streamAll: Stream[ConnectionIO, GeoPlace] =
     sql"SELECT $cols FROM $table".query[GeoPlace].streamWithChunkSize(100)
@@ -99,4 +97,3 @@ object RGeoPlace {
          LIMIT 1"""
       .query[GeoPlace]
       .option
-}

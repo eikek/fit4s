@@ -14,7 +14,7 @@ import fit4s.profile.types.*
 import io.bullet.borer.*
 
 /** Codecs for fit4s.profile */
-trait CoreJsonCodec {
+trait CoreJsonCodec:
   implicit def stringMapEncoder[A: Encoder]: Encoder[Map[String, A]] =
     Encoder { (w, m) =>
       w.writeMapOpen(m.size)
@@ -26,11 +26,11 @@ trait CoreJsonCodec {
     Decoder { reader =>
       @annotation.tailrec
       def loop(result: Map[String, A]): Map[String, A] =
-        if (reader.hasString) {
+        if (reader.hasString)
           val key = reader.readString()
           val v = reader.read[A]()
           loop(result.updated(key, v))
-        } else result
+        else result
 
       reader.readMapStart()
       val x = loop(Map.empty)
@@ -48,16 +48,15 @@ trait CoreJsonCodec {
   def valueDecoder[B: Decoder](name: String): Decoder[B] =
     Decoder { r =>
       def readB: B =
-        if (r.readString() == name) {
+        if (r.readString() == name)
           val b = r.read[B]()
           r.readString()
           r.readString()
           b
-        } else {
+        else
           r.readString()
           r.readString(name)
           r.read[B]()
-        }
 
       r.readMapStart()
       val b = readB
@@ -84,7 +83,7 @@ trait CoreJsonCodec {
       NonEmptyList.fromList(l).toRight("Expected non-empty list, but list was empty")
     )
 
-  implicit def baseTypeEncoder[A <: TypedValue[_]]: Encoder[A] =
+  implicit def baseTypeEncoder[A <: TypedValue[?]]: Encoder[A] =
     Encoder.forString.contramap(_.typeName)
 
   implicit def sportDecoder: Decoder[Sport] =
@@ -116,6 +115,5 @@ trait CoreJsonCodec {
 
   implicit val dateTimeDecoder: Decoder[DateTime] =
     Decoder.forLong.map(DateTime(_))
-}
 
 object CoreJsonCodec extends CoreJsonCodec

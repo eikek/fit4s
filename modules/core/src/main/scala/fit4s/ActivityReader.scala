@@ -8,13 +8,12 @@ import fit4s.profile.messages.{LapMsg, RecordMsg, SessionMsg}
 import fit4s.profile.types.{DateTime, LocalDateTime, MesgNum}
 import fit4s.util._
 
-object ActivityReader {
+object ActivityReader:
   sealed trait Failure extends Product
-  object Failure {
+  object Failure:
     final case class NoFileIdFound(message: String) extends Failure
     final case class NoActivityFound(id: FileId, message: String) extends Failure
     final case class GeneralError(message: String) extends Failure
-  }
 
   final case class Result(
       fileId: FileId,
@@ -22,7 +21,7 @@ object ActivityReader {
       sessions: Vector[FitActivitySession],
       laps: Map[Option[DateTime], Vector[FitActivityLap]],
       records: Map[Option[DateTime], Vector[data.Record]]
-  ) {
+  ):
     def unrelatedRecords = records.getOrElse(None, Vector.empty)
     def unrelatedLaps = laps.getOrElse(None, Vector.empty)
 
@@ -31,7 +30,6 @@ object ActivityReader {
 
     def lapsFor(session: FitActivitySession) =
       laps.getOrElse(Some(session.startTime), Vector.empty)
-  }
 
   def read(fit: FitFile, zoneId: ZoneId): Either[Failure, Result] = for {
     fileId <- fit.findFileId.left.map(Failure.NoFileIdFound.apply)
@@ -95,7 +93,7 @@ object ActivityReader {
     })
 
   private[fit4s] def tryFixTimestamps(result: Result, zoneId: ZoneId): Result =
-    (result.activity.timestamp.isTooLow, result.activity.localTimestamp) match {
+    (result.activity.timestamp.isTooLow, result.activity.localTimestamp) match
       case (_, None)                              => result
       case (false, _)                             => result
       case (_, Some(localTs)) if localTs.isTooLow => result
@@ -122,7 +120,6 @@ object ActivityReader {
             )
           }
         )
-    }
 
   private def addOpt(dt: Option[DateTime], secs: Long): Option[DateTime] =
     dt.map(add(_, secs))
@@ -130,13 +127,11 @@ object ActivityReader {
   private def add(dt: DateTime, secs: Long): DateTime =
     if (dt.isTooLow) DateTime(dt.rawValue + secs) else dt
 
-  implicit private class DateTimeOps(dt: DateTime) {
+  implicit private class DateTimeOps(dt: DateTime):
     def isTooLow = dt.rawValue < DateTime.minTimeForOffset
-  }
 
-  implicit private class LocalDateTimeOps(dt: LocalDateTime) {
+  implicit private class LocalDateTimeOps(dt: LocalDateTime):
     def isTooLow = dt.rawValue < LocalDateTime.minTimeForOffset
-  }
 
   private case class FromRecords(
       minTime: DateTime = DateTime(Int.MaxValue),
@@ -151,12 +146,11 @@ object ActivityReader {
       avgSpeed: Option[Speed] = None,
       maxPower: Option[Power] = None,
       avgPower: Option[Power] = None
-  ) {
+  ):
     def duration: Duration = Duration.ofSeconds(maxTime.rawValue - minTime.rawValue)
-  }
 
-  private object FromRecords {
-    def apply(rs: Vector[Record]): FromRecords = {
+  private object FromRecords:
+    def apply(rs: Vector[Record]): FromRecords =
       val (hr, temp, pwr, spd, res) =
         rs.foldLeft(
           (
@@ -196,20 +190,15 @@ object ActivityReader {
         avgTemp = avgTemp.map(Temperature.celcius),
         avgSpeed = avgSpd.map(Speed.meterPerSecond)
       )
-    }
 
     private def selectMin[A](a: Option[A], b: Option[A])(implicit ordering: Ordering[A]) =
-      (a, b) match {
+      (a, b) match
         case (Some(x), Some(y)) => Some(ordering.min(x, y))
         case (x, None)          => x
         case (None, y)          => y
-      }
 
     private def selectMax[A](a: Option[A], b: Option[A])(implicit ordering: Ordering[A]) =
-      (a, b) match {
+      (a, b) match
         case (Some(x), Some(y)) => Some(ordering.max(x, y))
         case (x, None)          => x
         case (None, y)          => y
-      }
-  }
-}

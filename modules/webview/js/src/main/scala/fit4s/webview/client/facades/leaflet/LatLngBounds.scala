@@ -6,7 +6,7 @@ import scala.scalajs.js.annotation.{JSGlobal, JSName}
 @JSGlobal("L.LatLngBounds")
 @js.native
 @annotation.nowarn
-class LatLngBounds(southWest: LatLng, northEast: LatLng) extends js.Object {
+class LatLngBounds(southWest: LatLng, northEast: LatLng) extends js.Object:
   def isValid(): Boolean = js.native
 
   def getSouthEast(): LatLng = js.native
@@ -33,9 +33,7 @@ class LatLngBounds(southWest: LatLng, northEast: LatLng) extends js.Object {
   def equalsLatLngBounds(latLngBounds: LatLngBounds): Boolean = js.native
 
   def toBBoxString(): String = js.native
-}
 
-object LatLngBounds {
+object LatLngBounds:
   def apply(northEast: LatLng, southWest: LatLng): LatLngBounds =
     new LatLngBounds(southWest, northEast)
-}

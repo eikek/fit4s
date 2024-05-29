@@ -7,7 +7,7 @@ import fs2.{Chunk, Stream}
 import io.bullet.borer.*
 
 /** Caveat: the buffersize must be large enough to decode at least one A */
-object StreamDecode {
+object StreamDecode:
 
   def decodeJson[F[_]: RaiseThrowable, A: Decoder](
       in: Stream[F, Byte],
@@ -34,10 +34,10 @@ object StreamDecode {
           Pull.pure(None)
       })
 
-  private[this] val curlyClose = Chunk('}'.toByte)
+  private val curlyClose = Chunk('}'.toByte)
   private def decodeCont[A](
       decode: Input[Array[Byte]] => DecodingSetup.Sealed[A]
-  )(input: Chunk[Byte]): Either[Throwable, (Vector[A], Chunk[Byte])] = {
+  )(input: Chunk[Byte]): Either[Throwable, (Vector[A], Chunk[Byte])] =
     @annotation.tailrec
     def go(
         in: Input[Array[Byte]],
@@ -52,16 +52,12 @@ object StreamDecode {
 
         case Left(ex) =>
           if (result.isEmpty) Left(ex)
-          else {
+          else
             // the position seems sometimes off by 1, standing on the last char closing the json object
-            val hack = {
+            val hack =
               val next = input.drop(pos)
               if (next == curlyClose) Chunk.empty
               else next
-            }
             Right(result -> hack)
-          }
 
     go(Input.fromByteArray(input.toArray), 0, Vector.empty)
-  }
-}

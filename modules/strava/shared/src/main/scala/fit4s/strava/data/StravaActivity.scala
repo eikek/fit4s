@@ -24,19 +24,18 @@ final case class StravaActivity(
     start_latlng: Option[Position],
     end_latlng: Option[Position],
     external_id: String
-) {
+):
   lazy val stravaSport: Option[StravaSportType] =
     StravaSportType.fromString(sport_type).toOption
 
   lazy val fitSport: Option[Sport] =
     stravaSport.flatMap(_.fitSport)
-}
 
-object StravaActivity {
+object StravaActivity:
   implicit val jsonDecoder: Decoder[StravaActivity] =
     JsonCodec.activityDecoder
 
-  private object JsonCodec {
+  private object JsonCodec:
 
     implicit val instantDecoder: Decoder[Instant] =
       Decoder.forString.emap(s =>
@@ -47,16 +46,13 @@ object StravaActivity {
       Decoder.forDouble.map(Distance.meter)
 
     implicit val positionDecoder: Decoder[Option[Position]] =
-      Decoder[Option[List[Double]]].emap {
+      Decoder[Option[List[Double]]].emap:
         case Some(lat :: lng :: Nil) =>
           Right(Position(Semicircle.degree(lat), Semicircle.degree(lng)).some)
 
         case Some(_) => Right(None)
 
         case None => Right(None)
-      }
 
     val activityDecoder: Decoder[StravaActivity] =
       MapBasedCodecs.deriveDecoder
-  }
-}

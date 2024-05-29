@@ -6,7 +6,6 @@ import fit4s.common.util.Cache
 import fit4s.data.Position
 import fit4s.geocode.data.Place
 
-private[geocode] object PlaceCache {
+private[geocode] object PlaceCache:
   def memory[F[_]: Sync](size: Int): F[Cache[F, Position, Place]] =
     Cache.memory[F, Position, Place](size)
-}

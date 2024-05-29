@@ -22,7 +22,7 @@ import org.http4s.multipart.{Multiparts, Part}
 final class StravaUpload[F[_]: Async: Files](
     config: StravaClientConfig,
     client: Client[F]
-) extends Http4sClientDsl[F] {
+) extends Http4sClientDsl[F]:
 
   def uploadFile(
       accessToken: StravaAccessToken,
@@ -74,11 +74,10 @@ final class StravaUpload[F[_]: Async: Files](
       timeout,
       waitingCallback
     ).compile.lastOrError
-    id = result.activity_id match {
+    id = result.activity_id match
       case Some(aid) => aid.asRight[StravaUploadError]
       case None =>
         Left(StravaUploadError.Processing(result, file))
-    }
   } yield id
 
   private def waitForActivityId(
@@ -109,7 +108,7 @@ final class StravaUpload[F[_]: Async: Files](
       name: String,
       description: Option[String],
       commute: Boolean
-  ): F[Either[StravaUploadError, StravaUploadStatus]] = {
+  ): F[Either[StravaUploadError, StravaUploadStatus]] =
     val uri = config.apiUrl / "uploads"
     implicit val errorDecoder: EntityDecoder[F, StravaUploadError] =
       enrichedUploadErrorDecoder(file)
@@ -146,33 +145,26 @@ final class StravaUpload[F[_]: Async: Files](
       upload <-
         client.expectEither[StravaUploadError, StravaUploadStatus](req)
     } yield upload
-  }
 
   def getUploadStatus(
       accessToken: StravaAccessToken,
       uploadId: StravaUploadId
-  ): F[StravaUploadStatus] = {
+  ): F[StravaUploadStatus] =
     val uri = config.apiUrl / "uploads" / uploadId
 
     client.expect[StravaUploadStatus](
       Method.GET(uri).putAuth(accessToken)
     )
-  }
 
-  def enrichedUploadErrorDecoder(file: Path): EntityDecoder[F, StravaUploadError] = {
+  def enrichedUploadErrorDecoder(file: Path): EntityDecoder[F, StravaUploadError] =
     val delegate = EntityDecoder.byteVector[F]
-    new EntityDecoder[F, StravaUploadError] {
-      def decode(m: Media[F], strict: Boolean) = {
+    new EntityDecoder[F, StravaUploadError]:
+      def decode(m: Media[F], strict: Boolean) =
         val result = delegate.decode(m, strict)
         val status =
-          m match {
+          m match
             case r: Response[_] => r.status.code.some
             case _              => None
-          }
 
         result.map(bv => StravaUploadError.Initial(bv, status, file))
-      }
       def consumes = delegate.consumes
-    }
-  }
-}

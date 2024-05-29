@@ -10,7 +10,7 @@ import fit4s.webview.client.shared.TextField
 
 import calico.html.io.{*, given}
 
-object SearchField {
+object SearchField:
   val containerStyle =
     "search py-4 flex flex-row items-center dark:border-stone-600 rounded-md"
   val buttonStyle =
@@ -19,11 +19,10 @@ object SearchField {
   final case class Model(
       busy: Boolean,
       text: TextField.Model
-  ) {
+  ):
     def setText(str: String): Model = copy(text = text.copy(text = str))
     def setBusy: Model = copy(busy = true)
     def unsetBusy: Model = copy(busy = false)
-  }
   object Model:
     val empty: Model = Model(false, TextField.Model.empty)
     def makeEmpty: IO[SignallingRef[IO, Model]] = SignallingRef[IO].of(empty)
@@ -31,7 +30,7 @@ object SearchField {
   def apply[F[_]](
       model: SignallingRef[IO, Model],
       on: String => IO[Unit]
-  ): Resource[IO, HtmlDivElement[IO]] = {
+  ): Resource[IO, HtmlDivElement[IO]] =
     val textModel = SignallingRef.lens[IO, Model, TextField.Model](model)(
       get = _.text,
       set = a => b => a.copy(text = b)
@@ -55,5 +54,3 @@ object SearchField {
       queryInputR,
       btn
     )
-  }
-}

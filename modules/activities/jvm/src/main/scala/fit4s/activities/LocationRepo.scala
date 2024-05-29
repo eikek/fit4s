@@ -6,7 +6,7 @@ import fs2.io.file.Path
 import fit4s.activities.LocationRepo.MoveResult
 import fit4s.activities.data.{Location, LocationId, Page}
 
-trait LocationRepo[F[_]] {
+trait LocationRepo[F[_]]:
 
   def listLocations(
       contains: Option[String],
@@ -20,16 +20,12 @@ trait LocationRepo[F[_]] {
   ): F[MoveResult]
 
   def delete(idOrPath: Either[LocationId, Path], withFs: Boolean): F[MoveResult]
-}
 
-object LocationRepo {
+object LocationRepo:
 
-  sealed trait MoveResult extends Product {
+  sealed trait MoveResult extends Product:
     def widen: MoveResult = this
-  }
-  object MoveResult {
+  object MoveResult:
     case object Success extends MoveResult
     case class FsFailure(ex: Throwable) extends MoveResult
     case object NotFound extends MoveResult
-  }
-}

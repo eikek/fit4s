@@ -4,7 +4,7 @@ import scodec.Codec
 import scodec.bits.ByteOrdering
 import scodec.codecs._
 
-object Codecs {
+object Codecs:
   def uintx(bits: Int, bo: ByteOrdering): Codec[Int] =
     if (bo == ByteOrdering.BigEndian) uint(bits) else uintL(bits)
 
@@ -19,4 +19,3 @@ object Codecs {
 
   def doublex(bo: ByteOrdering): Codec[Double] =
     if (bo == ByteOrdering.BigEndian) double else doubleL
-}

@@ -1,12 +1,11 @@
 package fit4s.profile.types
 
-sealed trait MeasurementUnit {
+sealed trait MeasurementUnit:
   def name: String
 
   def alternativeNames: List[String] = Nil
-}
 
-object MeasurementUnit {
+object MeasurementUnit:
 
   case object Millimeter extends MeasurementUnit { val name = "mm" }
   case object Meter extends MeasurementUnit { val name = "m" }
@@ -23,10 +22,9 @@ object MeasurementUnit {
   case object Bytes extends MeasurementUnit { val name = "bytes" }
   case object Steps extends MeasurementUnit { val name = "steps" }
   case object Bpm extends MeasurementUnit { val name = "bpm" }
-  case object Percent extends MeasurementUnit {
+  case object Percent extends MeasurementUnit:
     val name = "%"
     override val alternativeNames = List("percent")
-  }
 
   case object MeterPerSecond extends MeasurementUnit { val name = "m/s" }
 
@@ -129,13 +127,11 @@ object MeasurementUnit {
       MmHg
     )
 
-  private[this] val unitMap: Map[String, MeasurementUnit] =
+  private val unitMap: Map[String, MeasurementUnit] =
     all
       .flatMap(unit => (unit.name :: unit.alternativeNames).map(_.toLowerCase -> unit))
       .toMap
 
-  def fromString(str: String): MeasurementUnit = {
+  def fromString(str: String): MeasurementUnit =
     val key = str.replace("\\s+", "").toLowerCase
     unitMap.getOrElse(key, Unknown(key))
-  }
-}

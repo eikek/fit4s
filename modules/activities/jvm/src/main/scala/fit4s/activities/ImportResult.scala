@@ -11,28 +11,25 @@ import fit4s.data.FileId
 
 import scodec.Err
 
-trait ImportResult[+A] extends Product {
+trait ImportResult[+A] extends Product:
   def map[B](f: A => B): ImportResult[B]
 
   def toEither: Either[Failure, A]
-}
 
-object ImportResult {
+object ImportResult:
 
-  final case class Success[A](value: A) extends ImportResult[A] {
+  final case class Success[A](value: A) extends ImportResult[A]:
     def map[B](f: A => B): ImportResult[B] = Success(f(value))
     def toEither: Either[Failure, A] = Right(value)
-  }
 
-  final case class Failure(reason: FailureReason) extends ImportResult[Nothing] {
+  final case class Failure(reason: FailureReason) extends ImportResult[Nothing]:
     def map[B](f: Nothing => B): ImportResult[B] = this
     def toEither: Either[Failure, Nothing] = Left(this)
     def messages: String =
       reason.toString
-  }
 
   sealed trait FailureReason extends Product
-  object FailureReason {
+  object FailureReason:
     final case class Duplicate(id: ActivityId, fileId: FileId, path: String)
         extends FailureReason
     final case class FitReadError(err: Err) extends FailureReason
@@ -41,7 +38,7 @@ object ImportResult {
         extends FailureReason
 
     implicit val show: Show[FailureReason] =
-      Show.show {
+      Show.show:
         case _: Duplicate      => "Duplicate"
         case FitReadError(err) => err.messageWithContext
         case ActivityDecodeError(_: ActivityReader.Failure.NoActivityFound) =>
@@ -51,8 +48,6 @@ object ImportResult {
         case ActivityDecodeError(ActivityReader.Failure.GeneralError(msg)) => msg
         case TcxError(err) =>
           s"TCX file failed to read: ${err.getMessage}"
-      }
-  }
 
   def duplicate[A](
       activityId: ActivityId,
@@ -73,8 +68,6 @@ object ImportResult {
   def success[A](value: A): ImportResult[A] = Success(value)
 
   implicit def show[A]: Show[ImportResult[A]] =
-    Show.show {
+    Show.show:
       case _: Success[_]   => "Ok"
       case Failure(reason) => reason.show
-    }
-}

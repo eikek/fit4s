@@ -35,7 +35,9 @@ object ShowCmd extends SharedOpts with FormatDefinition {
         _ <- result match {
           case Some(r) =>
             opts.format.fold(
-              IO.println(Json.encode(r)(RecordJsonEncoder.encodeDetail).toUtf8String),
+              IO.println(
+                Json.encode(r)(using RecordJsonEncoder.encodeDetail).toUtf8String
+              ),
               showResults(r)(cliCfg.timezone)
             )
           case None =>

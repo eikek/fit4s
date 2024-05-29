@@ -10,7 +10,7 @@ import org.scalajs.dom.HTMLElement
 @js.native
 @annotation.nowarn
 class LeafletMap(id: String, options: UndefOr[LeafletMap.Options] = js.undefined)
-    extends js.Object {
+    extends js.Object:
   def setView(
       center: LatLng,
       zoom: Double,
@@ -50,11 +50,10 @@ class LeafletMap(id: String, options: UndefOr[LeafletMap.Options] = js.undefined
   def fitBounds(bounds: LatLngBounds): LeafletMap = js.native
 
   def getBounds(): LatLngBounds = js.native
-}
 
-object LeafletMap {
+object LeafletMap:
 
-  trait Options extends js.Object {
+  trait Options extends js.Object:
     val preferCanvas: UndefOr[Boolean] = js.undefined
     val attributionControl: UndefOr[Boolean] = js.undefined
     val zoomControl: UndefOr[Boolean] = js.undefined
@@ -76,13 +75,9 @@ object LeafletMap {
     val touchZoom: UndefOr[Boolean] = js.undefined
     val tap: UndefOr[Boolean] = js.undefined
     val scrollWheelZoom: UndefOr[Boolean] = js.undefined
-    val layers: UndefOr[js.Array[_ <: Layer]] = js.undefined
-  }
+    val layers: UndefOr[js.Array[? <: Layer]] = js.undefined
 
-  object Options {
-    def apply(mLayers: js.Array[_ <: Layer]): Options =
-      new Options {
+  object Options:
+    def apply(mLayers: js.Array[? <: Layer]): Options =
+      new Options:
         override val layers = mLayers
-      }
-  }
-}

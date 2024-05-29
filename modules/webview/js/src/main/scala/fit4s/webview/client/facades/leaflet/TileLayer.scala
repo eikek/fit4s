@@ -9,20 +9,15 @@ import scala.scalajs.js.annotation.JSGlobal
 class TileLayer(val urlTemplate: String, val tileLayerOptions: UndefOr[TileLayer.Options])
     extends GridLayer
 
-object TileLayer {
-  trait Options extends js.Object {
+object TileLayer:
+  trait Options extends js.Object:
 
     val maxZoom: UndefOr[Int] = js.undefined
     val attribution: UndefOr[String] = js.undefined
 
-  }
-
-  object Options {
+  object Options:
 
     def apply(maxZoomLevel: Int, attr: String): Options =
-      new Options {
+      new Options:
         override val maxZoom = maxZoomLevel
         override val attribution = attr
-      }
-  }
-}

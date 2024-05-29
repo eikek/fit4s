@@ -23,7 +23,7 @@ import org.h2.jdbcx.JdbcConnectionPool
 import org.http4s.ember.client.EmberClientBuilder
 import org.postgresql.ds.PGConnectionPoolDataSource
 
-trait ActivityLog[F[_]] {
+trait ActivityLog[F[_]]:
   def initialize: F[Unit]
 
   def geoLookup(ids: List[ActivityId], onId: ActivityId => F[Unit]): F[Unit]
@@ -69,15 +69,14 @@ trait ActivityLog[F[_]] {
   def strava: StravaSupport[F]
 
   def exportData: ExportData[F]
-}
 
-object ActivityLog {
+object ActivityLog:
   def apply[F[_]: Async: Network: Files: Compression](
       jdbcConfig: JdbcConfig,
       nominatimCfg: NominatimConfig,
       stravaConfig: StravaClientConfig,
       httpTimeout: Duration
-  ): Resource[F, ActivityLog[F]] = {
+  ): Resource[F, ActivityLog[F]] =
     val pool =
       jdbcConfig.dbms match
         case JdbcConfig.Dbms.H2 =>
@@ -104,5 +103,3 @@ object ActivityLog {
       )
       geoLookup <- Resource.eval(GeoLookupDb(revLookup, xa))
     } yield new ActivityLogDb[F](jdbcConfig, xa, geoLookup, strava)
-  }
-}

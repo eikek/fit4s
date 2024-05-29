@@ -11,7 +11,7 @@ import fit4s.strava.data.StravaActivityId
 import doobie._
 import doobie.implicits._
 
-object ActivityQueryBuilder {
+object ActivityQueryBuilder:
 
   val activityT = RActivity.table
   val activitySessionT = RActivitySession.table
@@ -26,7 +26,7 @@ object ActivityQueryBuilder {
     selectFragment(q)
       .query[(Activity, Option[StravaActivityId], Location, ActivitySession)]
 
-  def selectFragment(q: ActivityQuery): Fragment = {
+  def selectFragment(q: ActivityQuery): Fragment =
     val cols =
       (RActivity.columnList(Some("pa")) :::
         List(RActivityStrava.columnList(Some("st")).last) :::
@@ -40,12 +40,11 @@ object ActivityQueryBuilder {
     val limit = q.page.asFragment
 
     select ++ from ++ where ++ order ++ limit
-  }
 
   def buildSummary(q: ActivityQuery): Query0[ActivitySessionSummary] =
     summaryFragment(q).query[ActivitySessionSummary]
 
-  def summaryFragment(q: ActivityQuery): Fragment = {
+  def summaryFragment(q: ActivityQuery): Fragment =
     val selectGrouped =
       fr"""SELECT act.sport, min(act.start_time), max(act.end_time),
            sum(act.moving_time), sum(act.elapsed_time), sum(act.distance),
@@ -76,15 +75,13 @@ object ActivityQueryBuilder {
             FROM session act
             GROUP BY act.sport
            """
-  }
 
-  def activityIdFragment(q: Option[QueryCondition]) = {
+  def activityIdFragment(q: Option[QueryCondition]) =
     val select = sql"SELECT DISTINCT pa.id"
     val where = makeWhere(q)
     select ++ join ++ where
-  }
 
-  def tagsForActivity(id: ActivityId): ConnectionIO[Vector[Tag]] = {
+  def tagsForActivity(id: ActivityId): ConnectionIO[Vector[Tag]] =
     val cols = RTag.columnList(Some("t")).commas
     sql"""SELECT DISTINCT $cols
           FROM ${RTag.table} t
@@ -93,7 +90,6 @@ object ActivityQueryBuilder {
           ORDER BY t.name"""
       .query[Tag]
       .to[Vector]
-  }
 
   private def join: Fragment =
     sql"""
@@ -103,19 +99,17 @@ object ActivityQueryBuilder {
         LEFT JOIN $stravaT st ON st.activity_id = act.activity_id
       """
 
-  private def makeWhere(cond: Option[QueryCondition]): Fragment = {
+  private def makeWhere(cond: Option[QueryCondition]): Fragment =
     val hideTags = NonEmptyList.of(RTag.softDelete.id)
     val hideDeleted =
       fr"WHERE (pa.id not in (${activitiesWithAllTagIds(hideTags)}))"
 
-    cond match {
+    cond match
       case Some(c) => hideDeleted ++ sql"AND (" ++ condition(c) ++ fr")"
       case None    => hideDeleted
-    }
-  }
 
   def condition(c: QueryCondition): Fragment =
-    c match {
+    c match
       case QueryCondition.TagAllStarts(names) =>
         val in = activitiesWithAllTagsLike(names)
         fr"pa.id in ($in)"
@@ -212,19 +206,16 @@ object ActivityQueryBuilder {
         val inner = condition(el)
         fr"NOT($inner)"
 
-    }
-
   def combineFragments(cs: List[Fragment], sep: Fragment): Fragment =
-    cs match {
+    cs match
       case a :: Nil => a
       case _        => cs.foldSmash1(fr"(", sep, fr")")
-    }
 
   def wildcardEnd(s: TagName): String = s"${s.name}%"
   def wildcardEnd(p: Path): String = s"${p.toString}%"
   def wildcard(notes: String): String = s"%$notes%"
 
-  def activitiesWithEitherTag(tags: NonEmptyList[TagName]): Fragment = {
+  def activitiesWithEitherTag(tags: NonEmptyList[TagName]): Fragment =
     val names =
       tags.toList
         .map(_.toLowerCase)
@@ -234,9 +225,8 @@ object ActivityQueryBuilder {
       FROM $activityTagT ta
       INNER JOIN $tagT tag ON ta.tag_id = tag.id
       WHERE lower(tag.name) in ($names)"""
-  }
 
-  def activitiesWithEitherTagLike(tags: NonEmptyList[TagName]): Fragment = {
+  def activitiesWithEitherTagLike(tags: NonEmptyList[TagName]): Fragment =
     val names =
       tags.toList
         .map(wildcardEnd)
@@ -246,9 +236,8 @@ object ActivityQueryBuilder {
        FROM $activityTagT ta
        INNER JOIN $tagT tag ON ta.tag_id = tag.id
        WHERE $names"""
-  }
 
-  def activitiesWithAllTags(tags: NonEmptyList[TagName]): Fragment = {
+  def activitiesWithAllTags(tags: NonEmptyList[TagName]): Fragment =
     val inner = tags.toList
       .map(_.toLowerCase)
       .map(name => sql"""SELECT DISTINCT ta.activity_id
@@ -256,9 +245,8 @@ object ActivityQueryBuilder {
             INNER JOIN $tagT tag on ta.tag_id = tag.id
             WHERE lower(tag.name) = $name""")
     inner.foldSmash1(Fragment.empty, Fragment.const(" INTERSECT "), Fragment.empty)
-  }
 
-  def activitiesWithAllTagsLike(tags: NonEmptyList[TagName]): Fragment = {
+  def activitiesWithAllTagsLike(tags: NonEmptyList[TagName]): Fragment =
     val inner = tags.toList
       .map(wildcardEnd)
       .map(name => sql"""SELECT DISTINCT ta.activity_id
@@ -266,13 +254,10 @@ object ActivityQueryBuilder {
               INNER JOIN $tagT tag on ta.tag_id = tag.id
               WHERE tag.name ilike $name""")
     inner.foldSmash1(Fragment.empty, Fragment.const(" INTERSECT "), Fragment.empty)
-  }
 
-  def activitiesWithAllTagIds(tags: NonEmptyList[TagId]): Fragment = {
+  def activitiesWithAllTagIds(tags: NonEmptyList[TagId]): Fragment =
     val inner = tags.toList
       .map(id => sql"""SELECT DISTINCT ta.activity_id
               FROM $activityTagT ta
               WHERE ta.tag_id = $id""")
     inner.foldSmash1(Fragment.empty, Fragment.const(" INTERSECT "), Fragment.empty)
-  }
-}

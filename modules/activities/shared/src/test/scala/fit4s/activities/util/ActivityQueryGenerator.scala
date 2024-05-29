@@ -12,7 +12,7 @@ import fit4s.profile.types._
 
 import org.scalacheck.Gen
 
-object ActivityQueryGenerator {
+object ActivityQueryGenerator:
 
   def generator: Gen[ActivityQuery] =
     for {
@@ -105,14 +105,13 @@ object ActivityQueryGenerator {
   def instantGen: Gen[Instant] =
     Gen.choose(646747200000L, 1909051200000L).map(Instant.ofEpochMilli)
 
-  def dateTimeGen: Gen[DateTime] = {
+  def dateTimeGen: Gen[DateTime] =
     val now = Instant.now()
     val offset = DateTime.offset
     val max = Duration.between(offset, now).toSeconds
     Gen
       .choose(DateTime.minTimeForOffset, max)
       .map(DateTime.apply)
-  }
 
   def distanceGen: Gen[Distance] =
     Gen.choose(0d, 1500 * 1000d).map(Distance.meter)
@@ -125,4 +124,3 @@ object ActivityQueryGenerator {
 
   def serialNumberGen: Gen[Long] =
     Gen.choose(0, Int.MaxValue).map(_.toLong)
-}

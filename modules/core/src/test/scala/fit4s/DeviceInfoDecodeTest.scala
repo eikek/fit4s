@@ -12,8 +12,8 @@ import io.bullet.borer.*
 import munit.FunSuite
 import scodec.bits.ByteVector
 
-class DeviceInfoDecodeTest extends FunSuite with JsonCodec {
-  test("decode DeviceInfo data") {
+class DeviceInfoDecodeTest extends FunSuite with JsonCodec:
+  test("decode DeviceInfo data"):
     val data = ByteVector.fromValidHex(
       "249c0934220a24ebffffffffffffffffffffffffffffffff000000000000000000000000000000000000000000000000000000000000000000000000ffffffff0100890a1202ffffffff000000ffffffffff00ffff05ffffffffffffff"
     )
@@ -38,5 +38,3 @@ class DeviceInfoDecodeTest extends FunSuite with JsonCodec {
       dataMessage.getField(DeviceInfoMsg.softwareVersion).map(_.map(_.value.rawValue)),
       530L.some.asRight
     )
-  }
-}

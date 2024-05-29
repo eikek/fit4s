@@ -6,7 +6,7 @@ import fit4s.common.borer.syntax.all.*
 
 import io.bullet.borer.*
 
-final class TagName private (val name: String) extends AnyVal {
+final class TagName private (val name: String) extends AnyVal:
 
   override def toString = name
 
@@ -20,12 +20,12 @@ final class TagName private (val name: String) extends AnyVal {
     other.equalsIgnoreCase(name.take(other.length))
 
   def stripPrefix(prefix: TagName): TagName =
-    if (startsWith(prefix)) {
+    if (startsWith(prefix))
       val suffix = name.drop(prefix.name.length)
-      if (suffix.nonEmpty) {
+      if (suffix.nonEmpty)
         new TagName(if (suffix.charAt(0) == '/') suffix.drop(1) else suffix)
-      } else this
-    } else this
+      else this
+    else this
 
   def toLowerCase: TagName =
     new TagName(name.toLowerCase)
@@ -33,9 +33,8 @@ final class TagName private (val name: String) extends AnyVal {
   def quoted: String =
     if (name.exists(_.isWhitespace)) s"\"$name\""
     else name
-}
 
-object TagName {
+object TagName:
 
   def fromString(name: String): Either[String, TagName] =
     if (name.contains(',') || name.contains('+') || name.contains('%'))
@@ -54,4 +53,3 @@ object TagName {
 
   implicit val jsonEncoder: Encoder[TagName] =
     Encoder.forString.contramap(_.name)
-}

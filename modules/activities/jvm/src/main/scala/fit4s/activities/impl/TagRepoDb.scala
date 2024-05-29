@@ -11,7 +11,7 @@ import fit4s.activities.records.{RActivityTag, RTag}
 import doobie._
 import doobie.implicits._
 
-final class TagRepoDb[F[_]: Sync](xa: Transactor[F]) extends TagRepo[F] {
+final class TagRepoDb[F[_]: Sync](xa: Transactor[F]) extends TagRepo[F]:
   def linkTags(
       cond: Option[QueryCondition],
       tags: NonEmptyList[TagName]
@@ -50,4 +50,3 @@ final class TagRepoDb[F[_]: Sync](xa: Transactor[F]) extends TagRepo[F] {
 
   def removeById(tagId: TagId) =
     RTag.delete(tagId).transact(xa)
-}

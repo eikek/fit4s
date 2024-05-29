@@ -2,7 +2,7 @@ package fit4s.common.borer
 
 import io.bullet.borer.Encoder
 
-trait EncoderHelper {
+trait EncoderHelper:
 
   def from[A](vs: A => List[(String, Option[JsonValue])]): Encoder[A] =
     Encoder { (w, a) =>
@@ -14,6 +14,5 @@ trait EncoderHelper {
       }
       w.writeMapClose()
     }
-}
 
 object EncoderHelper extends EncoderHelper

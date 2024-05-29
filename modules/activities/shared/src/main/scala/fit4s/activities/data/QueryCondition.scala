@@ -12,13 +12,12 @@ import fit4s.profile.types.{Sport, SubSport}
 
 sealed trait QueryCondition extends Product
 
-object QueryCondition {
+object QueryCondition:
   type QueryReader = String => Either[String, QueryCondition]
 
-  def parser(zoneId: ZoneId, currentTime: Instant): QueryReader = {
+  def parser(zoneId: ZoneId, currentTime: Instant): QueryReader =
     val cp = new ConditionParser(zoneId, currentTime)
-    (cp.parseCondition _).andThen(_.left.map(_.show))
-  }
+    cp.parseCondition.andThen(_.left.map(_.show))
 
   def apply(id: ActivityId, more: ActivityId*): QueryCondition =
     ActivityIdMatch(Nel(id, more.toList))
@@ -78,7 +77,7 @@ object QueryCondition {
   case class Not(QueryCondition: QueryCondition) extends QueryCondition
 
   private[activities] def normalize(c: QueryCondition): QueryCondition =
-    c match {
+    c match
       case QueryCondition.And(inner) =>
         val nodes = spliceAnd(inner)
         if (nodes.tail.isEmpty) normalize(nodes.head)
@@ -90,28 +89,23 @@ object QueryCondition {
         else QueryCondition.Or(nodes.map(normalize))
 
       case QueryCondition.Not(inner) =>
-        inner match {
+        inner match
           case QueryCondition.Not(inner2) =>
             normalize(inner2)
           case _ =>
             QueryCondition.Not(normalize(inner))
-        }
       case _ => c
-    }
 
   private def spliceAnd(nodes: Nel[QueryCondition]): Nel[QueryCondition] =
-    nodes.flatMap {
+    nodes.flatMap:
       case QueryCondition.And(inner) =>
         spliceAnd(inner)
       case node =>
         Nel.of(node)
-    }
 
   private def spliceOr(nodes: Nel[QueryCondition]): Nel[QueryCondition] =
-    nodes.flatMap {
+    nodes.flatMap:
       case QueryCondition.Or(inner) =>
         spliceOr(inner)
       case node =>
         Nel.of(node)
-    }
-}

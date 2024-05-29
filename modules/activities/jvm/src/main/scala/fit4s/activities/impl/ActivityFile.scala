@@ -13,15 +13,14 @@ enum ActivityFile(val path: Path):
 
 object ActivityFile:
   def apply(f: Path): Option[ActivityFile] =
-    extNames(f) match {
+    extNames(f) match
       case ".fit" :: _          => ActivityFile.Fit(f).some
       case ".gz" :: ".fit" :: _ => ActivityFile.Fit(f).some
       case ".tcx" :: _          => ActivityFile.Tcx(f).some
       case ".gz" :: ".tcx" :: _ => ActivityFile.Tcx(f).some
       case _                    => None
-    }
 
-  private def extNames(p: Path): List[String] = {
+  private def extNames(p: Path): List[String] =
     val fname = p.fileName.toString.toLowerCase
     val lidx = fname.lastIndexOf('.', fname.size)
     val pidx = fname.lastIndexOf('.', lidx - 1)
@@ -30,4 +29,3 @@ object ActivityFile:
     val prev = if (pidx > 0 && pidx < lidx) fname.substring(pidx, lidx) else ""
 
     List(last, prev).filter(_.nonEmpty)
-  }

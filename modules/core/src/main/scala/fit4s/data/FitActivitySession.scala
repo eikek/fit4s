@@ -41,13 +41,12 @@ final case class FitActivitySession(
     avgStrokeCount: Option[StrokesPerLap],
     poolLength: Option[Distance],
     avgGrade: Option[Percent]
-) {
+):
 
   def containsTime(dt: DateTime): Boolean =
     startTime <= dt && dt <= endTime
-}
 
-object FitActivitySession {
+object FitActivitySession:
 
   def from(sessionMsg: DataMessage): Either[String, FitActivitySession] =
     if (!sessionMsg.isMessage(SessionMsg)) Left(s"Not a session message: $sessionMsg")
@@ -127,4 +126,3 @@ object FitActivitySession {
         poolLength.flatMap(_.distance),
         avgGrade.flatMap(_.percent)
       )
-}

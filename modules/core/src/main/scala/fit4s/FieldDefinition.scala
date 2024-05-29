@@ -24,35 +24,31 @@ final case class FieldDefinition(
     baseType: FieldDefinition.BaseType
 )
 
-object FieldDefinition {
+object FieldDefinition:
 
   case class BaseType(
       decoded: BaseType.Raw,
       fitBaseType: FitBaseType
   )
 
-  object BaseType {
+  object BaseType:
 
     final case class Raw(endianAbility: Boolean, reserved: Int, baseTypeNum: Int)
-    object Raw {
+    object Raw:
       def codec: Codec[Raw] =
         (bool :: uint2L :: uintL(5)).as[Raw]
-    }
 
     def codec: Codec[BaseType] =
       Raw.codec
         .flatZip[FitBaseType] { raw =>
-          FitBaseType.byOrdinal(raw.baseTypeNum) match {
+          FitBaseType.byOrdinal(raw.baseTypeNum) match
             case Some(ft) => provide(ft)
             case None =>
               provide(
                 FitBaseType.Uint8
               ) // fail(Err(s"Failed to lookup fit base type for: $raw"))
-          }
         }
         .as[BaseType]
-  }
 
   def codec: Codec[FieldDefinition] =
     (uint8L :: uint8L :: BaseType.codec).as[FieldDefinition]
-}

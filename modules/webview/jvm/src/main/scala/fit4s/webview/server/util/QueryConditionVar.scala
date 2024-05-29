@@ -9,7 +9,7 @@ import fit4s.activities.data.QueryCondition
 
 import org.http4s.ParseFailure
 
-object QueryConditionVar {
+object QueryConditionVar:
 
   def validate(zoneId: ZoneId, currentTime: Instant)(
       cond: String
@@ -26,4 +26,3 @@ object QueryConditionVar {
       .get("q")
       .flatMap(_.headOption)
       .map(str => validate(_, _)(str))
-}

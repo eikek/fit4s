@@ -13,8 +13,8 @@ import org.http4s.dsl.io._
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.multipart.Multipart
 
-object UploadServer extends IOApp {
-  override def run(args: List[String]) = {
+object UploadServer extends IOApp:
+  override def run(args: List[String]) =
     val port = args.headOption
       .flatMap(_.toIntOption)
       .flatMap(Port.fromInt)
@@ -27,10 +27,9 @@ object UploadServer extends IOApp {
       .withHttpApp(uploadRoutes.orNotFound)
       .build
       .useForever
-  }
 
   def uploadRoutes: HttpRoutes[IO] =
-    HttpRoutes.of {
+    HttpRoutes.of:
       case req @ POST -> Root / "uploads" =>
         for {
           // must consume the request
@@ -63,7 +62,6 @@ object UploadServer extends IOApp {
         randomChoice(0.5, done, wait).flatTap(r =>
           IO.println(s"Got upload status request: => $r")
         )
-    }
 
   def randomChoice[A](prob: Double, right: => IO[A], left: => IO[A]): IO[A] =
     Random
@@ -93,4 +91,3 @@ object UploadServer extends IOApp {
       status = "This is some status",
       activity_id = errorOrId.toOption.flatten
     )
-}

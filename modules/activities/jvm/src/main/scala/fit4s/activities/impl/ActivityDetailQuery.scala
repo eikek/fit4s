@@ -11,12 +11,12 @@ import fit4s.activities.records._
 import doobie._
 import doobie.implicits._
 
-object ActivityDetailQuery {
-  private[this] val activityT = RActivity.table
-  private[this] val locationT = RActivityLocation.table
-  private[this] val tagT = RTag.table
-  private[this] val actTagT = RActivityTag.table
-  private[this] val sessionT = RActivitySession.table
+object ActivityDetailQuery:
+  private val activityT = RActivity.table
+  private val locationT = RActivityLocation.table
+  private val tagT = RTag.table
+  private val actTagT = RActivityTag.table
+  private val sessionT = RActivitySession.table
 
   def create(
       id: ActivityId,
@@ -58,7 +58,7 @@ object ActivityDetailQuery {
       startEndDistance = dist.flatten.toMap
     )).value
 
-  private def laps(id: ActivitySessionId): ConnectionIO[List[ActivityLap]] = {
+  private def laps(id: ActivitySessionId): ConnectionIO[List[ActivityLap]] =
     val cols = RActivityLap
       .columnList(Some("lap"))
       .commas
@@ -68,9 +68,8 @@ object ActivityDetailQuery {
           ORDER BY lap.start_time ASC"""
       .query[ActivityLap]
       .to[List]
-  }
 
-  private def places(id: ActivityId) = {
+  private def places(id: ActivityId) =
     val placeCols = RGeoPlace.columnList(Some("p")).commas
     sql"""SELECT a.activity_session_id, a.position_name, $placeCols
           FROM ${RActivityGeoPlace.table} a
@@ -80,11 +79,10 @@ object ActivityDetailQuery {
           WHERE pa.id = $id"""
       .query[(ActivitySessionId, PositionName, GeoPlace)]
       .to[List]
-  }
 
   private def activitySessions(
       id: ActivityId
-  ): ConnectionIO[NonEmptyList[ActivitySession]] = {
+  ): ConnectionIO[NonEmptyList[ActivitySession]] =
     val actCols = RActivitySession.columnList(Some("act")).commas
     sql"""SELECT $actCols
           FROM $sessionT act
@@ -93,14 +91,12 @@ object ActivityDetailQuery {
       .query[ActivitySession]
       .to[List]
       .map(NonEmptyList.fromList)
-      .flatMap {
+      .flatMap:
         case Some(nel) => nel.pure[ConnectionIO]
         case None =>
           Sync[ConnectionIO].raiseError(new Exception(s"No sessions for activity: $id"))
-      }
-  }
 
-  private def activityTags(id: ActivityId) = {
+  private def activityTags(id: ActivityId) =
     val tagCols = RTag.columnList(Some("tag")).commas
     sql"""SELECT DISTINCT $tagCols
           FROM $tagT tag
@@ -109,9 +105,8 @@ object ActivityDetailQuery {
           ORDER BY tag.name"""
       .query[Tag]
       .to[Vector]
-  }
 
-  private def activityAndLocation(id: ActivityId) = {
+  private def activityAndLocation(id: ActivityId) =
     val colsAT = RActivity.columnList(Some("at")).commas
     val colsLoc = RActivityLocation.columnList(Some("loc")).commas
 
@@ -121,5 +116,3 @@ object ActivityDetailQuery {
           WHERE at.id = $id"""
       .query[(Activity, Location)]
       .option
-  }
-}

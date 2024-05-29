@@ -9,7 +9,7 @@ import org.scalajs.dom.HTMLElement
 @JSGlobal("L.Control")
 @js.native
 @annotation.nowarn
-class Control(position: UndefOr[String] = "topright") extends js.Object {
+class Control(position: UndefOr[String] = "topright") extends js.Object:
   def getPosition(): String = js.native
 
   def setPosition(position: String): Control = js.native
@@ -19,4 +19,3 @@ class Control(position: UndefOr[String] = "topright") extends js.Object {
   def addTo(map: LeafletMap): Control = js.native
 
   def remove(): Control = js.native
-}

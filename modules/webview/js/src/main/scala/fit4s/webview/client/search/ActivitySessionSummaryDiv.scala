@@ -16,7 +16,7 @@ import fit4s.webview.client.util.FormatDate
 import calico.*
 import calico.html.io.{*, given}
 
-object ActivitySessionSummaryDiv {
+object ActivitySessionSummaryDiv:
   val cardStyle =
     "card py-4 px-4 border rounded-md dark:border-stone-700 dark:hover:border-sky-700 flex flex-col"
   val labelStyle = "opacity-75 text-sm"
@@ -24,7 +24,7 @@ object ActivitySessionSummaryDiv {
   val headerStyle =
     "col-span-3 text-lg font-bold border border-t-0 border-x-0 border-b-2 dark:border-sky-500 py-0.5 mb-1"
 
-  def apply(a: ActivitySessionSummary, zone: ZoneId): Resource[IO, HtmlDivElement[IO]] = {
+  def apply(a: ActivitySessionSummary, zone: ZoneId): Resource[IO, HtmlDivElement[IO]] =
     implicit val sport: Sport = a.sport
 
     div(
@@ -100,11 +100,9 @@ object ActivitySessionSummaryDiv {
         )
       )
     )
-  }
 
   def makeRow(
       enabled: Boolean
   )(els: Resource[IO, HtmlDivElement[IO]]*): List[Resource[IO, HtmlDivElement[IO]]] =
     if (!enabled) Nil
     else els.toList
-}

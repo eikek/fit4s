@@ -11,7 +11,7 @@ import fit4s.strava.impl.Zip
 import com.github.tototoshi.csv.{CSVFormat, CSVReader, defaultCSVFormat}
 
 /** Extract activities from a strava export. */
-object StravaExportExtract {
+object StravaExportExtract:
   implicit val format: CSVFormat = defaultCSVFormat
 
   case class ExportData(
@@ -49,7 +49,7 @@ object StravaExportExtract {
   private def unpackPhase[F[_]: Async: Files](stravaExport: Path): Resource[F, Path] =
     Resource
       .eval(detectType[F](stravaExport))
-      .flatMap {
+      .flatMap:
         case InputDirType.ZipFile(_)   => unzip[F](stravaExport)
         case InputDirType.Directory(_) => Resource.pure[F, Path](stravaExport)
         case _ =>
@@ -58,7 +58,6 @@ object StravaExportExtract {
               new Exception(s"The strava export is neither a directory nor a zip file")
             )
           )
-      }
 
   private def readActivitiesCsv[F[_]: Async](
       dir: Path,
@@ -66,15 +65,14 @@ object StravaExportExtract {
       bikes: Set[String]
   )(
       file: Path
-  ) = Async[F].blocking {
+  ) = Async[F].blocking:
     val reader = CSVReader.open(file.toNioPath.toFile)
     val data = reader.allWithHeaders()
     data.flatMap { m =>
-      val (bike, shoe) = m.get("Activity Gear") match {
+      val (bike, shoe) = m.get("Activity Gear") match
         case Some(g) if g.trim.nonEmpty && bikes.contains(g.trim) => (g.trim.some, None)
         case Some(g) if g.trim.nonEmpty && shoes.contains(g.trim) => (None, g.trim.some)
         case g                                                    => (g.asNonBlank, None)
-      }
       m.get("Filename").asNonBlank.map { fn =>
         ExportData(
           fitFile = dir / fn,
@@ -89,23 +87,20 @@ object StravaExportExtract {
         )
       }
     }
-  }
 
-  private def readBikesCsv[F[_]: Async](file: Path): F[Set[String]] = Async[F].blocking {
+  private def readBikesCsv[F[_]: Async](file: Path): F[Set[String]] = Async[F].blocking:
     val reader = CSVReader.open(file.toNioPath.toFile)
     reader
       .allWithHeaders()
       .flatMap(_.get("Bike Name"))
       .toSet
-  }
 
-  private def readShoesCsv[F[_]: Async](file: Path): F[Set[String]] = Async[F].blocking {
+  private def readShoesCsv[F[_]: Async](file: Path): F[Set[String]] = Async[F].blocking:
     val reader = CSVReader.open(file.toNioPath.toFile)
     reader
       .allWithHeaders()
       .flatMap(_.get("Shoe Name"))
       .toSet
-  }
 
   private def unzip[F[_]: Async: Files](zipFile: Path): Resource[F, Path] =
     Files[F]
@@ -125,31 +120,29 @@ object StravaExportExtract {
       )
 
   private def detectType[F[_]: Async: Files](path: Path): F[InputDirType] =
-    Files[F].isRegularFile(path).flatMap {
-      case true =>
-        if (path.extName.equalsIgnoreCase(".zip"))
-          Async[F].pure(InputDirType.ZipFile(path))
-        else Async[F].pure(InputDirType.Unknown)
-      case false =>
-        Files[F].isDirectory(path).map {
-          case true  => InputDirType.Directory(path)
-          case false => InputDirType.Unknown
-        }
-    }
+    Files[F]
+      .isRegularFile(path)
+      .flatMap:
+        case true =>
+          if (path.extName.equalsIgnoreCase(".zip"))
+            Async[F].pure(InputDirType.ZipFile(path))
+          else Async[F].pure(InputDirType.Unknown)
+        case false =>
+          Files[F]
+            .isDirectory(path)
+            .map:
+              case true  => InputDirType.Directory(path)
+              case false => InputDirType.Unknown
 
   private def activityZipFilter: Zip.NameFilter =
     n => n.startsWith("activities") || n == "bikes.csv" || n == "shoes.csv"
 
-  implicit class StringOptionOps(self: Option[String]) {
+  implicit class StringOptionOps(self: Option[String]):
     def asNonBlank = self.map(_.trim).filter(_.nonEmpty)
-  }
 
-  sealed trait InputDirType extends Product {
+  sealed trait InputDirType extends Product:
     def widen: InputDirType = this
-  }
-  object InputDirType {
+  object InputDirType:
     case object Unknown extends InputDirType
     case class ZipFile(path: Path) extends InputDirType
     case class Directory(path: Path) extends InputDirType
-  }
-}

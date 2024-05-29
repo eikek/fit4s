@@ -16,7 +16,7 @@ import io.bullet.borer.NullOptions.given
 import io.bullet.borer.*
 import io.bullet.borer.derivation.MapBasedCodecs.*
 
-trait BasicJsonCodec extends DataJsonCodec {
+trait BasicJsonCodec extends DataJsonCodec:
   implicit def pathDecoder: Decoder[Path] =
     Decoder.forString.map(Path.apply)
 
@@ -138,15 +138,13 @@ trait BasicJsonCodec extends DataJsonCodec {
   implicit val activityDetailsDecoder: Decoder[ActivityDetailResult] =
     deriveDecoder
 
-  implicit val activitySessionSummaryEncoder: Encoder[ActivitySessionSummary] = Encoder {
+  implicit val activitySessionSummaryEncoder: Encoder[ActivitySessionSummary] = Encoder:
     (w, s) =>
       implicit val sport: Sport = s.sport
       val enc = deriveEncoder[ActivitySessionSummary]
       enc.write(w, s)
-  }
 
   implicit val activitySessionSummaryDecoder: Decoder[ActivitySessionSummary] =
     deriveDecoder
-}
 
 object BasicJsonCodec extends BasicJsonCodec

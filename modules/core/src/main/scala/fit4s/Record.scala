@@ -4,7 +4,7 @@ import scodec._
 
 case class Record(header: RecordHeader, content: FitMessage)
 
-object Record {
+object Record:
 
   def codec(prev: Map[Int, FitMessage.DefinitionMessage]): Codec[Record] =
     Codec(encoder, decoder(prev))
@@ -18,17 +18,14 @@ object Record {
   def decoder(prev: Map[Int, FitMessage.DefinitionMessage]): Decoder[Record] =
     RecordHeader.codec.flatMap(rh => FitMessage.decoder(prev)(rh).map(m => Record(rh, m)))
 
-  object DefinitionRecord {
+  object DefinitionRecord:
     def unapply(r: Record): Option[(RecordHeader, FitMessage.DefinitionMessage)] =
       if (r.header.messageType.isDefinitionMessage)
         Some(r.header -> r.content.asInstanceOf[FitMessage.DefinitionMessage])
       else None
-  }
 
-  object DataRecord {
+  object DataRecord:
     def unapply(r: Record): Option[(RecordHeader, FitMessage.DataMessage)] =
       if (r.header.messageType.isDataMessage)
         Some(r.header -> r.content.asInstanceOf[FitMessage.DataMessage])
       else None
-  }
-}

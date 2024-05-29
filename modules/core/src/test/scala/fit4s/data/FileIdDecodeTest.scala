@@ -12,9 +12,9 @@ import io.bullet.borer.*
 import munit.FunSuite
 import scodec.bits.ByteVector
 
-class FileIdDecodeTest extends FunSuite with JsonCodec {
+class FileIdDecodeTest extends FunSuite with JsonCodec:
 
-  test("decode FileId data (2)") {
+  test("decode FileId data (2)"):
     val data = ByteVector.fromValidHex("220a24eb63681234ffffffff0100890affff04")
     val definition = Json
       .decode(
@@ -41,9 +41,8 @@ class FileIdDecodeTest extends FunSuite with JsonCodec {
         )
       )
     )
-  }
 
-  test("decode FileId data") {
+  test("decode FileId data"):
     val data = ByteVector.fromValidHex("000103dc0001e24002")
     val definition = Json
       .decode(
@@ -70,9 +69,8 @@ class FileIdDecodeTest extends FunSuite with JsonCodec {
         )
       )
     )
-  }
 
-  test("fileId as string") {
+  test("fileId as string"):
     val samples =
       for {
         file <- File.all
@@ -93,5 +91,3 @@ class FileIdDecodeTest extends FunSuite with JsonCodec {
       val decoded = FileId.fromString(id)
       assertEquals(decoded, Right(fileId))
     }
-  }
-}

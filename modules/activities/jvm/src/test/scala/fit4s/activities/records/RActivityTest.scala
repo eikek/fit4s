@@ -7,10 +7,10 @@ import fit4s.activities.{DatabaseTest, FlywayMigrate}
 
 import doobie.implicits._
 
-class RActivityTest extends DatabaseTest with TestData {
+class RActivityTest extends DatabaseTest with TestData:
   override def munitFixtures = List(h2DataSource)
 
-  test("insert record") {
+  test("insert record"):
     val (jdbc, ds) = h2DataSource()
     DatabaseTest.makeXA(ds).use { xa =>
       for {
@@ -25,9 +25,8 @@ class RActivityTest extends DatabaseTest with TestData {
         _ = assertEquals(found, Some(expect))
       } yield ()
     }
-  }
 
-  test("fail on duplicate file-ids") {
+  test("fail on duplicate file-ids"):
     val (jdbc, ds) = h2DataSource()
     DatabaseTest.makeXA(ds).use { xa =>
       for {
@@ -44,5 +43,3 @@ class RActivityTest extends DatabaseTest with TestData {
         _ = assert(result.isLeft)
       } yield ()
     }
-  }
-}

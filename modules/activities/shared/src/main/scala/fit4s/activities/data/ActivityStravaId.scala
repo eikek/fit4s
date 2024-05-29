@@ -4,11 +4,10 @@ import cats.Show
 
 import io.bullet.borer.*
 
-final class ActivityStravaId(val id: Long) extends AnyVal {
+final class ActivityStravaId(val id: Long) extends AnyVal:
   override def toString = s"ActivityStravaId($id)"
-}
 
-object ActivityStravaId {
+object ActivityStravaId:
   def apply(id: Long): ActivityStravaId = new ActivityStravaId(id)
 
   implicit val jsonEncoder: Encoder[ActivityStravaId] =
@@ -18,4 +17,3 @@ object ActivityStravaId {
     Decoder.forLong.map(apply)
 
   given Show[ActivityStravaId] = Show.show(_.id.toString)
-}

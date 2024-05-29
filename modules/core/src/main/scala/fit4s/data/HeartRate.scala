@@ -1,6 +1,6 @@
 package fit4s.data
 
-final class HeartRate private (val bpm: Int) extends AnyVal {
+final class HeartRate private (val bpm: Int) extends AnyVal:
 
   def *(factor: Double): HeartRate = new HeartRate((bpm * factor).toInt)
 
@@ -9,13 +9,11 @@ final class HeartRate private (val bpm: Int) extends AnyVal {
   def +(other: HeartRate): HeartRate = new HeartRate(bpm + other.bpm)
 
   override def toString = s"${bpm}bpm"
-}
 
-object HeartRate {
+object HeartRate:
   val zero: HeartRate = bpm(0)
 
   def bpm(bpm: Int): HeartRate = new HeartRate(bpm)
 
   implicit val numeric: Numeric[HeartRate] =
     NumericFrom[HeartRate, Int](_.bpm, HeartRate.bpm)
-}

@@ -10,9 +10,9 @@ import io.bullet.borer.*
 import munit.FunSuite
 import scodec.bits.ByteVector
 
-class UserProfileDecodeTest extends FunSuite with JsonCodec {
+class UserProfileDecodeTest extends FunSuite with JsonCodec:
 
-  test("decode UserProfile data") {
+  test("decode UserProfile data"):
     val data = ByteVector.fromValidHex("0384011cbe00")
     val definition = Json
       .decode(
@@ -31,9 +31,8 @@ class UserProfileDecodeTest extends FunSuite with JsonCodec {
       dataMessage.getRequiredField(UserProfileMsg.gender).map(_.value),
       Right(Gender.Male)
     )
-  }
 
-  test("decode UserProfile data (2)") {
+  test("decode UserProfile data (2)"):
     val data = ByteVector.fromValidHex(
       "6054000060350100a8190934ffffffffffffffff2a0300000000000005000000ffff01b80300000001000032020050000000"
     )
@@ -60,5 +59,3 @@ class UserProfileDecodeTest extends FunSuite with JsonCodec {
       dataMessage.getRequiredField(UserProfileMsg.height).map(_.distance),
       Right(Some(Distance.meter(1.84)))
     )
-  }
-}

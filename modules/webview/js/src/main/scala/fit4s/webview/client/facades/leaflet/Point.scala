@@ -8,7 +8,7 @@ import scala.scalajs.js.annotation.{JSGlobal, JSName}
 @js.native
 @annotation.nowarn
 class Point(x: Double, y: Double, round: UndefOr[Boolean] = js.undefined)
-    extends js.Object {
+    extends js.Object:
   def this(coords: js.Array[Double]) = this(coords(0), coords(1))
 
   def add(point: Point): Point = js.native
@@ -33,4 +33,3 @@ class Point(x: Double, y: Double, round: UndefOr[Boolean] = js.undefined)
   def distanceTo(): Double = js.native
 
   def contains(): Boolean = js.native
-}

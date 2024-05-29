@@ -10,7 +10,7 @@ import io.bullet.borer.*
 import io.bullet.borer.derivation.MapBasedCodecs.*
 import scodec.bits.ByteOrdering
 
-trait JsonCodec {
+trait JsonCodec:
   extension [A](delegate: Decoder[A])
     def emap[B](f: A => Either[String, B]): Decoder[B] =
       delegate.mapWithReader((r, a) => f(a).fold(r.validationFailure, identity))
@@ -64,4 +64,3 @@ trait JsonCodec {
 
   implicit val fieldDefinitionMsgCodec: Codec[FitMessage.DefinitionMessage] =
     deriveCodec[FitMessage.DefinitionMessage]
-}

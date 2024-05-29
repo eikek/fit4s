@@ -13,21 +13,19 @@ import fit4s.activities.records.DoobieImplicits._
 import doobie._
 import doobie.implicits._
 
-object RActivityLocation {
+object RActivityLocation:
   private[activities] val table = fr"activity_location"
 
-  private[activities] def columnList(alias: Option[String]): List[Fragment] = {
+  private[activities] def columnList(alias: Option[String]): List[Fragment] =
     def c(name: String) = Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))
     List(c("id"), c("location"))
-  }
 
   def getOrCreateLocations(dir: List[Path]): ConnectionIO[Map[Path, LocationId]] =
     dir
       .traverse { p =>
-        findByPath(p).flatMap {
+        findByPath(p).flatMap:
           case Some(r) => Sync[ConnectionIO].pure(p -> r.id)
           case None    => insert(p).map(p -> _.id)
-        }
       }
       .map(_.toMap)
 
@@ -60,12 +58,11 @@ object RActivityLocation {
 
   def insertAll(
       records: Chunk[Path]
-  ): Stream[ConnectionIO, Location] = {
+  ): Stream[ConnectionIO, Location] =
     val sql = s"INSERT INTO ${table.internals.sql} (location) VALUES (?)"
     Update[Path](sql)
       .updateManyWithGeneratedKeys[Location]("id", "location")
       .apply[Chunk](records)
-  }
 
   def listAll: ConnectionIO[Vector[Location]] =
     fr"SELECT id, location FROM $table ORDER BY id ASC"
@@ -75,7 +72,7 @@ object RActivityLocation {
   def listSream(
       contains: Option[String],
       page: Page
-  ): Stream[ConnectionIO, (Location, Long)] = {
+  ): Stream[ConnectionIO, (Location, Long)] =
     val where =
       contains.map(c => sql"WHERE loc.location ilike $c").getOrElse(Fragment.empty)
 
@@ -88,9 +85,8 @@ object RActivityLocation {
           ${page.asFragment}"""
       .query[(Location, Long)]
       .streamWithChunkSize(100)
-  }
 
-  object insertMany {
+  object insertMany:
     val cols = columnList(None).map(_.internals.sql).mkString(",")
     val ph = columnList(None).map(_ => "?").mkString(",")
     val tn = table.internals.sql
@@ -98,8 +94,6 @@ object RActivityLocation {
 
     def apply(tags: Seq[Location]): ConnectionIO[Int] =
       Update[Location](sql).updateMany(tags)
-  }
 
   def streamAll: Stream[ConnectionIO, Location] =
     sql"SELECT id,location FROM $table".query[Location].streamWithChunkSize(100)
-}

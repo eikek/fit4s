@@ -12,12 +12,11 @@ import fit4s.common.util.{DateInstant, TimeInstant}
 import fit4s.data._
 import fit4s.profile.types.{Sport, SubSport, SwimStroke}
 
-trait ShowInstances {
+trait ShowInstances:
   implicit def optionShow[A](implicit showA: Show[A]): Show[Option[A]] =
-    Show.show {
+    Show.show:
       case None    => ""
       case Some(a) => showA.show(a)
-    }
 
   implicit def tupleShow[A, B](implicit showA: Show[A], showB: Show[B]): Show[(A, B)] =
     Show.show(t => show"${t._1}|${t._2}")
@@ -26,42 +25,38 @@ trait ShowInstances {
       showA: Show[A],
       showB: Show[B]
   ): Show[(Option[A], Option[B])] =
-    Show.show {
+    Show.show:
       case (Some(a), Some(b)) => (a, b).show
       case (Some(a), None)    => a.show
       case (None, Some(b))    => b.show
       case (None, None)       => ""
-    }
 
   implicit def sportSubSportShow: Show[(Sport, SubSport)] =
-    Show.show {
+    Show.show:
       case (s, SubSport.Generic)                                     => s.show
       case (Sport.Generic, s)                                        => s.show
       case (a, b) if b.show.toLowerCase.contains(a.show.toLowerCase) => b.show
       case (a, b)                                                    => show"$a/$b"
-    }
 
   implicit def speedShow(implicit sport: Sport): Show[Speed] =
     Show.show { speed =>
       if (speed.isZero) "-"
       else
-        (speed, sport) match {
+        (speed, sport) match
           case (sp, Sport.Swimming) => s"${minTomss(sp.minPer100m)} min/100m"
           case (sp, Sport.Running)  => s"${minTomss(sp.minPer1k)} min/km"
           case (sp, Sport.Walking)  => s"${minTomss(sp.minPer1k)} min/km"
           case (sp, Sport.Hiking)   => s"${minTomss(sp.minPer1k)} min/km"
           case (sp, _)              => sp.toString
-        }
     }
 
   implicit val swimStrokeShow: Show[SwimStroke] =
     Show.show(_.typeName)
 
-  private def minTomss(min: Double): String = {
+  private def minTomss(min: Double): String =
     val minutes = min.floor.toInt
     val secs = (min - minutes) * 60
     f"$minutes:${secs.toInt}%02d"
-  }
 
   implicit def instantShow(implicit zoneId: ZoneId): Show[Instant] =
     Show.show { i =>
@@ -102,10 +97,9 @@ trait ShowInstances {
 
   implicit val temperatureShow: Show[Temperature] =
     Show.show { temp =>
-      f"${temp.celcius}%.1f" match {
+      f"${temp.celcius}%.1f" match
         case str if str.endsWith("0") => s"${temp.celcius.toInt}°C"
         case str                      => s"$str°C"
-      }
     }
 
   implicit val intensityFactorShow: Show[IntensityFactor] =
@@ -141,11 +135,10 @@ trait ShowInstances {
     Show.fromToString
 
   implicit val deviceProductShow: Show[DeviceProduct] =
-    Show.show {
+    Show.show:
       case DeviceProduct.Garmin(d) => d.toString
       case DeviceProduct.Favero(d) => d.toString
       case DeviceProduct.Unknown   => "-"
-    }
 
   implicit val powerShow: Show[Power] =
     Show.show { pwr =>
@@ -160,6 +153,5 @@ trait ShowInstances {
 
   implicit val semicircleShow: Show[Semicircle] =
     Show.show(sc => s"${sc.semicircle} semicircle")
-}
 
 object ShowInstances extends ShowInstances

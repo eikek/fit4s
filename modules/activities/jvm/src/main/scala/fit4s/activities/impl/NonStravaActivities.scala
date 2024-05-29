@@ -15,9 +15,9 @@ import fit4s.data.FileId
 import doobie._
 import doobie.implicits._
 
-object NonStravaActivities {
+object NonStravaActivities:
 
-  def stats(query: ActivityQuery): ConnectionIO[Option[UnlinkedStravaStats]] = {
+  def stats(query: ActivityQuery): ConnectionIO[Option[UnlinkedStravaStats]] =
     val selected = ActivityQueryBuilder.activityIdFragment(query.condition)
     val limits = query.page.asFragment
 
@@ -32,9 +32,8 @@ object NonStravaActivities {
         (start, end).mapN(UnlinkedStravaStats(_, _, count))
       }
       .unique
-  }
 
-  def list(query: ActivityQuery): Stream[ConnectionIO, ActivityData] = {
+  def list(query: ActivityQuery): Stream[ConnectionIO, ActivityData] =
     val selected = ActivityQueryBuilder.activityIdFragment(query.condition)
     val limits = query.page.asFragment
 
@@ -52,5 +51,3 @@ object NonStravaActivities {
           .tagsForActivity(aId)
           .map(tags => ActivityData(aId, fId, name, notes, loc, path, tags.toSet))
       }
-  }
-}

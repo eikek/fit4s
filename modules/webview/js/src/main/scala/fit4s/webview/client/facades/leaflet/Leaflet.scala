@@ -8,7 +8,7 @@ import scala.scalajs.js.annotation.JSGlobal
 
 @JSGlobal("L")
 @js.native
-object Leaflet extends js.Object {
+object Leaflet extends js.Object:
 
   def map(id: String, options: UndefOr[LeafletMap.Options] = js.undefined): LeafletMap =
     js.native
@@ -35,4 +35,3 @@ object Leaflet extends js.Object {
   def icon(options: UndefOr[Icon.Options] = js.undefined): Icon = js.native
 
   def latLngBounds(points: js.Array[LatLng]): LatLngBounds = js.native
-}

@@ -17,9 +17,9 @@ import fit4s.data._
 import doobie._
 import doobie.implicits._
 
-object RActivitySessionData {
+object RActivitySessionData:
   private[activities] val table = fr"activity_session_data"
-  private[activities] def columnList(alias: Option[String]): List[Fragment] = {
+  private[activities] def columnList(alias: Option[String]): List[Fragment] =
     def c(name: String): Fragment =
       Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))
 
@@ -39,7 +39,6 @@ object RActivitySessionData {
       c("temperature"),
       c("calories")
     )
-  }
 
   private val columnsNoId = columnList(None).tail.commas
   private val columnsWithId = columnList(None).commas
@@ -53,7 +52,7 @@ object RActivitySessionData {
       sql")").update
       .withUniqueGeneratedKeys[ActivitySessionDataId]("id")
 
-  object insertMany {
+  object insertMany:
     val cols = columnList(None).map(_.internals.sql).mkString(",")
     val ph = columnList(None).map(_ => "?").mkString(",")
     val tn = table.internals.sql
@@ -61,7 +60,6 @@ object RActivitySessionData {
 
     def apply(tags: Seq[ActivitySessionData]): ConnectionIO[Int] =
       Update[ActivitySessionData](sql).updateMany(tags)
-  }
 
   def findForSession(id: ActivitySessionId): ConnectionIO[List[ActivitySessionData]] =
     sql"""SELECT $columnsWithId
@@ -78,4 +76,3 @@ object RActivitySessionData {
     sql"SELECT $columnsWithId FROM $table"
       .query[ActivitySessionData]
       .streamWithChunkSize(100)
-}

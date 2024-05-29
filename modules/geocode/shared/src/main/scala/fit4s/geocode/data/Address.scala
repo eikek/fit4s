@@ -12,7 +12,7 @@ final case class Address(
     postcode: Option[String]
 )
 
-object Address {
+object Address:
   val empty = Address(None, None, None, None, None, None, None, None, None)
 
   def fromMap(m: Map[String, String]): Address =
@@ -27,4 +27,3 @@ object Address {
       country = m.get("country"),
       postcode = m.get("postcode")
     )
-}

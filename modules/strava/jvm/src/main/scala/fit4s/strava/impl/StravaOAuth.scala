@@ -25,9 +25,9 @@ import scodec.bits.ByteVector
 final class StravaOAuth[F[_]: Async: Network](
     config: StravaClientConfig,
     client: Client[F]
-) {
+):
 
-  private[this] val logger = scribe.cats[F]
+  private val logger = scribe.cats[F]
 
   def init(cfg: StravaAppCredentials, timeout: FiniteDuration): F[Option[TokenAndScope]] =
     for {
@@ -81,10 +81,9 @@ final class StravaOAuth[F[_]: Async: Network](
     Resource
       .make(Async[F].blocking(new ServerSocket(0)))(ss => Async[F].blocking(ss.close()))
       .use(s => Async[F].blocking(s.getLocalPort).map(Port.fromInt))
-      .flatMap {
+      .flatMap:
         case Some(p) => p.pure[F]
         case None    => findPort
-      }
 
   private def createServer(
       cfg: StravaAppCredentials,
@@ -114,7 +113,7 @@ final class StravaOAuth[F[_]: Async: Network](
       cfg: StravaAppCredentials,
       state: String,
       whenDone: Deferred[F, Option[TokenAndScope]]
-  ): HttpRoutes[F] = {
+  ): HttpRoutes[F] =
     val dsl = new Http4sDsl[F] {}
     import dsl._
 
@@ -122,7 +121,7 @@ final class StravaOAuth[F[_]: Async: Network](
 
     HttpRoutes.of { case req @ GET -> Root / "fit4s" / "strava" =>
       val resp: F[(Response[F], Option[TokenAndScope])] =
-        req.params.get("error") match {
+        req.params.get("error") match
           case Some(err) =>
             logger.error(s"Strava responded with an error: $err") *>
               Forbidden(s"Strava disallowed access: $err").map(_ -> none)
@@ -139,7 +138,7 @@ final class StravaOAuth[F[_]: Async: Network](
                     tokenExchange(code, cfg)
                       .map(r => TokenAndScope(r, StravaScope(scope)))
                       .attempt
-                      .flatMap {
+                      .flatMap:
                         case Right(r) =>
                           Ok(r).map(_ -> r.some)
 
@@ -148,20 +147,17 @@ final class StravaOAuth[F[_]: Async: Network](
                             InternalServerError(s"Error in token exchange!").map(
                               _ -> none
                             )
-                      }
                 }
                 .getOrElse(
                   Forbidden(s"Strava did not respond with an access code").map(_ -> none)
                 )
-        }
 
       resp.flatMap { case (resp, token) =>
         logger.debug("Authorize flow done.") *> whenDone.complete(token).as(resp)
       }
     }
-  }
 
-  def tokenExchange(code: String, cfg: StravaAppCredentials) = {
+  def tokenExchange(code: String, cfg: StravaAppCredentials) =
     val dsl = Http4sClientDsl[F]
     import dsl._
 
@@ -180,14 +176,12 @@ final class StravaOAuth[F[_]: Async: Network](
       client
         .expect[StravaTokenResponse](req)
         .attempt
-        .flatTap {
+        .flatTap:
           case Left(ex) => logger.error("Error in token exchange", ex)
           case Right(r) => logger.debug(s"Got token response: $r")
-        }
         .rethrow
-  }
 
-  def tokenRefresh(cfg: StravaAppCredentials, refreshToken: StravaRefreshToken) = {
+  def tokenRefresh(cfg: StravaAppCredentials, refreshToken: StravaRefreshToken) =
     val dsl = Http4sClientDsl[F]
     import dsl._
 
@@ -206,13 +200,10 @@ final class StravaOAuth[F[_]: Async: Network](
       client
         .expect[StravaTokenResponse](req)
         .attempt
-        .flatTap {
+        .flatTap:
           case Left(ex) => logger.error("Error in token refresh", ex)
           case Right(r) => logger.debug(s"Got token response: $r")
-        }
         .rethrow
-  }
 
   private def println(m: String): F[Unit] =
     Async[F].blocking(Predef.println(m))
-}

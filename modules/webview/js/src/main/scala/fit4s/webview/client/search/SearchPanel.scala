@@ -15,7 +15,7 @@ import fit4s.webview.data.RequestFailure
 
 import calico.html.io.{*, given}
 
-object SearchPanel {
+object SearchPanel:
   final case class Model(
       search: SearchField.Model,
       paging: PagingDiv.Model,
@@ -106,7 +106,7 @@ object SearchPanel {
         (next, IO.unit)
 
   def subscribe(model: SignallingRef[IO, Model], cr: CommandRuntime[IO]) =
-    cr.subscribe.evalMap {
+    cr.subscribe.evalMap:
       case Result.SearchResult(cmd, results) =>
         model.flatModify(update(cr, Msg.SetResults(results.map(_._2), cmd.page)))
 
@@ -126,13 +126,12 @@ object SearchPanel {
         model.flatModify(update(cr, Msg.RefreshSearch))
 
       case _ => IO.unit
-    }
 
   def render(
       model: SignallingRef[IO, Model],
       cr: CommandRuntime[IO],
       zoneId: ZoneId
-  ): Resource[IO, HtmlDivElement[IO]] = {
+  ): Resource[IO, HtmlDivElement[IO]] =
     val searchModel = SignallingRef.lens(model)(
       get = _.search,
       set = a => b => a.copy(search = b)
@@ -159,5 +158,3 @@ object SearchPanel {
           case None      => span(cls := "hidden")
         }
       )
-  }
-}

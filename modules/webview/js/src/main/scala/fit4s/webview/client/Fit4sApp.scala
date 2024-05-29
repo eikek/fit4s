@@ -15,9 +15,9 @@ import fit4s.webview.client.search.SearchPage
 import calico.IOWebApp
 import calico.html.io.{*, given}
 
-object Fit4sApp extends IOWebApp {
-  private[this] val logger = scribe.Logger("Fit4sApp")
-  private[this] val loggerF = scribe.cats.io
+object Fit4sApp extends IOWebApp:
+  private val logger = scribe.Logger("Fit4sApp")
+  private val loggerF = scribe.cats.io
 
   val zoneId: ZoneId =
     try ZoneId.systemDefault()
@@ -41,19 +41,18 @@ object Fit4sApp extends IOWebApp {
       page: Page,
       searchPage: SearchPage.Model,
       detailPage: Option[DetailPage.Model]
-  ) {
+  ):
     def setDetail(dm: Option[DetailPage.Model]): Model =
       dm.map(_ => copy(detailPage = dm, page = Page.DetailPage)).getOrElse(this)
 
     def setSearch: Model =
       copy(detailPage = None, page = Page.SearchPage)
-  }
   object Model:
     val empty: Model = Model(Page.SearchPage, SearchPage.Model.empty, None)
     def makeEmpty: IO[SignallingRef[IO, Model]] = SignallingRef[IO].of(empty)
 
   def subscribe(model: SignallingRef[IO, Model], cr: CommandRuntime[IO]) =
-    cr.subscribe.evalMap {
+    cr.subscribe.evalMap:
       case Result.DetailResult(result) =>
         result.fold(
           d => model.update(_.setDetail(d.map(DetailPage.Model.make))),
@@ -64,7 +63,6 @@ object Fit4sApp extends IOWebApp {
         model.update(_.setSearch)
 
       case _ => IO.unit
-    }
 
   override def render: Resource[IO, HtmlElement[IO]] =
     for {
@@ -90,4 +88,3 @@ object Fit4sApp extends IOWebApp {
           }
         )
     } yield cnt
-}

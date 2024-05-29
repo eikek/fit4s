@@ -6,11 +6,10 @@ import cats.Show
 import io.bullet.borer.*
 import org.http4s.Uri
 
-final class ActivityId(val id: Long) extends AnyVal {
+final class ActivityId(val id: Long) extends AnyVal:
   override def toString = s"ActivityId($id)"
-}
 
-object ActivityId {
+object ActivityId:
   def apply(id: Long): ActivityId = new ActivityId(id)
 
   implicit val ordering: Ordering[ActivityId] =
@@ -29,4 +28,3 @@ object ActivityId {
 
   given Uri.Path.SegmentEncoder[ActivityId] =
     Uri.Path.SegmentEncoder.instance(id => Uri.Path.Segment(id.id.toString))
-}

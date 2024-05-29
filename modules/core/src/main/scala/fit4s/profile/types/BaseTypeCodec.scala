@@ -6,11 +6,10 @@ import scodec.Codec
 import scodec.bits._
 import scodec.codecs._
 
-trait BaseTypeCodec[T <: FitBaseType, R] {
+trait BaseTypeCodec[T <: FitBaseType, R]:
   def codec(byteOrdering: ByteOrdering): Codec[R]
-}
 
-object BaseTypeCodec {
+object BaseTypeCodec:
   def apply[T <: FitBaseType, R](implicit e: BaseTypeCodec[T, R]): BaseTypeCodec[T, R] = e
 
   def instance[T <: FitBaseType, R](f: ByteOrdering => Codec[R]): BaseTypeCodec[T, R] =
@@ -68,7 +67,7 @@ object BaseTypeCodec {
     BaseTypeCodec.instance[FitBaseType.Uint64z.type, Long](ulongx(64, _))
 
   def length(bt: FitBaseType): Int =
-    bt match {
+    bt match
       case FitBaseType.Enum    => 1
       case FitBaseType.Sint8   => 1
       case FitBaseType.Uint8   => 1
@@ -86,7 +85,6 @@ object BaseTypeCodec {
       case FitBaseType.Sint64  => 8
       case FitBaseType.Uint64  => 8
       case FitBaseType.Uint64z => 8
-    }
 
   def baseCodec[V](bt: FitBaseType, bo: ByteOrdering)(implicit
       e: BaseTypeCodec[bt.type, V]
@@ -94,7 +92,7 @@ object BaseTypeCodec {
     e.codec(bo)
 
   private def invalidValue(fitBaseType: FitBaseType): ByteVector =
-    fitBaseType match {
+    fitBaseType match
       case FitBaseType.Enum    => hex"ff"
       case FitBaseType.Sint8   => hex"7f"
       case FitBaseType.Uint8   => hex"ff"
@@ -112,11 +110,9 @@ object BaseTypeCodec {
       case FitBaseType.Sint64  => hex"7FFFFFFFFFFFFFFF"
       case FitBaseType.Uint64  => hex"FFFFFFFFFFFFFFFF"
       case FitBaseType.Uint64z => hex"0000000000000000"
-    }
 
   def isInvalid(fitBaseType: FitBaseType, byteOrdering: ByteOrdering)(
       bv: ByteVector
   ): Boolean =
     if (byteOrdering == ByteOrdering.BigEndian) invalidValue(fitBaseType) == bv
     else invalidValue(fitBaseType).reverse == bv
-}

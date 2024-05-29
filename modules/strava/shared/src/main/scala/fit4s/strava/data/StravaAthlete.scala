@@ -11,7 +11,6 @@ final case class StravaAthlete(
     shoes: List[StravaGear]
 )
 
-object StravaAthlete {
+object StravaAthlete:
   implicit val jsonDecoder: Decoder[StravaAthlete] =
     MapBasedCodecs.deriveDecoder
-}

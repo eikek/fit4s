@@ -4,21 +4,18 @@ import scodec.Codec
 import scodec.bits.ByteOrdering
 import scodec.codecs._
 
-trait TypedValue[V] {
+trait TypedValue[V]:
 
   def rawValue: V
 
   def typeName: String
 
-}
-
-trait TypedValueCompanion[A <: TypedValue[_]] {
+trait TypedValueCompanion[A <: TypedValue[?]]:
   def codec(bo: ByteOrdering): Codec[A]
 
   protected def baseType: FitBaseType
-}
 
-trait EnumValueCompanion[A <: TypedValue[_]] extends TypedValueCompanion[A] {
+trait EnumValueCompanion[A <: TypedValue[?]] extends TypedValueCompanion[A]:
 
   final def codec(bo: ByteOrdering): Codec[A] =
     mappedEnum[A, Long](baseTypeCodec(bo), allMap)
@@ -40,4 +37,3 @@ trait EnumValueCompanion[A <: TypedValue[_]] extends TypedValueCompanion[A] {
 
   def byOrdinal(n: Int): Option[A] =
     all.lift.apply(n)
-}

@@ -14,7 +14,7 @@ import fit4s.data.Distance
 
 import munit.FunSuite
 
-class ConditionParserTest extends FunSuite {
+class ConditionParserTest extends FunSuite:
 
   val current = Instant.parse("2023-04-02T10:05:00Z")
   val parser = new ConditionParser(ZoneId.of("Europe/Berlin"), current)
@@ -24,21 +24,19 @@ class ConditionParserTest extends FunSuite {
 
   def tag(name: String): TagName = TagName.unsafeFromString(name)
 
-  test("parse single and node") {
+  test("parse single and node"):
     val in = "(& id=1)"
     val result = parser.parseCondition(in)
     val expected = ActivityIdMatch(Nel.of(ActivityId(1)))
     assertEquals(result, expected.asRight)
-  }
 
-  test("unwrap and nodes") {
+  test("unwrap and nodes"):
     val in = "(& (& id=1))"
     val result = parser.parseCondition(in)
     val expected = ActivityIdMatch(Nel.of(ActivityId(1)))
     assertEquals(result, expected.asRight)
-  }
 
-  test("parse complex condition") {
+  test("parse complex condition"):
     val in =
       "(& tag~bike/ tag=commute loc=/my/path started>7days (| distance>100k moved>2h))"
     val result = parser.parseCondition(in)
@@ -57,9 +55,8 @@ class ConditionParserTest extends FunSuite {
       )
     )
     assertEquals(result, expected.asRight)
-  }
 
-  test("normalize trees") {
+  test("normalize trees"):
     val in = "(& (| distance<80k) (| tag=bike))"
     val result = parser.parseCondition(in)
     val expected = And(
@@ -69,9 +66,8 @@ class ConditionParserTest extends FunSuite {
       )
     )
     assertEquals(result, expected.asRight)
-  }
 
-  test("parse and") {
+  test("parse and"):
     assertEquals(
       parser.andCondition(parser.basicCondition).parseAll("(& distance>5k tag=commute)"),
       And(
@@ -90,9 +86,8 @@ class ConditionParserTest extends FunSuite {
         )
       ).asRight
     )
-  }
 
-  test("parse distance") {
+  test("parse distance"):
     assertEquals(
       parser.distanceCondition.parseAll("distance>100k"),
       DistanceGE(Distance.km(100)).asRight
@@ -101,9 +96,8 @@ class ConditionParserTest extends FunSuite {
       parser.distanceCondition.parseAll("distance<300m"),
       DistanceLE(Distance.meter(300)).asRight
     )
-  }
 
-  test("parse tag starts condition") {
+  test("parse tag starts condition"):
     assertEquals(
       parse(parser.tagCondition, "tag~bike/"),
       TagAnyStarts(Nel.of(tag("bike/")))
@@ -124,9 +118,8 @@ class ConditionParserTest extends FunSuite {
       parse(parser.tagCondition, "tag~bike/+commute+\"long ride\""),
       TagAllStarts(Nel.of(tag("bike/"), tag("commute"), tag("long ride")))
     )
-  }
 
-  test("parse tag match condition") {
+  test("parse tag match condition"):
     assertEquals(
       parse(parser.tagCondition, "tag=bike/"),
       TagAnyMatch(Nel.of(tag("bike/")))
@@ -147,5 +140,3 @@ class ConditionParserTest extends FunSuite {
       parse(parser.tagCondition, "tag=bike/+commute+\"long ride\""),
       TagAllMatch(Nel.of(tag("bike/"), tag("commute"), tag("long ride")))
     )
-  }
-}

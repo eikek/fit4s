@@ -19,7 +19,7 @@ final private case class DumpProduct(
     geoPlaces: List[GeoPlace],
     activityGeoPlaces: List[RActivityGeoPlace],
     stravaTokens: List[RStravaToken]
-) {
+):
 
   def add(p: DumpFormat): DumpProduct = p match
     case DumpFormat.DTag(value)         => copy(tags = value :: tags)
@@ -49,9 +49,8 @@ final private case class DumpProduct(
     RActivityGeoPlace.insertMany(activityGeoPlaces),
     RStravaToken.insertMany(stravaTokens)
   ).sequence.map(_.sum)
-}
 
-private object DumpProduct {
+private object DumpProduct:
   val empty: DumpProduct = DumpProduct(
     List.empty,
     List.empty,
@@ -65,4 +64,3 @@ private object DumpProduct {
     List.empty,
     List.empty
   )
-}

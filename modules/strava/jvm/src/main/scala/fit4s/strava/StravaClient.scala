@@ -16,7 +16,7 @@ import fit4s.strava.impl.DefaultStravaClient
 
 import org.http4s.client.Client
 
-trait StravaClient[F[_]] {
+trait StravaClient[F[_]]:
   def initAuth(
       cfg: StravaAppCredentials,
       timeout: FiniteDuration
@@ -69,9 +69,8 @@ trait StravaClient[F[_]] {
       processingTimeout: FiniteDuration,
       waitingCallback: (FiniteDuration, Int) => F[Unit]
   ): F[Either[StravaUploadError, StravaActivityId]]
-}
 
-object StravaClient {
+object StravaClient:
 
   def apply[F[_]: Async: Network: Files](
       config: StravaClientConfig,
@@ -80,4 +79,3 @@ object StravaClient {
     Cache
       .memory[F, String, StravaGear](config.gearCacheSize)
       .map(gearCache => new DefaultStravaClient[F](client, config, gearCache))
-}

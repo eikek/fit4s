@@ -8,10 +8,10 @@ import fit4s.activities.{DatabaseTest, FlywayMigrate}
 
 import doobie.implicits._
 
-class RActivitySessionTest extends DatabaseTest with TestData {
+class RActivitySessionTest extends DatabaseTest with TestData:
   override def munitFixtures = List(h2DataSource)
 
-  test("insert record") {
+  test("insert record"):
     val (jdbc, ds) = h2DataSource()
     DatabaseTest.makeXA(ds).use { xa =>
       for {
@@ -29,9 +29,8 @@ class RActivitySessionTest extends DatabaseTest with TestData {
         _ = assertEquals(found, Some(expect))
       } yield ()
     }
-  }
 
-  test("find by start-time") {
+  test("find by start-time"):
     val (jdbc, ds) = h2DataSource()
     DatabaseTest.makeXA(ds).use { xa =>
       for {
@@ -56,6 +55,3 @@ class RActivitySessionTest extends DatabaseTest with TestData {
         _ = assertEquals(found, expect)
       } yield ()
     }
-  }
-
-}

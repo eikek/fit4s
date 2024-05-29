@@ -4,11 +4,10 @@ import cats.Show
 
 import io.bullet.borer.*
 
-final class ActivityGeoPlaceId(val id: Long) extends AnyVal {
+final class ActivityGeoPlaceId(val id: Long) extends AnyVal:
   override def toString = s"ActivityGeoPlaceId($id)"
-}
 
-object ActivityGeoPlaceId {
+object ActivityGeoPlaceId:
   def apply(id: Long): ActivityGeoPlaceId = new ActivityGeoPlaceId(id)
 
   implicit val jsonEncoder: Encoder[ActivityGeoPlaceId] =
@@ -18,4 +17,3 @@ object ActivityGeoPlaceId {
     Decoder.forLong.map(apply)
 
   given Show[ActivityGeoPlaceId] = Show.show(_.id.toString)
-}

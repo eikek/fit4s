@@ -15,7 +15,7 @@ import fit4s.webview.client.util.*
 
 import calico.html.io.{*, given}
 
-object ActivityOverviewPanel {
+object ActivityOverviewPanel:
 
   def render(
       model: SignallingRef[IO, DetailPage.Model],
@@ -69,7 +69,7 @@ object ActivityOverviewPanel {
       )
     )
 
-  private def startEndLabel(details: ActivityDetailResult) = {
+  private def startEndLabel(details: ActivityDetailResult) =
     val start = details.startPlace.get(details.sessions.head.id).map(_.location)
     val finish = details.endPlace.get(details.sessions.head.id).map(_.location)
     (start, finish) match
@@ -77,7 +77,5 @@ object ActivityOverviewPanel {
       case (Some(s), _)                 => s", in $s"
       case (_, Some(f))                 => s", to $f"
       case (_, _)                       => ""
-  }
 
   given Eq[Sport] = Eq.fromUniversalEquals
-}

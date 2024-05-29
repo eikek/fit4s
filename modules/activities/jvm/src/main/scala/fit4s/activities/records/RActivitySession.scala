@@ -16,12 +16,12 @@ import fit4s.profile.types._
 import doobie._
 import doobie.implicits._
 
-object RActivitySession {
+object RActivitySession:
   private[activities] val table = fr"activity_session"
   private val columns = columnList(None).tail.commas
   private val columnsWithId = columnList(None).commas
 
-  private[activities] def columnList(alias: Option[String]): List[Fragment] = {
+  private[activities] def columnList(alias: Option[String]): List[Fragment] =
     def c(name: String) = Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))
     List(
       c("id"),
@@ -60,7 +60,6 @@ object RActivitySession {
       c("pool_length"),
       c("avg_grade")
     )
-  }
 
   def insert(r: ActivitySession): ConnectionIO[ActivitySessionId] =
     (fr"INSERT INTO $table ($columns) VALUES(" ++
@@ -72,7 +71,7 @@ object RActivitySession {
       fr"${r.avgStrokeCount}, ${r.poolLength}, ${r.avgGrade}" ++
       fr")").update.withUniqueGeneratedKeys[ActivitySessionId]("id")
 
-  object insertMany {
+  object insertMany:
     val cols = columnList(None).map(_.internals.sql).mkString(",")
     val ph = columnList(None).map(_ => "?").mkString(",")
     val tn = table.internals.sql
@@ -80,7 +79,6 @@ object RActivitySession {
 
     def apply(tags: Seq[ActivitySession]): ConnectionIO[Int] =
       Update[ActivitySession](sql).updateMany(tags)
-  }
 
   def findById(id: ActivitySessionId): ConnectionIO[Option[ActivitySession]] =
     fr"SELECT $columnsWithId FROM $table WHERE id = $id"
@@ -95,15 +93,14 @@ object RActivitySession {
       withinSecs: Int,
       sport: Option[Sport],
       limit: Option[Int]
-  ): ConnectionIO[List[ActivitySession]] = {
+  ): ConnectionIO[List[ActivitySession]] =
     val sportFrag = sport.map(s => sql"sport = $s")
     val startFrag =
       if (withinSecs <= 0) sql"start_time = $startTime".some
-      else {
+      else
         val lowerBound = startTime.minusSeconds(withinSecs / 2)
         val upperBound = startTime.plusSeconds(withinSecs / 2)
         sql"start_time >= $lowerBound AND start_time <= $upperBound".some
-      }
     val limitFrag = limit.map(l => sql"LIMIT $l").getOrElse(Fragment.empty)
     val cond = List(startFrag, sportFrag).flatten
       .foldSmash1(Fragment.empty, sql" AND ", Fragment.empty)
@@ -111,7 +108,6 @@ object RActivitySession {
     sql"SELECT $columnsWithId FROM $table WHERE $cond $limitFrag"
       .query[ActivitySession]
       .to[List]
-  }
 
   def countAll =
     sql"SELECT count(*) FROM $table".query[Long].unique
@@ -156,4 +152,3 @@ object RActivitySession {
     sql"""SELECT min(start_time) FROM $table WHERE activity_id = $id"""
       .query[Instant]
       .option
-}

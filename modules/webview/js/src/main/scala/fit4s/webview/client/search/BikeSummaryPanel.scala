@@ -15,7 +15,7 @@ import _root_.fit4s.webview.client.shared.Styles
 import calico.*
 import calico.html.io.{*, given}
 
-object BikeSummaryPanel {
+object BikeSummaryPanel:
   implicit private val sport: Sport = Sport.Cycling // for speed.show
 
   private val enabledSports: Set[Sport] = Set(Sport.Cycling, Sport.EBiking)
@@ -40,7 +40,7 @@ object BikeSummaryPanel {
       model: SignallingRef[IO, Model],
       cr: CommandRuntime[IO]
   ): Stream[IO, Unit] =
-    cr.subscribe.evalMap {
+    cr.subscribe.evalMap:
       case Result.TagSummaryResult(req, result) if req.hasBikeTags =>
         val data = result.fold(
           _.filter(_._1.name.startsWith1("Bike/"))
@@ -59,7 +59,6 @@ object BikeSummaryPanel {
 
       case _ =>
         IO.unit
-    }
 
   def render(model: SignallingRef[IO, Model], cr: CommandRuntime[IO]) =
     Resource
@@ -122,4 +121,3 @@ object BikeSummaryPanel {
         )
       )
     )
-}

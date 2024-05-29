@@ -10,8 +10,7 @@ import io.bullet.borer.derivation.MapBasedCodecs.*
 
 final case class TagAndQuery(tags: NonEmptyList[TagName], query: Option[String])
 
-object TagAndQuery {
+object TagAndQuery:
 
   implicit val jsonCodec: Codec[TagAndQuery] =
     deriveCodec
-}

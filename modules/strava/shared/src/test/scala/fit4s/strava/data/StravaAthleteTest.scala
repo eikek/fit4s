@@ -3,9 +3,9 @@ package fit4s.strava.data
 import io.bullet.borer.*
 import munit.*
 
-class StravaAthleteTest extends FunSuite {
+class StravaAthleteTest extends FunSuite:
 
-  test("decode") {
+  test("decode"):
     val data = getClass
       .getResourceAsStream("/athlete-payload.json")
       .readAllBytes()
@@ -15,5 +15,3 @@ class StravaAthleteTest extends FunSuite {
     assertEquals(result.username, None)
     assertEquals(result.bikes.size, 2)
     assertEquals(result.shoes.size, 1)
-  }
-}

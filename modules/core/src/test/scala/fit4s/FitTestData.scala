@@ -7,7 +7,7 @@ import fs2._
 
 import scodec.bits.ByteVector
 
-object FitTestData {
+object FitTestData:
 
   val exampleActivity = fromURL(getClass.getResource("/fit/Activity.fit"))
 
@@ -42,4 +42,3 @@ object FitTestData {
       .compile
       .fold(Chunk.empty[Byte])(_ ++ _)
       .map(_.toByteVector)
-}

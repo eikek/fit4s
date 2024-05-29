@@ -7,7 +7,7 @@ import fit4s.profile.types.TypedValue
 final class DataFields private (
     val allFields: Vector[DataField],
     protected val byName: Map[String, DataField.KnownField]
-) {
+):
   lazy val size = allFields.size
 
   def getByName(fieldName: String): Option[DataField.KnownField] =
@@ -16,14 +16,14 @@ final class DataFields private (
   def get(field: Msg.FieldAttributes): Option[DataField.KnownField] =
     getByName(field.fieldName)
 
-  def getDecodedValue(field: Msg.FieldAttributes): Option[TypedValue[_]] =
+  def getDecodedValue(field: Msg.FieldAttributes): Option[TypedValue[?]] =
     for {
       field <- get(field)
       decoded <- field.decodedValue.toOption
       value <- decoded.asSuccess
     } yield value.fieldValue.value
 
-  def getDecodedField[A <: TypedValue[_]](
+  def getDecodedField[A <: TypedValue[?]](
       field: Msg.FieldWithCodec[A]
   ): Either[String, Option[FieldValue[A]]] =
     get(field)
@@ -54,26 +54,22 @@ final class DataFields private (
   override def toString =
     s"DataFields($allFields)"
 
-  override def equals(obj: Any) = obj match {
+  override def equals(obj: Any) = obj match
     case t: DataFields => t.allFields == allFields
     case _             => false
-  }
 
   override def hashCode() = allFields.hashCode()
-}
 
-object DataFields {
+object DataFields:
 
   val empty: DataFields = DataFields(Vector.empty)
 
-  def apply(allFields: Vector[DataField]): DataFields = {
+  def apply(allFields: Vector[DataField]): DataFields =
     val byName = allFields.flatMap {
       case f: DataField.KnownField => List(f.field.fieldName -> f)
       case _                       => Nil
     }.toMap
     new DataFields(allFields, byName)
-  }
 
   def of(field: DataField*): DataFields =
     apply(field.toVector)
-}

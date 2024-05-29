@@ -13,7 +13,6 @@ final case class BoundingBox(
     lng2: Semicircle
 )
 
-object BoundingBox {
+object BoundingBox:
   implicit val jsonDecoder: Decoder[BoundingBox] = deriveDecoder
   implicit val jsonEncoder: Encoder[BoundingBox] = deriveEncoder
-}

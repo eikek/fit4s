@@ -15,7 +15,7 @@ import fit4s.data._
 
 import doobie._
 
-object ActivityImport {
+object ActivityImport:
   def addActivity(
       tags: Set[TagId],
       locationId: LocationId,
@@ -25,7 +25,7 @@ object ActivityImport {
       now: Instant
   )(
       result: ActivityReader.Result
-  ): ConnectionIO[ImportResult[ActivityId]] = {
+  ): ConnectionIO[ImportResult[ActivityId]] =
     val sports = result.sessions.map(_.sport).toSet
     val startTime =
       result.sessions.headOption.map(_.startTime).getOrElse(result.activity.timestamp)
@@ -33,16 +33,13 @@ object ActivityImport {
 
     for {
       actId <- add(locationId, path, name, notes, now)(result)
-      _ <- NonEmptyList.fromList(tags.toList) match {
+      _ <- NonEmptyList.fromList(tags.toList) match
         case Some(nel) =>
-          actId match {
+          actId match
             case ImportResult.Success(id) => RActivityTag.insert1(id, nel)
             case _                        => Sync[ConnectionIO].pure(0)
-          }
         case None => Sync[ConnectionIO].pure(0)
-      }
     } yield actId
-  }
 
   def add(
       locationId: LocationId,
@@ -52,7 +49,7 @@ object ActivityImport {
       now: Instant
   )(
       result: ActivityReader.Result
-  ): ConnectionIO[ImportResult[ActivityId]] = {
+  ): ConnectionIO[ImportResult[ActivityId]] =
     val insert: ConnectionIO[ImportResult[ActivityId]] =
       for {
         actId <- RActivity.insert(
@@ -75,7 +72,6 @@ object ActivityImport {
     OptionT(RActivity.findByFileId(result.fileId))
       .map(r => ImportResult.duplicate(r.id, result.fileId, path))
       .getOrElseF(insert)
-  }
 
   private def addSession(activityId: ActivityId, result: ActivityReader.Result)(
       session: FitActivitySession
@@ -180,4 +176,3 @@ object ActivityImport {
         )
       }
     } yield (sessionId, lapIds, rIds)
-}

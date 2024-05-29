@@ -1,6 +1,6 @@
 package fit4s.data
 
-final class Distance private (val meter: Double) extends AnyVal with Ordered[Distance] {
+final class Distance private (val meter: Double) extends AnyVal with Ordered[Distance]:
 
   def km: Double = meter / 1000.0
 
@@ -15,9 +15,8 @@ final class Distance private (val meter: Double) extends AnyVal with Ordered[Dis
   def compare(that: Distance): Int = meter.compare(that.meter)
 
   override def toString = s"${meter}m"
-}
 
-object Distance {
+object Distance:
   val zero: Distance = meter(0)
 
   def meter(meter: Double): Distance =
@@ -28,4 +27,3 @@ object Distance {
 
   given Numeric[Distance] =
     NumericFrom[Distance, Double](_.meter, Distance.meter)
-}

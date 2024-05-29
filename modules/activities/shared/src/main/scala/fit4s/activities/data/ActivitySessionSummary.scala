@@ -37,11 +37,11 @@ final case class ActivitySessionSummary(
     count: Int
 )
 
-object ActivitySessionSummary {
+object ActivitySessionSummary:
 
   def combine(ass: NonEmptyList[ActivitySessionSummary]): ActivitySessionSummary =
     if (ass.tail.isEmpty) ass.head
-    else {
+    else
       val len = ass.length.toDouble
       ActivitySessionSummary(
         ass.head.sport,
@@ -70,15 +70,12 @@ object ActivitySessionSummary {
         sum(ass.map(_.avgTss)).map(_ / len),
         ass.map(_.count).toList.sum
       )
-    }
 
   given Numeric[java.time.Duration] = NumericFrom.javaDuration
 
   private def sum[A](data: NonEmptyList[Option[A]])(using
       numeric: Numeric[A]
-  ): Option[A] = {
+  ): Option[A] =
     given Semigroup[A] = Semigroup.instance(numeric.plus)
 
     data.foldLeft(Option.empty[A])(_ |+| _)
-  }
-}

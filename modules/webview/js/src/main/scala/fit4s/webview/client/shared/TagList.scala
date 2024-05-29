@@ -9,7 +9,7 @@ import fit4s.activities.data.Tag
 import calico.*
 import calico.html.io.{*, given}
 
-object TagList {
+object TagList:
   val skyTagStyle =
     "border text-white bg-sky-400 dark:bg-sky-500 dark:text-sky-400 dark:bg-opacity-30 border-sky-300 dark:border-sky-400 dark:bg-opacity-50 flex flex-row items-center px-2 py-0.5 rounded"
 
@@ -41,4 +41,3 @@ object TagList {
           onClick --> ClickAction(act(tag)),
           tag.name.name
         )
-}
