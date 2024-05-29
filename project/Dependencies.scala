@@ -20,7 +20,7 @@ object Dependencies {
     val flyway = "10.13.0"
     val h2 = "2.2.224"
     val munit = "1.0.0"
-    val munitCatsEffect = "1.0.7"
+    val munitCatsEffect = "2.0.0"
     val scodec1 = "1.11.10"
     val scodec2 = "2.3.0"
     val catsCore = "2.9.0"
@@ -200,6 +200,6 @@ object Dependencies {
   val munit = Seq(
     "org.scalameta" %% "munit" % V.munit,
     "org.scalameta" %% "munit-scalacheck" % V.munit,
-    "org.typelevel" %% "munit-cats-effect-3" % V.munitCatsEffect
+    "org.typelevel" %% "munit-cats-effect" % V.munitCatsEffect
   )
 }
