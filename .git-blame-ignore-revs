@@ -3,3 +3,6 @@ cc528f259de04df80490ef6a40db43d438da89b8
 
 # eikek: scala 3.4 migration
 c388afc6002c60519f02da810a7a478a1548446f
+
+# eikek: scalafix to 0.12.1
+05104c2aa632037034ca5f04e6eeecc04a228f00
