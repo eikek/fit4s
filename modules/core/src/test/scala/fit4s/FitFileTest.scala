@@ -9,7 +9,7 @@ import fit4s.profile.messages.FileIdMsg
 import munit.CatsEffectSuite
 
 class FitFileTest extends CatsEffectSuite:
-  override def munitTimeout = FiniteDuration(3, TimeUnit.MINUTES)
+  override def munitIOTimeout = FiniteDuration(3, TimeUnit.MINUTES)
 
   test("read example activity records"):
     for {

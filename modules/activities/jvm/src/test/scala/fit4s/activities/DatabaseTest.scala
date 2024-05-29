@@ -34,7 +34,7 @@ trait DatabaseTest extends CatsEffectSuite:
     } yield res
   )
 
-  lazy val newH2DataSource = ResourceFixture(for {
+  lazy val newH2DataSource = ResourceFunFixture(for {
     jdbc <- Resource.eval(IO(DatabaseTest.memoryDB(UUID.randomUUID().toString)))
     ds <- DatabaseTest.dataSource(jdbc)
   } yield (jdbc, ds))
