@@ -13,14 +13,12 @@ case class NominatimConfig(
     cacheSize: Int
 )
 
-object NominatimConfig extends Http4sCodec {
-  object Defaults {
+object NominatimConfig extends Http4sCodec:
+  object Defaults:
     val baseUrl = uri"https://nominatim.openstreetmap.org/reverse"
     val maxReqPerSecond = 1f
     val cacheSize = 100
-  }
   val default =
     NominatimConfig(Defaults.baseUrl, Defaults.maxReqPerSecond, Defaults.cacheSize)
 
   given Encoder[NominatimConfig] = deriveEncoder
-}

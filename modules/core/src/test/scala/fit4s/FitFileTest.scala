@@ -8,10 +8,10 @@ import fit4s.profile.messages.FileIdMsg
 
 import munit.CatsEffectSuite
 
-class FitFileTest extends CatsEffectSuite {
+class FitFileTest extends CatsEffectSuite:
   override def munitTimeout = FiniteDuration(3, TimeUnit.MINUTES)
 
-  test("read example activity records") {
+  test("read example activity records"):
     for {
       raw <- FitTestData.exampleActivity
       fits = FitFile.decodeUnsafe(raw)
@@ -26,7 +26,6 @@ class FitFileTest extends CatsEffectSuite {
       )
       _ = assertEquals(fit.crc, 15318)
     } yield ()
-  }
 
   // test("read some edge 530 activity") {
   //   for {
@@ -101,4 +100,3 @@ class FitFileTest extends CatsEffectSuite {
   //     _ = assertEquals(fit5.crc, 58021)
   //   } yield ()
   // }
-}

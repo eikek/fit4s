@@ -7,7 +7,7 @@ import fit4s.activities.data.TagName
 
 import org.http4s.ParseFailure
 
-object TagNamesVar {
+object TagNamesVar:
   def validate(name: String): ValidatedNel[ParseFailure, TagName] =
     TagName.fromString(name).leftMap(ParseFailure(_, "")).toValidatedNel
 
@@ -23,4 +23,3 @@ object TagNamesVar {
 
   def unapply(name: String): Option[TagName] =
     TagName.fromString(name).toOption
-}

@@ -8,7 +8,7 @@ import fit4s.activities.records.*
 import doobie.*
 import doobie.implicits.*
 
-object RestartSequences {
+object RestartSequences:
 
   private val tables = List(
     RActivity.table,
@@ -42,4 +42,3 @@ object RestartSequences {
         .query[Long]
         .unique
     }
-}

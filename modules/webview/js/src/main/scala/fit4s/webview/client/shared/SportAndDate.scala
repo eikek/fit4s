@@ -8,7 +8,7 @@ import fit4s.activities.data.ActivitySession
 import calico.*
 import calico.html.io.{*, given}
 
-object SportAndDate {
+object SportAndDate:
 
   def apply(a: ActivitySession): Resource[IO, HtmlDivElement[IO]] =
     div(
@@ -16,4 +16,3 @@ object SportAndDate {
       SportIcon(a.sport, moreCls = "mr-2" :: Nil),
       a.startTime.toString
     )
-}

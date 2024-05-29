@@ -20,11 +20,10 @@ final case class ActivitySessionData(
     grade: Option[Grade],
     temperature: Option[Temperature],
     calories: Option[Calories]
-) {
+):
 
   def pair[A, B, C](
       fa: ActivitySessionData => Option[A],
       fb: ActivitySessionData => Option[B]
   )(g: (A, B) => C): Option[C] =
     (fa(this), fb(this)).mapN(g)
-}

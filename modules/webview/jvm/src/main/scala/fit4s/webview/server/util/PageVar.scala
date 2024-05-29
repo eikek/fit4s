@@ -7,7 +7,7 @@ import fit4s.activities.data.Page
 
 import org.http4s.ParseFailure
 
-object PageVar {
+object PageVar:
   val defaultLimit = 50
   val defaultOffset = 0
 
@@ -15,7 +15,7 @@ object PageVar {
 
   def unapply(
       params: Map[String, collection.Seq[String]]
-  ): Option[ValidatedNel[ParseFailure, Page]] = {
+  ): Option[ValidatedNel[ParseFailure, Page]] =
     val limit = params
       .get("limit")
       .flatMap(_.headOption)
@@ -28,8 +28,6 @@ object PageVar {
       .getOrElse(defaultOffset.validNel)
 
     (limit, offset).mapN(Page.apply).some
-  }
 
   private def parseInt(str: String): ValidatedNel[ParseFailure, Int] =
     str.toIntOption.toValidNel(ParseFailure(s"Invalid integer value: $str", ""))
-}

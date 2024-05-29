@@ -27,43 +27,43 @@ final class StravaImpl[F[_]: Async: Compression: Files](
     stravaClient: StravaClient[F],
     xa: Transactor[F],
     placeAttach: GeoPlaceAttach[F]
-) extends StravaSupport[F] {
+) extends StravaSupport[F]:
 
-  private[this] val logger = scribe.cats.effect[F]
+  private val logger = scribe.cats.effect[F]
 
   def initOAuth(
       cfg: StravaAppCredentials,
       timeout: FiniteDuration
   ): F[Option[RStravaToken]] =
-    nonInteractiveOAuth(cfg).flatMap {
+    nonInteractiveOAuth(cfg).flatMap:
       case Some(t) => Option(t).pure[F]
       case None =>
         stravaClient
           .initAuth(cfg, timeout)
           .flatMap(storeTokenResponse)
-    }
 
   def nonInteractiveOAuth(
       cfg: StravaAppCredentials
   ): F[Option[RStravaToken]] =
     Clock[F].realTimeInstant.flatMap { now =>
-      RStravaToken.findLatest.transact(xa).flatMap {
-        case Some(t) if t.expiresAt.plusSeconds(20) > now =>
-          logger.debug(s"Latest token is still valid.").as(Option(t))
+      RStravaToken.findLatest
+        .transact(xa)
+        .flatMap:
+          case Some(t) if t.expiresAt.plusSeconds(20) > now =>
+            logger.debug(s"Latest token is still valid.").as(Option(t))
 
-        case Some(t) =>
-          stravaClient
-            .refreshAuth(cfg, t.toTokenAndScope.pure[F])
-            .map(_.some)
-            .flatMap(storeTokenResponse)
+          case Some(t) =>
+            stravaClient
+              .refreshAuth(cfg, t.toTokenAndScope.pure[F])
+              .map(_.some)
+              .flatMap(storeTokenResponse)
 
-        case None =>
-          Option.empty[RStravaToken].pure[F]
-      }
+          case None =>
+            Option.empty[RStravaToken].pure[F]
     }
 
   private def storeTokenResponse(resp: Option[TokenAndScope]) =
-    resp match {
+    resp match
       case Some(tr) =>
         logger.debug(s"Got token response, storing to db") *>
           RStravaToken
@@ -73,7 +73,6 @@ final class StravaImpl[F[_]: Async: Compression: Files](
             .map(_.some)
       case None =>
         Option.empty[RStravaToken].pure[F]
-    }
 
   private def requireToken(cfg: StravaAppCredentials) =
     nonInteractiveOAuth(cfg)
@@ -188,7 +187,7 @@ final class StravaImpl[F[_]: Async: Compression: Files](
           .map(_.map(id => id -> activityData))
       }
 
-    _ <- Stream.eval {
+    _ <- Stream.eval:
       stravaId
         .map { case (stravaId, activityData) =>
           RActivityStrava.insert(activityData.id, stravaId).transact(xa) *>
@@ -202,7 +201,6 @@ final class StravaImpl[F[_]: Async: Compression: Files](
             )
         }
         .getOrElse(().pure[F])
-    }
   } yield stravaId.map(_._1)
 
   private def updateGear(
@@ -212,13 +210,13 @@ final class StravaImpl[F[_]: Async: Compression: Files](
       bikeTagPrefix: Option[TagName],
       shoeTagPrefix: Option[TagName],
       athlete: StravaAthlete
-  ) = {
+  ) =
     val gearId =
       findGearInTags(bikeTagPrefix, activityData.tags, athlete.bikes)
         .orElse(findGearInTags(shoeTagPrefix, activityData.tags, athlete.shoes))
         .map(_.id)
 
-    gearId match {
+    gearId match
       case Some(gId) =>
         val updateData =
           StravaUpdatableActivity.empty
@@ -227,8 +225,6 @@ final class StravaImpl[F[_]: Async: Compression: Files](
         stravaClient.updateActivity(accessToken, stravaId, updateData)
 
       case None => ().pure[F]
-    }
-  }
 
   private def findGearInTags(
       tagPrefix: Option[TagName],
@@ -278,7 +274,7 @@ final class StravaImpl[F[_]: Async: Compression: Files](
       commuteTag: Option[TagName],
       moreTags: Set[TagName],
       callback: ImportCallback[F]
-  )(exportData: Vector[ExportData]): Stream[F, ImportResult[ActivityId]] = {
+  )(exportData: Vector[ExportData]): Stream[F, ImportResult[ActivityId]] =
     val bikeTags = bikeTagPrefix
       .map(makeGearTags(exportData.flatMap(_.bike)))
       .getOrElse(Set.empty)
@@ -332,7 +328,6 @@ final class StravaImpl[F[_]: Async: Compression: Files](
       })
       _ <- Stream.eval(placeAttach.applyResult(result))
     } yield result
-  }
 
   private def updateStravaMeta(id: ActivityId, entry: ExportData): F[Unit] =
     for {
@@ -353,7 +348,7 @@ final class StravaImpl[F[_]: Async: Compression: Files](
       bikeTagPrefix: Option[TagName],
       shoeTagPrefix: Option[TagName],
       commuteTag: Option[TagName]
-  )(entry: ExportData): Set[TagId] = {
+  )(entry: ExportData): Set[TagId] =
     val names =
       bikeTagPrefix
         .map(makeGearTags(entry.bike.iterator.toVector))
@@ -366,11 +361,9 @@ final class StravaImpl[F[_]: Async: Compression: Files](
     names.foldLeft(Set.empty[TagId]) { (res, t) =>
       res ++ all.get(t).iterator.toSet
     }
-  }
 
   private def makeGearTags(tags: Vector[String])(prefix: TagName) =
     tags
       .flatMap(TagName.fromString(_).toOption)
       .map(prefix / _)
       .toSet
-}

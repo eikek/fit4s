@@ -10,7 +10,6 @@ final case class ActivityListResult(
     location: Location,
     sessions: NonEmptyList[ActivitySession],
     tags: Vector[Tag]
-) {
+):
 
   lazy val id: ActivityId = activity.id
-}

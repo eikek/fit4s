@@ -6,7 +6,7 @@ import fs2.{Pipe, Stream}
 
 import fit4s.strava.impl.Zip.NameFilter
 
-trait Zip[F[_]] {
+trait Zip[F[_]]:
 
   def zip(chunkSize: Int = Zip.defaultChunkSize): Pipe[F, (String, Stream[F, Byte]), Byte]
 
@@ -23,15 +23,12 @@ trait Zip[F[_]] {
       nameFilter: NameFilter = NameFilter.all,
       targetDir: Path => Option[Path] = _ => None
   ): Pipe[F, Path, Path]
-}
 
-object Zip {
+object Zip:
   val defaultChunkSize = 64 * 1024
   type NameFilter = String => Boolean
-  object NameFilter {
+  object NameFilter:
     val all: NameFilter = _ => true
-  }
 
   def apply[F[_]: Async: Files](tempDir: Option[Path] = None): Zip[F] =
     new ZipImpl[F](tempDir)
-}

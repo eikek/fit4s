@@ -9,7 +9,7 @@ import fit4s.strava.data.StravaActivityId
 import calico.*
 import calico.html.io.{*, given}
 
-object Anchor {
+object Anchor:
   val style =
     "text-blue-400 hover:text-blue-500 dark:text-sky-300 dark:hover:text-sky-200 cursor-pointer"
 
@@ -31,4 +31,3 @@ object Anchor {
       s"https://strava.com/activities/${id.id}".some,
       s"${id.id}"
     )
-}

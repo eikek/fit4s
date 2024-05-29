@@ -12,19 +12,18 @@ import fit4s.profile.types.Sport
 
 import calico.html.io.{*, given}
 
-object LapPanel {
+object LapPanel:
   private val cellStyle = " text-center"
 
   def apply(
       details: ActivityDetailResult,
       zone: ZoneId
-  ): Resource[IO, HtmlElement[IO]] = {
+  ): Resource[IO, HtmlElement[IO]] =
     val s = details.sessions.head
     val laps = details.laps.get(s.id).getOrElse(Nil)
     apply(laps, zone)
-  }
 
-  def apply(laps: List[ActivityLap], zone: ZoneId): Resource[IO, HtmlElement[IO]] = {
+  def apply(laps: List[ActivityLap], zone: ZoneId): Resource[IO, HtmlElement[IO]] =
     implicit val zoneId: ZoneId = zone
     implicit val styles = HasValue(laps)
     div(
@@ -52,9 +51,8 @@ object LapPanel {
         )
       )
     )
-  }
 
-  def row(l: ActivityLap, n: Int)(implicit zone: ZoneId, styles: HasValue) = {
+  def row(l: ActivityLap, n: Int)(implicit zone: ZoneId, styles: HasValue) =
     implicit val sport: Sport = l.sport
     tr(
       cls := "dark:hover:bg-stone-600 hover:bg-slate-200",
@@ -70,7 +68,6 @@ object LapPanel {
       td(cls := styles.get(_.strokeCount, cellStyle), l.strokeCount.show),
       td(cls := styles.get(_.avgStrokeDst, cellStyle), l.avgStrokeDistance.show)
     )
-  }
 
   final case class HasValue(
       moved: Boolean,
@@ -81,7 +78,7 @@ object LapPanel {
       swimStroke: Boolean,
       strokeCount: Boolean,
       avgStrokeDst: Boolean
-  ) {
+  ):
     def update(l: ActivityLap): HasValue =
       copy(
         moved = this.moved || l.movingTime.isDefined,
@@ -95,12 +92,9 @@ object LapPanel {
 
     def get(f: HasValue => Boolean, v: String): String =
       if (f(this)) v else "hidden"
-  }
 
-  object HasValue {
+  object HasValue:
     val empty: HasValue = HasValue(false, false, false, false, false, false, false, false)
 
     def apply(laps: List[ActivityLap]): HasValue =
-      laps.foldLeft(empty)(_ update _)
-  }
-}
+      laps.foldLeft(empty)(_.update(_))

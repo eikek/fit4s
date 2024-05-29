@@ -11,9 +11,9 @@ import fit4s.webview.client.shared.*
 
 import calico.html.io.{*, given}
 
-object DataOverviewPanel {
+object DataOverviewPanel:
 
-  def apply(details: ActivityDetailResult) = {
+  def apply(details: ActivityDetailResult) =
     val s = details.sessions.head
     div(
       cls := "ml-4 flex flex-col self-end",
@@ -47,9 +47,8 @@ object DataOverviewPanel {
       // min/max table
       dataTable(s)
     )
-  }
 
-  def dataTable(s: ActivitySession) = {
+  def dataTable(s: ActivitySession) =
     implicit val sport: Sport = s.sport
     table(
       cls := "table-auto mt-2 dark:bg-stone-800 py-2 px-1",
@@ -73,7 +72,6 @@ object DataOverviewPanel {
         tableRow("Stroke Distance", s.avgStrokeDistance.show, "", "")
       )
     )
-  }
 
   def tableRow(label: String, avg: String, min: String, max: String) =
     if (List(avg, min, max).forall(_.isEmpty)) div(cls := "hidden")
@@ -126,5 +124,3 @@ object DataOverviewPanel {
         )
       case None =>
         span(cls := "hidden")
-
-}

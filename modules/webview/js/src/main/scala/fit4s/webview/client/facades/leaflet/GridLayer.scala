@@ -7,7 +7,7 @@ import org.scalajs.dom.HTMLElement
 
 @JSGlobal("L.GridLayer")
 @js.native
-class GridLayer extends Layer {
+class GridLayer extends Layer:
 
   def createTile(coords: js.Any): HTMLElement = js.native
 
@@ -26,4 +26,3 @@ class GridLayer extends Layer {
   def redraw(): GridLayer = js.native
 
   def getTileSize(): GridLayer = js.native
-}

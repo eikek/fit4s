@@ -18,7 +18,7 @@ final case class Record(
     calories: Option[Calories]
 )
 
-object Record {
+object Record:
 
   def from(recordMsg: DataMessage): Either[String, Record] =
     if (!recordMsg.isMessage(RecordMsg)) Left(s"Not a record: $recordMsg")
@@ -49,4 +49,3 @@ object Record {
         temp.flatMap(_.temperature),
         cal.flatMap(_.calories)
       )
-}

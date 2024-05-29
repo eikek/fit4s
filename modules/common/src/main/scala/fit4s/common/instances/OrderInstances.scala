@@ -6,7 +6,7 @@ import fit4s.profile.types.Sport
 
 import _root_.fit4s.data._
 
-trait OrderInstances {
+trait OrderInstances:
   given Order[Distance] = Order.fromOrdering
 
   given Order[Calories] = Order.fromOrdering
@@ -16,6 +16,5 @@ trait OrderInstances {
   given Order[Temperature] = Order.fromOrdering
 
   given Order[Sport] = Order.by(_.rawValue)
-}
 
 object OrderInstances extends OrderInstances

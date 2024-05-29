@@ -8,9 +8,9 @@ import scala.scalajs.js.annotation.JSGlobal
 @js.native
 class Icon extends js.Object
 
-object Icon {
+object Icon:
 
-  trait Options extends js.Object {
+  trait Options extends js.Object:
     val url: UndefOr[String] = js.undefined
     val retinaUrl: UndefOr[String] = js.undefined
     val iconSize: UndefOr[Point] = js.undefined
@@ -22,5 +22,3 @@ object Icon {
     val shadowSize: UndefOr[Point] = js.undefined
     val shadowAnchor: UndefOr[Point] = js.undefined
     val className: UndefOr[String] = js.undefined
-  }
-}

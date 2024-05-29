@@ -40,13 +40,12 @@ final case class FitActivityLap(
     avgStrokeDistance: Option[Distance],
     strokeCount: Option[Int],
     avgGrade: Option[Percent]
-) {
+):
 
   def contains(dt: DateTime): Boolean =
     startTime <= dt && dt <= endTime
-}
 
-object FitActivityLap {
+object FitActivityLap:
 
   def from(lapMsg: DataMessage): Either[String, FitActivityLap] =
     if (!lapMsg.isMessage(LapMsg)) Left(s"Not a session message: $lapMsg")
@@ -128,4 +127,3 @@ object FitActivityLap {
         strokeCnt.flatMap(_.counts),
         avgGrade.flatMap(_.percent)
       )
-}

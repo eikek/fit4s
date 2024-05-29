@@ -8,10 +8,9 @@ final case class TokenAndScope(
     scope: StravaScope
 )
 
-object TokenAndScope {
+object TokenAndScope:
   implicit val jsonDecoder: Decoder[TokenAndScope] =
     deriveDecoder
 
   implicit val jsonEncoder: Encoder[TokenAndScope] =
     deriveEncoder
-}

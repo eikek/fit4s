@@ -13,7 +13,7 @@ import fit4s.webview.client.cmd.*
 
 import calico.html.io.{*, given}
 
-object ActivitySummaryPanel {
+object ActivitySummaryPanel:
 
   final case class Model(
       summaries: List[ActivitySessionSummary]
@@ -32,12 +32,11 @@ object ActivitySummaryPanel {
         (results.fold(Model.apply, _ => model), IO.unit)
 
   def subscribe(model: SignallingRef[IO, Model], cr: CommandRuntime[IO]) =
-    cr.subscribe.evalMap {
+    cr.subscribe.evalMap:
       case Result.SearchResult(cmd, results) =>
         model.flatModify(update(cr, Msg.SetResults(results.map(_._2))))
 
       case _ => IO.unit
-    }
 
   def render(model: SignallingRef[IO, Model], cr: CommandRuntime[IO], zone: ZoneId) =
     Resource
@@ -50,4 +49,3 @@ object ActivitySummaryPanel {
             .flatMap(divs => div(cls := "mt-4 flex flex-col space-y-2", divs))
         )
       )
-}

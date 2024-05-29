@@ -49,15 +49,15 @@ object ListCmd extends SharedOpts {
 
   def printJson(filesOnly: Boolean): ActivityListResult => IO[Unit] = {
     if (filesOnly)
-      (filePathString _).andThen(Json.encode(_).toUtf8String).andThen(IO.println)
+      filePathString.andThen(Json.encode(_).toUtf8String).andThen(IO.println)
     (Json
-      .encode(_: ActivityListResult)(RecordJsonEncoder.encodeList))
+      .encode(_: ActivityListResult)(using RecordJsonEncoder.encodeList))
       .andThen(_.toUtf8String)
       .andThen(IO.println)
   }
 
   def printText(zoneId: ZoneId, filesOnly: Boolean): ActivityListResult => IO[Unit] =
-    (makeString(zoneId, filesOnly) _).andThen(IO.println)
+    makeString(zoneId, filesOnly).andThen(IO.println)
 
   def makeString(zoneId: ZoneId, filesOnly: Boolean)(r: ActivityListResult): String =
     if (filesOnly) filePathString(r)

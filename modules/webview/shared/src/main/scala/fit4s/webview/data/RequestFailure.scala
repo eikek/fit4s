@@ -10,7 +10,7 @@ import org.http4s.ParseFailure
 final case class RequestFailure(message: String, errors: List[String])
     extends RuntimeException(message)
 
-object RequestFailure {
+object RequestFailure:
   def apply(parseFailure: NonEmptyList[ParseFailure]): RequestFailure =
     RequestFailure("The request was invalid", parseFailure.map(_.message).toList)
 
@@ -18,4 +18,3 @@ object RequestFailure {
     deriveCodec
 
   given Eq[RequestFailure] = Eq.fromUniversalEquals
-}

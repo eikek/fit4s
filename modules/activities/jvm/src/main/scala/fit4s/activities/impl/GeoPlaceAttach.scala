@@ -11,10 +11,10 @@ import fit4s.data.Position
 import doobie._
 import doobie.implicits._
 
-final class GeoPlaceAttach[F[_]: Async](xa: Transactor[F], geoLookup: GeoLookup[F]) {
+final class GeoPlaceAttach[F[_]: Async](xa: Transactor[F], geoLookup: GeoLookup[F]):
 
   def applyResult(result: ImportResult[ActivityId]): F[List[ActivityGeoPlaceId]] =
-    result match {
+    result match
       case ImportResult.Success(id) =>
         attachGeoPlace(id)
 
@@ -23,28 +23,29 @@ final class GeoPlaceAttach[F[_]: Async](xa: Transactor[F], geoLookup: GeoLookup[
 
       case _ =>
         List.empty[ActivityGeoPlaceId].pure[F]
-    }
 
   def attachGeoPlace(id: ActivityId): F[List[ActivityGeoPlaceId]] =
-    RActivityGeoPlace.findByActivity(id).transact(xa).flatMap {
-      case Nil =>
-        PositionName.all.toList.flatTraverse(attachPosition(id, _))
+    RActivityGeoPlace
+      .findByActivity(id)
+      .transact(xa)
+      .flatMap:
+        case Nil =>
+          PositionName.all.toList.flatTraverse(attachPosition(id, _))
 
-      case pos :: Nil if pos.name == PositionName.End =>
-        attachPosition(id, PositionName.Start).map(pos.id :: _)
+        case pos :: Nil if pos.name == PositionName.End =>
+          attachPosition(id, PositionName.Start).map(pos.id :: _)
 
-      case pos :: Nil if pos.name == PositionName.Start =>
-        attachPosition(id, PositionName.End).map(pos.id :: _)
+        case pos :: Nil if pos.name == PositionName.Start =>
+          attachPosition(id, PositionName.End).map(pos.id :: _)
 
-      case list => list.map(_.id).pure[F]
-    }
+        case list => list.map(_.id).pure[F]
 
   private def attachPosition(id: ActivityId, name: PositionName) =
     for {
       pos <- getPositions(id, name)
       pIds <- pos.traverse(t => geoLookup.lookup(t._2).map(t._1 -> _))
       res <- pIds.flatTraverse { case (sessionId, optPlace) =>
-        optPlace match {
+        optPlace match
           case Some(p) =>
             (RActivityGeoPlace.delete(sessionId, name.some) *>
               RActivityGeoPlace.insert(sessionId, p.id, name))
@@ -52,7 +53,6 @@ final class GeoPlaceAttach[F[_]: Async](xa: Transactor[F], geoLookup: GeoLookup[
               .map(List(_))
           case None =>
             List.empty[ActivityGeoPlaceId].pure[F]
-        }
       }
     } yield res
 
@@ -60,8 +60,6 @@ final class GeoPlaceAttach[F[_]: Async](xa: Transactor[F], geoLookup: GeoLookup[
       id: ActivityId,
       name: PositionName
   ): F[List[(ActivitySessionId, Position)]] =
-    name match {
+    name match
       case PositionName.Start => RActivitySession.getStartPositions(id).transact(xa)
       case PositionName.End   => RActivitySession.getEndPositions(id).transact(xa)
-    }
-}

@@ -7,7 +7,7 @@ import org.scalajs.dom.HTMLElement
 
 @js.native
 @JSImport("plotly.js-dist/plotly.js", JSImport.Namespace)
-object Plotly extends js.Object {
+object Plotly extends js.Object:
 
   def newPlot(
       el: HTMLElement | String,
@@ -15,5 +15,3 @@ object Plotly extends js.Object {
       layout: js.UndefOr[PlotlyLayout] = js.undefined,
       config: js.UndefOr[PlotlyConfig] = PlotlyConfig.default
   ): Unit = js.native
-
-}

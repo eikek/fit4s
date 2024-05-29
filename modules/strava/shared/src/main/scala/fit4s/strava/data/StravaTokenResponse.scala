@@ -13,7 +13,7 @@ final case class StravaTokenResponse(
     refresh_token: StravaRefreshToken
 )
 
-object StravaTokenResponse {
+object StravaTokenResponse:
 
   implicit val jsonDecoder: Decoder[StravaTokenResponse] =
     JsonCodec.decoder
@@ -21,7 +21,7 @@ object StravaTokenResponse {
   implicit val jsonEncoder: Encoder[StravaTokenResponse] =
     JsonCodec.encoder
 
-  private object JsonCodec {
+  private object JsonCodec:
     implicit val instantDecoder: Decoder[Instant] =
       Decoder.forLong.map(Instant.ofEpochSecond)
 
@@ -39,5 +39,3 @@ object StravaTokenResponse {
 
     val encoder: Encoder[StravaTokenResponse] =
       deriveEncoder
-  }
-}

@@ -11,7 +11,6 @@ case class Place(
     display_name: String,
     address: Address,
     boundingbox: BoundingBox
-) {
+):
 
   val position: Position = Position(lat, lon)
-}

@@ -9,15 +9,14 @@ import fit4s.activities.data.QueryCondition
 import fit4s.activities.data.QueryCondition._
 
 final private[activities] class ConditionParser(val zoneId: ZoneId, currentTime: Instant)
-    extends BasicParser(zoneId, currentTime) {
+    extends BasicParser(zoneId, currentTime):
 
-  def parseCondition(c: String): Either[Parser.Error, QueryCondition] = {
+  def parseCondition(c: String): Either[Parser.Error, QueryCondition] =
     val str =
       if (c.startsWith("(")) c.trim
       else s"(& ${c.trim})"
 
     condition.parseAll(str).map(QueryCondition.normalize)
-  }
 
   val tagCondition: Parser[QueryCondition] =
     (Parser.stringIn(List("tag~", "tag=")) ~ listOf(tagName)(Right(_), Left(_)))
@@ -50,11 +49,10 @@ final private[activities] class ConditionParser(val zoneId: ZoneId, currentTime:
       .map(SubSportMatch.apply)
 
   val startedCondition: Parser[QueryCondition] =
-    (Parser.stringIn(List("start>", "started>", "start<", "started<")) ~ dateTime).map {
+    (Parser.stringIn(List("start>", "started>", "start<", "started<")) ~ dateTime).map:
       case (word, time) =>
         if (word.endsWith(">")) StartedAfter(time)
         else StartedBefore(time)
-    }
 
   val distanceCondition: Parser[QueryCondition] =
     (Parser.stringIn(List("dist>", "distance>", "dist<", "distance<")) ~ distance)
@@ -63,19 +61,17 @@ final private[activities] class ConditionParser(val zoneId: ZoneId, currentTime:
         else DistanceLE(dst)
       }
 
-  val durationCondition: Parser[QueryCondition] = {
+  val durationCondition: Parser[QueryCondition] =
     val words =
       Parser.stringIn(List("elapsed>", "elapsed<", "moved>", "moved<", "time>", "time<"))
 
-    (words ~ duration).map {
+    (words ~ duration).map:
       case ("elapsed>", d) => ElapsedGE(d)
       case ("elapsed<", d) => ElapsedLE(d)
       case ("moved>", d)   => MovedGE(d)
       case ("moved<", d)   => MovedLE(d)
       case ("time>", d)    => Or(NonEmptyList.of(MovedGE(d), ElapsedGE(d)))
       case ("time<", d)    => Or(NonEmptyList.of(MovedLE(d), ElapsedLE(d)))
-    }
-  }
 
   val notesCondition: Parser[QueryCondition] =
     (Parser.stringIn(List("notes=", "notes:")).void *> BasicParser.qstring)
@@ -132,5 +128,3 @@ final private[activities] class ConditionParser(val zoneId: ZoneId, currentTime:
       val notP = notCondition(recurse)
       Parser.oneOf(basicCondition :: andP :: orP :: notP :: Nil)
     }
-
-}

@@ -12,7 +12,7 @@ import fit4s.webview.client.shared.*
 
 import calico.html.io.{*, given}
 
-object DetailPage {
+object DetailPage:
 
   final case class Model(
       details: ActivityDetailResult,
@@ -62,4 +62,3 @@ object DetailPage {
         LapPanel(details, zone)
       )
     }
-}

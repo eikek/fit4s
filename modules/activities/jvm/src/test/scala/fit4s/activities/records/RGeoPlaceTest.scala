@@ -9,10 +9,10 @@ import fit4s.geocode.data.BoundingBox
 
 import doobie.implicits._
 
-class RGeoPlaceTest extends DatabaseTest with TestData {
+class RGeoPlaceTest extends DatabaseTest with TestData:
   override def munitFixtures = List(h2DataSource)
 
-  test("test not in bounding box") {
+  test("test not in bounding box"):
     // sometimes the position is not completely in the reported bbox
     val place =
       testPlace1.copy(
@@ -40,9 +40,8 @@ class RGeoPlaceTest extends DatabaseTest with TestData {
         _ = assertEquals(res1.get._1, place.copy(id = res1.get._1.id))
       } yield ()
     }
-  }
 
-  test("test distance") {
+  test("test distance"):
     val (jdbc, ds) = h2DataSource()
     DatabaseTest.makeXA(ds).use { xa =>
       for {
@@ -69,5 +68,3 @@ class RGeoPlaceTest extends DatabaseTest with TestData {
         _ = assertEquals(res2, None)
       } yield ()
     }
-  }
-}

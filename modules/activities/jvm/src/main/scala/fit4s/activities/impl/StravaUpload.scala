@@ -17,7 +17,7 @@ import org.http4s.client.dsl.Http4sClientDsl
 final class StravaUpload[F[_]: Async](
     stravaClient: StravaClient[F],
     getToken: F[StravaAccessToken]
-) extends Http4sClientDsl[F] {
+) extends Http4sClientDsl[F]:
 
   def uploadFit(
       activityId: ActivityId,
@@ -28,7 +28,7 @@ final class StravaUpload[F[_]: Async](
       commute: Boolean,
       timeout: FiniteDuration,
       waitingCallback: (FiniteDuration, Int) => F[Unit]
-  ): F[Either[StravaUploadError, StravaActivityId]] = {
+  ): F[Either[StravaUploadError, StravaActivityId]] =
     val externalId = StravaExternalId(activityId, fileId)
     val dataType =
       if (fitFile.extName == ".gz") StravaFileType.FitGz else StravaFileType.Fit
@@ -46,5 +46,3 @@ final class StravaUpload[F[_]: Async](
         waitingCallback = waitingCallback
       )
     )
-  }
-}

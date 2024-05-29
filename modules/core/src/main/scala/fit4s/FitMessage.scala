@@ -10,11 +10,10 @@ import scodec._
 import scodec.bits.{ByteOrdering, ByteVector}
 import scodec.codecs._
 
-sealed trait FitMessage {
+sealed trait FitMessage:
   def fold[A](fd: FitMessage.DefinitionMessage => A, fdd: FitMessage.DataMessage => A): A
-}
 
-object FitMessage {
+object FitMessage:
 
   final case class DefinitionMessage(
       reserved: Int,
@@ -25,7 +24,7 @@ object FitMessage {
       profileMsg: Option[Msg],
       devFieldCount: Int,
       devFields: List[FieldDefinition]
-  ) extends FitMessage {
+  ) extends FitMessage:
     def fold[A](
         fd: FitMessage.DefinitionMessage => A,
         fdd: FitMessage.DataMessage => A
@@ -39,16 +38,15 @@ object FitMessage {
 
     override def toString: String =
       s"DefinitionMessage(mesgNum=$globalMessageNumber, profileMsg=$profileMsg, fieldCount=$fieldCount/$devFieldCount)"
-  }
 
-  object DefinitionMessage {
+  object DefinitionMessage:
     private val archCodec: Codec[ByteOrdering] =
       uint8.xmap(
         n => if (n == 0) ByteOrdering.LittleEndian else ByteOrdering.BigEndian,
         bo => if (bo == ByteOrdering.LittleEndian) 0 else 1
       )
 
-    def codec(header: RecordHeader): Codec[DefinitionMessage] = {
+    def codec(header: RecordHeader): Codec[DefinitionMessage] =
       val fieldCodec =
         uint8 :: archCodec.flatPrepend(bo =>
           fallback(uintx(16, bo), MesgNum.codec(bo)).flatPrepend { eitherMsgNum =>
@@ -71,11 +69,9 @@ object FitMessage {
         .flatConcat(_ => devFieldCodec)
         .as[DefinitionMessage]
         .withContext("DefinitionMessage")
-    }
-  }
 
   final case class DataMessage(definition: DefinitionMessage, raw: ByteVector)
-      extends FitMessage {
+      extends FitMessage:
 
     def fold[A](
         fd: FitMessage.DefinitionMessage => A,
@@ -90,26 +86,25 @@ object FitMessage {
     def isMessage(m: Msg): Boolean =
       definition.profileMsg.contains(m)
 
-    def getField[A <: TypedValue[_]](
+    def getField[A <: TypedValue[?]](
         ft: Msg.FieldWithCodec[A]
     ): Either[String, Option[FieldValue[A]]] =
       dataFields.getDecodedField[A](ft)
 
-    def getRequiredField[A <: TypedValue[_]](
+    def getRequiredField[A <: TypedValue[?]](
         ft: Msg.FieldWithCodec[A]
     ): Either[String, FieldValue[A]] =
-      getField(ft).flatMap {
+      getField(ft).flatMap:
         case Some(v) => Right(v)
         case None =>
           Left(s"Field '${ft.fieldName}' not found in msg '${definition.profileMsg}'.")
-      }
 
-    def unsafeGetField[A <: TypedValue[_]](
+    def unsafeGetField[A <: TypedValue[?]](
         ft: Msg.FieldWithCodec[A]
     ): Option[FieldValue[A]] =
       getField(ft).fold(sys.error, identity)
 
-    def unsafeGetRequiredField[A <: TypedValue[_]](
+    def unsafeGetRequiredField[A <: TypedValue[?]](
         ft: Msg.FieldWithCodec[A]
     ): FieldValue[A] =
       getRequiredField(ft).fold(sys.error, identity)
@@ -118,9 +113,8 @@ object FitMessage {
       definition.profileMsg.contains(EventMsg) &&
         getField(EventMsg.eventType).map(_.map(_.value)).contains(Some(eventType)) &&
         getField(EventMsg.event).map(_.map(_.value)).contains(Some(event))
-  }
 
-  object DataMessage {
+  object DataMessage:
     def decoder(
         prev: Map[Int, FitMessage.DefinitionMessage],
         header: RecordHeader
@@ -138,39 +132,35 @@ object FitMessage {
     private def lastDefinitionMessage(
         prev: Map[Int, FitMessage.DefinitionMessage],
         header: RecordHeader
-    ): Decoder[DefinitionMessage] = {
+    ): Decoder[DefinitionMessage] =
       val defMsg = prev.get(header.localMessageType)
 
-      Decoder.pure(defMsg).flatMap {
-        case Some(v) => Decoder.pure(v)
-        case None =>
-          fail(
-            Err(
-              s"No definition message for $header. Looked in ${prev.size} previous records: $prev"
+      Decoder
+        .pure(defMsg)
+        .flatMap:
+          case Some(v) => Decoder.pure(v)
+          case None =>
+            fail(
+              Err(
+                s"No definition message for $header. Looked in ${prev.size} previous records: $prev"
+              )
             )
-          )
-      }
-    }
 
     val encoder: Encoder[DataMessage] =
       Encoder(dm => Attempt.successful(dm.raw.bits))
-  }
 
   def encoder(header: RecordHeader): Encoder[FitMessage] =
     Encoder[FitMessage] { (m: FitMessage) =>
-      m match {
+      m match
         case dm: DefinitionMessage => DefinitionMessage.codec(header).encode(dm)
         case dm: DataMessage       => DataMessage.encoder.encode(dm)
-      }
     }
 
   def decoder(
       prev: Map[Int, FitMessage.DefinitionMessage]
   )(rh: RecordHeader): Decoder[FitMessage] =
-    rh.messageType match {
+    rh.messageType match
       case MessageType.DefinitionMessage =>
         DefinitionMessage.codec(rh).upcast[FitMessage]
       case MessageType.DataMessage =>
         DataMessage.decoder(prev, rh)
-    }
-}

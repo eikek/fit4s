@@ -15,12 +15,11 @@ import doobie.*
 import doobie.implicits.*
 import io.bullet.borer.*
 
-trait ExportData[F[_]] {
+trait ExportData[F[_]]:
 
   def dump(progress: ProgressObserve[F]): Stream[F, Byte]
 
   def read(dryRun: Boolean, progress: ProgressObserve[F]): Pipe[F, Byte, Nothing]
-}
 
 object ExportData:
   trait ProgressObserve[F[_]]:
@@ -33,11 +32,10 @@ object ExportData:
 
   object ProgressObserve:
     def apply[F[_]](f: DumpFormat => F[Unit]): ProgressObserve[F] =
-      new ProgressObserve[F] {
+      new ProgressObserve[F]:
         def onProcess(value: DumpFormat) = f(value)
-      }
     def none[F[_]: Applicative]: ProgressObserve[F] = apply(_ => ().pure[F])
-    def count[F[_]](counters: Ref[F, Map[Class[_], Int]]): ProgressObserve[F] =
+    def count[F[_]](counters: Ref[F, Map[Class[?], Int]]): ProgressObserve[F] =
       ProgressObserve(v =>
         counters.update(m => m.updatedWith(v.getClass)(_.map(_ + 1).orElse(Some(1))))
       )
@@ -46,7 +44,7 @@ object ExportData:
     new Impl[F](xa, dbms)
 
   private class Impl[F[_]: Sync](xa: Transactor[F], dbms: JdbcConfig.Dbms)
-      extends ExportData[F] {
+      extends ExportData[F]:
 
     private def encode(in: Stream[F, DumpFormat]): Stream[F, Byte] =
       in.flatMap { a =>
@@ -87,8 +85,6 @@ object ExportData:
     private def databaseSink(in: Stream[F, DumpFormat]): Stream[F, Nothing] =
       in.chunkN(50, allowFewer = true).evalMap(storeData).drain
 
-    private def storeData(ch: Chunk[DumpFormat]): F[Int] = {
-      val p = ch.foldLeft(DumpProduct.empty)(_ add _)
+    private def storeData(ch: Chunk[DumpFormat]): F[Int] =
+      val p = ch.foldLeft(DumpProduct.empty)(_.add(_))
       p.insertStatement.transact(xa)
-    }
-  }

@@ -13,7 +13,7 @@ import fit4s.webview.data.RequestFailure
 
 import calico.html.io.{*, given}
 
-object TagEdit {
+object TagEdit:
 
   final case class Model(
       id: ActivityId,
@@ -22,11 +22,10 @@ object TagEdit {
       query: TextField.Model,
       results: List[Tag],
       error: Option[RequestFailure]
-  ) {
+  ):
     def tags: Model.TagSelection = Model.TagSelection(active, results)
-  }
 
-  object Model {
+  object Model:
     def apply(id: ActivityId, active: Vector[Tag]): Model =
       Model(id, active.toSet, false, TextField.Model.empty, Nil, None)
 
@@ -40,17 +39,14 @@ object TagEdit {
     final case class TagSelection(
         active: Set[Tag],
         results: List[Tag]
-    ) {
+    ):
       val all = (active ++ results).toList.distinct.sortBy(_.name.name)
       def isActive(t: Tag) = active.contains(t)
       def notActive(t: Tag) = !isActive(t)
-    }
-    object TagSelection {
+    object TagSelection:
       given Eq[TagSelection] = Eq.fromUniversalEquals
-    }
-  }
 
-  enum Msg {
+  enum Msg:
     case ToggleMenu
     case CloseMenu
     case SearchTags
@@ -59,10 +55,9 @@ object TagEdit {
     case CreateTag
     case TagsRemoved(tag: Tag)
     case TagsAdded(tag: Tag)
-  }
 
   def update(cr: CommandRuntime[IO], msg: Msg)(model: Model): (Model, IO[Unit]) =
-    msg match {
+    msg match
       case Msg.ToggleMenu =>
         val cmd =
           if (model.menuOpen || model.results.nonEmpty) IO.unit
@@ -90,50 +85,44 @@ object TagEdit {
         (model, cr.send(cmd))
 
       case Msg.CreateTag =>
-        TagName.fromString(model.query.text) match {
+        TagName.fromString(model.query.text) match
           case Right(tn) =>
             val cmd = Cmd.CreateTag(model.id, tn)
             (model, cr.send(cmd))
           case Left(_) =>
             (model, IO.unit)
-        }
 
       case Msg.TagsRemoved(tag) =>
         (model.copy(active = model.active - tag), cr.send(Cmd.SearchRefresh))
 
       case Msg.TagsAdded(tag) =>
         (model.copy(active = model.active + tag), cr.send(Cmd.SearchRefresh))
-    }
 
   def subscribe(model: SignallingRef[IO, Model], cr: CommandRuntime[IO]) =
-    cr.subscribe.evalMap {
+    cr.subscribe.evalMap:
       case Result.GetTagsResult(r) =>
         model.flatModify(update(cr, Msg.SearchTagsResult(r)))
 
       case Result.SetTagsResult(id, tags, true) =>
-        model.get.flatMap {
+        model.get.flatMap:
           case m if m.id == id =>
             model.flatModify(update(cr, Msg.TagsAdded(tags)))
           case _ => IO.unit
-        }
 
       case Result.RemoveTagsResult(id, tag, true) =>
-        model.get.flatMap {
+        model.get.flatMap:
           case m if m.id == id =>
             model.flatModify(update(cr, Msg.TagsRemoved(tag)))
           case _ => IO.unit
-        }
 
       case Result.CreateTagResult(id, name, true) =>
-        model.get.flatMap {
+        model.get.flatMap:
           case m if m.id == id =>
             model.flatModify(update(cr, Msg.TagsAdded(Tag.create(name))))
           case _ => IO.unit
-        }
 
       case _ =>
         IO.unit
-    }
 
   def render(model: SignallingRef[IO, Model], cr: CommandRuntime[IO]) =
     Resource
@@ -216,4 +205,3 @@ object TagEdit {
         tag.name.name
       )
     )
-}

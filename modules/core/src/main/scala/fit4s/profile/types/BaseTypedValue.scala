@@ -4,52 +4,44 @@ import scodec.Codec
 import scodec.bits.ByteOrdering
 import scodec.codecs.fixedSizeBytes
 
-sealed trait BaseTypedValue[V] extends TypedValue[V] {
+sealed trait BaseTypedValue[V] extends TypedValue[V]:
   def base: FitBaseType
-}
 
-object BaseTypedValue {
+object BaseTypedValue:
   final case class LongBaseValue(rawValue: Long, base: FitBaseType)
-      extends TypedValue[Long] {
+      extends TypedValue[Long]:
 
     override def typeName = base.typeName
-  }
 
-  object LongBaseValue {
+  object LongBaseValue:
 
     def codec(bo: ByteOrdering, base: FitBaseType)(implicit
         e: BaseTypeCodec[base.type, Long]
     ): Codec[LongBaseValue] =
       BaseTypeCodec.baseCodec(base, bo).xmap(LongBaseValue(_, base), _.rawValue)
-  }
 
   final case class FloatBaseValue(rawValue: Double, base: FitBaseType)
-      extends BaseTypedValue[Double] {
+      extends BaseTypedValue[Double]:
     override def typeName = base.typeName
-  }
 
-  object FloatBaseValue {
+  object FloatBaseValue:
     def codec(bo: ByteOrdering, base: FitBaseType)(implicit
         e: BaseTypeCodec[base.type, Double]
     ): Codec[FloatBaseValue] =
       BaseTypeCodec.baseCodec(base, bo).xmapc(FloatBaseValue(_, base))(_.rawValue)
-  }
 
-  final case class StringBaseValue(rawValue: String) extends TypedValue[String] {
+  final case class StringBaseValue(rawValue: String) extends TypedValue[String]:
     val base: FitBaseType = StringBaseValue.baseType
     override def typeName = "string"
-  }
 
-  object StringBaseValue {
-    def codec(sizeBytes: Int): Codec[StringBaseValue] = {
+  object StringBaseValue:
+    def codec(sizeBytes: Int): Codec[StringBaseValue] =
       val sc = BaseTypeCodec.baseCodec(FitBaseType.String, ByteOrdering.LittleEndian)
       fixedSizeBytes(sizeBytes, sc).xmap(StringBaseValue.apply, _.rawValue)
-    }
 
     val baseType: FitBaseType = FitBaseType.String
-  }
 
-  def codec(bt: FitBaseType, bo: ByteOrdering): Codec[BaseTypedValue[_]] =
+  def codec(bt: FitBaseType, bo: ByteOrdering): Codec[BaseTypedValue[?]] =
     (bt match {
       case FitBaseType.Enum =>
         LongBaseValue.codec(bo, FitBaseType.Enum)
@@ -85,5 +77,4 @@ object BaseTypedValue {
         LongBaseValue.codec(bo, FitBaseType.Uint64)
       case FitBaseType.Uint64z =>
         LongBaseValue.codec(bo, FitBaseType.Uint64)
-    }).asInstanceOf[Codec[BaseTypedValue[_]]]
-}
+    }).asInstanceOf[Codec[BaseTypedValue[?]]]

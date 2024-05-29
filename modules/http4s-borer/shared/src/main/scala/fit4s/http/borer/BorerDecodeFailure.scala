@@ -4,8 +4,8 @@ import io.bullet.borer.derivation.MapBasedCodecs.*
 import io.bullet.borer.{Borer, Encoder}
 import org.http4s._
 
-final case class BorerDecodeFailure(respString: String, error: Borer.Error[_])
-    extends DecodeFailure {
+final case class BorerDecodeFailure(respString: String, error: Borer.Error[?])
+    extends DecodeFailure:
 
   override val message: String = s"${error.getMessage}: $respString"
 
@@ -13,10 +13,9 @@ final case class BorerDecodeFailure(respString: String, error: Borer.Error[_])
 
   def toHttpResponse[F[_]](httpVersion: HttpVersion): Response[F] =
     Response(status = Status.BadRequest).withEntity(this)
-}
 
 object BorerDecodeFailure:
-  implicit val borerErrorEncoder: Encoder[Borer.Error[_]] =
+  implicit val borerErrorEncoder: Encoder[Borer.Error[?]] =
     Encoder.forString.contramap(_.getMessage)
 
   implicit val borerDecodeFailureEncoder: Encoder[BorerDecodeFailure] = deriveEncoder

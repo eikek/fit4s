@@ -16,17 +16,16 @@ import org.scalacheck.Prop.forAll
 import org.scalacheck.Test
 import org.scalacheck.Test.Parameters
 
-class BasicParserTest extends FunSuite {
+class BasicParserTest extends FunSuite:
   val current = Instant.parse("2023-04-02T10:05:00Z")
   val zone: ZoneId = ZoneId.of("Europe/Berlin")
   val parser = new ConditionParser(zone, current)
 
-  test("parse device") {
+  test("parse device"):
     DeviceProduct.all.foreach { p =>
       val out = parser.device.parseAll(p.name.toLowerCase)
       assertEquals(out, p.asRight)
     }
-  }
 
   List(
     "15min" -> Duration.ofMinutes(15),
@@ -35,10 +34,9 @@ class BasicParserTest extends FunSuite {
     "12 h" -> Duration.ofHours(12)
   )
     .foreach { case (in, out) =>
-      test(s"parse duration: $in -> $out") {
+      test(s"parse duration: $in -> $out"):
         val result = parser.duration.parseAll(in)
         assertEquals(result, out.asRight)
-      }
     }
 
   List(
@@ -49,13 +47,12 @@ class BasicParserTest extends FunSuite {
     "6 km" -> Distance.km(6)
   )
     .foreach { case (in, out) =>
-      test(s"parse distance: $in -> $out") {
+      test(s"parse distance: $in -> $out"):
         val result = parser.distance.parseAll(in)
         assertEquals(result, out.asRight)
-      }
     }
 
-  test("parse sport") {
+  test("parse sport"):
     Sport.all.foreach { sp =>
       val out = parser.sport.parseAll(sp.typeName)
       assertEquals(out, sp.asRight)
@@ -64,9 +61,8 @@ class BasicParserTest extends FunSuite {
       val out = parser.subSport.parseAll(sp.typeName)
       assertEquals(out, sp.asRight)
     }
-  }
 
-  test("parse FileId strings") {
+  test("parse FileId strings"):
     val prop =
       forAll(ActivityQueryGenerator.fileIdGen) { fileId =>
         val out = parser.fileId.parseAll(fileId.asString)
@@ -76,9 +72,8 @@ class BasicParserTest extends FunSuite {
     val result = Test.check(Parameters.default, prop)
     if (result.passed) ()
     else sys.error(result.status.toString)
-  }
 
-  test("quoted string") {
+  test("quoted string"):
     assertEquals(
       BasicParser.qstring.parseAll("\"hello world\""),
       "hello world".asRight
@@ -91,9 +86,8 @@ class BasicParserTest extends FunSuite {
       BasicParser.qstring.parseAll("hello-world"),
       "hello-world".asRight
     )
-  }
 
-  test("parse listOf") {
+  test("parse listOf"):
     val p = parser.listOf(parser.tagName)(identity, identity)
     assertEquals(p.parseAll("bike/mine"), NonEmptyList.of(tag("bike/mine")).asRight)
     assertEquals(
@@ -108,7 +102,6 @@ class BasicParserTest extends FunSuite {
       p.parseAll("bike/mine, commute"),
       NonEmptyList.of(tag("bike/mine"), tag("commute")).asRight
     )
-  }
 
   List(
     "2023" -> dt(2023),
@@ -125,13 +118,12 @@ class BasicParserTest extends FunSuite {
     "1670674515s" -> dt(2022, 12, 10, 13, 15, 15),
     "1679072400s" -> dt(2023, 3, 17, 18)
   ).foreach { case (in, out) =>
-    test(s"parsing date: $in -> $out") {
+    test(s"parsing date: $in -> $out"):
       val dateTime = parser.instant
         .parseAll(in)
         .fold(err => sys.error(err.toString()), identity)
 
       assertEquals(dateTime, out)
-    }
   }
 
   List(
@@ -141,12 +133,11 @@ class BasicParserTest extends FunSuite {
     "3w" -> current.minus(21, ChronoUnit.DAYS),
     "14 weeks" -> current.minus(14 * 7, ChronoUnit.DAYS)
   ).foreach { case (in, out) =>
-    test(s"parse n weeks ago: $in -> $out") {
+    test(s"parse n weeks ago: $in -> $out"):
       val dateTime = parser.lastWeeks
         .parseAll(in)
         .fold(err => sys.error(err.toString()), identity)
       assertEquals(dateTime, out)
-    }
   }
 
   List(
@@ -156,12 +147,11 @@ class BasicParserTest extends FunSuite {
     "3d" -> current.minus(3, ChronoUnit.DAYS),
     "14 days" -> current.minus(14, ChronoUnit.DAYS)
   ).foreach { case (in, out) =>
-    test(s"parse n days ago: $in -> $out") {
+    test(s"parse n days ago: $in -> $out"):
       val dateTime = parser.lastDays
         .parseAll(in)
         .fold(err => sys.error(err.toString()), identity)
       assertEquals(dateTime, out)
-    }
   }
 
   def dt(
@@ -175,4 +165,3 @@ class BasicParserTest extends FunSuite {
     LocalDateTime.of(year, month, day, hour, min, secs).atZone(parser.zoneId).toInstant
 
   def tag(name: String): TagName = TagName.unsafeFromString(name)
-}

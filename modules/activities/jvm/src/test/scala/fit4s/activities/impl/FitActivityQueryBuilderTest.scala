@@ -10,10 +10,10 @@ import org.scalacheck.Prop.forAll
 import org.scalacheck.Test
 import org.scalacheck.Test.Parameters
 
-class FitActivityQueryBuilderTest extends DatabaseTest {
+class FitActivityQueryBuilderTest extends DatabaseTest:
   override def munitFixtures = List(h2DataSource)
 
-  test("generate syntactically correct query") {
+  test("generate syntactically correct query"):
     val (jdbc, ds) = h2DataSource()
     DatabaseTest.makeXA(ds).use { xa =>
       for {
@@ -30,5 +30,3 @@ class FitActivityQueryBuilderTest extends DatabaseTest {
           else IO.raiseError(new Exception(result.status.toString))
       } yield prop
     }
-  }
-}

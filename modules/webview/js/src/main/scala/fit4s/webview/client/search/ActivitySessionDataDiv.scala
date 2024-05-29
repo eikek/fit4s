@@ -12,17 +12,16 @@ import _root_.fit4s.webview.client.shared.Styles
 import calico.*
 import calico.html.io.{*, given}
 
-object ActivitySessionDataDiv {
+object ActivitySessionDataDiv:
   val distanceIcon = Styles.distanceIcon
   val elevationIcon = Styles.elevationIcon
   val speedIcon = Styles.speedIcon
   val timeIcon = Styles.timeIcon
 
   implicit def optionShow[A: Show]: Show[Option[A]] =
-    Show {
+    Show:
       case Some(a) => a.show
       case None    => "-"
-    }
 
   private def valueBox(iconCls: String, label: String, value: String) =
     div(
@@ -35,7 +34,7 @@ object ActivitySessionDataDiv {
       div(cls := "font-mono", value)
     )
 
-  def apply(s: ActivitySession): Resource[IO, HtmlDivElement[IO]] = {
+  def apply(s: ActivitySession): Resource[IO, HtmlDivElement[IO]] =
     implicit val sport: Sport = s.sport // for distance.show
 
     div(
@@ -94,5 +93,3 @@ object ActivitySessionDataDiv {
         )
       )
     )
-  }
-}

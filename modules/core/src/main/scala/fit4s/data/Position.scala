@@ -2,7 +2,7 @@ package fit4s.data
 
 final case class Position(latitude: Semicircle, longitude: Semicircle)
 
-object Position {
+object Position:
   def degree(lat: Double, lng: Double): Position =
     Position(Semicircle.degree(lat), Semicircle.degree(lng))
 
@@ -11,4 +11,3 @@ object Position {
       longitude: Option[Semicircle]
   ): Option[Position] =
     latitude.flatMap(lat => longitude.map(lng => Position(lat, lng)))
-}

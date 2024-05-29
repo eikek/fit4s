@@ -8,20 +8,19 @@ import fit4s.{FieldDecodeResult, FieldDefinition}
 import scodec.bits.{ByteOrdering, ByteVector}
 import scodec.{Attempt, Decoder}
 
-trait DataField {
+trait DataField:
   def local: FieldDefinition
   def byteOrdering: ByteOrdering
   def raw: ByteVector
   def fold[A](fa: KnownField => A, fb: UnknownField => A): A
   def decodedValue: Attempt[FieldDecodeResult]
-}
 
-object DataField {
+object DataField:
 
   def apply(
       local: FieldDefinition,
       byteOrdering: ByteOrdering,
-      field: Msg.FieldWithCodec[TypedValue[_]],
+      field: Msg.FieldWithCodec[TypedValue[?]],
       raw: ByteVector
   ): DataField =
     KnownField(local, byteOrdering, field, raw)
@@ -36,7 +35,7 @@ object DataField {
   def apply(
       local: FieldDefinition,
       byteOrdering: ByteOrdering,
-      maybeField: Option[Msg.FieldWithCodec[TypedValue[_]]],
+      maybeField: Option[Msg.FieldWithCodec[TypedValue[?]]],
       raw: ByteVector
   ): DataField =
     maybeField
@@ -46,27 +45,24 @@ object DataField {
   final case class KnownField(
       local: FieldDefinition,
       byteOrdering: ByteOrdering,
-      field: Msg.FieldWithCodec[TypedValue[_]],
+      field: Msg.FieldWithCodec[TypedValue[?]],
       raw: ByteVector
-  ) extends DataField {
+  ) extends DataField:
     def fold[A](fa: KnownField => A, fb: UnknownField => A): A = fa(this)
 
     private val fieldDecoder: Decoder[FieldDecodeResult] =
       DataMessageDecoder.decodeFieldWithCodec(byteOrdering, local, field)
 
     lazy val decodedValue = fieldDecoder.complete.decode(raw.bits).map(_.value)
-  }
 
   final case class UnknownField(
       local: FieldDefinition,
       byteOrdering: ByteOrdering,
       raw: ByteVector
-  ) extends DataField {
+  ) extends DataField:
     def fold[A](fa: KnownField => A, fb: UnknownField => A): A = fb(this)
 
     private val fieldDecoder: Decoder[FieldDecodeResult] =
       DataMessageDecoder.decodeUnknownField(byteOrdering, local)
 
     lazy val decodedValue = fieldDecoder.complete.decode(raw.bits).map(_.value)
-  }
-}

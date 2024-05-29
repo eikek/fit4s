@@ -16,38 +16,34 @@ import scodec._
 import scodec.bits.{BitVector, ByteOrdering, ByteVector}
 import scodec.codecs._
 
-object DataMessageDecoder {
+object DataMessageDecoder:
   def create(definition: DefinitionMessage): Decoder[DataFields] =
     Decoder.apply { bits =>
       val dm = DataMessage(definition, bits.bytes)
       Attempt.successful(DecodeResult(decode(dm), BitVector.empty))
     }
 
-  def decode(dm: DataMessage): DataFields = {
+  def decode(dm: DataMessage): DataFields =
     val init = makeDataFields(dm)
-    dm.definition.profileMsg match {
+    dm.definition.profileMsg match
       case Some(pm) => init.flatMap(expandField(pm, init))
       case None     => init
-    }
-  }
 
-  def makeDataFields(dm: DataMessage): DataFields = {
+  def makeDataFields(dm: DataMessage): DataFields =
     @tailrec
     def loop(
         fields: List[FieldDefinition],
         bytes: ByteVector,
         result: Vector[DataField]
     ): Vector[DataField] =
-      fields match {
+      fields match
         case Nil => result.reverse
         case h :: t =>
           val field = dm.definition.profileMsg.flatMap(_.findField(h.fieldDefNum))
           val (raw, next) = bytes.splitAt(h.sizeBytes)
           loop(t, next, DataField(h, dm.definition.archType, field, raw) +: result)
-      }
 
     DataFields(loop(dm.definition.fields, dm.raw, Vector.empty))
-  }
 
   /** Fields are expanded as follows:
     *
@@ -74,7 +70,7 @@ object DataMessageDecoder {
     * The result contains the given field and potentially its expanded fields.
     */
   def expandField(profileMsg: Msg, allFields: DataFields)(field: DataField): DataFields =
-    field match {
+    field match
       case DynamicField(subFields) =>
         val activeSubField =
           subFields.toList.find { subField =>
@@ -111,17 +107,16 @@ object DataMessageDecoder {
             comp: List[(String, Int)],
             result: Vector[DataField]
         ): Vector[DataField] =
-          comp match {
+          comp match
             case Nil => result
             case (name, len) :: t =>
-              profileMsg.getFieldByName(name) match {
+              profileMsg.getFieldByName(name) match
                 case Some(cfield) =>
                   val nextData = bits.takeRight(len)
-                  if (nextData.sizeLessThan(len)) {
-                    result
-                  } else {
+                  if (nextData.sizeLessThan(len)) result
+                  else
                     val cfieldMinLen = cfield.baseTypeLen * 8
-                    val nextBits = bits.takeRight(len) match {
+                    val nextBits = bits.takeRight(len) match
                       case b if len < cfieldMinLen =>
                         b.lowPaddedByteVectorToLength(f.byteOrdering, cfieldMinLen)
 
@@ -129,7 +124,6 @@ object DataMessageDecoder {
                         b.lowPaddedByteVector(f.byteOrdering)
 
                       case b => b.bytes
-                    }
                     val nextLocal = f.local.copy(sizeBytes =
                       math.min(nextBits.length, f.local.sizeBytes).toInt
                     )
@@ -137,11 +131,8 @@ object DataMessageDecoder {
                       KnownField(nextLocal, f.byteOrdering, cfield, nextBits)
 
                     loop(bits.dropRight(len), t, nextField +: result)
-                  }
                 case None =>
                   loop(bits.dropRight(len), t, result)
-              }
-          }
 
         val comp = components.toList.zip(f.field.bits)
         val expanded = DataFields(loop(f.raw.bits, comp, Vector.empty))
@@ -151,13 +142,12 @@ object DataMessageDecoder {
           field +: expanded
 
       case _ => DataFields(Vector(field))
-    }
 
   def decodeFieldWithCodec(
       byteOrdering: ByteOrdering,
       localField: FieldDefinition,
-      field: FieldWithCodec[TypedValue[_]]
-  ): Decoder[FieldDecodeResult] = {
+      field: FieldWithCodec[TypedValue[?]]
+  ): Decoder[FieldDecodeResult] =
     val fc = field
       .fieldCodec(localField)(byteOrdering)
       .asDecoder
@@ -173,8 +163,8 @@ object DataMessageDecoder {
       .map(v => ArrayFieldType(v, localField.baseType.fitBaseType))
       .map(v => FieldDecodeResult.Success(localField, FieldValue(field, v)))
 
-    withInvalidValue(localField, byteOrdering) {
-      field.isArray match {
+    withInvalidValue(localField, byteOrdering):
+      field.isArray match
         case ArrayDef.NoArray =>
           fc.asDecoder
 
@@ -183,18 +173,15 @@ object DataMessageDecoder {
 
         case ArrayDef.Sized(n) =>
           if (n > 1) ac else fc
-      }
-    }
-  }
 
   def decodeUnknownField(
       byteOrdering: ByteOrdering,
       localField: FieldDefinition
   ): Decoder[FieldDecodeResult] =
-    withInvalidValue(localField, byteOrdering) {
+    withInvalidValue(localField, byteOrdering):
       val base = localField.baseType.fitBaseType
       val baseLen = BaseTypeCodec.length(base)
-      if (localField.sizeBytes > baseLen && localField.sizeBytes % baseLen != 0) {
+      if (localField.sizeBytes > baseLen && localField.sizeBytes % baseLen != 0)
         bytes(localField.sizeBytes).asDecoder.map(_ =>
           FieldDecodeResult.DecodeError(
             localField,
@@ -203,38 +190,33 @@ object DataMessageDecoder {
             )
           )
         )
-      } else {
-        if (localField.sizeBytes > baseLen) {
-          localResult(localField)(
-            ArrayFieldType.codec(
-              localField.sizeBytes,
-              byteOrdering,
-              localField.baseType.fitBaseType
-            )
+      else if (localField.sizeBytes > baseLen)
+        localResult(localField)(
+          ArrayFieldType.codec(
+            localField.sizeBytes,
+            byteOrdering,
+            localField.baseType.fitBaseType
           )
-        } else {
-          localResult(localField)(BaseTypedValue.codec(base, byteOrdering))
-        }
-      }
-    }
+        )
+      else
+        localResult(localField)(BaseTypedValue.codec(base, byteOrdering))
 
   private def withInvalidValue(
       localField: FieldDefinition,
       byteOrdering: ByteOrdering
   )(ifValid: Decoder[FieldDecodeResult]): Decoder[FieldDecodeResult] =
     peek(bytes(BaseTypeCodec.length(localField.baseType.fitBaseType))).flatMap { bv =>
-      if (BaseTypeCodec.isInvalid(localField.baseType.fitBaseType, byteOrdering)(bv)) {
+      if (BaseTypeCodec.isInvalid(localField.baseType.fitBaseType, byteOrdering)(bv))
         bytes(localField.sizeBytes).asDecoder.map(_ =>
           FieldDecodeResult.InvalidValue(localField)
         )
-      } else {
+      else
         ifValid
-      }
     }
 
   private def localResult(
       localField: FieldDefinition
-  )(d: Decoder[TypedValue[_]]): Decoder[FieldDecodeResult] =
+  )(d: Decoder[TypedValue[?]]): Decoder[FieldDecodeResult] =
     Decoder(bits =>
       d.decode(bits) match {
         case Attempt.Successful(result) =>
@@ -248,28 +230,22 @@ object DataMessageDecoder {
       }
     )
 
-  private object DynamicField {
-    def unapply(field: DataField): Option[Nel[Msg.SubField[TypedValue[_]]]] =
-      field match {
-        case DataField.KnownField(_, _, field: Msg.Field[TypedValue[_]], _) =>
-          Nel.fromList(field.subFields().asInstanceOf[List[Msg.SubField[TypedValue[_]]]])
+  private object DynamicField:
+    def unapply(field: DataField): Option[Nel[Msg.SubField[TypedValue[?]]]] =
+      field match
+        case DataField.KnownField(_, _, field: Msg.Field[TypedValue[?]], _) =>
+          Nel.fromList(field.subFields().asInstanceOf[List[Msg.SubField[TypedValue[?]]]])
         case _ => None
-      }
 
     def test(field: DataField): Boolean =
       unapply(field).isDefined
-  }
 
-  private object ComponentField {
+  private object ComponentField:
     def unapply(field: DataField): Option[(Nel[String], KnownField)] =
-      field match {
+      field match
         case f @ DataField.KnownField(_, _, field, _) =>
           Nel.fromList(field.components).map(_ -> f)
         case _ => None
-      }
 
     def test(field: DataField): Boolean =
       unapply(field).isDefined
-  }
-
-}

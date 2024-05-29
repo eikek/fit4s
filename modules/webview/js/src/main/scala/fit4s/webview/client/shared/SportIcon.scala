@@ -11,8 +11,8 @@ import calico.*
 import calico.html.Modifier
 import calico.html.io.{*, given}
 
-object SportIcon {
-  private[this] val fa = "fa"
+object SportIcon:
+  private val fa = "fa"
 
   def apply[M](s: Sport, moreCls: List[String] = Nil, modifier: M = ())(using
       M: Modifier[IO, HtmlElement[IO], M]
@@ -41,4 +41,3 @@ object SportIcon {
     case Sport.Basketball         => "fa-basketball"
     case _                        => "fa-shoe-prints"
     // was too lazy to add more…
-}

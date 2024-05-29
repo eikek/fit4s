@@ -1,6 +1,6 @@
 package fit4s.webview.client.shared
 
-object Styles {
+object Styles:
 
   val countIcon = "fa fa-hashtag text-sky-400"
   val distanceIcon = "fa fa-right-long text-sky-400"
@@ -10,4 +10,3 @@ object Styles {
 
   def apply(p: (String, Boolean)*): List[String] =
     p.toList.filter(_._2).map(_._1)
-}

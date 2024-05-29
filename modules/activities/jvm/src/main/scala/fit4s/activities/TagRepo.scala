@@ -5,7 +5,7 @@ import fs2.Stream
 
 import fit4s.activities.data._
 
-trait TagRepo[F[_]] {
+trait TagRepo[F[_]]:
   def linkTags(
       cond: Option[QueryCondition],
       tags: NonEmptyList[TagName]
@@ -23,4 +23,3 @@ trait TagRepo[F[_]] {
   def remove(tag: TagName): F[Int]
 
   def removeById(tagId: TagId): F[Int]
-}

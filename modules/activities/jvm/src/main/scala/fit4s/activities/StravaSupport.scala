@@ -26,7 +26,7 @@ import fit4s.strava.{StravaAppCredentials, StravaClient, StravaClientConfig}
 import doobie.util.transactor.Transactor
 import org.http4s.client.Client
 
-trait StravaSupport[F[_]] {
+trait StravaSupport[F[_]]:
   def unlink(aq: ActivityQuery): F[Int]
 
   def initOAuth(
@@ -89,9 +89,8 @@ trait StravaSupport[F[_]] {
       callback: ImportCallback[F],
       concN: Int
   ): Stream[F, ImportResult[ActivityId]]
-}
 
-object StravaSupport {
+object StravaSupport:
 
   def apply[F[_]: Async: Network: Files: Compression](
       stravaCfg: StravaClientConfig,
@@ -109,24 +108,22 @@ object StravaSupport {
       )
     } yield strava
 
-  sealed trait LinkResult extends Product {
+  sealed trait LinkResult extends Product:
     final def widen: LinkResult = this
     def fold[A](success: LinkResult.Success => A, notFound: => A): A
-  }
-  object LinkResult {
+  object LinkResult:
     case class AlreadyLinked(activityId: ActivityId, stravaId: StravaActivityId)
     case class Ambiguous(stravaId: StravaActivityId, activities: NonEmptyList[ActivityId])
 
-    case object NoActivitiesFound extends LinkResult {
+    case object NoActivitiesFound extends LinkResult:
       def fold[A](success: LinkResult.Success => A, notFound: => A): A = notFound
-    }
     case class Success(
         linked: Int,
         existed: Int,
         notFound: Int,
         ambiguous: List[Ambiguous],
         alreadyLinked: List[AlreadyLinked]
-    ) extends LinkResult {
+    ) extends LinkResult:
       def fold[A](success: LinkResult.Success => A, notFound: => A) = success(this)
 
       def +(other: Success): Success = Success(
@@ -139,24 +136,18 @@ object StravaSupport {
 
       lazy val allCount =
         linked + existed + notFound + ambiguous.size + alreadyLinked.size
-    }
-    object Success {
+    object Success:
       val empty: Success = Success(0, 0, 0, Nil, Nil)
       implicit val monoid: Monoid[Success] =
         Monoid.instance(empty, _ + _)
-    }
-  }
 
-  trait UploadCallback[F[_]] {
+  trait UploadCallback[F[_]]:
     def onPollingStrava(waitedSoFar: FiniteDuration, attempts: Int): F[Unit]
     def onFile(activity: ActivityData): F[Unit]
-  }
-  object UploadCallback {
-    def noop[F[_]: Applicative] = new UploadCallback[F] {
+  object UploadCallback:
+    def noop[F[_]: Applicative] = new UploadCallback[F]:
       def onPollingStrava(waitedSoFar: FiniteDuration, attempts: Int) = ().pure[F]
       override def onFile(activity: ActivityData) = ().pure[F]
-    }
-  }
 
   final case class ActivityData(
       id: ActivityId,
@@ -166,7 +157,5 @@ object StravaSupport {
       location: Path,
       file: String,
       tags: Set[Tag]
-  ) {
+  ):
     def activityFile: Path = location / file
-  }
-}

@@ -14,13 +14,12 @@ final case class StravaClientConfig(
     gearCacheSize: Int
 )
 
-object StravaClientConfig extends Http4sCodec {
-  object Defaults {
+object StravaClientConfig extends Http4sCodec:
+  object Defaults:
     val authUrl = uri"https://www.strava.com/oauth/authorize"
     val apiUrl = uri"https://www.strava.com/api/v3"
     val tokenUrl = apiUrl / "oauth" / "token"
     val gearCacheSize = 50
-  }
 
   val default =
     StravaClientConfig(
@@ -31,4 +30,3 @@ object StravaClientConfig extends Http4sCodec {
     )
 
   given Encoder[StravaClientConfig] = deriveEncoder
-}

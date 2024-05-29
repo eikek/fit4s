@@ -16,37 +16,34 @@ import fit4s.webview.client.shared.ClickAction
 import calico.html.io.{*, given}
 import org.scalajs.dom.{ResizeObserver, document}
 
-object MapPanel {
+object MapPanel:
 
   final case class Model(
       initialized: Boolean,
       largeView: Boolean,
       leafletId: String
-  ) {
+  ):
     def initDone: Model = copy(initialized = true)
     def toggleLargeView = copy(largeView = !largeView)
-    def requestFullscreen = IO {
+    def requestFullscreen = IO:
       Option
         .when(leafletId.nonEmpty)(leafletId)
         .flatMap(id => Option(document.getElementById(id)))
         .map(_.requestFullscreen())
       ()
-    }
     def setMapId(id: String): Model =
       copy(leafletId = id)
-  }
-  object Model {
+  object Model:
     val empty: Model = Model(false, false, "")
     def makeEmpty: IO[SignallingRef[IO, Model]] = SignallingRef[IO].of(empty)
     given Eq[Model] = Eq.fromUniversalEquals
-  }
 
   private val viewButtonStyle =
     "px-1 py-1 rounded border dark:border-stone-500 hover:bg-sky-500 hover:border-sky-400 hover:text-stone-800 text-xs"
 
   def apply(details: ActivityDetailResult) =
     if (!hasPositionData(details)) div(cls := "hidden")
-    else {
+    else
       val mapElId = s"map${details.activity.id.id}"
       val plotElId = s"plot${details.activity.id.id}"
       Resource.eval(Model.makeEmpty).flatMap { model =>
@@ -84,14 +81,13 @@ object MapPanel {
           )
         )
       }
-    }
 
   private def initNative(
       mapId: String,
       plotId: String,
       model: SignallingRef[IO, Model],
       details: ActivityDetailResult
-  ): IO[Unit] = {
+  ): IO[Unit] =
     val doInit = List(
       initializeMap(details, mapId),
       initializePlot(details, plotId),
@@ -102,7 +98,6 @@ object MapPanel {
       if (m.initialized) IO.unit
       else doInit
     }
-  }
 
   private def fullscreenBtn(model: SignallingRef[IO, Model]) =
     div(
@@ -114,27 +109,24 @@ object MapPanel {
       )
     )
 
-  private def hasPositionData(details: ActivityDetailResult): Boolean = {
+  private def hasPositionData(details: ActivityDetailResult): Boolean =
     val s = details.sessions.head
     details.sessionData.get(s.id).getOrElse(Nil).exists(_.position.isDefined)
-  }
 
-  private def hasPlotData(details: ActivityDetailResult): Boolean = {
+  private def hasPlotData(details: ActivityDetailResult): Boolean =
     val s = details.sessions.head
     val data = details.sessionData.get(s.id).getOrElse(Nil)
     data.exists(_.heartRate.isDefined) ||
     data.exists(_.altitude.isDefined) ||
     data.exists(_.temperature.isDefined)
-  }
 
   @annotation.nowarn
-  private def debug[A](msg: String, a: A): A = {
+  private def debug[A](msg: String, a: A): A =
     scribe.warn(s"$msg: $a")
     a
-  }
 
   private def initializeMap(details: ActivityDetailResult, elId: String): IO[LeafletMap] =
-    IO.delay {
+    IO.delay:
       val s = details.sessions.head
       val sd = details.sessionData.get(s.id).getOrElse(Nil).filter(_.position.isDefined)
 
@@ -167,10 +159,9 @@ object MapPanel {
         .addTo(leafletMap)
 
       leafletMap
-    }
 
   private def initializePlot(details: ActivityDetailResult, elId: String): IO[Unit] =
-    IO.delay {
+    IO.delay:
       val s = details.sessions.head
       val sd = details.sessionData.get(s.id).getOrElse(Nil)
 
@@ -202,5 +193,3 @@ object MapPanel {
       val data = js.Array(elevationTrace, hrTrace, tempTrace)
 
       Plotly.newPlot(elId, data, layout, PlotlyConfig.default)
-    }
-}

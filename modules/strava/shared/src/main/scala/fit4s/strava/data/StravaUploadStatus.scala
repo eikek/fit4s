@@ -12,18 +12,16 @@ final case class StravaUploadStatus(
     activity_id: Option[StravaActivityId]
 )
 
-object StravaUploadStatus {
+object StravaUploadStatus:
   implicit val jsonDecoder: Decoder[StravaUploadStatus] =
     JsonCodec.decoder
 
   implicit val jsonEncoder: Encoder[StravaUploadStatus] =
     JsonCodec.encoder
 
-  private object JsonCodec {
+  private object JsonCodec:
     val decoder: Decoder[StravaUploadStatus] =
       MapBasedCodecs.deriveDecoder
 
     val encoder: Encoder[StravaUploadStatus] =
       MapBasedCodecs.deriveEncoder
-  }
-}

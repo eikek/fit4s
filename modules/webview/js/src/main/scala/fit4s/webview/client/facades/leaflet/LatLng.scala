@@ -9,7 +9,7 @@ import fit4s.data.Position
 @JSGlobal("L.LatLng")
 @js.native
 class LatLng(val lat: Double, val lng: Double, val alt: UndefOr[Double] = js.undefined)
-    extends js.Object {
+    extends js.Object:
   def this(lat: Double, lng: Double) = this(lat, lng, js.undefined)
 
   def distanceTo(other: LatLng): Double = js.native
@@ -18,11 +18,9 @@ class LatLng(val lat: Double, val lng: Double, val alt: UndefOr[Double] = js.und
   def equalsLatLng(other: LatLng): Boolean = js.native
 
   def wrap(left: Double, right: Double): LatLng = js.native
-}
 
-object LatLng {
+object LatLng:
   def apply(latitude: Double, longitude: Double): LatLng = new LatLng(latitude, longitude)
 
   def apply(pos: Position): LatLng =
     new LatLng(pos.latitude.toDegree, pos.longitude.toDegree)
-}

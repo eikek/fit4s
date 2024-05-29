@@ -35,9 +35,9 @@ case class FileHeader(
     crc: Int
 )
 
-object FileHeader {
+object FileHeader:
 
-  val codec: Codec[FileHeader] = {
+  val codec: Codec[FileHeader] =
     val fields = ushort8 :: uint16L :: uint32L :: fixedSizeBits(32, ascii)
     val zeroCrc = provide(0)
     val crc = uint16L.withContext("FIT file crc")
@@ -52,6 +52,3 @@ object FileHeader {
           fail(Err(s"FIT file headers of size $n not supported."))
       }(_ => 14)
       .withContext("FIT file header")
-  }
-
-}

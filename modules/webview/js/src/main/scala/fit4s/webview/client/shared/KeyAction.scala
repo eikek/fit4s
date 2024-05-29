@@ -6,7 +6,7 @@ import cats.syntax.all.*
 import fs2.dom.KeyboardEvent
 import fs2.{Pipe, Stream}
 
-object KeyAction {
+object KeyAction:
 
   def apply[F[_]: FlatMap: Concurrent](
       action: String => F[Unit]
@@ -17,4 +17,3 @@ object KeyAction {
       action: F[Unit]
   ): Pipe[F, KeyboardEvent[F], Nothing] =
     apply(key => if ("enter".equalsIgnoreCase(key)) action else ().pure[F])
-}

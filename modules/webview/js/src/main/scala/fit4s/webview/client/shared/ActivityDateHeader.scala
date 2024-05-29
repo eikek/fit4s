@@ -11,7 +11,7 @@ import fit4s.webview.client.util.FormatTimestamp
 import calico.*
 import calico.html.io.{*, given}
 
-object ActivityDateHeader {
+object ActivityDateHeader:
 
   def apply(a: ActivityListResult, zone: ZoneId): Resource[IO, HtmlDivElement[IO]] =
     div(
@@ -19,5 +19,3 @@ object ActivityDateHeader {
       SportIcon.of(a.sessions.map(_.sport), moreCls = "text-4xl mr-2" :: Nil),
       FormatTimestamp(a.activity.created.getOrElse(a.activity.timestamp), zone)
     )
-
-}

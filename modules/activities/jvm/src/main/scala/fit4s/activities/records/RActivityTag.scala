@@ -19,14 +19,13 @@ final case class RActivityTag(
     tagId: TagId
 )
 
-object RActivityTag {
+object RActivityTag:
   private[activities] val table = fr"activity_tag"
 
-  private[activities] def columnList(alias: Option[String]): List[Fragment] = {
+  private[activities] def columnList(alias: Option[String]): List[Fragment] =
     def c(name: String): Fragment =
       Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))
     List(c("id"), c("activity_id"), c("tag_id"))
-  }
 
   private val colsNoId = columnList(None).tail.commas
   private val colsWithId = columnList(None).commas
@@ -34,37 +33,33 @@ object RActivityTag {
   def streamAll: Stream[ConnectionIO, RActivityTag] =
     sql"SELECT $colsWithId FROM $table".query[RActivityTag].streamWithChunkSize(100)
 
-  def insert1(activityId: ActivityId, tagIds: NonEmptyList[TagId]): ConnectionIO[Int] = {
+  def insert1(activityId: ActivityId, tagIds: NonEmptyList[TagId]): ConnectionIO[Int] =
     val values = tagIds.toList.map(tagId => fr"($activityId, $tagId)").commas
 
     fr"INSERT INTO $table ($colsNoId) VALUES $values".update.run
-  }
 
-  def insert2(tagId: TagId, activityIds: NonEmptyList[ActivityId]): ConnectionIO[Int] = {
+  def insert2(tagId: TagId, activityIds: NonEmptyList[ActivityId]): ConnectionIO[Int] =
     val values = activityIds.toList
       .map(activityId => fr"($activityId, $tagId)")
       .commas
 
     fr"INSERT INTO $table ($colsNoId) VALUES $values".update.run
-  }
 
-  def remove(activityId: ActivityId, tags: NonEmptyList[TagId]): ConnectionIO[Int] = {
+  def remove(activityId: ActivityId, tags: NonEmptyList[TagId]): ConnectionIO[Int] =
     val tagIds = tags.map(id => sql"$id").foldSmash1(sql"(", sql", ", sql")")
     fr"DELETE FROM $table WHERE activity_id = $activityId AND tag_id in $tagIds".update.run
-  }
 
   def removeTags(
       actQuery: Option[QueryCondition],
       tags: List[TagId]
   ): ConnectionIO[Int] =
     if (tags.isEmpty) Sync[ConnectionIO].pure(0)
-    else {
+    else
       val actSql = ActivityQueryBuilder.activityIdFragment(actQuery)
       val tagIds = tags.map(id => sql"$id").commas
       sql"DELETE FROM $table WHERE tag_id in ($tagIds) AND activity_id in ($actSql)".update.run
-    }
 
-  def insertAll(actQuery: Option[QueryCondition], tags: NonEmptyList[TagId]) = {
+  def insertAll(actQuery: Option[QueryCondition], tags: NonEmptyList[TagId]) =
     val actSql = ActivityQueryBuilder.activityIdFragment(actQuery)
     val tids = tags.toList.map(id => sql"($id)").commas
 
@@ -73,9 +68,8 @@ object RActivityTag {
         WITH actids as ($actSql)
         SELECT * FROM actids
         CROSS JOIN (VALUES $tids) as t(tid)""".update.run
-  }
 
-  object insertMany {
+  object insertMany:
     val cols = columnList(None).map(_.internals.sql).mkString(",")
     val ph = columnList(None).map(_ => "?").mkString(",")
     val tn = table.internals.sql
@@ -83,5 +77,3 @@ object RActivityTag {
 
     def apply(tags: Seq[RActivityTag]): ConnectionIO[Int] =
       Update[RActivityTag](sql).updateMany(tags)
-  }
-}

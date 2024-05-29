@@ -5,11 +5,10 @@ import cats.Show
 
 import io.bullet.borer.*
 
-final class ActivityLapId(val id: Long) extends AnyVal {
+final class ActivityLapId(val id: Long) extends AnyVal:
   override def toString = s"ActivityLap($id)"
-}
 
-object ActivityLapId {
+object ActivityLapId:
   def apply(id: Long): ActivityLapId = new ActivityLapId(id)
 
   implicit val ordering: Ordering[ActivityLapId] =
@@ -25,4 +24,3 @@ object ActivityLapId {
     Decoder.forLong.map(apply)
 
   given Show[ActivityLapId] = Show.show(_.id.toString)
-}
