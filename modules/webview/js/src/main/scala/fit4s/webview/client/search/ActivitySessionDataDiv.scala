@@ -63,8 +63,8 @@ object ActivitySessionDataDiv:
           // avg heart rate
           valueBox("fa fa-heart-pulse text-red-400 mr-1", "Avg. HR", s.avgHr.show),
 
-          // norm power
-          valueBox("fa fa-bolt text-sky-400 mr-1", "Norm Power", s.normPower.show)
+          // avg power
+          valueBox("fa fa-bolt text-sky-400 mr-1", "Avg Power", s.avgPower.show)
         )
       ),
       div(
@@ -89,7 +89,8 @@ object ActivitySessionDataDiv:
             "fa fa-temperature-quarter text-sky-400 mr-1",
             "Avg Temp",
             s.avgTemp.show
-          )
+          ),
+          valueBox("fa fa-bolt text-sky-400 mr-1", "Norm Power", s.normPower.show)
         )
       )
     )
