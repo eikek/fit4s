@@ -1,8 +1,8 @@
 package fit4s.activities.impl
 
 import cats.data.{EitherT, OptionT}
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
+import cats.syntax.all.*
 import fs2.Stream
 import fs2.io.file.{Files, Path}
 
@@ -11,8 +11,8 @@ import fit4s.activities.LocationRepo.MoveResult
 import fit4s.activities.data.{Location, LocationId, Page}
 import fit4s.activities.records.RActivityLocation
 
-import doobie._
-import doobie.implicits._
+import doobie.*
+import doobie.implicits.*
 
 final class LocationRepoDb[F[_]: Sync: Files](xa: Transactor[F]) extends LocationRepo[F]:
   def listLocations(

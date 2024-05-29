@@ -3,14 +3,14 @@ package fit4s.activities.records
 import scala.collection.immutable.Seq
 
 import cats.effect.kernel.Sync
-import cats.syntax.all._
+import cats.syntax.all.*
 import fs2.Stream
 
-import fit4s.activities.data._
-import fit4s.activities.records.DoobieImplicits._
+import fit4s.activities.data.*
+import fit4s.activities.records.DoobieImplicits.*
 
-import doobie._
-import doobie.implicits._
+import doobie.*
+import doobie.implicits.*
 
 object RTag:
   val softDelete: Tag =

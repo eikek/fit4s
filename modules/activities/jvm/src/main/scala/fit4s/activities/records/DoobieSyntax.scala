@@ -4,8 +4,8 @@ import cats.Foldable
 
 import fit4s.activities.data.Page
 
-import doobie._
-import doobie.implicits._
+import doobie.*
+import doobie.implicits.*
 
 trait DoobieSyntax:
 

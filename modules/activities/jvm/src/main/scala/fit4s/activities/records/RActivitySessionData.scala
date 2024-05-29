@@ -11,11 +11,11 @@ import fit4s.activities.data.{
   ActivitySessionDataId,
   ActivitySessionId
 }
-import fit4s.activities.records.DoobieImplicits._
-import fit4s.data._
+import fit4s.activities.records.DoobieImplicits.*
+import fit4s.data.*
 
-import doobie._
-import doobie.implicits._
+import doobie.*
+import doobie.implicits.*
 
 object RActivitySessionData:
   private[activities] val table = fr"activity_session_data"

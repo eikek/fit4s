@@ -1,6 +1,6 @@
 package fit4s.cli
 
-import cats.effect._
+import cats.effect.*
 
 import com.monovore.decline.Opts
 

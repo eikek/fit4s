@@ -3,13 +3,13 @@ package fit4s.activities.impl
 import cats.data.NonEmptyList
 import fs2.io.file.Path
 
-import fit4s.activities.data._
-import fit4s.activities.records.DoobieImplicits._
-import fit4s.activities.records._
+import fit4s.activities.data.*
+import fit4s.activities.records.*
+import fit4s.activities.records.DoobieImplicits.*
 import fit4s.strava.data.StravaActivityId
 
-import doobie._
-import doobie.implicits._
+import doobie.*
+import doobie.implicits.*
 
 object ActivityQueryBuilder:
 

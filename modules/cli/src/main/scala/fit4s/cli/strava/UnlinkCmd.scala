@@ -1,7 +1,7 @@
 package fit4s.cli.strava
 
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
+import cats.syntax.all.*
 
 import fit4s.activities.data.{ActivityQuery, Page}
 import fit4s.cli.{ActivitySelection, CliConfig, SharedOpts}

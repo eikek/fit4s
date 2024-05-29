@@ -2,10 +2,10 @@ package fit4s.activities.records
 
 import java.time.{Duration, Instant}
 
-import fit4s.activities.data._
-import fit4s.data._
+import fit4s.activities.data.*
+import fit4s.data.*
 import fit4s.geocode.data.{BoundingBox, NominatimOsmId, NominatimPlaceId}
-import fit4s.profile.types.{Activity => _, _}
+import fit4s.profile.types.{Activity as _, *}
 
 trait TestData:
   val importDate: Instant = Instant.parse("2023-04-07T11:00:11Z")

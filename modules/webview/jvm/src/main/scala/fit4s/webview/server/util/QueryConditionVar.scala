@@ -3,7 +3,7 @@ package fit4s.webview.server.util
 import java.time.{Instant, ZoneId}
 
 import cats.data.ValidatedNel
-import cats.syntax.all._
+import cats.syntax.all.*
 
 import fit4s.activities.data.QueryCondition
 

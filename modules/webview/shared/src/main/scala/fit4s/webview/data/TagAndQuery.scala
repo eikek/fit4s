@@ -3,7 +3,7 @@ package fit4s.webview.data
 import cats.data.NonEmptyList
 
 import fit4s.activities.data.TagName
-import fit4s.webview.json.BasicJsonCodec._
+import fit4s.webview.json.BasicJsonCodec.*
 
 import io.bullet.borer.*
 import io.bullet.borer.derivation.MapBasedCodecs.*

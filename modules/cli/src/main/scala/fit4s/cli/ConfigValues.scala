@@ -6,14 +6,14 @@ import java.util.concurrent.atomic.AtomicReference
 import scala.concurrent.duration.*
 
 import cats.MonadThrow
-import cats.syntax.all._
+import cats.syntax.all.*
 import fs2.io.file.{Files, Path}
 
 import fit4s.activities.JdbcConfig
 import fit4s.geocode.NominatimConfig
 import fit4s.strava.{StravaAppCredentials, StravaClientConfig}
 
-import ciris._
+import ciris.*
 import org.http4s.Uri
 
 object ConfigValues {

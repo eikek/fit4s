@@ -3,7 +3,7 @@ package fit4s.cli.activity
 import cats.Monoid
 import cats.data.NonEmptyList
 import cats.effect.{ExitCode, IO}
-import cats.syntax.all._
+import cats.syntax.all.*
 import fs2.io.file.{Files, Path}
 
 import fit4s.ActivityReader

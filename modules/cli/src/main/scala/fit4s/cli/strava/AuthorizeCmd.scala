@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import scala.concurrent.duration.FiniteDuration
 
-import cats.effect._
+import cats.effect.*
 
 import fit4s.cli.{CliConfig, SharedOpts}
 

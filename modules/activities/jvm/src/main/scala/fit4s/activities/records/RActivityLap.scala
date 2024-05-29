@@ -5,10 +5,10 @@ import scala.collection.immutable.Seq
 import fs2.Stream
 
 import fit4s.activities.data.{ActivityLap, ActivityLapId}
-import fit4s.activities.records.DoobieImplicits._
+import fit4s.activities.records.DoobieImplicits.*
 
-import doobie._
-import doobie.implicits._
+import doobie.*
+import doobie.implicits.*
 
 object RActivityLap:
   private[activities] val table = fr"activity_lap"

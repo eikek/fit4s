@@ -1,7 +1,7 @@
 package fit4s.cli.tag
 
 import cats.effect.{ExitCode, IO}
-import cats.syntax.all._
+import cats.syntax.all.*
 
 import fit4s.activities.data.TagName
 import fit4s.cli.{CliConfig, SharedOpts}

@@ -8,7 +8,7 @@ import fs2.concurrent.SignallingRef
 import fit4s.activities.data.{ActivityId, Tag, TagName}
 import fit4s.webview.client.FetchResult
 import fit4s.webview.client.cmd.*
-import fit4s.webview.client.shared._
+import fit4s.webview.client.shared.*
 import fit4s.webview.data.RequestFailure
 
 import calico.html.io.{*, given}

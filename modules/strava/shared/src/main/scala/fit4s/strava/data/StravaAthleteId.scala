@@ -1,6 +1,6 @@
 package fit4s.strava.data
 
-import io.bullet.borer._
+import io.bullet.borer.*
 
 final class StravaAthleteId(val id: Long) extends AnyVal:
   override def toString = s"StravaAthleteId($id)"

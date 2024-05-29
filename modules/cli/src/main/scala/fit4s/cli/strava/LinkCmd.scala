@@ -1,13 +1,13 @@
 package fit4s.cli.strava
 
 import cats.data.NonEmptyList
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
+import cats.syntax.all.*
 
 import fit4s.activities.StravaSupport.LinkResult
+import fit4s.activities.data.*
 import fit4s.activities.data.QueryCondition.TagAnyMatch
-import fit4s.activities.data._
-import fit4s.cli._
+import fit4s.cli.*
 
 import com.monovore.decline.Opts
 

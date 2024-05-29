@@ -3,7 +3,7 @@ package fit4s.activities.data
 import cats.Eq
 
 import io.bullet.borer.*
-import io.bullet.borer.derivation.MapBasedCodecs._
+import io.bullet.borer.derivation.MapBasedCodecs.*
 
 final case class Tag(id: TagId, name: TagName)
 

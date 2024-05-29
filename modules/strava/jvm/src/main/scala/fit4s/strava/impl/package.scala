@@ -2,12 +2,12 @@ package fit4s.strava
 
 import cats.data.NonEmptyList
 import cats.effect.Sync
-import cats.syntax.all._
+import cats.syntax.all.*
 
 import fit4s.strava.data.StravaAccessToken
 
+import org.http4s.*
 import org.http4s.Status.Successful
-import org.http4s._
 import org.http4s.client.Client
 import org.http4s.headers.{Accept, Authorization, MediaRangeAndQValue}
 

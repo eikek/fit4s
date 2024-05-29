@@ -3,12 +3,12 @@ package fit4s
 import fit4s.decode.{DataFields, DataMessageDecoder}
 import fit4s.profile.FieldValue
 import fit4s.profile.messages.{EventMsg, FitMessages, Msg}
-import fit4s.profile.types._
-import fit4s.util.Codecs._
+import fit4s.profile.types.*
+import fit4s.util.Codecs.*
 
-import scodec._
+import scodec.*
 import scodec.bits.{ByteOrdering, ByteVector}
-import scodec.codecs._
+import scodec.codecs.*
 
 sealed trait FitMessage:
   def fold[A](fd: FitMessage.DefinitionMessage => A, fdd: FitMessage.DataMessage => A): A

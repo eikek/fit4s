@@ -2,8 +2,8 @@ package fit4s.activities.data
 
 import java.time.{Duration, Instant, ZoneId}
 
-import cats.data.{NonEmptyList => Nel}
-import cats.syntax.all._
+import cats.data.NonEmptyList as Nel
+import cats.syntax.all.*
 import fs2.io.file.Path
 
 import fit4s.activities.internal.ConditionParser

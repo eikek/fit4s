@@ -2,13 +2,13 @@ package fit4s.cli.activity
 
 import java.time.ZoneId
 
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
+import cats.syntax.all.*
 
-import fit4s.activities.data._
-import fit4s.cli.FormatDefinition._
-import fit4s.cli._
-import fit4s.common.syntax.all._
+import fit4s.activities.data.*
+import fit4s.cli.*
+import fit4s.cli.FormatDefinition.*
+import fit4s.common.syntax.all.*
 import fit4s.profile.types.Sport
 
 import com.monovore.decline.Opts

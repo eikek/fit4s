@@ -5,10 +5,10 @@ import java.time.{Duration, Instant}
 import cats.data.NonEmptyList
 import fs2.io.file.Path
 
-import fit4s.activities.data.QueryCondition._
-import fit4s.activities.data._
+import fit4s.activities.data.*
+import fit4s.activities.data.QueryCondition.*
 import fit4s.data.{DeviceProduct, Distance, FileId}
-import fit4s.profile.types._
+import fit4s.profile.types.*
 
 import org.scalacheck.Gen
 

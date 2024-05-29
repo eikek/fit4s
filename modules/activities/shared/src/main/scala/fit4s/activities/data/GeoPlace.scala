@@ -2,10 +2,10 @@ package fit4s.activities.data
 
 import fit4s.common.borer.DataJsonCodec.*
 import fit4s.data.Position
-import fit4s.geocode.data._
+import fit4s.geocode.data.*
 
-import io.bullet.borer.NullOptions.given
 import io.bullet.borer.*
+import io.bullet.borer.NullOptions.given
 import io.bullet.borer.derivation.MapBasedCodecs
 
 final case class GeoPlace(

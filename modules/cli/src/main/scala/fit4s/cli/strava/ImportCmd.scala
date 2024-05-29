@@ -2,7 +2,7 @@ package fit4s.cli.strava
 
 import cats.effect.{ExitCode, IO}
 import cats.kernel.Monoid
-import cats.syntax.all._
+import cats.syntax.all.*
 import fs2.io.file.Path
 
 import fit4s.ActivityReader

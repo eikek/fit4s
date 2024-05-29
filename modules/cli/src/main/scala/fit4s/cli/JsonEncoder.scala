@@ -2,8 +2,8 @@ package fit4s.cli
 
 import fit4s.*
 import fit4s.profile.FieldValue
-import fit4s.profile.types.BaseTypedValue.{FloatBaseValue, LongBaseValue, StringBaseValue}
 import fit4s.profile.types.*
+import fit4s.profile.types.BaseTypedValue.{FloatBaseValue, LongBaseValue, StringBaseValue}
 import fit4s.util.Nel
 
 import io.bullet.borer.*

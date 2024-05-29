@@ -1,6 +1,6 @@
 package fit4s
 
-import cats.syntax.all._
+import cats.syntax.all.*
 
 import fit4s.FitMessage.DataMessage
 import fit4s.data.DeviceProduct

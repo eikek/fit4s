@@ -2,19 +2,19 @@ package fit4s.activities.impl
 
 import cats.data.NonEmptyList
 import cats.data.OptionT
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
+import cats.syntax.all.*
 import fs2.Chunk
 
 import fit4s.activities.StravaExternalId
 import fit4s.activities.StravaSupport.LinkResult
-import fit4s.activities.data._
-import fit4s.activities.records._
+import fit4s.activities.data.*
+import fit4s.activities.records.*
 import fit4s.profile.types.Sport
 import fit4s.strava.data.{StravaActivity, StravaActivityId, StravaGear}
 
-import doobie._
-import doobie.implicits._
+import doobie.*
+import doobie.implicits.*
 
 final class StravaSync[F[_]: Async](
     xa: Transactor[F],

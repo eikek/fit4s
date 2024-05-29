@@ -12,8 +12,8 @@ import fit4s.common.borer.syntax.all.*
 import fit4s.data.Distance
 import fit4s.profile.types.Sport
 
-import io.bullet.borer.NullOptions.given
 import io.bullet.borer.*
+import io.bullet.borer.NullOptions.given
 import io.bullet.borer.derivation.MapBasedCodecs.*
 
 trait BasicJsonCodec extends DataJsonCodec:

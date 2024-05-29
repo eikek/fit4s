@@ -4,17 +4,17 @@ import java.time.Instant
 
 import scala.collection.immutable.Seq
 
-import cats.syntax.all._
+import cats.syntax.all.*
 import fs2.Stream
 
 import fit4s.activities.data.ActivitySession
 import fit4s.activities.data.{ActivityId, ActivitySessionId}
-import fit4s.activities.records.DoobieImplicits._
+import fit4s.activities.records.DoobieImplicits.*
 import fit4s.data.Position
-import fit4s.profile.types._
+import fit4s.profile.types.*
 
-import doobie._
-import doobie.implicits._
+import doobie.*
+import doobie.implicits.*
 
 object RActivitySession:
   private[activities] val table = fr"activity_session"

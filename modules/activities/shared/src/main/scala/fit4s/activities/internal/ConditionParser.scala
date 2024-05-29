@@ -1,12 +1,12 @@
 package fit4s.activities.internal
 
-import java.time._
+import java.time.*
 
 import cats.data.NonEmptyList
 import cats.parse.Parser
 
 import fit4s.activities.data.QueryCondition
-import fit4s.activities.data.QueryCondition._
+import fit4s.activities.data.QueryCondition.*
 
 final private[activities] class ConditionParser(val zoneId: ZoneId, currentTime: Instant)
     extends BasicParser(zoneId, currentTime):

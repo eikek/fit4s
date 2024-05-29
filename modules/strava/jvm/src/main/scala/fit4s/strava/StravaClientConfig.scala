@@ -5,7 +5,7 @@ import fit4s.http.borer.Http4sCodec
 import io.bullet.borer.*
 import io.bullet.borer.derivation.MapBasedCodecs.*
 import org.http4s.Uri
-import org.http4s.implicits._
+import org.http4s.implicits.*
 
 final case class StravaClientConfig(
     authUrl: Uri,

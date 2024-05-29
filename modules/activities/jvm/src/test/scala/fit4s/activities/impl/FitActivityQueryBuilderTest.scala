@@ -5,7 +5,7 @@ import cats.effect.IO
 import fit4s.activities.util.ActivityQueryGenerator
 import fit4s.activities.{DatabaseTest, FlywayMigrate}
 
-import doobie.implicits._
+import doobie.implicits.*
 import org.scalacheck.Prop.forAll
 import org.scalacheck.Test
 import org.scalacheck.Test.Parameters

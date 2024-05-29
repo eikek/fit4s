@@ -6,7 +6,7 @@ import cats.syntax.all.*
 import fit4s.cli.{CliConfig, SharedOpts}
 import fit4s.webview.server.Fit4sServer
 
-import com.comcast.ip4s._
+import com.comcast.ip4s.*
 import com.monovore.decline.Opts
 
 object StartCmd extends SharedOpts:

@@ -1,10 +1,10 @@
 package fit4s.activities.internal
 
-import java.time._
+import java.time.*
 import java.time.temporal.ChronoUnit
 
 import cats.data.NonEmptyList
-import cats.syntax.all._
+import cats.syntax.all.*
 
 import fit4s.activities.data.TagName
 import fit4s.activities.util.ActivityQueryGenerator

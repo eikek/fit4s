@@ -2,7 +2,7 @@ package fit4s.data
 
 import java.time.Duration
 
-import fit4s.profile.types._
+import fit4s.profile.types.*
 import fit4s.{FitFile, FitTestData}
 
 import munit.CatsEffectSuite

@@ -3,7 +3,7 @@ package fit4s.cli
 import cats.effect.{ExitCode, IO}
 import fs2.io.file.{Files, Path}
 
-import fit4s.cli.JsonEncoder._
+import fit4s.cli.JsonEncoder.*
 import fit4s.{FitFile, MessageType}
 
 import com.monovore.decline.Opts

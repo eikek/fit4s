@@ -2,8 +2,8 @@ package fit4s.activities.data
 
 import java.time.{Duration, Instant}
 
-import fit4s.data._
-import fit4s.profile.types._
+import fit4s.data.*
+import fit4s.profile.types.*
 
 final case class ActivityLap(
     id: ActivityLapId,

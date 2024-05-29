@@ -1,9 +1,9 @@
 package fit4s.cli
 
-import java.time._
+import java.time.*
 
-import cats.data.{NonEmptyList => Nel}
-import cats.syntax.all._
+import cats.data.NonEmptyList as Nel
+import cats.syntax.all.*
 
 import fit4s.activities.data.QueryCondition
 import fit4s.activities.data.QueryCondition.{And, StartedAfter, StartedBefore}

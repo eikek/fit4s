@@ -4,11 +4,11 @@ import java.time.{Duration, Instant}
 
 import fs2.io.file.Path
 
-import fit4s.activities.data._
-import fit4s.data._
-import fit4s.geocode.data._
-import fit4s.profile.types._
-import fit4s.strava.data._
+import fit4s.activities.data.*
+import fit4s.data.*
+import fit4s.geocode.data.*
+import fit4s.profile.types.*
+import fit4s.strava.data.*
 
 import doobie.Meta
 

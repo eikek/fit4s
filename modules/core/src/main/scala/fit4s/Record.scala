@@ -1,6 +1,6 @@
 package fit4s
 
-import scodec._
+import scodec.*
 
 case class Record(header: RecordHeader, content: FitMessage)
 

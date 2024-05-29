@@ -1,7 +1,7 @@
 package fit4s
 
-import scodec._
-import scodec.codecs._
+import scodec.*
+import scodec.codecs.*
 
 /** The file header provides information about the FIT File. The minimum size of the file
   * header is 12 bytes including protocol and profile version numbers, the amount of data

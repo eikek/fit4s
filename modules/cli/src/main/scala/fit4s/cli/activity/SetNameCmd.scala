@@ -1,7 +1,7 @@
 package fit4s.cli.activity
 
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
+import cats.syntax.all.*
 
 import fit4s.activities.data.ActivityId
 import fit4s.cli.{CliConfig, SharedOpts}

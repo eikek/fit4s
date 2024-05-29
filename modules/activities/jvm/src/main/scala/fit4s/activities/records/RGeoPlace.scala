@@ -2,16 +2,16 @@ package fit4s.activities.records
 
 import scala.collection.immutable.Seq
 
-import cats.syntax.all._
+import cats.syntax.all.*
 import fs2.Stream
 
-import fit4s.activities.data._
-import fit4s.activities.records.DoobieImplicits._
+import fit4s.activities.data.*
+import fit4s.activities.records.DoobieImplicits.*
 import fit4s.data.Position
-import fit4s.geocode.data._
+import fit4s.geocode.data.*
 
-import doobie._
-import doobie.implicits._
+import doobie.*
+import doobie.implicits.*
 
 object RGeoPlace:
   def fromPlace(id: GeoPlaceId, place: Place): Option[GeoPlace] =

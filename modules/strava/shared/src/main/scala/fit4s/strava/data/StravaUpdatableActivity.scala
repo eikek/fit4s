@@ -2,8 +2,8 @@ package fit4s.strava.data
 
 import fit4s.common.borer.{EncoderHelper, JsonValue}
 
-import io.bullet.borer.NullOptions.given
 import io.bullet.borer.*
+import io.bullet.borer.NullOptions.given
 import io.bullet.borer.derivation.MapBasedCodecs
 
 final case class StravaUpdatableActivity(

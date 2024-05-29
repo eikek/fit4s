@@ -3,19 +3,19 @@ package fit4s.activities.impl
 import java.time.ZoneId
 
 import cats.data.NonEmptyList
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
+import cats.syntax.all.*
 import fs2.Stream
 import fs2.compression.Compression
 import fs2.io.file.{Files, Path}
 
-import fit4s.activities._
-import fit4s.activities.data._
+import fit4s.activities.*
+import fit4s.activities.data.*
 import fit4s.activities.dump.ExportData
-import fit4s.activities.records._
+import fit4s.activities.records.*
 
-import doobie.implicits._
-import doobie.{Query => _, _}
+import doobie.implicits.*
+import doobie.{Query as _, *}
 
 final class ActivityLogDb[F[_]: Async: Files: Compression](
     jdbcConfig: JdbcConfig,
