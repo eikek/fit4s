@@ -3,7 +3,7 @@ package fit4s
 import java.net.URL
 
 import cats.effect.IO
-import fs2._
+import fs2.*
 
 import scodec.bits.ByteVector
 

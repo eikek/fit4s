@@ -3,14 +3,14 @@ package fit4s.activities
 import java.util.UUID
 import javax.sql.DataSource
 
-import cats.effect._
-import cats.syntax.option._
+import cats.effect.*
+import cats.syntax.option.*
 import fs2.io.file.{Files, Path}
 
-import fit4s.activities.records._
+import fit4s.activities.records.*
 
-import doobie._
-import doobie.implicits._
+import doobie.*
+import doobie.implicits.*
 import munit.CatsEffectSuite
 import org.h2.jdbcx.{JdbcConnectionPool, JdbcDataSource}
 

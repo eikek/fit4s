@@ -2,7 +2,7 @@ package fit4s.cli
 
 import cats.effect.{ExitCode, IO}
 
-import fit4s.cli.activity._
+import fit4s.cli.activity.*
 
 import com.monovore.decline.Opts
 

@@ -1,15 +1,15 @@
 package fit4s.strava
 
-import cats.effect._
+import cats.effect.*
 import cats.effect.std.Random
-import cats.syntax.all._
+import cats.syntax.all.*
 
 import fit4s.http.borer.BorerEntityCodec.Implicits.*
 import fit4s.strava.data.{StravaActivityId, StravaUploadId, StravaUploadStatus}
 
-import com.comcast.ip4s._
+import com.comcast.ip4s.*
 import org.http4s.HttpRoutes
-import org.http4s.dsl.io._
+import org.http4s.dsl.io.*
 import org.http4s.ember.server.EmberServerBuilder
 import org.http4s.multipart.Multipart
 

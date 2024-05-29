@@ -6,10 +6,10 @@ import java.time.{Duration, Instant, ZoneId}
 import java.util.Locale
 
 import cats.Show
-import cats.syntax.all._
+import cats.syntax.all.*
 
 import fit4s.common.util.{DateInstant, TimeInstant}
-import fit4s.data._
+import fit4s.data.*
 import fit4s.profile.types.{Sport, SubSport, SwimStroke}
 
 trait ShowInstances:

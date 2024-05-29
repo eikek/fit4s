@@ -2,7 +2,7 @@ package fit4s.util
 
 import scodec.Codec
 import scodec.bits.ByteOrdering
-import scodec.codecs._
+import scodec.codecs.*
 
 object Codecs:
   def uintx(bits: Int, bo: ByteOrdering): Codec[Int] =

@@ -5,7 +5,7 @@ import cats.syntax.all.*
 import fit4s.activities.data.*
 import fit4s.activities.records.*
 
-import doobie._
+import doobie.*
 
 final private case class DumpProduct(
     tags: List[Tag],

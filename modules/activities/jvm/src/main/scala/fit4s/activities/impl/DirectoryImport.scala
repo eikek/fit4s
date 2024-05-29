@@ -2,16 +2,16 @@ package fit4s.activities.impl
 
 import java.time.{Instant, ZoneId}
 
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
+import cats.syntax.all.*
 import fs2.compression.Compression
 import fs2.io.file.{Files, Path}
 import fs2.{Pipe, Stream}
 
-import fit4s.activities.data._
+import fit4s.activities.data.*
 import fit4s.activities.{ImportCallback, ImportResult}
 
-import doobie._
+import doobie.*
 
 object DirectoryImport:
 

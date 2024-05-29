@@ -11,11 +11,11 @@ import fs2.Stream
 import fit4s.activities.StravaExternalId
 import fit4s.activities.data.{Activity, ActivityId, LocationId}
 import fit4s.activities.impl.ActivityName
-import fit4s.activities.records.DoobieImplicits._
+import fit4s.activities.records.DoobieImplicits.*
 import fit4s.data.FileId
 
-import doobie._
-import doobie.implicits._
+import doobie.*
+import doobie.implicits.*
 
 object RActivity:
   private[activities] val table = fr"activity"

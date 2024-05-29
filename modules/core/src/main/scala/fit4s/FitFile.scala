@@ -5,9 +5,9 @@ import fit4s.data.FileId
 import fit4s.profile.types.MesgNum
 import fit4s.util.Nel
 
-import scodec._
+import scodec.*
 import scodec.bits.{BitVector, ByteVector}
-import scodec.codecs._
+import scodec.codecs.*
 
 final case class FitFile(
     header: FileHeader,

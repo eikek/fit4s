@@ -4,7 +4,7 @@ import java.util.concurrent.atomic.AtomicReference
 
 import fit4s.FieldDefinition
 import fit4s.profile.FieldValue
-import fit4s.profile.types._
+import fit4s.profile.types.*
 
 import scodec.Codec
 import scodec.bits.ByteOrdering

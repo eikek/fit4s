@@ -1,7 +1,7 @@
 package fit4s.activities
 
 import cats.Show
-import cats.syntax.all._
+import cats.syntax.all.*
 
 import fit4s.ActivityReader
 import fit4s.activities.ImportResult.Failure

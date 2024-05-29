@@ -4,7 +4,7 @@ import cats.Order
 
 import fit4s.profile.types.Sport
 
-import _root_.fit4s.data._
+import _root_.fit4s.data.*
 
 trait OrderInstances:
   given Order[Distance] = Order.fromOrdering

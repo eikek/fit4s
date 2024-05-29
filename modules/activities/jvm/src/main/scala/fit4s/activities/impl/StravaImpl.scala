@@ -12,8 +12,8 @@ import fs2.Stream
 import fs2.compression.Compression
 import fs2.io.file.{Files, Path}
 
-import fit4s.activities.StravaSupport.{ActivityData, LinkResult, UploadCallback}
 import fit4s.activities.*
+import fit4s.activities.StravaSupport.{ActivityData, LinkResult, UploadCallback}
 import fit4s.activities.data.*
 import fit4s.activities.records.*
 import fit4s.strava.StravaExportExtract.ExportData

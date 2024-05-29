@@ -2,16 +2,16 @@ package fit4s.activities.records
 
 import scala.collection.immutable.Seq
 
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
+import cats.syntax.all.*
 import fs2.io.file.Path
 import fs2.{Chunk, Stream}
 
 import fit4s.activities.data.{Location, LocationId, Page}
-import fit4s.activities.records.DoobieImplicits._
+import fit4s.activities.records.DoobieImplicits.*
 
-import doobie._
-import doobie.implicits._
+import doobie.*
+import doobie.implicits.*
 
 object RActivityLocation:
   private[activities] val table = fr"activity_location"

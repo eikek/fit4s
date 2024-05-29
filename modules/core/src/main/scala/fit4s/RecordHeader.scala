@@ -2,7 +2,7 @@ package fit4s
 
 import scodec.Codec
 import scodec.bits.BitVector
-import scodec.codecs._
+import scodec.codecs.*
 
 /** All records contain a 1 byte Record Header that indicates whether the Record Content
   * is a definition message, a normal data message or a compressed timestamp data message.

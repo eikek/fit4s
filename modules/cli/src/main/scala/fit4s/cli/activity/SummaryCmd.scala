@@ -4,14 +4,14 @@ import java.time.{Duration, ZoneId}
 
 import cats.Show
 import cats.effect.{Clock, ExitCode, IO}
-import cats.syntax.all._
+import cats.syntax.all.*
 
 import fit4s.activities.data.{ActivityQuery, ActivitySessionSummary, Page}
-import fit4s.cli.FormatDefinition._
-import fit4s.cli._
-import fit4s.common.syntax.all._
+import fit4s.cli.*
+import fit4s.cli.FormatDefinition.*
+import fit4s.common.syntax.all.*
 import fit4s.common.util.DateInstant
-import fit4s.data._
+import fit4s.data.*
 import fit4s.profile.types.Sport
 
 import com.monovore.decline.Opts

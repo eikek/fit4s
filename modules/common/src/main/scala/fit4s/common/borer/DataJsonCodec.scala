@@ -8,8 +8,8 @@ import fit4s.common.util.DateInstant
 import fit4s.data.*
 import fit4s.profile.types.Sport
 
-import io.bullet.borer.NullOptions.given
 import io.bullet.borer.*
+import io.bullet.borer.NullOptions.given
 import io.bullet.borer.derivation.MapBasedCodecs
 
 trait DataJsonCodec extends CoreJsonCodec:

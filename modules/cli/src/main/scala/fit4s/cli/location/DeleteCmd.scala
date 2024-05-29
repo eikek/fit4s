@@ -1,7 +1,7 @@
 package fit4s.cli.location
 
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
+import cats.syntax.all.*
 import fs2.io.file.Path
 
 import fit4s.activities.LocationRepo.MoveResult

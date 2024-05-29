@@ -3,18 +3,18 @@ package fit4s.decode
 import scala.annotation.tailrec
 
 import fit4s.FitMessage.{DataMessage, DefinitionMessage}
-import fit4s.decode.CodecUtils._
+import fit4s.decode.CodecUtils.*
 import fit4s.decode.DataField.KnownField
 import fit4s.profile.FieldValue
 import fit4s.profile.messages.Msg
 import fit4s.profile.messages.Msg.{ArrayDef, FieldWithCodec}
-import fit4s.profile.types._
+import fit4s.profile.types.*
 import fit4s.util.Nel
 import fit4s.{FieldDecodeResult, FieldDefinition}
 
-import scodec._
+import scodec.*
 import scodec.bits.{BitVector, ByteOrdering, ByteVector}
-import scodec.codecs._
+import scodec.codecs.*
 
 object DataMessageDecoder:
   def create(definition: DefinitionMessage): Decoder[DataFields] =

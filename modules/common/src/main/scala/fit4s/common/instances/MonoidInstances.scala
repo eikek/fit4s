@@ -2,7 +2,7 @@ package fit4s.common.instances
 
 import cats.Monoid
 
-import fit4s.data._
+import fit4s.data.*
 
 trait MonoidInstances:
   given Monoid[Distance] =

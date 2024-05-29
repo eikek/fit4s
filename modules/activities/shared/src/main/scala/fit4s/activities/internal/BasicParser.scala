@@ -1,6 +1,6 @@
 package fit4s.activities.internal
 
-import java.time._
+import java.time.*
 import java.time.temporal.ChronoUnit
 
 import cats.data.NonEmptyList

@@ -3,12 +3,12 @@ package fit4s.activities.internal
 import java.time.temporal.ChronoUnit
 import java.time.{Duration, Instant, ZoneId}
 
-import cats.data.{NonEmptyList => Nel}
+import cats.data.NonEmptyList as Nel
 import cats.parse.Parser
-import cats.syntax.all._
+import cats.syntax.all.*
 import fs2.io.file.Path
 
-import fit4s.activities.data.QueryCondition._
+import fit4s.activities.data.QueryCondition.*
 import fit4s.activities.data.{ActivityId, QueryCondition, TagName}
 import fit4s.data.Distance
 

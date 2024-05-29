@@ -2,8 +2,8 @@ package fit4s
 
 import fit4s.profile.types.FitBaseType
 
-import scodec._
-import scodec.codecs._
+import scodec.*
+import scodec.codecs.*
 
 /** @param fieldDefNum
   *   The Field Definition Number uniquely identifies a specific FIT field of the given

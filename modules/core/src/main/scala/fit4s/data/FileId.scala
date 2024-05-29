@@ -6,7 +6,7 @@ import fit4s.profile.types.{DateTime, File, Manufacturer}
 
 import scodec.Codec
 import scodec.bits.{Bases, ByteOrdering, ByteVector}
-import scodec.codecs._
+import scodec.codecs.*
 
 final case class FileId(
     fileType: File,

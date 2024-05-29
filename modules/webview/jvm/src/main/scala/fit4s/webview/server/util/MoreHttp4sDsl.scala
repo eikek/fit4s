@@ -7,7 +7,7 @@ import cats.{Applicative, Monad}
 import fit4s.http.borer.BorerEntityCodec.Implicits.*
 import fit4s.webview.data.RequestFailure
 
-import org.http4s._
+import org.http4s.*
 import org.http4s.dsl.Http4sDsl
 
 trait MoreHttp4sDsl[F[_]] { self: Http4sDsl[F] =>

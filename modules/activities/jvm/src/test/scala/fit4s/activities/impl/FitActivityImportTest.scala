@@ -13,7 +13,7 @@ import fit4s.activities.records.{
 import fit4s.activities.{DatabaseTest, FlywayMigrate}
 import fit4s.{ActivityReader, FitFile, FitTestData}
 
-import doobie.implicits._
+import doobie.implicits.*
 
 class FitActivityImportTest extends DatabaseTest:
   override def munitFixtures = Seq(h2DataSource)

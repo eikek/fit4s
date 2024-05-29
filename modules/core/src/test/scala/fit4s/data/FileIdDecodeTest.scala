@@ -6,7 +6,7 @@ import fit4s.FitMessage
 import fit4s.FitMessage.DataMessage
 import fit4s.json.JsonCodec
 import fit4s.profile.messages.FileIdMsg
-import fit4s.profile.types._
+import fit4s.profile.types.*
 
 import io.bullet.borer.*
 import munit.FunSuite

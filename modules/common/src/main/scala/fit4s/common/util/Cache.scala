@@ -1,7 +1,7 @@
 package fit4s.common.util
 
-import cats.effect._
-import cats.syntax.all._
+import cats.effect.*
+import cats.syntax.all.*
 
 trait Cache[F[_], A, B]:
 

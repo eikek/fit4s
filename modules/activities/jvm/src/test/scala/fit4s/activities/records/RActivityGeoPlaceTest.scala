@@ -1,15 +1,15 @@
 package fit4s.activities.records
 
 import cats.effect.IO
-import cats.syntax.all._
+import cats.syntax.all.*
 import fs2.io.file.Path
 
 import fit4s.activities.data.PositionName
-import fit4s.activities.records.TestData._
+import fit4s.activities.records.TestData.*
 import fit4s.activities.{DatabaseTest, FlywayMigrate}
 import fit4s.data.Distance
 
-import doobie.implicits._
+import doobie.implicits.*
 
 class RActivityGeoPlaceTest extends DatabaseTest:
   override def munitFixtures = List(h2DataSource)

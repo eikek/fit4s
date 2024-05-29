@@ -7,11 +7,11 @@ import cats.effect.*
 import cats.syntax.all.*
 
 import fit4s.activities.StravaSupport.UploadCallback
-import fit4s.activities.data.QueryCondition.TagAnyMatch
 import fit4s.activities.data.*
+import fit4s.activities.data.QueryCondition.TagAnyMatch
 import fit4s.activities.{ActivityLog, StravaSupport}
-import fit4s.cli.FormatDefinition.*
 import fit4s.cli.*
+import fit4s.cli.FormatDefinition.*
 import fit4s.strava.StravaAppCredentials
 import fit4s.strava.data.{StravaActivityId, StravaUploadError}
 

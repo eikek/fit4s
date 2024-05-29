@@ -2,7 +2,7 @@ package fit4s.profile.types
 
 import scodec.Codec
 import scodec.bits.ByteOrdering
-import scodec.codecs._
+import scodec.codecs.*
 
 trait TypedValue[V]:
 

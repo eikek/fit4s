@@ -1,7 +1,7 @@
 package fit4s.webview.server.util
 
 import cats.data.ValidatedNel
-import cats.syntax.all._
+import cats.syntax.all.*
 
 import fit4s.activities.data.TagName
 
