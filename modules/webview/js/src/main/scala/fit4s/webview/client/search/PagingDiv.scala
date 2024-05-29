@@ -10,14 +10,14 @@ import _root_.fit4s.activities.data.Page
 import _root_.fit4s.webview.client.shared.{Anchor, ClickAction}
 import calico.html.io.{*, given}
 
-object PagingDiv {
+object PagingDiv:
   final case class Model(
       currentPage: Int,
       lastPage: Int,
       page: Page
-  ) {
+  ):
 
-    def expand(contextSize: Int): List[Model.Element] = {
+    def expand(contextSize: Int): List[Model.Element] =
       val candidates =
         (1 :: currentPageContext(contextSize) ::: List(lastPage)).distinct.sorted.filter(
           p => p > 0 && p <= lastPage
@@ -25,7 +25,6 @@ object PagingDiv {
       candidates match
         case Nil => Nil
         case _   => pagingLabels(candidates)
-    }
 
     private def currentPageContext(amount: Int = 2): List[Int] =
       ((currentPage - amount) to (currentPage + amount)).toList.filter(_ >= 1)
@@ -36,9 +35,8 @@ object PagingDiv {
         if (n - p <= 1) List(current)
         else List(current, Model.Element.Fill)
       }) ::: List(Model.Element.Page(pages.last, pages.last == currentPage))
-  }
 
-  object Model {
+  object Model:
     enum Element:
       case Fill
       case Page(n: Int, current: Boolean)
@@ -47,12 +45,10 @@ object PagingDiv {
 
     given Eq[Model] = Eq.fromUniversalEquals
 
-  }
-
   def apply(
       model: Signal[IO, Model],
       onPage: Int => IO[Unit]
-  ): Signal[IO, Resource[IO, HtmlDivElement[IO]]] = {
+  ): Signal[IO, Resource[IO, HtmlDivElement[IO]]] =
     val pages = model.map(_.expand(1))
     val links =
       pages.map(_.traverse {
@@ -72,11 +68,10 @@ object PagingDiv {
           span(cls := "px-2 py-1", "...")
       })
 
-    val styles = pages.map {
+    val styles = pages.map:
       case Nil      => "hidden" :: Nil
       case _ :: Nil => "hidden" :: Nil
       case _        => "flex flex-row space-x-3 items-center justify-right" :: Nil
-    }
 
     links.map(children =>
       div(
@@ -84,7 +79,5 @@ object PagingDiv {
         children
       )
     )
-  }
 
   private val currentStyle = "font-bold underline"
-}

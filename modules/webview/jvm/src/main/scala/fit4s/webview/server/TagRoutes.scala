@@ -17,9 +17,9 @@ import org.http4s.dsl.Http4sDsl
 final class TagRoutes[F[_]: Async](log: ActivityLog[F], zoneId: ZoneId)
     extends Http4sDsl[F]
     with BasicJsonCodec
-    with MoreHttp4sDsl[F] {
+    with MoreHttp4sDsl[F]:
 
-  def routes: HttpRoutes[F] = HttpRoutes.of {
+  def routes: HttpRoutes[F] = HttpRoutes.of:
     case GET -> Root :? PageVar(page) +& TagNamesVar(tags) =>
       (page, tags.map(_.headOption)).mapN { (p, contains) =>
         log.tagRepository
@@ -70,5 +70,3 @@ final class TagRoutes[F[_]: Async](log: ActivityLog[F], zoneId: ZoneId)
         result <- log.tagRepository.rename(input.from, input.to)
         resp <- if (result) Created() else Ok()
       } yield resp
-  }
-}

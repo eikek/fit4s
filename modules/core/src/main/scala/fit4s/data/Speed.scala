@@ -1,6 +1,6 @@
 package fit4s.data
 
-final class Speed private (val meterPerSecond: Double) extends AnyVal {
+final class Speed private (val meterPerSecond: Double) extends AnyVal:
   def isZero: Boolean = this == Speed.zero
 
   def kmh: Double = meterPerSecond * 3.6
@@ -20,9 +20,8 @@ final class Speed private (val meterPerSecond: Double) extends AnyVal {
   def +(spd: Speed): Speed = new Speed(meterPerSecond + spd.meterPerSecond)
 
   override def toString = f"$kmh%.2fkmh"
-}
 
-object Speed {
+object Speed:
   val zero: Speed = meterPerSecond(0)
 
   def meterPerSecond(meterPerSecond: Double): Speed =
@@ -33,4 +32,3 @@ object Speed {
 
   given Numeric[Speed] =
     NumericFrom[Speed, Double](_.meterPerSecond, Speed.meterPerSecond)
-}

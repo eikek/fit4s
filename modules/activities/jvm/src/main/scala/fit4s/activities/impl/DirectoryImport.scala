@@ -13,7 +13,7 @@ import fit4s.activities.{ImportCallback, ImportResult}
 
 import doobie._
 
-object DirectoryImport {
+object DirectoryImport:
 
   def update[F[_]: Sync: Files: Compression](
       tags: Set[TagId],
@@ -91,4 +91,3 @@ object DirectoryImport {
       dir: Path
   ): Pipe[F, ActivityFile, (ActivityFile, String)] =
     _.map(file => file -> dir.relativize(file.path).toString)
-}

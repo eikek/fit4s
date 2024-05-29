@@ -17,9 +17,9 @@ import fit4s.data.FileId
 import doobie._
 import doobie.implicits._
 
-object RActivity {
+object RActivity:
   private[activities] val table = fr"activity"
-  private[activities] def columnList(alias: Option[String]): List[Fragment] = {
+  private[activities] def columnList(alias: Option[String]): List[Fragment] =
     def c(name: String) = Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))
     List(
       c("id"),
@@ -35,11 +35,10 @@ object RActivity {
       c("notes"),
       c("import_time")
     )
-  }
   private val columnsWithId = columnList(None).commas
   private val columnsNoId = columnList(None).tail.commas
 
-  object insertMany {
+  object insertMany:
     val cols = columnList(None).map(_.internals.sql).mkString(",")
     val ph = columnList(None).map(_ => "?").mkString(",")
     val tn = table.internals.sql
@@ -47,7 +46,6 @@ object RActivity {
 
     def apply(tags: Seq[Activity]): ConnectionIO[Int] =
       Update[Activity](sql).updateMany(tags)
-  }
 
   def insert(r: Activity): ConnectionIO[ActivityId] =
     (sql"INSERT INTO $table ($columnsNoId) VALUES " ++
@@ -95,8 +93,6 @@ object RActivity {
   def updateNotes(id: ActivityId, desc: Option[String]): ConnectionIO[Int] =
     sql"UPDATE $table SET notes = $desc WHERE id = $id".update.run
 
-  def delete(ids: NonEmptyList[ActivityId]): ConnectionIO[Int] = {
+  def delete(ids: NonEmptyList[ActivityId]): ConnectionIO[Int] =
     val in = ids.toList.map(id => sql"$id").commas
     sql"DELETE FROM $table WHERE id in ($in)".update.run
-  }
-}

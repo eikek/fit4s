@@ -19,9 +19,9 @@ import org.http4s.dsl.Http4sDsl
 final class ActivityRoutes[F[_]: Async](log: ActivityLog[F], zoneId: ZoneId)
     extends Http4sDsl[F]
     with BasicJsonCodec
-    with MoreHttp4sDsl[F] {
+    with MoreHttp4sDsl[F]:
 
-  def routes: HttpRoutes[F] = HttpRoutes.of {
+  def routes: HttpRoutes[F] = HttpRoutes.of:
     case GET -> Root :? ActivityQueryVar(query) =>
       for {
         now <- Clock[F].realTimeInstant
@@ -77,5 +77,3 @@ final class ActivityRoutes[F[_]: Async](log: ActivityLog[F], zoneId: ZoneId)
 
     case DELETE -> Root / ActivityIdVar(id) / "tags" / TagNamesVar(tag) =>
       log.tagRepository.unlinkTags(QueryCondition(id).some, Nel.of(tag)) *> Ok()
-  }
-}

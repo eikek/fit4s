@@ -22,9 +22,9 @@ final class ActivityLogDb[F[_]: Async: Files: Compression](
     xa: Transactor[F],
     geoLookup: GeoLookup[F],
     stravaSupport: StravaSupport[F]
-) extends ActivityLog[F] {
-  private[this] val placeAttach = new GeoPlaceAttach[F](xa, geoLookup)
-  private[this] val dumpData = ExportData(xa, jdbcConfig.dbms)
+) extends ActivityLog[F]:
+  private val placeAttach = new GeoPlaceAttach[F](xa, geoLookup)
+  private val dumpData = ExportData(xa, jdbcConfig.dbms)
 
   override def initialize: F[Unit] =
     FlywayMigrate[F](jdbcConfig).run.flatMap { result =>
@@ -113,7 +113,7 @@ final class ActivityLogDb[F[_]: Async: Files: Compression](
       .transact(xa)
       .groupAdjacentBy(_._1.id)
       .evalMap { case (_, group) =>
-        group.toNel match {
+        group.toNel match
           case Some(nel) =>
             ActivityQueryBuilder
               .tagsForActivity(nel.head._1.id)
@@ -132,7 +132,6 @@ final class ActivityLogDb[F[_]: Async: Files: Compression](
             Async[F].raiseError[ActivityListResult](
               new Exception("empty group by in stream")
             )
-        }
       }
 
   override def activitySummary(
@@ -166,4 +165,3 @@ final class ActivityLogDb[F[_]: Async: Files: Compression](
   val locationRepository: LocationRepo[F] = new LocationRepoDb[F](xa)
 
   val exportData: ExportData[F] = dumpData
-}

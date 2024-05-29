@@ -14,35 +14,35 @@ import fit4s.activities.records.RActivityLocation
 import doobie._
 import doobie.implicits._
 
-final class LocationRepoDb[F[_]: Sync: Files](xa: Transactor[F]) extends LocationRepo[F] {
+final class LocationRepoDb[F[_]: Sync: Files](xa: Transactor[F]) extends LocationRepo[F]:
   def listLocations(
       contains: Option[String],
       page: Page
-  ): Stream[F, (Location, Long)] = {
+  ): Stream[F, (Location, Long)] =
     val search = contains.map(s => s"%$s%")
     RActivityLocation
       .listSream(search, page)
       .transact(xa)
-  }
 
   def move(
       idOrPath: Either[LocationId, Path],
       target: Path,
       withFs: Boolean
-  ): F[MoveResult] = {
+  ): F[MoveResult] =
     def moveFs(current: Location): EitherT[F, MoveResult, Unit] =
       if (!withFs) noop
       else
-        EitherT.right(Files[F].exists(current.locationPath)).flatMapF {
-          case true =>
-            Files[F]
-              .move(current.locationPath, target)
-              .attempt
-              .map(_.leftMap(ex => MoveResult.FsFailure(ex).widen))
+        EitherT
+          .right(Files[F].exists(current.locationPath))
+          .flatMapF:
+            case true =>
+              Files[F]
+                .move(current.locationPath, target)
+                .attempt
+                .map(_.leftMap(ex => MoveResult.FsFailure(ex).widen))
 
-          case false =>
-            MoveResult.NotFound.widen.asLeft[Unit].pure[F]
-        }
+            case false =>
+              MoveResult.NotFound.widen.asLeft[Unit].pure[F]
 
     loadLocation(idOrPath)
       .flatTap(moveFs)
@@ -51,22 +51,22 @@ final class LocationRepoDb[F[_]: Sync: Files](xa: Transactor[F]) extends Locatio
       }
       .as(MoveResult.Success)
       .merge
-  }
 
-  def delete(idOrPath: Either[LocationId, Path], withFs: Boolean): F[MoveResult] = {
+  def delete(idOrPath: Either[LocationId, Path], withFs: Boolean): F[MoveResult] =
     def deleteFs(current: Location) =
       if (!withFs) noop
       else
-        EitherT.right(Files[F].exists(current.locationPath)).flatMapF {
-          case true =>
-            Files[F]
-              .deleteRecursively(current.locationPath)
-              .attempt
-              .map(_.leftMap(ex => MoveResult.FsFailure(ex).widen))
+        EitherT
+          .right(Files[F].exists(current.locationPath))
+          .flatMapF:
+            case true =>
+              Files[F]
+                .deleteRecursively(current.locationPath)
+                .attempt
+                .map(_.leftMap(ex => MoveResult.FsFailure(ex).widen))
 
-          case false =>
-            MoveResult.NotFound.widen.asLeft[Unit].pure[F]
-        }
+            case false =>
+              MoveResult.NotFound.widen.asLeft[Unit].pure[F]
 
     loadLocation(idOrPath)
       .flatTap(deleteFs)
@@ -75,7 +75,6 @@ final class LocationRepoDb[F[_]: Sync: Files](xa: Transactor[F]) extends Locatio
       }
       .as(MoveResult.Success)
       .merge
-  }
 
   private val noop: EitherT[F, MoveResult, Unit] = EitherT.right(().pure[F])
 
@@ -87,5 +86,3 @@ final class LocationRepoDb[F[_]: Sync: Files](xa: Transactor[F]) extends Locatio
         .fold(RActivityLocation.findById, RActivityLocation.findByPath)
         .transact(xa)
     ).toRight(MoveResult.NotFound.widen)
-
-}

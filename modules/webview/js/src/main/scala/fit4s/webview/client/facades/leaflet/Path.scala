@@ -6,20 +6,17 @@ import scala.scalajs.js.annotation.JSGlobal
 
 @JSGlobal("L.Path")
 @js.native
-abstract class Path extends Layer {
+abstract class Path extends Layer:
   def setStyle(pathOptions: Path.Options): Path = js.native
 
   def redraw(): Path = js.native
 
   def bringToFront(): Path = js.native
-}
 
-object Path {
-  trait Options extends js.Object {
+object Path:
+  trait Options extends js.Object:
     val color: UndefOr[String] = js.undefined
     val opacity: UndefOr[Double] = js.undefined
     val fillOpacity: UndefOr[Double] = js.undefined
     val className: UndefOr[String] = js.undefined
     val weight: UndefOr[Int] = js.undefined
-  }
-}

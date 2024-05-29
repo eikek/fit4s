@@ -9,7 +9,6 @@ final case class StravaGear(
     name: String
 )
 
-object StravaGear {
+object StravaGear:
   implicit val jsonDecoder: Decoder[StravaGear] =
     deriveDecoder
-}

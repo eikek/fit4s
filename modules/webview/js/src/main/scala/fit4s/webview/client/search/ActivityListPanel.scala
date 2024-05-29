@@ -14,7 +14,7 @@ import fit4s.webview.client.shared.*
 
 import calico.html.io.{*, given}
 
-object ActivityListPanel {
+object ActivityListPanel:
 
   final case class Model(
       activities: List[ActivityListResult]
@@ -32,7 +32,7 @@ object ActivityListPanel {
         (results.fold(Model.apply, _ => model), IO.unit)
 
   def subscribe(model: SignallingRef[IO, Model], cr: CommandRuntime[IO]) =
-    cr.subscribe.evalMap {
+    cr.subscribe.evalMap:
       case Result.SearchResult(cmd, results) =>
         model.flatModify(update(cr, Msg.SetResults(results.map(_._1))))
 
@@ -40,7 +40,6 @@ object ActivityListPanel {
         model.flatModify(update(cr, Msg.SetResults(results)))
 
       case _ => IO.unit
-    }
 
   def render(model: SignallingRef[IO, Model], cr: CommandRuntime[IO], zone: ZoneId) =
     Resource
@@ -58,10 +57,9 @@ object ActivityListPanel {
   private def setDetailPage(cr: CommandRuntime[IO])(r: ActivityListResult): IO[Unit] =
     cr.send(Cmd.SetDetailPage(r.id))
 
-  private def setTagSearch(cr: CommandRuntime[IO])(tag: Tag): IO[Unit] = {
+  private def setTagSearch(cr: CommandRuntime[IO])(tag: Tag): IO[Unit] =
     val q = s"tag=${tag.name.quoted}"
     cr.send(Cmd.SetSearchQuery(q))
-  }
 
   def renderCard(
       a: ActivityListResult,
@@ -86,4 +84,3 @@ object ActivityListPanel {
       ActivityNotes(a.activity),
       ActivitySessionDataDiv(a.sessions.head)
     )
-}

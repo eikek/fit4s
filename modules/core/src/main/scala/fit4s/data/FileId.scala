@@ -16,7 +16,7 @@ final case class FileId(
     createdAt: Option[DateTime],
     number: Option[Long],
     productName: Option[String]
-) {
+):
 
   def asString: String =
     FileId.idCodec
@@ -24,9 +24,8 @@ final case class FileId(
       .map(_.toBase58(Bases.Alphabets.Base58))
       .toEither
       .fold(err => sys.error(err.messageWithContext), identity)
-}
 
-object FileId {
+object FileId:
 
   private def idCodec: Codec[FileId] =
     (File.codec(ByteOrdering.LittleEndian) ::
@@ -71,4 +70,3 @@ object FileId {
       number.map(_.value.rawValue),
       prodname.map(_.value.rawValue)
     )
-}

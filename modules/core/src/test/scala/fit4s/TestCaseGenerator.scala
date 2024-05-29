@@ -5,7 +5,7 @@ import fit4s.json.JsonCodec
 
 import io.bullet.borer.Json
 
-object TestCaseGenerator extends JsonCodec {
+object TestCaseGenerator extends JsonCodec:
   private val quotes = "\"\"\""
 
   def makeTestCaseStub(title: String, dm: DataMessage): String =
@@ -20,5 +20,3 @@ object TestCaseGenerator extends JsonCodec {
        |
        |}
        |""".stripMargin
-
-}

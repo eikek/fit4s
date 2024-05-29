@@ -1,6 +1,6 @@
 package fit4s.data
 
-final class Semicircle(val semicircle: Long) extends AnyVal {
+final class Semicircle(val semicircle: Long) extends AnyVal:
   def toDegree: Double =
     semicircle * Semicircle.scToDegFactor
 
@@ -10,9 +10,8 @@ final class Semicircle(val semicircle: Long) extends AnyVal {
   def toSeconds: Long = semicircle * 20
 
   override def toString = s"Semicircles($semicircle)"
-}
 
-object Semicircle {
+object Semicircle:
   private val maxC = Int.MaxValue.toDouble + 1
   private val scToDegFactor = 180d / maxC
 
@@ -23,4 +22,3 @@ object Semicircle {
 
   given Numeric[Semicircle] =
     NumericFrom[Semicircle, Long](_.semicircle, Semicircle.semicircle)
-}

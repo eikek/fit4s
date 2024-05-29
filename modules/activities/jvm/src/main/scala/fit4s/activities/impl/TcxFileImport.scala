@@ -17,7 +17,7 @@ import fit4s.tcx.{TcxActivity, TcxReader}
 
 import doobie.*
 
-object TcxFileImport {
+object TcxFileImport:
 
   def addSingle[F[_]: Files: Sync: Compression](
       tags: Set[TagId],
@@ -29,7 +29,7 @@ object TcxFileImport {
   )(tcxFile: Path): Stream[F, ConnectionIO[ImportResult[ActivityId]]] =
     Stream
       .eval(readTcxFile(tcxFile))
-      .flatMap {
+      .flatMap:
         case Right(fits) =>
           Stream.emits(
             fits
@@ -38,7 +38,6 @@ object TcxFileImport {
 
         case Left(err) =>
           Stream.emit(Sync[ConnectionIO].pure(ImportResult.tcxError(err)))
-      }
 
   def addTcxActivity(
       tags: Set[TagId],
@@ -73,5 +72,3 @@ object TcxFileImport {
         .through(fs2.compression.Compression[F].gunzip())
         .flatMap(_.content)
     else Files[F].readAll(file)
-
-}

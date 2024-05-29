@@ -6,14 +6,12 @@ import scala.scalajs.js.annotation.JSGlobal
 
 @JSGlobal("L.Marker")
 @js.native
-class Marker extends Layer {
+class Marker extends Layer:
 
   def setLatLng(latLng: LatLng): Unit = js.native
 
-}
-
-object Marker {
-  trait Options extends js.Object {
+object Marker:
+  trait Options extends js.Object:
     val icon: UndefOr[Icon] = js.undefined
     val draggable: UndefOr[Boolean] = js.undefined
     val autoPan: UndefOr[Boolean] = js.undefined
@@ -28,5 +26,3 @@ object Marker {
     val riseOffset: UndefOr[Int] = js.undefined
     val pane: UndefOr[String] = js.undefined
     val bubblingMouseEvents: UndefOr[Boolean] = js.undefined
-  }
-}

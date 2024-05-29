@@ -15,7 +15,7 @@ final case class FitActivity(
     activityType: Option[types.Activity]
 )
 
-object FitActivity {
+object FitActivity:
 
   def from(activityMsg: DataMessage): Either[String, FitActivity] =
     if (!activityMsg.isMessage(ActivityMsg))
@@ -37,4 +37,3 @@ object FitActivity {
         num.map(_.value.rawValue.toInt).getOrElse(1),
         at.map(_.value)
       )
-}

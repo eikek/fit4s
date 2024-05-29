@@ -6,10 +6,10 @@ import fit4s.profile.messages.RecordMsg
 
 import munit.CatsEffectSuite
 
-class FitActivityReaderTest extends CatsEffectSuite {
+class FitActivityReaderTest extends CatsEffectSuite:
   val zone: ZoneId = ZoneId.of("Europe/Berlin")
 
-  test("read example activity") {
+  test("read example activity"):
     for {
       data <- FitTestData.exampleActivity
       fit = FitFile.decodeUnsafe(data).head
@@ -24,7 +24,6 @@ class FitActivityReaderTest extends CatsEffectSuite {
       _ = assertEquals(result.unrelatedLaps.size, 0)
       _ = assertEquals(result.recordsFor(result.sessions.head).size, recCount.size)
     } yield ()
-  }
 
   // test("read cycling activity") {
   //   for {
@@ -105,4 +104,3 @@ class FitActivityReaderTest extends CatsEffectSuite {
   //     )
   //   } yield ()
   // }
-}

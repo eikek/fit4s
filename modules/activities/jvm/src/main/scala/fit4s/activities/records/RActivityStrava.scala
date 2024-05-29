@@ -18,10 +18,10 @@ final case class RActivityStrava(
     stravaId: StravaActivityId
 )
 
-object RActivityStrava {
+object RActivityStrava:
   private[activities] val table = fr"activity_strava"
 
-  private[activities] def columnList(alias: Option[String]): List[Fragment] = {
+  private[activities] def columnList(alias: Option[String]): List[Fragment] =
     def c(name: String) = Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))
 
     List(
@@ -29,7 +29,6 @@ object RActivityStrava {
       c("activity_id"),
       c("strava_id")
     )
-  }
 
   private val columnsWithId =
     columnList(None).commas
@@ -46,7 +45,7 @@ object RActivityStrava {
   def insert(activityId: ActivityId, stravaId: StravaActivityId): ConnectionIO[Int] =
     sql"INSERT INTO $table ($columnsNoId) VALUES (${activityId}, ${stravaId})".update.run
 
-  object insertMany {
+  object insertMany:
     val cols = columnList(None).map(_.internals.sql).mkString(",")
     val ph = columnList(None).map(_ => "?").mkString(",")
     val tn = table.internals.sql
@@ -54,7 +53,6 @@ object RActivityStrava {
 
     def apply(tags: Seq[RActivityStrava]): ConnectionIO[Int] =
       Update[RActivityStrava](sql).updateMany(tags)
-  }
 
   def removeForActivity(activityId: ActivityId): ConnectionIO[Int] =
     sql"DELETE FROM $table WHERE activity_id = $activityId".update.run
@@ -62,10 +60,9 @@ object RActivityStrava {
   def removeForStravaId(stravaId: StravaActivityId): ConnectionIO[Int] =
     sql"DELETE FROM $table WHERE strava_id = $stravaId".update.run
 
-  def removeAll(query: ActivityQuery): ConnectionIO[Int] = {
+  def removeAll(query: ActivityQuery): ConnectionIO[Int] =
     val subq = ActivityQueryBuilder.activityIdFragment(query.condition)
     sql"DELETE FROM $table WHERE activity_id in ($subq) ${query.page.asFragment}".update.run
-  }
 
   def findByActivityId(id: ActivityId): ConnectionIO[Option[StravaActivityId]] =
     sql"SELECT strava_id FROM $table WHERE activity_id = $id"
@@ -76,4 +73,3 @@ object RActivityStrava {
     sql"SELECT $columnsWithId FROM $table WHERE strava_id = $id "
       .query[RActivityStrava]
       .option
-}

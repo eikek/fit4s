@@ -12,7 +12,7 @@ import io.bullet.borer.NullOptions.given
 import io.bullet.borer.*
 import io.bullet.borer.derivation.MapBasedCodecs
 
-trait DataJsonCodec extends CoreJsonCodec {
+trait DataJsonCodec extends CoreJsonCodec:
   implicit def deviceProductCodec: Codec[DeviceProduct] =
     Codec(
       Encoder.forString.contramap(_.name),
@@ -128,6 +128,5 @@ trait DataJsonCodec extends CoreJsonCodec {
 
   implicit val dateInstantDecoder: Decoder[DateInstant] =
     valueDecoder[Instant]("timestamp").map(DateInstant.apply)
-}
 
 object DataJsonCodec extends DataJsonCodec

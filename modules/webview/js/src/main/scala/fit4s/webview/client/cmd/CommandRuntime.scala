@@ -9,13 +9,12 @@ import fs2.concurrent.Topic
 import fit4s.activities.data.*
 import fit4s.webview.client.{FetchResult, Fit4sClient}
 
-trait CommandRuntime[F[_]] {
+trait CommandRuntime[F[_]]:
   def send(cmd: Cmd): F[Unit]
 
   def subscribe: Stream[F, Result]
-}
 
-object CommandRuntime {
+object CommandRuntime:
   def apply[F[_]: Async: Parallel](
       fit4sClient: Fit4sClient[F]
   ): F[CommandRuntime[F]] =
@@ -24,12 +23,12 @@ object CommandRuntime {
   final private class Impl[F[_]: Async: Parallel](
       topic: Topic[F, Result],
       fit4sClient: Fit4sClient[F]
-  ) extends CommandRuntime[F] {
-    private[this] val logger = scribe.cats.effect[F]
+  ) extends CommandRuntime[F]:
+    private val logger = scribe.cats.effect[F]
     override def subscribe: Stream[F, Result] = topic.subscribeUnbounded.changes
 
     override def send(cmd: Cmd): F[Unit] =
-      cmd match {
+      cmd match
         case c @ Cmd.SearchCmd(q, page) =>
           val query = q.some.map(_.trim).filter(_.nonEmpty)
           (fit4sClient.activities(query, page), fit4sClient.summary(query))
@@ -72,18 +71,18 @@ object CommandRuntime {
 
         case req @ Cmd.SearchTagSummary(query, tags) =>
           if (tags.isEmpty) logger.info(s"No tags provided for search-tags-summary")
-          else {
+          else
             val results: F[List[(Tag, FetchResult[List[ActivitySessionSummary]])]] =
-              tags.map(t => t -> s"""$query tag="${t.name.name}"""").parTraverse {
-                case (t, q) =>
-                  fit4sClient.summary(q.some).map(r => t -> r)
-              }
+              tags
+                .map(t => t -> s"""$query tag="${t.name.name}"""")
+                .parTraverse:
+                  case (t, q) =>
+                    fit4sClient.summary(q.some).map(r => t -> r)
             results
               .map(_.traverse { case (t, fr) => fr.map(r => t -> r) })
               .map(Result.TagSummaryResult(req, _))
               .flatMap(topic.publish1)
               .void
-          }
 
         case Cmd.SetDetailPage(id) =>
           fit4sClient
@@ -136,6 +135,3 @@ object CommandRuntime {
 
         case Cmd.SearchRefresh =>
           topic.publish1(Result.SearchRefresh).void
-      }
-  }
-}

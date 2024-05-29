@@ -10,11 +10,10 @@ import fit4s.activities.records.{RActivity, RActivityLocation}
 import doobie._
 import doobie.implicits._
 
-case class SyncData(locations: Vector[Location], lastImport: Instant) {
+case class SyncData(locations: Vector[Location], lastImport: Instant):
   def isEmpty: Boolean = locations.isEmpty
-}
 
-object SyncData {
+object SyncData:
 
   val empty: SyncData = SyncData(Vector.empty, Instant.MIN)
 
@@ -24,4 +23,3 @@ object SyncData {
       RActivity.latestImport.map(_.getOrElse(Instant.MIN))
     )
       .mapN(SyncData.apply)
-}

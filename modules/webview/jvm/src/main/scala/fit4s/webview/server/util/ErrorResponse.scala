@@ -6,7 +6,7 @@ import io.bullet.borer.*
 import org.http4s.*
 import org.http4s.headers.`Content-Length`
 
-object ErrorResponse {
+object ErrorResponse:
 
   def apply[F[_]](status: Status, message: String): Response[F] =
     create(status, ErrorMsg(message))
@@ -14,7 +14,7 @@ object ErrorResponse {
   def apply[F[_]](ex: Throwable): Response[F] =
     create(Status.InternalServerError, ErrorMsg(ex))
 
-  private def create[F[_]](status: Status, msg: ErrorMsg): Response[F] = {
+  private def create[F[_]](status: Status, msg: ErrorMsg): Response[F] =
     val w = EntityEncoder[F, ErrorMsg]
     val e = w.toEntity(msg)
     val headers =
@@ -25,7 +25,6 @@ object ErrorResponse {
       body = e.body,
       headers = headers
     )
-  }
 
   final private case class ErrorMsg(msg: String)
   private object ErrorMsg:
@@ -36,4 +35,3 @@ object ErrorResponse {
       w.writeMapMember("errorMessage", e.msg)
       w.writeMapClose()
     }
-}

@@ -20,25 +20,20 @@ enum FetchResult[+A]:
     fold(Right(_), Left(_))
 end FetchResult
 
-object FetchResult {
+object FetchResult:
 
   given Applicative[FetchResult] =
-    new Applicative[FetchResult] {
+    new Applicative[FetchResult]:
       def pure[A](a: A): FetchResult[A] = FetchResult.Success(a)
       def ap[A, B](ff: FetchResult[A => B])(fa: FetchResult[A]): FetchResult[B] =
-        ff match {
+        ff match
           case FetchResult.Success(f) =>
-            fa match {
+            fa match
               case FetchResult.Success(a) => FetchResult.Success(f(a))
               case err                    => err.asInstanceOf[FetchResult[B]]
-            }
           case err => err.asInstanceOf[FetchResult[B]]
-        }
-    }
 
   given Functor[FetchResult] =
-    new Functor[FetchResult] {
+    new Functor[FetchResult]:
       def map[A, B](fa: FetchResult[A])(f: A => B): FetchResult[B] =
         fa.map(f)
-    }
-}

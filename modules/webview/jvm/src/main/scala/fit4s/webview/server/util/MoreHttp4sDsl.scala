@@ -14,18 +14,16 @@ trait MoreHttp4sDsl[F[_]] { self: Http4sDsl[F] =>
 
   implicit final class ValidatedToResponse(
       resp: ValidatedNel[ParseFailure, F[Response[F]]]
-  )(implicit F: Monad[F]) {
+  )(implicit F: Monad[F]):
     def orBadRequest =
       resp.fold(errs => BadRequest(RequestFailure(errs)), identity)
-  }
 
   implicit final class OptionToResponse[A](resp: Option[A])(implicit
       e: EntityEncoder[F, A],
       F: Applicative[F]
-  ) {
+  ):
     def orNotFound(msg: String) =
       resp.fold(NotFoundF(msg))(Ok(_))
-  }
 
   def InternalServerError(ex: Throwable): Response[F] =
     ErrorResponse(ex)

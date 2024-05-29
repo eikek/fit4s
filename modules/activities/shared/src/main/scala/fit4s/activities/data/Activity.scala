@@ -19,7 +19,7 @@ final case class Activity(
     importDate: Instant
 )
 
-object Activity {
+object Activity:
   def apply(
       id: ActivityId,
       locationId: LocationId,
@@ -44,4 +44,3 @@ object Activity {
     notes,
     importDate
   )
-}

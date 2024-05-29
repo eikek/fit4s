@@ -7,10 +7,10 @@ import fit4s.activities.{DatabaseTest, FlywayMigrate}
 
 import doobie.implicits._
 
-class RTagTest extends DatabaseTest {
+class RTagTest extends DatabaseTest:
   override def munitFixtures = List(h2DataSource)
 
-  test("insert record") {
+  test("insert record"):
     val (jdbc, ds) = h2DataSource()
     DatabaseTest.makeXA(ds).use { xa =>
       for {
@@ -27,5 +27,3 @@ class RTagTest extends DatabaseTest {
         _ = assert(exists)
       } yield ()
     }
-  }
-}

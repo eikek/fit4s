@@ -9,7 +9,7 @@ import scodec.codecs._
   * The lengths of the records vary in size depending on the number and size of fields
   * within them.
   */
-sealed trait RecordHeader {
+sealed trait RecordHeader:
 
   def fold[A](
       nh: RecordHeader.NormalHeader => A,
@@ -21,16 +21,15 @@ sealed trait RecordHeader {
   def localMessageType: Int
 
   def isExtendedDefinitionMessage: Boolean
-}
 
-object RecordHeader {
+object RecordHeader:
 
   final case class NormalHeader(
       messageType: MessageType,
       messageTypeSpecific: Boolean,
       reserved: Boolean,
       localMessageType: Int
-  ) extends RecordHeader {
+  ) extends RecordHeader:
     def fold[A](
         nh: RecordHeader.NormalHeader => A,
         ch: RecordHeader.CompressedTimestampHeader => A
@@ -38,9 +37,8 @@ object RecordHeader {
 
     def isExtendedDefinitionMessage: Boolean =
       messageType == MessageType.DefinitionMessage && messageTypeSpecific
-  }
 
-  object NormalHeader {
+  object NormalHeader:
     val codec: Codec[NormalHeader] = (bits(3) :: uint4L).xmap(
       { case (flags, lmt) =>
         val mt =
@@ -58,12 +56,11 @@ object RecordHeader {
         (flags, rh.localMessageType)
       }
     )
-  }
 
   final case class CompressedTimestampHeader(
       localMessageType: Int,
       timeOffsetSeconds: Int
-  ) extends RecordHeader {
+  ) extends RecordHeader:
     def fold[A](
         nh: RecordHeader.NormalHeader => A,
         ch: RecordHeader.CompressedTimestampHeader => A
@@ -72,9 +69,8 @@ object RecordHeader {
     val messageType = MessageType.DataMessage
 
     val isExtendedDefinitionMessage: Boolean = false
-  }
 
-  object CompressedTimestampHeader {
+  object CompressedTimestampHeader:
 
     val codec: Codec[CompressedTimestampHeader] = (uint2 :: uint(5)).xmap(
       { case (lmt, ts) =>
@@ -82,7 +78,6 @@ object RecordHeader {
       },
       rh => (rh.localMessageType, rh.timeOffsetSeconds)
     )
-  }
 
   val codec: Codec[RecordHeader] = {
     val nc: Codec[RecordHeader] =
@@ -90,9 +85,7 @@ object RecordHeader {
     val cc: Codec[RecordHeader] = CompressedTimestampHeader.codec
       .upcast[RecordHeader]
       .withContext("CompressedTimestampHeader")
-    bits(1).consume(bv => if (bv == BitVector.one) cc else nc) {
+    bits(1).consume(bv => if (bv == BitVector.one) cc else nc):
       case _: NormalHeader              => BitVector.zero
       case _: CompressedTimestampHeader => BitVector.one
-    }
   }.withContext("RecordHeader")
-}

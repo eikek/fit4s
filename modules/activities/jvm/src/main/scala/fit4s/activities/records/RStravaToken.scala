@@ -23,7 +23,7 @@ final case class RStravaToken(
     refreshToken: StravaRefreshToken,
     scope: StravaScope,
     createdAt: Instant
-) {
+):
   def toTokenAndScope: TokenAndScope =
     TokenAndScope(
       StravaTokenResponse(
@@ -35,9 +35,8 @@ final case class RStravaToken(
       ),
       scope
     )
-}
 
-object RStravaToken {
+object RStravaToken:
   def fromResponse(tr: TokenAndScope): ConnectionIO[RStravaToken] =
     fromResponse(tr.tokenResponse, tr.scope)
 
@@ -60,7 +59,7 @@ object RStravaToken {
 
   private[activities] val table = fr"strava_token"
 
-  private[activities] def columnList(alias: Option[String]): List[Fragment] = {
+  private[activities] def columnList(alias: Option[String]): List[Fragment] =
     def c(name: String) = Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))
 
     List(
@@ -73,7 +72,6 @@ object RStravaToken {
       c("scope"),
       c("created_at")
     )
-  }
 
   private val colsNoId = columnList(None).tail.commas
   private val cols = columnList(None).commas
@@ -81,7 +79,7 @@ object RStravaToken {
   def streamAll: Stream[ConnectionIO, RStravaToken] =
     sql"SELECT $cols FROM $table".query[RStravaToken].streamWithChunkSize(100)
 
-  object insertMany {
+  object insertMany:
     val cols = columnList(None).map(_.internals.sql).mkString(",")
     val ph = columnList(None).map(_ => "?").mkString(",")
     val tn = table.internals.sql
@@ -89,7 +87,6 @@ object RStravaToken {
 
     def apply(tags: Seq[RStravaToken]): ConnectionIO[Int] =
       Update[RStravaToken](sql).updateMany(tags)
-  }
 
   def insert(r: RStravaToken): ConnectionIO[RStravaToken] =
     (sql"INSERT INTO $table ($colsNoId) VALUES (${r.tokenType}, ${r.accessToken}, " ++
@@ -125,4 +122,3 @@ object RStravaToken {
 
   def deleteAll: ConnectionIO[Int] =
     sql"DELETE FROM $table".update.run
-}

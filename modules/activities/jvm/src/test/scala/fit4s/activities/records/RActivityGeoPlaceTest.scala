@@ -11,10 +11,10 @@ import fit4s.data.Distance
 
 import doobie.implicits._
 
-class RActivityGeoPlaceTest extends DatabaseTest {
+class RActivityGeoPlaceTest extends DatabaseTest:
   override def munitFixtures = List(h2DataSource)
 
-  test("test distance") {
+  test("test distance"):
     val (jdbc, ds) = h2DataSource()
     DatabaseTest.makeXA(ds).use { xa =>
       for {
@@ -44,9 +44,8 @@ class RActivityGeoPlaceTest extends DatabaseTest {
         _ = assertEquals(dst.map(_.rounded), Some(Distance.meter(82685)))
       } yield ()
     }
-  }
 
-  test("test zero distance") {
+  test("test zero distance"):
     val (jdbc, ds) = h2DataSource()
     DatabaseTest.makeXA(ds).use { xa =>
       for {
@@ -74,5 +73,3 @@ class RActivityGeoPlaceTest extends DatabaseTest {
         _ = assertEquals(dst.map(_.rounded), Some(Distance.meter(0)))
       } yield ()
     }
-  }
-}

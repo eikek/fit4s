@@ -7,7 +7,7 @@ import fit4s.data._
 import fit4s.geocode.data.{BoundingBox, NominatimOsmId, NominatimPlaceId}
 import fit4s.profile.types.{Activity => _, _}
 
-trait TestData {
+trait TestData:
   val importDate: Instant = Instant.parse("2023-04-07T11:00:11Z")
 
   val testActivity = Activity(
@@ -159,6 +159,5 @@ trait TestData {
       Semicircle.degree(78)
     )
   )
-}
 
 object TestData extends TestData

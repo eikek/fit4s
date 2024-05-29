@@ -18,10 +18,10 @@ final case class RActivityGeoPlace(
     name: PositionName
 )
 
-object RActivityGeoPlace {
+object RActivityGeoPlace:
   private[activities] val table = fr"activity_geo_place"
 
-  private[activities] def columnList(alias: Option[String]): List[Fragment] = {
+  private[activities] def columnList(alias: Option[String]): List[Fragment] =
     def c(name: String) = Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))
     List(
       c("id"),
@@ -29,7 +29,6 @@ object RActivityGeoPlace {
       c("geo_place_id"),
       c("position_name")
     )
-  }
 
   private val colsNoId = columnList(None).tail.commas
   private val colsWithId = columnList(None).commas
@@ -37,7 +36,7 @@ object RActivityGeoPlace {
   def streamAll: Stream[ConnectionIO, RActivityGeoPlace] =
     sql"SELECT $colsWithId FROM $table".query[RActivityGeoPlace].streamWithChunkSize(100)
 
-  object insertMany {
+  object insertMany:
     val cols = columnList(None).map(_.internals.sql).mkString(",")
     val ph = columnList(None).map(_ => "?").mkString(",")
     val tn = table.internals.sql
@@ -45,7 +44,6 @@ object RActivityGeoPlace {
 
     def apply(tags: Seq[RActivityGeoPlace]): ConnectionIO[Int] =
       Update[RActivityGeoPlace](sql).updateMany(tags)
-  }
 
   def insert(r: RActivityGeoPlace): ConnectionIO[ActivityGeoPlaceId] =
     sql"INSERT INTO $table ($colsNoId) VALUES (${r.activityId}, ${r.placeId}, ${r.name})".update
@@ -72,7 +70,7 @@ object RActivityGeoPlace {
       .unique
       .map(_ > 0)
 
-  def findByActivity(id: ActivityId): ConnectionIO[List[RActivityGeoPlace]] = {
+  def findByActivity(id: ActivityId): ConnectionIO[List[RActivityGeoPlace]] =
     val c = columnList(Some("gp")).commas
     sql"""SELECT $c FROM $table gp
           INNER JOIN ${RActivitySession.table} act
@@ -80,14 +78,12 @@ object RActivityGeoPlace {
           WHERE act.activity_id = $id"""
       .query[RActivityGeoPlace]
       .to[List]
-  }
 
-  def findMissingActivities(ids: List[ActivityId]): Stream[ConnectionIO, ActivityId] = {
-    val cond = ids match {
+  def findMissingActivities(ids: List[ActivityId]): Stream[ConnectionIO, ActivityId] =
+    val cond = ids match
       case Nil => Fragment.empty
       case nn =>
         fr"AND act.activity_id IN (${nn.map(_.id.toString).map(Fragment.const(_)).commas})"
-    }
     sql"""WITH
             gstart as (select * from $table where position_name = 'start'),
             gend as (select * from $table where position_name = 'end')
@@ -98,11 +94,10 @@ object RActivityGeoPlace {
                  OR s.id not in (select activity_session_id from gend)) $cond"""
       .query[ActivityId]
       .streamWithChunkSize(100)
-  }
 
   def getStartEndDistance(
       sessionId: ActivitySessionId
-  ): ConnectionIO[Option[Distance]] = {
+  ): ConnectionIO[Option[Distance]] =
     val start = PositionName.Start.widen
     val end = PositionName.End.widen
     sql"""WITH
@@ -126,5 +121,3 @@ object RActivityGeoPlace {
       .query[Option[Double]]
       .option
       .map(_.flatten.map(Distance.km))
-  }
-}

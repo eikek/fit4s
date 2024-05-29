@@ -10,12 +10,12 @@ import fit4s.activities.records.DoobieImplicits._
 import doobie._
 import doobie.implicits._
 
-object RActivityLap {
+object RActivityLap:
   private[activities] val table = fr"activity_lap"
   private val columns = columnList(None).tail.commas
   private val columnsWithId = columnList(None).commas
 
-  private[activities] def columnList(alias: Option[String]): List[Fragment] = {
+  private[activities] def columnList(alias: Option[String]): List[Fragment] =
     def c(name: String) = Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))
     List(
       c("id"),
@@ -54,7 +54,6 @@ object RActivityLap {
       c("stroke_count"),
       c("avg_grade")
     )
-  }
 
   def insert(r: ActivityLap): ConnectionIO[ActivityLapId] =
     (fr"INSERT INTO $table ($columns) VALUES(" ++
@@ -69,7 +68,7 @@ object RActivityLap {
       fr"${r.avgGrade}" ++
       fr")").update.withUniqueGeneratedKeys[ActivityLapId]("id")
 
-  object insertMany {
+  object insertMany:
     val cols = columnList(None).map(_.internals.sql).mkString(",")
     val ph = columnList(None).map(_ => "?").mkString(",")
     val tn = table.internals.sql
@@ -77,7 +76,6 @@ object RActivityLap {
 
     def apply(tags: Seq[ActivityLap]): ConnectionIO[Int] =
       Update[ActivityLap](sql).updateMany(tags)
-  }
 
   def findById(id: ActivityLapId): ConnectionIO[Option[ActivityLap]] =
     fr"SELECT $columnsWithId FROM $table WHERE id = $id"
@@ -89,4 +87,3 @@ object RActivityLap {
 
   def streamAll: Stream[ConnectionIO, ActivityLap] =
     sql"SELECT $columnsWithId FROM $table".query[ActivityLap].streamWithChunkSize(50)
-}

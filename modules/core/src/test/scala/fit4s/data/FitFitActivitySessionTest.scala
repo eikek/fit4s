@@ -7,9 +7,9 @@ import fit4s.{FitFile, FitTestData}
 
 import munit.CatsEffectSuite
 
-class FitFitActivitySessionTest extends CatsEffectSuite {
+class FitFitActivitySessionTest extends CatsEffectSuite:
 
-  test("read activity data") {
+  test("read activity data"):
     for {
       raw <- FitTestData.examplePoolswimActivity
       fit = FitFile.decodeUnsafe(raw).head
@@ -53,7 +53,6 @@ class FitFitActivitySessionTest extends CatsEffectSuite {
         )
       )
     } yield ()
-  }
 
   // test("read indoor activity with gps invalid value") {
   //   for {
@@ -67,4 +66,3 @@ class FitFitActivitySessionTest extends CatsEffectSuite {
   //     _ = assertEquals(lat, FieldDecodeResult.InvalidValue(field.local))
   //   } yield ()
   // }
-}

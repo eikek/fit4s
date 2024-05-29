@@ -47,7 +47,7 @@ trait JsonEncoder {
       w.writeMapClose()
     }
 
-  implicit val fieldValueEncoder: Encoder[FieldValue[TypedValue[_]]] =
+  implicit val fieldValueEncoder: Encoder[FieldValue[TypedValue[?]]] =
     Encoder { (w, fval) =>
       def writeAmount = fval.scaledValue
         .map {

@@ -15,9 +15,9 @@ import org.http4s.server.Server
 import org.http4s.server.middleware.{CORS, Logger}
 import org.http4s.{HttpRoutes, Response}
 
-object Fit4sServer {
+object Fit4sServer:
 
-  def httpRoutes[F[_]: Async](log: ActivityLog[F], zoneId: ZoneId): HttpRoutes[F] = {
+  def httpRoutes[F[_]: Async](log: ActivityLog[F], zoneId: ZoneId): HttpRoutes[F] =
     val cors = CORS.policy
     val logger = scribe.cats.effect[F]
     Logger.httpRoutes(
@@ -27,14 +27,13 @@ object Fit4sServer {
     )(
       cors(new Routes[F](log, zoneId).all)
     )
-  }
 
   def apply[F[_]: Async: Network](
       host: Host,
       port: Port,
       log: ActivityLog[F],
       zoneId: ZoneId
-  ): Resource[F, Server] = {
+  ): Resource[F, Server] =
     val logger = scribe.cats.effect[F]
     EmberServerBuilder
       .default[F]
@@ -47,5 +46,3 @@ object Fit4sServer {
           .as(ErrorResponse(ex))
       }
       .build
-  }
-}

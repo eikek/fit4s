@@ -10,9 +10,9 @@ import io.bullet.borer.*
 import munit.FunSuite
 import scodec.bits.ByteVector
 
-class DataMessageDecoderTest extends FunSuite with JsonCodec {
+class DataMessageDecoderTest extends FunSuite with JsonCodec:
 
-  test("return top-level field if dynamic fields don't match") {
+  test("return top-level field if dynamic fields don't match"):
 
     val data = ByteVector.fromValidHex("04ff000000f8ef593b05fdd856")
     val definition = Json
@@ -35,9 +35,8 @@ class DataMessageDecoderTest extends FunSuite with JsonCodec {
       fields.get(FileIdMsg.product).getOrElse(sys.error("Expected product field"))
     val expanded = DataMessageDecoder.expandField(msg, fields)(product)
     assertEquals(expanded, DataFields.of(product))
-  }
 
-  test("expand dynamic fields") {
+  test("expand dynamic fields"):
     val data = ByteVector.fromValidHex("bc8dd3cb515c753effffffff0100310cffff04")
     val definition = Json
       .decode(
@@ -61,13 +60,12 @@ class DataMessageDecoderTest extends FunSuite with JsonCodec {
     val expected = KnownField(
       product.local,
       product.byteOrdering,
-      FileIdMsg.productGarminProduct.asInstanceOf[Msg.SubField[TypedValue[_]]],
+      FileIdMsg.productGarminProduct.asInstanceOf[Msg.SubField[TypedValue[?]]],
       product.raw
     )
     assertEquals(expanded, DataFields.of(product, expected))
-  }
 
-  test("RecordMsg expand components for speed and altitude") {
+  test("RecordMsg expand components for speed and altitude"):
     val data =
       ByteVector.fromValidHex("8dfb593b34860400e80318a0fa00690a0000000048d9040018")
     val definition = Json
@@ -99,9 +97,8 @@ class DataMessageDecoderTest extends FunSuite with JsonCodec {
       expandedAlti.getDecodedValue(RecordMsg.enhancedAltitude).map(_.rawValue),
       Some(2665)
     )
-  }
 
-  test("MonitoringMsg expand components for current_activity_type_intensity") {
+  test("MonitoringMsg expand components for current_activity_type_intensity"):
     val data = ByteVector.fromValidHex("85a468")
     val definition = Json
       .decode(
@@ -123,5 +120,3 @@ class DataMessageDecoderTest extends FunSuite with JsonCodec {
 
     assertEquals(activityType, Some(ActivityType.Sedentary))
     assertEquals(intensity.map(_.rawValue), Some(3L))
-  }
-}

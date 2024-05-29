@@ -12,7 +12,7 @@ import fit4s.strava.data._
 
 import doobie.Meta
 
-trait DoobieMeta {
+trait DoobieMeta:
   implicit val activityLapIdMeta: Meta[ActivityLapId] =
     Meta[Long].timap(ActivityLapId.apply)(_.id)
 
@@ -144,6 +144,5 @@ trait DoobieMeta {
 
   implicit val activitySessionId: Meta[ActivitySessionId] =
     Meta[Long].timap(ActivitySessionId.apply)(_.id)
-}
 
 object DoobieMeta extends DoobieMeta

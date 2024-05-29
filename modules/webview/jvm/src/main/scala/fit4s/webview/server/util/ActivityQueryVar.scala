@@ -9,11 +9,11 @@ import fit4s.activities.data.*
 
 import org.http4s.ParseFailure
 
-object ActivityQueryVar {
+object ActivityQueryVar:
 
   def unapply(
       params: Map[String, collection.Seq[String]]
-  ): Option[(ZoneId, Instant) => ValidatedNel[ParseFailure, ActivityQuery]] = {
+  ): Option[(ZoneId, Instant) => ValidatedNel[ParseFailure, ActivityQuery]] =
     val page = PageVar
       .unapply(params)
       .getOrElse(PageVar.first.validNel)
@@ -23,5 +23,3 @@ object ActivityQueryVar {
     Option { (zone, now) =>
       (cond.traverse(_.apply(zone, now)), page).mapN(ActivityQuery.apply)
     }
-  }
-}

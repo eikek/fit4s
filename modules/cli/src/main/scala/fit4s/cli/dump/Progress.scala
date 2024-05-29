@@ -14,7 +14,7 @@ import fit4s.activities.dump.ExportData.ProgressObserve
 
 final case class Progress[F[_]](
     progress: ProgressObserve[F],
-    counters: Ref[F, Map[Class[_], Int]]
+    counters: Ref[F, Map[Class[?], Int]]
 ) {
 
   def makeSummary(implicit F: Applicative[F]): F[String] =
@@ -31,7 +31,7 @@ final case class Progress[F[_]](
 object Progress {
 
   def apply[F[_]: Async]: F[Progress[F]] = for {
-    data <- Ref[F].of(Map.empty[Class[_], Int])
+    data <- Ref[F].of(Map.empty[Class[?], Int])
     start <- Clock[F].monotonic
     lastTime <- Ref[F].of(start)
     cp = ExportData.ProgressObserve.count(data)
@@ -44,7 +44,7 @@ object Progress {
     )
   } yield Progress(cp >> pr, data)
 
-  private def classLabel(c: Class[_]): String =
+  private def classLabel(c: Class[?]): String =
     c.getSimpleName().drop(1)
 
   private def label(v: DumpFormat): String = v match

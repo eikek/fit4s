@@ -2,15 +2,13 @@ package fit4s.strava.data
 
 import cats.data.NonEmptyList
 
-sealed trait StravaFileType extends Product {
+sealed trait StravaFileType extends Product:
   final def name: String =
-    productPrefix.toLowerCase match {
+    productPrefix.toLowerCase match
       case n if n.endsWith("gz") => s"${n.dropRight(2)}.gz"
       case n                     => n
-    }
-}
 
-object StravaFileType {
+object StravaFileType:
   case object Fit extends StravaFileType
   case object FitGz extends StravaFileType
   case object Tcx extends StravaFileType
@@ -26,4 +24,3 @@ object StravaFileType {
 
   def unsafeFromString(str: String): StravaFileType =
     fromString(str).fold(sys.error, identity)
-}

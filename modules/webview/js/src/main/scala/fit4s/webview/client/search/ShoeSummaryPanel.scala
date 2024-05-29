@@ -14,7 +14,7 @@ import _root_.fit4s.webview.client.shared.Styles
 import calico.*
 import calico.html.io.{*, given}
 
-object ShoeSummaryPanel {
+object ShoeSummaryPanel:
   implicit private val sport: Sport = Sport.Running // for speed.show
 
   private val enabledSports: Set[Sport] =
@@ -37,7 +37,7 @@ object ShoeSummaryPanel {
         (model.copy(data = data), IO.unit)
 
   def subscribe(model: SignallingRef[IO, Model], cr: CommandRuntime[IO]) =
-    cr.subscribe.evalMap {
+    cr.subscribe.evalMap:
       case Result.TagSummaryResult(req, result) if req.hasShoeTags =>
         val data = result.fold(
           _.filter(_._1.name.startsWith1("Shoe/"))
@@ -56,7 +56,6 @@ object ShoeSummaryPanel {
 
       case _ =>
         IO.unit
-    }
 
   def render(model: SignallingRef[IO, Model], cr: CommandRuntime[IO]) =
     Resource
@@ -119,4 +118,3 @@ object ShoeSummaryPanel {
         )
       )
     )
-}

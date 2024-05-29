@@ -15,7 +15,7 @@ import fit4s.{ActivityReader, FitFile}
 import doobie._
 import scodec.Attempt
 
-object FitFileImport {
+object FitFileImport:
 
   def addSingle[F[_]: Files: Sync: Compression](
       tags: Set[TagId],
@@ -27,7 +27,7 @@ object FitFileImport {
   )(fitFile: Path): Stream[F, ConnectionIO[ImportResult[ActivityId]]] =
     Stream
       .eval(readFitFile(fitFile))
-      .flatMap {
+      .flatMap:
         case Attempt.Successful(fits) =>
           Stream.emits(
             fits.map(addFitFile(tags, notes, locationId, zoneId, now)(_, relativePath))
@@ -35,7 +35,6 @@ object FitFileImport {
 
         case Attempt.Failure(err) =>
           Stream.emit(Sync[ConnectionIO].pure(ImportResult.readFitError(err)))
-      }
 
   def addFitFile(
       tags: Set[TagId],
@@ -47,13 +46,12 @@ object FitFileImport {
       fitFile: FitFile,
       relativePath: String
   ): ConnectionIO[ImportResult[ActivityId]] =
-    ActivityReader.read(fitFile, zoneId).map(ActivityReader.fixMissingValues) match {
+    ActivityReader.read(fitFile, zoneId).map(ActivityReader.fixMissingValues) match
       case Left(err) => Sync[ConnectionIO].pure(ImportResult.activityDecodeError(err))
       case Right(result) =>
         ActivityImport.addActivity(tags, locationId, relativePath, notes, zoneId, now)(
           result
         )
-    }
 
   def readFitFile[F[_]: Sync: Files: Compression](file: Path): F[Attempt[List[FitFile]]] =
     readFileOrGz[F](file).compile
@@ -72,4 +70,3 @@ object FitFileImport {
 
   private def isMain(fit: FitFile) =
     fit.findFileId.isRight
-}

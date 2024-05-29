@@ -8,7 +8,7 @@ import fit4s.activities.data.Activity
 import calico.*
 import calico.html.io.{*, given}
 
-object ActivityTitle {
+object ActivityTitle:
 
   def apply(a: Activity, clicked: IO[Unit]): Resource[IO, HtmlDivElement[IO]] =
     div(
@@ -29,5 +29,3 @@ object ActivityTitle {
         name
       )
     )
-
-}

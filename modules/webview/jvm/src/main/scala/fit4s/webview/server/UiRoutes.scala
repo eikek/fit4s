@@ -9,9 +9,9 @@ import fit4s.webview.server.util.*
 import org.http4s.*
 import org.http4s.dsl.Http4sDsl
 
-final class UiRoutes[F[_]: Async] extends Http4sDsl[F] with MoreHttp4sDsl[F] {
+final class UiRoutes[F[_]: Async] extends Http4sDsl[F] with MoreHttp4sDsl[F]:
 
-  private[this] val suffixes = List(
+  private val suffixes = List(
     ".css",
     ".eot",
     ".html",
@@ -30,7 +30,7 @@ final class UiRoutes[F[_]: Async] extends Http4sDsl[F] with MoreHttp4sDsl[F] {
   )
 
   def appRoutes[F[_]: Async]: HttpRoutes[F] =
-    Kleisli {
+    Kleisli:
       case req if req.method == Method.GET =>
         val p = req.pathInfo.segments match
           case Vector() => "/index.html"
@@ -52,7 +52,5 @@ final class UiRoutes[F[_]: Async] extends Http4sDsl[F] with MoreHttp4sDsl[F] {
             )
       case _ =>
         OptionT.none
-    }
 
   def routes: HttpRoutes[F] = appRoutes[F]
-}

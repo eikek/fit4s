@@ -7,7 +7,7 @@ import fs2.dom.*
 
 import calico.html.io.{*, given}
 
-object TextField {
+object TextField:
   val inputStyle =
     "px-2 py-2 flex-grow border dark:border-0 dark:bg-stone-700 rounded"
 
@@ -53,4 +53,3 @@ object TextField {
           .start
       )
     } yield el
-}

@@ -24,10 +24,10 @@ final class DefaultStravaClient[F[_]: Async: Network: Files](
     config: StravaClientConfig,
     gearCache: Cache[F, String, StravaGear]
 ) extends StravaClient[F]
-    with Http4sClientDsl[F] {
+    with Http4sClientDsl[F]:
 
-  private[this] val oauth = new StravaOAuth[F](config, client)
-  private[this] val upload = new StravaUpload[F](config, client)
+  private val oauth = new StravaOAuth[F](config, client)
+  private val upload = new StravaUpload[F](config, client)
 
   def initAuth(cfg: StravaAppCredentials, timeout: FiniteDuration) =
     oauth.init(cfg, timeout)
@@ -48,7 +48,7 @@ final class DefaultStravaClient[F[_]: Async: Network: Files](
       before: Instant,
       page: Int,
       perPage: Int
-  ): F[List[StravaActivity]] = {
+  ): F[List[StravaActivity]] =
     val uri = (config.apiUrl / "athlete" / "activities")
       .withQueryParam("before", before.getEpochSecond)
       .withQueryParam("after", after.getEpochSecond)
@@ -58,7 +58,6 @@ final class DefaultStravaClient[F[_]: Async: Network: Files](
     client.expect[List[StravaActivity]](
       Method.GET(uri).putAuth(accessToken)
     )
-  }
 
   def findGear(accessToken: StravaAccessToken, gearId: String) =
     gearCache.cached(findGear1(accessToken, _))(gearId)
@@ -66,31 +65,28 @@ final class DefaultStravaClient[F[_]: Async: Network: Files](
   private def findGear1(
       accessToken: StravaAccessToken,
       gearId: String
-  ): F[Option[StravaGear]] = {
+  ): F[Option[StravaGear]] =
     val uri = config.apiUrl / "gear" / gearId
     client.expectOption[StravaGear](
       Method.GET(uri).putAuth(accessToken)
     )
-  }
 
   def updateActivity(
       accessToken: StravaAccessToken,
       id: StravaActivityId,
       data: StravaUpdatableActivity
-  ) = {
+  ) =
     val uri = config.apiUrl / "activities" / id
     client
       .successful(
         Method.PUT(data, uri).putAuth(accessToken)
       )
-      .flatMap {
+      .flatMap:
         case true => ().pure[F]
         case false =>
           Async[F].raiseError(
             new Exception(s"Activity $id update returned with a failure")
           )
-      }
-  }
 
   def uploadFile(
       accessToken: StravaAccessToken,
@@ -114,4 +110,3 @@ final class DefaultStravaClient[F[_]: Async: Network: Files](
       processingTimeout,
       waitingCallback
     )
-}

@@ -4,11 +4,10 @@ import cats.Show
 
 import io.bullet.borer.*
 
-final class LocationId(val id: Long) extends AnyVal {
+final class LocationId(val id: Long) extends AnyVal:
   override def toString: String = s"LocationId($id)"
-}
 
-object LocationId {
+object LocationId:
   def apply(id: Long): LocationId = new LocationId(id)
 
   implicit val ordering: Ordering[LocationId] =
@@ -21,4 +20,3 @@ object LocationId {
     Encoder.forLong.contramap(_.id)
 
   given Show[LocationId] = Show.show(_.id.toString)
-}

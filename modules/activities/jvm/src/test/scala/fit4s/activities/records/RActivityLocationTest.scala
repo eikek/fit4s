@@ -9,10 +9,10 @@ import fit4s.activities.{DatabaseTest, FlywayMigrate}
 
 import doobie.implicits._
 
-class RActivityLocationTest extends DatabaseTest {
+class RActivityLocationTest extends DatabaseTest:
   override def munitFixtures = List(h2DataSource)
 
-  test("insert record") {
+  test("insert record"):
     val (jdbc, ds) = h2DataSource()
     DatabaseTest.makeXA(ds).use { xa =>
       val location = Path("/home/user/test")
@@ -29,9 +29,8 @@ class RActivityLocationTest extends DatabaseTest {
         _ = assert(exists)
       } yield ()
     }
-  }
 
-  test("insert many and list") {
+  test("insert many and list"):
     val (jdbc, ds) = h2DataSource()
     DatabaseTest.makeXA(ds).use { xa =>
       for {
@@ -48,5 +47,3 @@ class RActivityLocationTest extends DatabaseTest {
         _ = assertEquals(records.sortBy(_.id), all.sortBy(_.id))
       } yield ()
     }
-  }
-}

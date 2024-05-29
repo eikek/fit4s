@@ -9,7 +9,7 @@ import scala.xml.Node
 import fit4s.data.*
 import fit4s.profile.types.Sport
 
-object TcxReader {
+object TcxReader:
   def activities(n: Node): Seq[TcxActivity] =
     (n \ "Activities" \ "Activity").map(activity)
 
@@ -65,4 +65,3 @@ object TcxReader {
       .find(e => e.typeName.equalsIgnoreCase(s))
       .orElse(Option.when("biking".equalsIgnoreCase(s))(Sport.Cycling))
       .getOrElse(Sport.Generic)
-}

@@ -3,9 +3,9 @@ package fit4s.strava.data
 import io.bullet.borer.*
 import munit.*
 
-class StravaUpdatableActivityTest extends FunSuite {
+class StravaUpdatableActivityTest extends FunSuite:
 
-  test("encode") {
+  test("encode"):
     val data = StravaUpdatableActivity(
       commute = Some(true),
       trainer = None,
@@ -18,5 +18,3 @@ class StravaUpdatableActivityTest extends FunSuite {
       jsonStr,
       """{"commute":true,"description":"my description","name":"Morning Ride","gear_id":"123"}"""
     )
-  }
-}

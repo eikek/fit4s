@@ -11,10 +11,10 @@ import fit4s.strava.data.{StravaAccessToken, StravaFileType}
 import org.http4s.ember.client.EmberClientBuilder
 import org.http4s.implicits._
 
-object FileUploadTest extends IOApp {
+object FileUploadTest extends IOApp:
   val token = StravaAccessToken("none")
 
-  override def run(args: List[String]) = {
+  override def run(args: List[String]) =
     val files = Stream
       .range(1, 10)
       .covary[IO]
@@ -57,8 +57,6 @@ object FileUploadTest extends IOApp {
           .drain
       }
       .as(ExitCode.Success)
-  }
 
   def callback(waited: FiniteDuration, attempts: Int): IO[Unit] =
     IO.println(s"  - waited ${waited.toSeconds}s, attempt $attempts")
-}

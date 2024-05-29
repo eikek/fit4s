@@ -21,7 +21,6 @@ final case class GeoPlace(
     boundingBox: BoundingBox
 )
 
-object GeoPlace {
+object GeoPlace:
   given Encoder[GeoPlace] = MapBasedCodecs.deriveEncoder
   given Decoder[GeoPlace] = MapBasedCodecs.deriveDecoder
-}

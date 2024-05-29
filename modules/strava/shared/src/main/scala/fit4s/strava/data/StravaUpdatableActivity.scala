@@ -12,13 +12,12 @@ final case class StravaUpdatableActivity(
     description: Option[String],
     name: Option[String],
     gear_id: Option[String]
-) {
+):
   def isEmpty: Boolean =
     commute.isEmpty && trainer.isEmpty && description.isEmpty &&
       name.isEmpty && gear_id.isEmpty
-}
 
-object StravaUpdatableActivity {
+object StravaUpdatableActivity:
   val empty: StravaUpdatableActivity =
     StravaUpdatableActivity(None, None, None, None, None)
 
@@ -35,4 +34,3 @@ object StravaUpdatableActivity {
 
   implicit val jsonDecoder: Decoder[StravaUpdatableActivity] =
     MapBasedCodecs.deriveDecoder
-}

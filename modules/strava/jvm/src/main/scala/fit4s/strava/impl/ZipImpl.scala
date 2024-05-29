@@ -17,7 +17,7 @@ import fit4s.strava.impl.Zip.NameFilter
 
 final private class ZipImpl[F[_]: Async: Files](
     tempDir: Option[Path]
-) extends Zip[F] {
+) extends Zip[F]:
 
   private val createTempDir: Resource[F, Path] =
     Files[F].tempDirectory(tempDir, "fit4s-zip-", None)
@@ -55,9 +55,8 @@ final private class ZipImpl[F[_]: Async: Files](
         })
         e <- Stream.chunk(entries)
       } yield e
-}
 
-object ZipImpl {
+object ZipImpl:
   implicit val zipFileReleasable: Releasable[ZipFile] =
     (resource: ZipFile) => resource.close()
 
@@ -81,28 +80,26 @@ object ZipImpl {
       )
     }
 
-  private def deduplicate[F[_]: Sync, A]: Pipe[F, (String, A), (String, A)] = {
+  private def deduplicate[F[_]: Sync, A]: Pipe[F, (String, A), (String, A)] =
     def makeName(name: String, count: Int): String =
       if (count <= 0) name
       else
-        name.lastIndexOf('.') match {
+        name.lastIndexOf('.') match
           case n if n > 0 =>
             s"${name.substring(0, n)}_$count${name.substring(n)}"
           case _ =>
             s"${name}_$count"
-        }
 
     @annotation.tailrec
     def unique(
         current: Set[String],
         name: String,
         counter: Int
-    ): (Set[String], String) = {
+    ): (Set[String], String) =
       val nextName = makeName(name, counter)
       if (current.contains(nextName))
         unique(current, name, counter + 1)
       else (current + nextName, nextName)
-    }
 
     in =>
       Stream
@@ -114,7 +111,6 @@ object ZipImpl {
               .map(n => (n, element._2))
           }
         }
-  }
 
   private def zipJava[F[_]: Async](
       chunkSize: Int,
@@ -146,14 +142,13 @@ object ZipImpl {
       val zip = new ZipOutputStream(out, StandardCharsets.UTF_8)
       val writeEntries =
         entries.evalMap { case (name, file) =>
-          val javaOut = Sync[F].blocking {
+          val javaOut = Sync[F].blocking:
             val fin = new BufferedInputStream(
               java.nio.file.Files.newInputStream(file.toNioPath),
               chunkSize
             )
             fin.transferTo(zip)
             fin.close()
-          }
 
           val nextEntry = Sync[F].delay(zip.putNextEntry(new ZipEntry(name)))
           Resource
@@ -164,4 +159,3 @@ object ZipImpl {
 
       writeEntries.onFinalize(closeStream).compile.drain
     }
-}

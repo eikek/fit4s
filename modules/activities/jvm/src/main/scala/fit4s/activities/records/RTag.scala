@@ -12,25 +12,23 @@ import fit4s.activities.records.DoobieImplicits._
 import doobie._
 import doobie.implicits._
 
-object RTag {
+object RTag:
   val softDelete: Tag =
     Tag(TagId(-999L), TagName.unsafeFromString("System/Deleted"))
 
   private[activities] val table = fr"tag"
 
-  private[activities] def columnList(alias: Option[String]): List[Fragment] = {
+  private[activities] def columnList(alias: Option[String]): List[Fragment] =
     def c(name: String): Fragment =
       Fragment.const(alias.map(a => s"$a.$name").getOrElse(name))
     List(c("id"), c("name"))
-  }
 
   def getOrCreate(names: List[TagName]): ConnectionIO[List[Tag]] =
     names
       .traverse { name =>
-        find(name).flatMap {
+        find(name).flatMap:
           case Some(r) => Sync[ConnectionIO].pure(r)
           case None    => insert(name)
-        }
       }
 
   def insert(name: TagName): ConnectionIO[Tag] =
@@ -45,13 +43,12 @@ object RTag {
 
   def findAll(names: List[TagName]): ConnectionIO[List[Tag]] =
     if (names.isEmpty) List.empty[Tag].pure[ConnectionIO]
-    else {
+    else
       val values = names.map(t => sql"${t.name.toLowerCase}").commas
 
       sql"""SELECT id, name FROM $table WHERE lower(name) in ($values)"""
         .query[Tag]
         .to[List]
-    }
 
   def exists(name: TagName): ConnectionIO[Boolean] =
     fr"SELECT count(id) FROM $table WHERE name = $name"
@@ -59,22 +56,20 @@ object RTag {
       .unique
       .map(_ > 0)
 
-  def listAll(nameLike: Option[String], page: Page): Stream[ConnectionIO, Tag] = {
+  def listAll(nameLike: Option[String], page: Page): Stream[ConnectionIO, Tag] =
     val cond =
-      nameLike.map(_.trim).filter(_.nonEmpty) match {
+      nameLike.map(_.trim).filter(_.nonEmpty) match
         case Some(like) => fr"WHERE name ilike $like"
         case None       => Fragment.empty
-      }
 
     fr"SELECT id, name FROM $table $cond ORDER BY name ${page.asFragment}"
       .query[Tag]
       .streamWithChunkSize(100)
-  }
 
   def streamAll: Stream[ConnectionIO, Tag] =
     sql"SELECT id, name FROM $table".query[Tag].streamWithChunkSize(100)
 
-  object insertMany {
+  object insertMany:
     val cols = columnList(None).map(_.internals.sql).mkString(",")
     val ph = columnList(None).map(_ => "?").mkString(",")
     val tn = table.internals.sql
@@ -82,7 +77,6 @@ object RTag {
 
     def apply(tags: Seq[Tag]): ConnectionIO[Int] =
       Update[Tag](sql).updateMany(tags)
-  }
 
   def rename(from: TagName, to: TagName): ConnectionIO[Int] =
     sql"UPDATE $table SET name = $to WHERE name = $from".update.run
@@ -92,4 +86,3 @@ object RTag {
 
   def delete(tagId: TagId): ConnectionIO[Int] =
     sql"DELETE FROM $table WHERE id = $tagId".update.run
-}

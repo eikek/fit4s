@@ -15,13 +15,13 @@ import fit4s.{ActivityReader, FitFile, FitTestData}
 
 import doobie.implicits._
 
-class FitActivityImportTest extends DatabaseTest {
+class FitActivityImportTest extends DatabaseTest:
   override def munitFixtures = Seq(h2DataSource)
 
   val now = Instant.parse("2023-04-07T11:36:30Z")
   val zone: ZoneId = ZoneId.systemDefault()
 
-  test("insert example activity") {
+  test("insert example activity"):
     val (jdbc, ds) = h2DataSource()
     DatabaseTest.makeXA(ds).use { xa =>
       for {
@@ -45,5 +45,3 @@ class FitActivityImportTest extends DatabaseTest {
         _ = assert(id.id > 0)
       } yield ()
     }
-  }
-}

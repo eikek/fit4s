@@ -9,11 +9,11 @@ import fit4s.activities.data.*
 
 import org.http4s.ParseFailure
 
-object ActivitySummaryQueryVar {
+object ActivitySummaryQueryVar:
 
   def unapply(
       params: Map[String, collection.Seq[String]]
-  ): Option[(ZoneId, Instant) => ValidatedNel[ParseFailure, ActivityQuery]] = {
+  ): Option[(ZoneId, Instant) => ValidatedNel[ParseFailure, ActivityQuery]] =
     val page = params
       .get("limit")
       .flatMap(_.headOption)
@@ -25,8 +25,6 @@ object ActivitySummaryQueryVar {
     Option { (zone, now) =>
       (cond.traverse(_.apply(zone, now)), page).mapN(ActivityQuery.apply)
     }
-  }
 
   private def parseInt(str: String): ValidatedNel[ParseFailure, Int] =
     str.toIntOption.toValidNel(ParseFailure(s"Invalid integer value: $str", ""))
-}

@@ -11,7 +11,7 @@ import _root_.fit4s.webview.client.shared.{Anchor, ClickAction}
 import calico.*
 import calico.html.io.{*, given}
 
-object DefinedQueries {
+object DefinedQueries:
 
   val queries = List(
     "This week" -> "started>{current_monday}",
@@ -53,7 +53,7 @@ object DefinedQueries {
       lastMonth: LocalDate,
       currentMonday: LocalDate,
       lastMonday: LocalDate
-  ) {
+  ):
     def replace(in: String): String =
       in.replace("{current_year}", currentYear.toString)
         .replace("{last_year}", lastYear.toString)
@@ -61,7 +61,6 @@ object DefinedQueries {
         .replace("{last_monday}", lastMonday.toString)
         .replace("{current_month}", currentMonth.toString)
         .replace("{last_month}", lastMonth.toString)
-  }
   object DateData:
     def make(zone: ZoneId): IO[DateData] =
       for {
@@ -78,4 +77,3 @@ object DefinedQueries {
         prevMon._2.atZone(zone).toLocalDate().plusDays(1),
         prevMon._1.atZone(zone).toLocalDate()
       )
-}

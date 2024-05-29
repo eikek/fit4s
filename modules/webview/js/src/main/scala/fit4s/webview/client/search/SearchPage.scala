@@ -9,7 +9,7 @@ import fit4s.webview.client.cmd.*
 
 import calico.html.io.{*, given}
 
-object SearchPage {
+object SearchPage:
 
   final case class Model(
       search: SearchPanel.Model,
@@ -28,7 +28,7 @@ object SearchPage {
     )
     def makeEmpty: IO[SignallingRef[IO, Model]] = SignallingRef[IO].of(empty)
 
-  def render(model: SignallingRef[IO, Model], cr: CommandRuntime[IO], zone: ZoneId) = {
+  def render(model: SignallingRef[IO, Model], cr: CommandRuntime[IO], zone: ZoneId) =
     val searchModel = SignallingRef.lens(model)(
       get = _.search,
       set = a => b => a.copy(search = b)
@@ -58,5 +58,3 @@ object SearchPage {
         )
       )
     )
-  }
-}

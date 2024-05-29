@@ -17,7 +17,7 @@ import fit4s.tcx.TcxActivity
 
 import doobie.*
 
-object TcxActivityImport {
+object TcxActivityImport:
   def addActivity(
       tags: Set[TagId],
       locationId: LocationId,
@@ -27,21 +27,18 @@ object TcxActivityImport {
       now: Instant
   )(
       tcx: TcxActivity
-  ): ConnectionIO[ImportResult[ActivityId]] = {
+  ): ConnectionIO[ImportResult[ActivityId]] =
     val name = ActivityName.generate(tcx.id, Set(tcx.sport), zone)
 
     for {
       actId <- add(locationId, path, name, notes, now)(tcx)
-      _ <- NonEmptyList.fromList(tags.toList) match {
+      _ <- NonEmptyList.fromList(tags.toList) match
         case Some(nel) =>
-          actId match {
+          actId match
             case ImportResult.Success(id) => RActivityTag.insert1(id, nel)
             case _                        => Sync[ConnectionIO].pure(0)
-          }
         case None => Sync[ConnectionIO].pure(0)
-      }
     } yield actId
-  }
 
   def add(
       locationId: LocationId,
@@ -51,7 +48,7 @@ object TcxActivityImport {
       now: Instant
   )(
       tcx: TcxActivity
-  ): ConnectionIO[ImportResult[ActivityId]] = {
+  ): ConnectionIO[ImportResult[ActivityId]] =
     val insert: ConnectionIO[ImportResult[ActivityId]] =
       for {
         actId <- RActivity.insert(
@@ -80,7 +77,6 @@ object TcxActivityImport {
     OptionT(RActivity.findByFileId(tcx.fileId))
       .map(r => ImportResult.duplicate(r.id, tcx.fileId, path))
       .getOrElseF(insert)
-  }
 
   private def addSession(activityId: ActivityId, act: TcxActivity): ConnectionIO[
     (ActivitySessionId, Seq[ActivityLapId], Seq[ActivitySessionDataId])
@@ -183,4 +179,3 @@ object TcxActivityImport {
         )
       }
     } yield (sessionId, lapIds, rIds)
-}

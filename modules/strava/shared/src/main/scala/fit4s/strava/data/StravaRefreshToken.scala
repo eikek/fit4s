@@ -2,11 +2,10 @@ package fit4s.strava.data
 
 import io.bullet.borer._
 
-final class StravaRefreshToken(val token: String) extends AnyVal {
+final class StravaRefreshToken(val token: String) extends AnyVal:
   override def toString = "StravaRefreshToken(***)"
-}
 
-object StravaRefreshToken {
+object StravaRefreshToken:
   def apply(token: String): StravaRefreshToken = new StravaRefreshToken(token)
 
   implicit val jsonEncoder: Encoder[StravaRefreshToken] =
@@ -14,4 +13,3 @@ object StravaRefreshToken {
 
   implicit val jsonDecoder: Decoder[StravaRefreshToken] =
     Decoder.forString.map(apply)
-}
