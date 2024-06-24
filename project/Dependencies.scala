@@ -26,7 +26,7 @@ object Dependencies {
     val catsCore = "2.9.0"
     val fs2 = "3.10.2"
     val scalaCheck = "1.17.0"
-    val scalaCsv = "1.3.10"
+    val scalaCsv = "1.4.0"
     val postgres = "42.7.3"
     val scalaJsDom = "2.8.0"
     val scalaJsTime = "2.6.0"
