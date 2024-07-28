@@ -1,104 +1,76 @@
 {
   description = "fit4s flake";
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-23.11";
+    nixpkgs.url = "nixpkgs/nixos-24.05";
+    devshell-tools.url = "github:eikek/devshell-tools";
     sbt.url = "github:zaninime/sbt-derivation";
     sbt.inputs.nixpkgs.follows = "nixpkgs";
   };
 
-  outputs = { self, nixpkgs, sbt }:
-    let
-      supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" ];
-      forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
-    in
-    rec
-    {
-      overlays.default = final: prev: {
-        fit4s = with final; sbt.lib.mkSbtDerivation {
-          pkgs = final;
+  outputs = {
+    self,
+    nixpkgs,
+    devshell-tools,
+    sbt,
+  }: let
+    supportedSystems = ["x86_64-linux" "aarch64-linux" "x86_64-darwin"];
+    forAllSystems = nixpkgs.lib.genAttrs supportedSystems;
 
-          version = "dynamic";
-          pname = "fit4s-cli";
+    fit4sPkgs = pkgs: {
+      fit4s-dev = import ./nix/pkg-dev.nix {
+        inherit pkgs;
+        inherit sbt;
+        lib = pkgs.lib;
+      };
+      fit4s = pkgs.callPackage (import ./nix/pkg-bin.nix) {};
+    };
+  in rec
+  {
+    overlays.default = final: prev: (fit4sPkgs final);
 
-          nativeBuildInputs = [ pkgs.nodejs ];
+    formatter = forAllSystems (
+      system:
+        nixpkgs.legacyPackages.${system}.alejandra
+    );
 
-          # depsWarmupCommand = ''
-          #   sbt compile webviewJS/tzdbCodeGen
-          # '';
+    apps = forAllSystems (system: {
+      default = {
+        type = "app";
+        program = "${self.packages.${system}.default}/bin/fit4s";
+      };
+    });
 
-          src = lib.sourceByRegex ./. [
-            "^build.sbt$"
-            "^modules$"
-            "^modules/.*$"
-            "^project$"
-            "^project/.*$"
-            "^make-cli.sh$"
+    packages = forAllSystems (system: let
+      pkgs = import nixpkgs {
+          inherit system;
+          overlays = [self.overlays.default];
+      };
+      in {
+      default = pkgs.fit4s;
+    fit4s = pkgs.fit4s;
+    fit4s-dev = pkgs.fit4s-dev;
+    });
+
+    devShells = forAllSystems (system: {
+      default = let
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [
+            devshell-tools.overlays.default
+          ];
+        };
+      in
+        pkgs.mkShell {
+          buildInputs = [
+            pkgs.sbt17
+            pkgs.nodejs
+            pkgs.scala-cli
+          ];
+          nativeBuildInputs = [
           ];
 
-          depsSha256 = "sha256-+Yj69e4d3o2Nf2kGvK6hmD7fpYyZAqAmoKxC3/10Kmk=";
-
-          buildPhase = ''
-            env
-            ls -lha
-            bash make-cli.sh
-          '';
-
-          installPhase = ''
-            mkdir -p $out
-            cp -R modules/cli/target/universal/stage/* $out/
-
-            cat > $out/bin/fit4s <<-EOF
-            #!${bash}/bin/bash
-            $out/bin/fit4s-cli -java-home ${jdk} "\$@"
-            EOF
-            chmod 755 $out/bin/fit4s
-          '';
+          SBT_OPTS = "-Xmx2G";
         };
-      };
-
-      apps = forAllSystems (system:
-        { default = {
-            type = "app";
-            program = "${self.packages.${system}.default}/bin/fit4s";
-          };
-        });
-
-      packages = forAllSystems (system:
-        {
-          default = (import nixpkgs {
-            inherit system;
-            overlays = [ self.overlays.default ];
-          }).fit4s;
-        });
-
-
-      devShells = forAllSystems(system:
-        { default =
-            let
-              overlays = import ./nix/overlays.nix;
-              pkgs = import nixpkgs {
-                inherit system;
-                overlays = [
-                  overlays.sbt
-                  overlays.postgres-fg
-                ];
-              };
-            in
-              pkgs.mkShell {
-                buildInputs = [
-                  pkgs.sbt
-                  pkgs.openjdk
-                  pkgs.nodejs
-                  pkgs.postgres-fg
-                  pkgs.scala-cli
-                ];
-                nativeBuildInputs =
-                  [
-                  ];
-
-                SBT_OPTS = "-Xmx2G";
-                JAVA_HOME = "${pkgs.openjdk19}/lib/openjdk";
-              };
-        });
-    };
+    });
+  };
 }
