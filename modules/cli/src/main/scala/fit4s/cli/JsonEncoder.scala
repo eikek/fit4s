@@ -95,6 +95,7 @@ trait JsonEncoder {
         w.writeMapMember(f, v)
       }
       w.writeMapClose()
+      w.writeMapClose()
     }
 
   implicit val normalHeaderEncoder: Encoder[RecordHeader.NormalHeader] =

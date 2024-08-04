@@ -42,13 +42,13 @@
 
     packages = forAllSystems (system: let
       pkgs = import nixpkgs {
-          inherit system;
-          overlays = [self.overlays.default];
+        inherit system;
+        overlays = [self.overlays.default];
       };
-      in {
+    in {
       default = pkgs.fit4s;
-    fit4s = pkgs.fit4s;
-    fit4s-dev = pkgs.fit4s-dev;
+      fit4s = pkgs.fit4s;
+      fit4s-dev = pkgs.fit4s-dev;
     });
 
     devShells = forAllSystems (system: {
