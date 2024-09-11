@@ -11,7 +11,8 @@ object App
     extends CommandIOApp(
       name = "fit4s",
       header = "Read fit files.",
-      version = "0.0.1"
+      version =
+        s"${fit4s.BuildInfo.version} (#${fit4s.BuildInfo.gitHeadCommit.map(_.take(8)).getOrElse("-")})"
     )
     with SharedOpts {
 

@@ -3,7 +3,7 @@ package fit4s.webview.client.detail
 import java.time.ZoneId
 
 import cats.Eq
-import cats.effect.{IO, Resource}
+import cats.effect.IO
 import cats.syntax.all.*
 import fs2.concurrent.SignallingRef
 
