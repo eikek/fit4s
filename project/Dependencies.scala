@@ -15,7 +15,7 @@ object Dependencies {
     val ciris = "3.6.0"
     val decline = "2.4.1"
     val doobie = "1.0.0-RC5"
-    val http4s = "0.23.27"
+    val http4s = "0.23.28"
     val http4sDom = "0.2.11"
     val flyway = "10.16.0"
     val h2 = "2.3.230"
