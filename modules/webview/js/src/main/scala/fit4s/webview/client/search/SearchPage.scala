@@ -2,7 +2,7 @@ package fit4s.webview.client.search
 
 import java.time.ZoneId
 
-import cats.effect.{IO, Resource}
+import cats.effect.IO
 import fs2.concurrent.SignallingRef
 
 import fit4s.webview.client.cmd.*
