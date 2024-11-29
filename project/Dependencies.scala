@@ -31,8 +31,8 @@ object Dependencies {
     val scalaJsDom = "2.8.0"
     val scalaJsTime = "2.6.0"
     val scalaXML = "2.3.0"
-    val scribeSlf4j = "3.15.1"
-    val scribe = "3.15.1"
+    val scribeSlf4j = "3.15.2"
+    val scribe = "3.15.2"
   }
 
   val scalaXML = Def.setting(
