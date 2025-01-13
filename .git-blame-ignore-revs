@@ -6,3 +6,5 @@ c388afc6002c60519f02da810a7a478a1548446f
 
 # eikek: scalafix to 0.12.1
 05104c2aa632037034ca5f04e6eeecc04a228f00
+# Scala Steward: Reformat with scalafmt 3.8.4
+153e0091da3df80540fe090400040bddb398de5d
