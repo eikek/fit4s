@@ -38,9 +38,8 @@ object ActivityDetailQuery:
       )
       sessionData <- OptionT
         .whenF(withSessionData)(
-          ses.toList.traverse(s =>
-            RActivitySessionData.findForSession(s.id).map(s.id -> _)
-          )
+          ses.toList
+            .traverse(s => RActivitySessionData.findForSession(s.id).map(s.id -> _))
         )
         .orElse(OptionT.some(Nil))
     } yield ActivityDetailResult(
