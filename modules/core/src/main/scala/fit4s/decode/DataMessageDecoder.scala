@@ -207,9 +207,8 @@ object DataMessageDecoder:
   )(ifValid: Decoder[FieldDecodeResult]): Decoder[FieldDecodeResult] =
     peek(bytes(BaseTypeCodec.length(localField.baseType.fitBaseType))).flatMap { bv =>
       if (BaseTypeCodec.isInvalid(localField.baseType.fitBaseType, byteOrdering)(bv))
-        bytes(localField.sizeBytes).asDecoder.map(_ =>
-          FieldDecodeResult.InvalidValue(localField)
-        )
+        bytes(localField.sizeBytes).asDecoder
+          .map(_ => FieldDecodeResult.InvalidValue(localField))
       else
         ifValid
     }
