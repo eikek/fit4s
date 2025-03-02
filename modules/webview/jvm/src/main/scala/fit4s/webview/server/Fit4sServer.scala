@@ -20,7 +20,7 @@ object Fit4sServer:
   def httpRoutes[F[_]: Async](log: ActivityLog[F], zoneId: ZoneId): HttpRoutes[F] =
     val cors = CORS.policy
     val logger = scribe.cats.effect[F]
-    Logger.httpRoutes(
+    Logger.httpRoutes[F](
       logHeaders = true,
       logBody = false,
       logAction = Some(msg => logger.info(msg))
