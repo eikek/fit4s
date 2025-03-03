@@ -8,11 +8,11 @@ import cats.effect.kernel.Clock
 import cats.syntax.all.*
 import fs2.Stream
 
-import fit4s.activities.records.DoobieImplicits.*
+import fit4s.activities.records.DoobieImplicits.{*, given}
 import fit4s.strava.data.*
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 final case class RStravaToken(
     id: StravaTokenId,
@@ -23,7 +23,8 @@ final case class RStravaToken(
     refreshToken: StravaRefreshToken,
     scope: StravaScope,
     createdAt: Instant
-):
+) derives Read,
+      Write:
   def toTokenAndScope: TokenAndScope =
     TokenAndScope(
       StravaTokenResponse(

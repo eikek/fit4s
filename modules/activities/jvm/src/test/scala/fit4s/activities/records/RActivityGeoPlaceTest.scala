@@ -9,7 +9,7 @@ import fit4s.activities.records.TestData.*
 import fit4s.activities.{DatabaseTest, FlywayMigrate}
 import fit4s.data.Distance
 
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 class RActivityGeoPlaceTest extends DatabaseTest:
   override def munitFixtures = List(h2DataSource)

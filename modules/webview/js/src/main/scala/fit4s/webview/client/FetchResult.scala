@@ -1,6 +1,6 @@
 package fit4s.webview.client
 
-import cats.{Applicative, Functor}
+import cats.Applicative
 
 import fit4s.webview.data.RequestFailure
 
@@ -32,8 +32,3 @@ object FetchResult:
               case FetchResult.Success(a) => FetchResult.Success(f(a))
               case err                    => err.asInstanceOf[FetchResult[B]]
           case err => err.asInstanceOf[FetchResult[B]]
-
-  given Functor[FetchResult] =
-    new Functor[FetchResult]:
-      def map[A, B](fa: FetchResult[A])(f: A => B): FetchResult[B] =
-        fa.map(f)

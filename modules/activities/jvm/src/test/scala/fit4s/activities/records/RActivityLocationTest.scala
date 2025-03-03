@@ -7,7 +7,7 @@ import fs2.io.file.Path
 import fit4s.activities.data.LocationId
 import fit4s.activities.{DatabaseTest, FlywayMigrate}
 
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 class RActivityLocationTest extends DatabaseTest:
   override def munitFixtures = List(h2DataSource)

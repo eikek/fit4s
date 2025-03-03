@@ -8,16 +8,17 @@ import fs2.Stream
 
 import fit4s.activities.data.*
 import fit4s.activities.impl.ActivityQueryBuilder
-import fit4s.activities.records.DoobieImplicits.*
+import fit4s.activities.records.DoobieImplicits.{*, given}
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 final case class RActivityTag(
     id: ActivityTagId,
     activityId: ActivityId,
     tagId: TagId
-)
+) derives Read,
+      Write
 
 object RActivityTag:
   private[activities] val table = fr"activity_tag"

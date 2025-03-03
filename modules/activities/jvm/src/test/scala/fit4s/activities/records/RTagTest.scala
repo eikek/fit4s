@@ -5,7 +5,7 @@ import cats.effect.IO
 import fit4s.activities.data.{TagId, TagName}
 import fit4s.activities.{DatabaseTest, FlywayMigrate}
 
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 class RTagTest extends DatabaseTest:
   override def munitFixtures = List(h2DataSource)

@@ -31,7 +31,7 @@ package object impl:
 
       self
         .run(r)
-        .use:
+        .use {
           case Successful(resp) =>
             da.decode(resp, strict = false)
               .leftWiden[Throwable]
@@ -42,3 +42,4 @@ package object impl:
               .leftWiden[Throwable]
               .rethrowT
               .map(_.asLeft[A])
+        }

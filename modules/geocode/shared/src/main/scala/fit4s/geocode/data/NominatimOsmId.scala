@@ -8,8 +8,5 @@ final class NominatimOsmId(val id: Long) extends AnyVal:
 object NominatimOsmId:
   def apply(id: Long): NominatimOsmId = new NominatimOsmId(id)
 
-  implicit val jsonDecoder: Decoder[NominatimOsmId] =
-    Decoder.forLong.map(apply)
-
-  implicit val jsonEncoder: Encoder[NominatimOsmId] =
-    Encoder.forLong.contramap(_.id)
+  given Decoder[NominatimOsmId] = Decoder.forLong.map(apply)
+  given Encoder[NominatimOsmId] = Encoder.forLong.contramap(_.id)

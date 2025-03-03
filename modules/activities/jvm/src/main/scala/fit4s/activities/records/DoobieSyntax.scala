@@ -5,15 +5,15 @@ import cats.Foldable
 import fit4s.activities.data.Page
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 trait DoobieSyntax:
 
-  implicit final class PageOps(self: Page):
+  extension (self: Page)
     def asFragment: Fragment =
       if (self == Page.unlimited) Fragment.empty
       else fr"LIMIT ${self.limit} OFFSET ${self.offset}"
 
-  implicit final class MoreFragmentFoldableOps[F[_]: Foldable](self: F[Fragment]):
+  extension [F[_]: Foldable](self: F[Fragment])
     def commas: Fragment =
       self.foldSmash1(Fragment.empty, sql",", Fragment.empty)

@@ -6,7 +6,7 @@ import fs2.io.file.Path
 
 import fit4s.activities.{DatabaseTest, FlywayMigrate}
 
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 class RActivitySessionTest extends DatabaseTest with TestData:
   override def munitFixtures = List(h2DataSource)

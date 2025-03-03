@@ -9,17 +9,17 @@ import io.bullet.borer.*
 import io.bullet.borer.derivation.MapBasedCodecs.*
 
 trait NominatimDecoder:
-  implicit val addressDecoder: Decoder[Address] =
+  given Decoder[Address] =
     CoreJsonCodec.stringMapDecoder[String].map(Address.fromMap)
 
-  implicit val placeDecoder: Decoder[Place] = deriveDecoder
+  given Decoder[Place] = deriveDecoder
 
-  implicit val semicircleDecoder: Decoder[Semicircle] =
+  given Decoder[Semicircle] =
     Decoder.forString
       .emap(s => s.toDoubleOption.toRight(s"Invalid double for coordinate: $s"))
       .map(Semicircle.degree)
 
-  implicit val boundingboxDecoder: Decoder[BoundingBox] =
+  given Decoder[BoundingBox] =
     Decoder
       .forArray[String]
       .map(_.toList)

@@ -6,15 +6,15 @@ object Dependencies {
 
   object V {
     val scala2 = "2.13.10"
-    val scala3 = "3.5.2"
+    val scala3 = "3.6.3"
 
     val borer = "1.15.0"
-    val catsEffect = "3.5.5"
+    val catsEffect = "3.5.7"
     val catsParse = "1.1.0"
     val calico = "0.2.3"
     val ciris = "3.7.0"
     val decline = "2.5.0"
-    val doobie = "1.0.0-RC6"
+    val doobie = "1.0.0-RC8"
     val http4s = "0.23.30"
     val http4sDom = "0.2.11"
     val flyway = "11.3.4"
@@ -26,13 +26,13 @@ object Dependencies {
     val catsCore = "2.9.0"
     val fs2 = "3.11.0"
     val scalaCheck = "1.17.0"
-    val scalaCsv = "1.4.1"
+    val scalaCsv = "2.0.0"
     val postgres = "42.7.5"
     val scalaJsDom = "2.8.0"
     val scalaJsTime = "2.6.0"
     val scalaXML = "2.3.0"
-    val scribeSlf4j = "3.15.1"
-    val scribe = "3.15.1"
+    val scribeSlf4j = "3.16.0"
+    val scribe = "3.16.0"
   }
 
   val scalaXML = Def.setting(

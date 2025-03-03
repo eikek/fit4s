@@ -6,10 +6,10 @@ import cats.syntax.all.*
 
 import fit4s.activities.data.*
 import fit4s.activities.records.*
-import fit4s.activities.records.DoobieImplicits.*
+import fit4s.activities.records.DoobieImplicits.{*, given}
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 object ActivityDetailQuery:
   private val activityT = RActivity.table

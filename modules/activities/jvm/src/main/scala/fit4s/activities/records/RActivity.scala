@@ -9,13 +9,13 @@ import cats.effect.kernel.Clock
 import fs2.Stream
 
 import fit4s.activities.StravaExternalId
-import fit4s.activities.data.{Activity, ActivityId, LocationId}
+import fit4s.activities.data.{Activity, ActivityId}
 import fit4s.activities.impl.ActivityName
-import fit4s.activities.records.DoobieImplicits.*
+import fit4s.activities.records.DoobieImplicits.{*, given}
 import fit4s.data.FileId
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 object RActivity:
   private[activities] val table = fr"activity"

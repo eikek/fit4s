@@ -7,10 +7,10 @@ import cats.syntax.all.*
 import fs2.Stream
 
 import fit4s.activities.data.*
-import fit4s.activities.records.DoobieImplicits.*
+import fit4s.activities.records.DoobieImplicits.{*, given}
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 object RTag:
   val softDelete: Tag =

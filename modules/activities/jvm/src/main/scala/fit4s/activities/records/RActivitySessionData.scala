@@ -1,7 +1,5 @@
 package fit4s.activities.records
 
-import java.time.Instant
-
 import scala.collection.immutable.Seq
 
 import fs2.Stream
@@ -11,11 +9,10 @@ import fit4s.activities.data.{
   ActivitySessionDataId,
   ActivitySessionId
 }
-import fit4s.activities.records.DoobieImplicits.*
-import fit4s.data.*
+import fit4s.activities.records.DoobieImplicits.{*, given}
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 object RActivitySessionData:
   private[activities] val table = fr"activity_session_data"

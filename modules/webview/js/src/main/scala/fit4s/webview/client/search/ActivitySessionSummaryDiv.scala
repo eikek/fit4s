@@ -8,7 +8,6 @@ import fs2.dom.*
 
 import fit4s.activities.data.ActivitySessionSummary
 import fit4s.common.instances.all.*
-import fit4s.data.Temperature
 import fit4s.profile.types.Sport
 import fit4s.webview.client.shared.SportIcon
 import fit4s.webview.client.util.FormatDate

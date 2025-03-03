@@ -4,145 +4,173 @@ import java.time.{Duration, Instant}
 
 import fs2.io.file.Path
 
-import fit4s.activities.data.*
+import fit4s.activities.data.{Activity as FActivity, *}
 import fit4s.data.*
 import fit4s.geocode.data.*
 import fit4s.profile.types.*
 import fit4s.strava.data.*
 
-import doobie.Meta
+import doobie.*
+import doobie.syntax.all.*
 
 trait DoobieMeta:
-  implicit val activityLapIdMeta: Meta[ActivityLapId] =
-    Meta[Long].timap(ActivityLapId.apply)(_.id)
+  given Get[ActivityLapId] = Get[Long].map(ActivityLapId.apply)
+  given Put[ActivityLapId] = Put[Long].contramap(_.id)
 
-  implicit val percentMeta: Meta[Percent] =
-    Meta[Double].timap(Percent.percent)(_.percent)
+  given Get[Percent] = Get[Double].map(Percent.percent)
+  given Put[Percent] = Put[Double].contramap(_.percent)
 
-  implicit val stravaIdMeta: Meta[StravaActivityId] =
-    Meta[Long].timap(StravaActivityId.apply)(_.id)
+  given Get[StravaActivityId] = Get[Long].map(StravaActivityId.apply)
+  given Put[StravaActivityId] = Put[Long].contramap(_.id)
 
-  implicit val stravaScopeMeta: Meta[StravaScope] =
-    Meta[String].timap(StravaScope.apply)(_.asString)
+  given Get[StravaScope] = Get[String].map(StravaScope.apply)
+  given Put[StravaScope] = Put[String].contramap(_.asString)
 
-  implicit val activityStravaIdMeta: Meta[ActivityStravaId] =
-    Meta[Long].timap(ActivityStravaId.apply)(_.id)
+  given Get[ActivityStravaId] = Get[Long].map(ActivityStravaId.apply)
+  given Put[ActivityStravaId] = Put[Long].contramap(_.id)
 
-  implicit val stravaAccessTokenMeta: Meta[StravaAccessToken] =
-    Meta[String].timap(StravaAccessToken.apply)(_.token)
+  given Get[StravaAccessToken] = Get[String].map(StravaAccessToken.apply)
+  given Put[StravaAccessToken] = Put[String].contramap(_.token)
 
-  implicit val stravaRefreshTokenMeta: Meta[StravaRefreshToken] =
-    Meta[String].timap(StravaRefreshToken.apply)(_.token)
+  given Get[StravaRefreshToken] = Get[String].map(StravaRefreshToken.apply)
+  given Put[StravaRefreshToken] = Put[String].contramap(_.token)
 
-  implicit val stravaTokenIdMeta: Meta[StravaTokenId] =
-    Meta[Long].timap(StravaTokenId.apply)(_.id)
+  given Get[StravaTokenId] = Get[Long].map(StravaTokenId.apply)
+  given Put[StravaTokenId] = Put[Long].contramap(_.id)
 
-  implicit val positionNameMeta: Meta[PositionName] =
-    Meta[String].timap(PositionName.unsafeFromString)(_.name)
+  given Get[PositionName] = Get[String].map(PositionName.unsafeFromString)
+  given Put[PositionName] = Put[String].contramap(_.name)
 
-  implicit val countryCodeMeta: Meta[CountryCode] =
-    Meta[String].timap(CountryCode.apply)(a => a.code)
+  given Get[CountryCode] = Get[String].map(CountryCode.apply)
+  given Put[CountryCode] = Put[String].contramap(_.code)
 
-  implicit val postCodeMeta: Meta[PostCode] =
-    Meta[String].timap(PostCode.apply)(_.zip)
+  given Get[PostCode] = Get[String].map(PostCode.apply)
+  given Put[PostCode] = Put[String].contramap(_.zip)
 
-  implicit val activityGeoPlaceIdMeta: Meta[ActivityGeoPlaceId] =
-    Meta[Long].timap(ActivityGeoPlaceId.apply)(_.id)
+  given Get[ActivityGeoPlaceId] = Get[Long].map(ActivityGeoPlaceId.apply)
+  given Put[ActivityGeoPlaceId] = Put[Long].contramap(_.id)
 
-  implicit val geoPlaceIdMeta: Meta[GeoPlaceId] =
-    Meta[Long].timap(GeoPlaceId.apply)(_.id)
+  given Get[GeoPlaceId] = Get[Long].map(GeoPlaceId.apply)
+  given Put[GeoPlaceId] = Put[Long].contramap(_.id)
 
-  implicit val osmPlaceIdMeta: Meta[NominatimPlaceId] =
-    Meta[Long].timap(NominatimPlaceId.apply)(_.id)
+  given Get[NominatimPlaceId] = Get[Long].map(NominatimPlaceId.apply)
+  given Put[NominatimPlaceId] = Put[Long].contramap(_.id)
 
-  implicit val osmIdMeta: Meta[NominatimOsmId] =
-    Meta[Long].timap(NominatimOsmId.apply)(_.id)
+  given Get[NominatimOsmId] = Get[Long].map(NominatimOsmId.apply)
+  given Put[NominatimOsmId] = Put[Long].contramap(_.id)
 
-  implicit val lapTriggerMeta: Meta[LapTrigger] =
-    Meta[Long].timap(LapTrigger.unsafeByRawValue)(_.rawValue)
+  given Get[LapTrigger] = Get[Long].map(LapTrigger.unsafeByRawValue)
+  given Put[LapTrigger] = Put[Long].contramap(_.rawValue)
 
-  implicit val swimStrokeMeta: Meta[SwimStroke] =
-    Meta[Long].timap(SwimStroke.unsafeByRawValue)(_.rawValue)
+  given Get[SwimStroke] = Get[Long].map(SwimStroke.unsafeByRawValue)
+  given Put[SwimStroke] = Put[Long].contramap(_.rawValue)
 
-  implicit val tssMeta: Meta[TrainingStressScore] =
-    Meta[Double].timap(TrainingStressScore.tss)(_.tss)
+  given Get[TrainingStressScore] = Get[Double].map(TrainingStressScore.tss)
+  given Put[TrainingStressScore] = Put[Double].contramap(_.tss)
 
-  implicit val intensityFactorMeta: Meta[IntensityFactor] =
-    Meta[Double].timap(IntensityFactor.iff)(_.iff)
+  given Get[IntensityFactor] = Get[Double].map(IntensityFactor.iff)
+  given Put[IntensityFactor] = Put[Double].contramap(_.iff)
 
-  implicit val strokesPerLapMeta: Meta[StrokesPerLap] =
-    Meta[Double].timap(StrokesPerLap.strokesPerLap)(_.spl)
+  given Get[StrokesPerLap] = Get[Double].map(StrokesPerLap.spl)
+  given Put[StrokesPerLap] = Put[Double].contramap(_.spl)
 
-  implicit val deviceProductMeta: Meta[DeviceProduct] =
-    Meta[String].timap(DeviceProduct.unsafeFromString)(_.name)
+  given Get[DeviceProduct] = Get[String].map(DeviceProduct.unsafeFromString)
+  given Put[DeviceProduct] = Put[String].contramap(_.name)
 
-  implicit val deviceInfoMeta: Meta[DeviceInfo] =
-    Meta[String].timap(DeviceInfo.fromString)(_.name)
+  given Get[DeviceInfo] = Get[String].map(DeviceInfo.fromString)
+  given Put[DeviceInfo] = Put[String].contramap(_.name)
 
-  implicit val pathMeta: Meta[Path] =
-    Meta[String].timap(Path.apply)(_.absolute.toString)
+  given Get[Path] = Get[String].map(Path.apply)
+  given Put[Path] = Put[String].contramap(_.absolute.toString)
 
-  implicit val fileIdMeta: Meta[FileId] =
-    Meta[String].timap(FileId.unsafeFromString)(_.asString)
+  given Get[FileId] = Get[String].map(FileId.unsafeFromString)
+  given Put[FileId] = Put[String].contramap(_.asString)
 
-  implicit val sportMeta: Meta[Sport] =
-    Meta[Long].timap(Sport.unsafeByRawValue)(_.rawValue)
+  given Get[Sport] = Get[Long].map(Sport.unsafeByRawValue)
+  given Put[Sport] = Put[Long].contramap(_.rawValue)
 
-  implicit val subSportMeta: Meta[SubSport] =
-    Meta[Long].timap(SubSport.unsafeByRawValue)(_.rawValue)
+  given Get[SubSport] = Get[Long].map(SubSport.unsafeByRawValue)
+  given Put[SubSport] = Put[Long].contramap(_.rawValue)
 
-  implicit val instantMeta: Meta[Instant] =
-    doobie.implicits.legacy.instant.JavaTimeInstantMeta
+  given Get[Instant] = doobie.implicits.legacy.instant.JavaTimeInstantMeta.get
+  given Put[Instant] = doobie.implicits.legacy.instant.JavaTimeInstantMeta.put
 
-  implicit val durationMeta: Meta[Duration] =
-    Meta[Long].timap(Duration.ofMillis)(_.toMillis)
+  given Get[Duration] = Get[Long].map(Duration.ofMillis)
+  given Put[Duration] = Put[Long].contramap(_.toMillis)
 
-  implicit val distanceMeta: Meta[Distance] =
-    Meta[Double].timap(Distance.meter)(_.meter)
+  given Get[Distance] = Get[Double].map(Distance.meter)
+  given Put[Distance] = Put[Double].contramap(_.meter)
 
-  implicit val heartRateMeta: Meta[HeartRate] =
-    Meta[Int].timap(HeartRate.bpm)(_.bpm)
+  given Get[HeartRate] = Get[Int].map(HeartRate.bpm)
+  given Put[HeartRate] = Put[Int].contramap(_.bpm)
 
-  implicit val speedMeta: Meta[Speed] =
-    Meta[Double].timap(Speed.meterPerSecond)(_.meterPerSecond)
+  given Get[Speed] = Get[Double].map(Speed.meterPerSecond)
+  given Put[Speed] = Put[Double].contramap(_.meterPerSecond)
 
-  implicit val caloriesMeta: Meta[Calories] =
-    Meta[Double].timap(Calories.kcal)(_.kcal)
+  given Get[Calories] = Get[Double].map(Calories.kcal)
+  given Put[Calories] = Put[Double].contramap(_.kcal)
 
-  implicit val temperatureMeta: Meta[Temperature] =
-    Meta[Double].timap(Temperature.celcius)(_.celcius)
+  given Get[Temperature] = Get[Double].map(Temperature.celcius)
+  given Put[Temperature] = Put[Double].contramap(_.celcius)
 
-  implicit val semicircleMeta: Meta[Semicircle] =
-    Meta[Long].timap(Semicircle.semicircle)(_.semicircle)
+  given Get[Semicircle] = Get[Long].map(Semicircle.semicircle)
+  given Put[Semicircle] = Put[Long].contramap(_.semicircle)
 
-  implicit val cadenceMeta: Meta[Cadence] =
-    Meta[Int].timap(Cadence.rpm)(_.rpm)
+  given Get[Cadence] = Get[Int].map(Cadence.rpm)
+  given Put[Cadence] = Put[Int].contramap(_.rpm)
 
-  implicit val gradeMeta: Meta[Grade] =
-    Meta[Double].timap(Grade.percent)(_.percent)
+  given Get[Grade] = Get[Double].map(Grade.percent)
+  given Put[Grade] = Put[Double].contramap(_.percent)
 
-  implicit val powerMeta: Meta[Power] =
-    Meta[Int].timap(Power.watts)(_.watts)
+  given Get[Power] = Get[Int].map(Power.watts)
+  given Put[Power] = Put[Int].contramap(_.watts)
 
-  implicit val tagNameMeta: Meta[TagName] =
-    Meta[String].timap(TagName.unsafeFromString)(_.name)
+  given Get[TagName] = Get[String].map(TagName.unsafeFromString)
+  given Put[TagName] = Put[String].contramap(_.name)
 
-  implicit val tagIdMeta: Meta[TagId] =
-    Meta[Long].timap(TagId.apply)(_.id)
+  given Get[TagId] = Get[Long].map(TagId.apply)
+  given Put[TagId] = Put[Long].contramap(_.id)
 
-  implicit val locationIdMeta: Meta[LocationId] =
-    Meta[Long].timap(LocationId.apply)(_.id)
+  given Read[Tag] = Read.derived
+  given Write[Tag] = Write.derived
 
-  implicit val activityIdMeta: Meta[ActivityId] =
-    Meta[Long].timap(ActivityId.apply)(_.id)
+  given Get[LocationId] = Get[Long].map(LocationId.apply)
+  given Write[LocationId] = Write[Long].contramap(_.id)
 
-  implicit val activityTagIdMeta: Meta[ActivityTagId] =
-    Meta[Long].timap(ActivityTagId.apply)(_.id)
+  given Get[ActivityId] = Get[Long].map(ActivityId.apply)
+  given Write[ActivityId] = Write[Long].contramap(_.id)
 
-  implicit val activityDataIdMeta: Meta[ActivitySessionDataId] =
-    Meta[Long].timap(ActivitySessionDataId.apply)(_.id)
+  given Get[ActivityTagId] = Get[Long].map(ActivityTagId.apply)
+  given Write[ActivityTagId] = Write[Long].contramap(_.id)
 
-  implicit val activitySessionId: Meta[ActivitySessionId] =
-    Meta[Long].timap(ActivitySessionId.apply)(_.id)
+  given Get[ActivitySessionDataId] = Get[Long].map(ActivitySessionDataId.apply)
+  given Write[ActivitySessionDataId] = Write[Long].contramap(_.id)
+
+  given Get[ActivitySessionId] = Get[Long].map(ActivitySessionId.apply)
+  given Write[ActivitySessionId] = Write[Long].contramap(_.id)
+
+  given Read[Position] = Read.derived
+  given Write[Position] = Write.derived
+
+  given Read[GeoPlace] = Read.derived
+  given Write[GeoPlace] = Write.derived
+
+  given Read[ActivitySessionData] = Read.derived
+  given Write[ActivitySessionData] = Write.derived
+
+  given Read[ActivitySession] = Read.derived
+  given Write[ActivitySession] = Write.derived
+
+  given Read[Location] = Read.derived
+  given Write[Location] = Write.derived
+
+  given Read[ActivityLap] = Read.derived
+  given Write[ActivityLap] = Write.derived
+
+  given Read[FActivity] = Read.derived
+  given Write[FActivity] = Write.derived
+
+  given Read[ActivitySessionSummary] = Read.derived
+  given Write[ActivitySessionSummary] = Write.derived
 
 object DoobieMeta extends DoobieMeta

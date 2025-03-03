@@ -6,7 +6,7 @@ import fit4s.activities.JdbcConfig.Dbms
 import fit4s.activities.records.*
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 object RestartSequences:
 

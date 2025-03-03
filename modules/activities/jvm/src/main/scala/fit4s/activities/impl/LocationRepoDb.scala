@@ -12,7 +12,7 @@ import fit4s.activities.data.{Location, LocationId, Page}
 import fit4s.activities.records.RActivityLocation
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 final class LocationRepoDb[F[_]: Sync: Files](xa: Transactor[F]) extends LocationRepo[F]:
   def listLocations(
@@ -22,7 +22,7 @@ final class LocationRepoDb[F[_]: Sync: Files](xa: Transactor[F]) extends Locatio
     val search = contains.map(s => s"%$s%")
     RActivityLocation
       .listSream(search, page)
-      .transact(xa)
+      .transactNoPrefetch(xa)
 
   def move(
       idOrPath: Either[LocationId, Path],

@@ -9,7 +9,7 @@ import fit4s.activities.data.*
 import fit4s.activities.records.{RActivityTag, RTag}
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 final class TagRepoDb[F[_]: Sync](xa: Transactor[F]) extends TagRepo[F]:
   def linkTags(
@@ -39,7 +39,7 @@ final class TagRepoDb[F[_]: Sync](xa: Transactor[F]) extends TagRepo[F]:
   def listTags(contains: Option[TagName], page: Page) =
     RTag
       .listAll(contains.map(t => s"%${t.name}%"), page)
-      .transact(xa)
+      .transactNoPrefetch(xa)
       .map(t => Tag(t.id, t.name))
 
   def rename(from: TagName, to: TagName): F[Boolean] =
