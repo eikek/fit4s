@@ -15,5 +15,5 @@ object HeartRate:
 
   def bpm(bpm: Int): HeartRate = new HeartRate(bpm)
 
-  implicit val numeric: Numeric[HeartRate] =
+  given Numeric[HeartRate] =
     NumericFrom[HeartRate, Int](_.bpm, HeartRate.bpm)

@@ -5,18 +5,19 @@ import scala.collection.immutable.Seq
 import fs2.Stream
 
 import fit4s.activities.data.*
-import fit4s.activities.records.DoobieImplicits.*
+import fit4s.activities.records.DoobieImplicits.{*, given}
 import fit4s.data.Distance
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 final case class RActivityGeoPlace(
     id: ActivityGeoPlaceId,
     activityId: ActivitySessionId,
     placeId: GeoPlaceId,
     name: PositionName
-)
+) derives Read,
+      Write
 
 object RActivityGeoPlace:
   private[activities] val table = fr"activity_geo_place"

@@ -5,11 +5,11 @@ import fs2.io.file.Path
 
 import fit4s.activities.data.*
 import fit4s.activities.records.*
-import fit4s.activities.records.DoobieImplicits.*
+import fit4s.activities.records.DoobieImplicits.{*, given}
 import fit4s.strava.data.StravaActivityId
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 object ActivityQueryBuilder:
 

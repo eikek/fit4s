@@ -10,7 +10,7 @@ import fs2.io.file.{Files, Path}
 import fit4s.activities.records.*
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 import munit.CatsEffectSuite
 import org.h2.jdbcx.{JdbcConnectionPool, JdbcDataSource}
 

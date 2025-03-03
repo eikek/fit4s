@@ -9,11 +9,11 @@ import fs2.io.file.Path
 import fit4s.activities.StravaSupport.ActivityData
 import fit4s.activities.data.{ActivityId, ActivityQuery, UnlinkedStravaStats}
 import fit4s.activities.records.*
-import fit4s.activities.records.DoobieImplicits.*
+import fit4s.activities.records.DoobieImplicits.{*, given}
 import fit4s.data.FileId
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 object NonStravaActivities:
 

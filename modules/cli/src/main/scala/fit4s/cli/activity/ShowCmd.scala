@@ -78,7 +78,7 @@ object ShowCmd extends SharedOpts with FormatDefinition {
   private def fileId(r: ActivityDetailResult): String =
     s"File-Id: ${r.activity.activityFileId.asString}".in(Styles.device)
 
-  private def showSession(r: ActivityDetailResult, s: ActivitySession)(implicit
+  private def showSession(r: ActivityDetailResult, s: ActivitySession)(using
       zoneId: ZoneId
   ): String = {
     implicit val sport: Sport = s.sport

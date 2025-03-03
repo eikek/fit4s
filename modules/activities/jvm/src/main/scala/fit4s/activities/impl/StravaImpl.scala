@@ -21,7 +21,7 @@ import fit4s.strava.data.*
 import fit4s.strava.{StravaAppCredentials, StravaClient, StravaExportExtract}
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 final class StravaImpl[F[_]: Async: Compression: Files](
     stravaClient: StravaClient[F],

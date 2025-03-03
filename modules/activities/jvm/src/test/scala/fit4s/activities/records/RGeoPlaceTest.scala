@@ -7,7 +7,7 @@ import fit4s.activities.{DatabaseTest, FlywayMigrate}
 import fit4s.data.*
 import fit4s.geocode.data.BoundingBox
 
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 class RGeoPlaceTest extends DatabaseTest with TestData:
   override def munitFixtures = List(h2DataSource)

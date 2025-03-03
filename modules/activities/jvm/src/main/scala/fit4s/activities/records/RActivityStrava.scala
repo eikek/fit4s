@@ -6,17 +6,18 @@ import fs2.Stream
 
 import fit4s.activities.data.*
 import fit4s.activities.impl.ActivityQueryBuilder
-import fit4s.activities.records.DoobieImplicits.*
+import fit4s.activities.records.DoobieImplicits.{*, given}
 import fit4s.strava.data.StravaActivityId
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 final case class RActivityStrava(
     id: ActivityStravaId,
     activityId: ActivityId,
     stravaId: StravaActivityId
-)
+) derives Read,
+      Write
 
 object RActivityStrava:
   private[activities] val table = fr"activity_strava"

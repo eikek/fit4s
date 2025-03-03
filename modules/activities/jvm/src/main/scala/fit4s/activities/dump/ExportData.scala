@@ -12,7 +12,7 @@ import fit4s.activities.records.*
 import fit4s.http.borer.StreamDecode
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 import io.bullet.borer.*
 
 trait ExportData[F[_]]:
@@ -59,18 +59,18 @@ object ExportData:
 
     override def dump(progress: ProgressObserve[F]): Stream[F, Byte] =
       (
-        RTag.streamAll.transact(xa).map(DumpFormat.apply) ++
-          RActivityLocation.streamAll.transact(xa).map(DumpFormat.apply) ++
-          RActivity.streamAll.transact(xa).map(DumpFormat.apply) ++
-          RActivitySession.streamAll.transact(xa).map(DumpFormat.apply) ++
-          RActivityLap.streamAll.transact(xa).map(DumpFormat.apply) ++
-          RActivitySessionData.streamAll.transact(xa).map(DumpFormat.apply) ++
-          RActivityTag.streamAll.transact(xa).map(DumpFormat.apply) ++
-          RActivityStrava.streamAll.transact(xa).map(DumpFormat.apply) ++
-          RGeoPlace.streamAll.transact(xa).map(DumpFormat.apply) ++
-          RActivityGeoPlace.streamAll.transact(xa).map(DumpFormat.apply) ++
+        RTag.streamAll.transactNoPrefetch(xa).map(DumpFormat.apply) ++
+          RActivityLocation.streamAll.transactNoPrefetch(xa).map(DumpFormat.apply) ++
+          RActivity.streamAll.transactNoPrefetch(xa).map(DumpFormat.apply) ++
+          RActivitySession.streamAll.transactNoPrefetch(xa).map(DumpFormat.apply) ++
+          RActivityLap.streamAll.transactNoPrefetch(xa).map(DumpFormat.apply) ++
+          RActivitySessionData.streamAll.transactNoPrefetch(xa).map(DumpFormat.apply) ++
+          RActivityTag.streamAll.transactNoPrefetch(xa).map(DumpFormat.apply) ++
+          RActivityStrava.streamAll.transactNoPrefetch(xa).map(DumpFormat.apply) ++
+          RGeoPlace.streamAll.transactNoPrefetch(xa).map(DumpFormat.apply) ++
+          RActivityGeoPlace.streamAll.transactNoPrefetch(xa).map(DumpFormat.apply) ++
           Stream.eval(RStravaToken.deleteExpired.transact(xa)).drain ++
-          RStravaToken.streamAll.transact(xa).map(DumpFormat.apply)
+          RStravaToken.streamAll.transactNoPrefetch(xa).map(DumpFormat.apply)
       ).evalTap(progress.onProcess).through(encode)
 
     override def read(

@@ -9,7 +9,7 @@ import fit4s.activities.{GeoLookup, ImportResult}
 import fit4s.data.Position
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 final class GeoPlaceAttach[F[_]: Async](xa: Transactor[F], geoLookup: GeoLookup[F]):
 

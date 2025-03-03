@@ -9,12 +9,12 @@ import fs2.Stream
 
 import fit4s.activities.data.ActivitySession
 import fit4s.activities.data.{ActivityId, ActivitySessionId}
-import fit4s.activities.records.DoobieImplicits.*
+import fit4s.activities.records.DoobieImplicits.{*, given}
 import fit4s.data.Position
 import fit4s.profile.types.*
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 object RActivitySession:
   private[activities] val table = fr"activity_session"

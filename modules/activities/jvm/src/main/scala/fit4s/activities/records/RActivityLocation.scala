@@ -8,10 +8,10 @@ import fs2.io.file.Path
 import fs2.{Chunk, Stream}
 
 import fit4s.activities.data.{Location, LocationId, Page}
-import fit4s.activities.records.DoobieImplicits.*
+import fit4s.activities.records.DoobieImplicits.{*, given}
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 object RActivityLocation:
   private[activities] val table = fr"activity_location"

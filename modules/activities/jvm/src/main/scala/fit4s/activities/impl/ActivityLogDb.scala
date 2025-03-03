@@ -14,7 +14,7 @@ import fit4s.activities.data.*
 import fit4s.activities.dump.ExportData
 import fit4s.activities.records.*
 
-import doobie.implicits.*
+import doobie.syntax.all.*
 import doobie.{Query as _, *}
 
 final class ActivityLogDb[F[_]: Async: Files: Compression](

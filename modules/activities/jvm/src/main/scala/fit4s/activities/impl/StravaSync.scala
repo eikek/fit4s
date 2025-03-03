@@ -14,7 +14,7 @@ import fit4s.profile.types.Sport
 import fit4s.strava.data.{StravaActivity, StravaActivityId, StravaGear}
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 final class StravaSync[F[_]: Async](
     xa: Transactor[F],

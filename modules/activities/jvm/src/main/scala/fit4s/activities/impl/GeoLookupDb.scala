@@ -12,7 +12,7 @@ import fit4s.geocode.ReverseLookup
 import fit4s.geocode.data.Place
 
 import doobie.*
-import doobie.implicits.*
+import doobie.syntax.all.*
 
 class GeoLookupDb[F[_]: Sync](
     reverseLookup: ReverseLookup[F],
