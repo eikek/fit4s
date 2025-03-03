@@ -8,11 +8,11 @@ import fs2.io.file.{Files, Path}
 import fit4s.strava.data.StravaActivityId
 import fit4s.strava.impl.Zip
 
-import com.github.tototoshi.csv.{CSVFormat, CSVReader, defaultCSVFormat}
+import com.github.tototoshi.csv.{CSVFormat, CSVReader}
 
 /** Extract activities from a strava export. */
 object StravaExportExtract:
-  implicit val format: CSVFormat = defaultCSVFormat
+  implicit val format: CSVFormat = CSVFormat.defaultCSVFormat
 
   case class ExportData(
       fitFile: Path,
