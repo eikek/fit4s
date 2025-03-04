@@ -51,26 +51,30 @@
       fit4s-dev = pkgs.fit4s-dev;
     });
 
-    devShells = forAllSystems (system: {
-      default = let
-        pkgs = import nixpkgs {
-          inherit system;
-          overlays = [
-            devshell-tools.overlays.default
-          ];
-        };
-      in
-        pkgs.mkShell {
-          buildInputs = [
-            pkgs.sbt17
-            pkgs.nodejs
-            pkgs.scala-cli
-          ];
-          nativeBuildInputs = [
-          ];
+    devShells = forAllSystems (system: let
+      pkgs = import nixpkgs {
+        inherit system;
+        overlays = [
+          devshell-tools.overlays.default
+        ];
+      };
+      ciPkgs = with pkgs; [
+        sbt17 nodejs
+      ];
+    in {
+      ci = pkgs.mkShellNoCC {
+        buildInputs = ciPkgs;
+        SBT_OPTS = "-Xmx2G";
+      };
+      default = pkgs.mkShellNoCC {
+        buildInputs = ciPkgs ++ [
+          pkgs.scala-cli
+        ];
+        nativeBuildInputs = [
+        ];
 
-          SBT_OPTS = "-Xmx2G";
-        };
+        SBT_OPTS = "-Xmx2G";
+      };
     });
   };
 }

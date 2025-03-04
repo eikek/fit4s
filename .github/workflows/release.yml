@@ -10,21 +10,18 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
-      matrix:
-        java: [ 'openjdk@1.17' ]
     steps:
       - uses: actions/checkout@v4.2.2
         with:
           fetch-depth: 0
-      - uses: olafurpg/setup-scala@v14
-        with:
-          java-version: ${{ matrix.java }}
+
+      - uses: cachix/install-nix-action@v30
 
       - name: Set current version
         id: version
         shell: bash
         run: |
-          sbt 'cli/writeVersion'
+          nix develop .#ci --command sbt 'cli/writeVersion'
           FIT4S_VERSION=$(cat target/version.txt)
           echo "FIT4S_VERSION=${FIT4S_VERSION}" >> $GITHUB_ENV
 
@@ -33,12 +30,8 @@ jobs:
             exit 1
           fi
 
-      - uses: bahmutov/npm-install@v1
-        with:
-          working-directory: modules/webview
-
-      - name: create zip package
-        run: ./make-cli.sh
+      - name: Create zip package (${{ env.FIT4S_VERSION }})
+        run: nix develop .#ci --command ./make-cli.sh
 
       - name: Publish Release (${{ env.FIT4S_VERSION }})
         uses: softprops/action-gh-release@v2
