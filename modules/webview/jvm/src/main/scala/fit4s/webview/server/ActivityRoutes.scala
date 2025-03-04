@@ -8,7 +8,7 @@ import cats.syntax.all.*
 
 import fit4s.activities.ActivityLog
 import fit4s.activities.data.QueryCondition
-import fit4s.http.borer.BorerEntityCodec.Implicits.*
+import com.github.eikek.borer.compats.http4s.BorerEntityJsonCodec.given
 import fit4s.webview.data.*
 import fit4s.webview.json.BasicJsonCodec
 import fit4s.webview.server.util.*

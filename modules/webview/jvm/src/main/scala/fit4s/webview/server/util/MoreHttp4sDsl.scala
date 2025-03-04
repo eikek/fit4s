@@ -4,7 +4,7 @@ import cats.data.ValidatedNel
 import cats.syntax.all.*
 import cats.{Applicative, Monad}
 
-import fit4s.http.borer.BorerEntityCodec.Implicits.*
+import com.github.eikek.borer.compats.http4s.BorerEntityJsonCodec.given
 import fit4s.webview.data.RequestFailure
 
 import org.http4s.*

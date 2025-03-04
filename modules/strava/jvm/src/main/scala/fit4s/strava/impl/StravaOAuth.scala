@@ -9,7 +9,7 @@ import cats.effect.std.Random
 import cats.syntax.all.*
 import fs2.io.net.Network
 
-import fit4s.http.borer.BorerEntityCodec.Implicits.*
+import com.github.eikek.borer.compats.http4s.BorerEntityJsonCodec.given
 import fit4s.strava.data.*
 import fit4s.strava.{StravaAppCredentials, StravaClientConfig}
 

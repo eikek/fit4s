@@ -8,8 +8,7 @@ import cats.syntax.all.*
 import fs2.Stream
 import fs2.io.file.{Files, Path}
 
-import fit4s.http.borer.BorerEntityCodec
-import fit4s.http.borer.BorerEntityCodec.Implicits.*
+import com.github.eikek.borer.compats.http4s.BorerEntityJsonCodec.given
 import fit4s.strava.StravaClientConfig
 import fit4s.strava.data.*
 

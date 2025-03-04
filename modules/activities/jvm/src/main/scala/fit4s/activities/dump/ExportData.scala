@@ -9,7 +9,7 @@ import fit4s.activities.JdbcConfig
 import fit4s.activities.data.Location
 import fit4s.activities.dump.ExportData.ProgressObserve
 import fit4s.activities.records.*
-import fit4s.http.borer.StreamDecode
+import com.github.eikek.borer.compats.fs2.StreamDecode
 
 import doobie.*
 import doobie.syntax.all.*

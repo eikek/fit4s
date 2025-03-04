@@ -12,7 +12,7 @@ import fit4s.common.util.Cache
 import fit4s.data.Position
 import fit4s.geocode.NominatimOSM.State
 import fit4s.geocode.data.Place
-import fit4s.http.borer.BorerEntityCodec.Implicits.*
+import com.github.eikek.borer.compats.http4s.BorerEntityJsonCodec.given
 
 import org.http4s.Method.GET
 import org.http4s.client.Client

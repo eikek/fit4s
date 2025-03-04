@@ -1,6 +1,6 @@
 package fit4s.webview.server.util
 
-import fit4s.http.borer.BorerEntityCodec.Implicits.*
+import com.github.eikek.borer.compats.http4s.BorerEntityJsonCodec.given
 
 import io.bullet.borer.*
 import org.http4s.*

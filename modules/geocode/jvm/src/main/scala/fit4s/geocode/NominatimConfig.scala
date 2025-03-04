@@ -1,6 +1,6 @@
 package fit4s.geocode
 
-import fit4s.http.borer.Http4sCodec
+import com.github.eikek.borer.compats.http4s.Http4sCodec
 
 import io.bullet.borer.*
 import io.bullet.borer.derivation.MapBasedCodecs.*

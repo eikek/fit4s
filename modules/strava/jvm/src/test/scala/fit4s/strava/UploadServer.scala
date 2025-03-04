@@ -4,7 +4,7 @@ import cats.effect.*
 import cats.effect.std.Random
 import cats.syntax.all.*
 
-import fit4s.http.borer.BorerEntityCodec.Implicits.*
+import com.github.eikek.borer.compats.http4s.BorerEntityCodec.Implicits.*
 import fit4s.strava.data.{StravaActivityId, StravaUploadId, StravaUploadStatus}
 
 import com.comcast.ip4s.*
