@@ -149,24 +149,6 @@ lazy val tcx = crossProject(JSPlatform, JVMPlatform)
 lazy val tcxJs = tcx.js
 lazy val tcxJvm = tcx.jvm
 
-lazy val http4sBorer = crossProject(JSPlatform, JVMPlatform)
-  .crossType(CrossType.Full)
-  .withoutSuffixFor(JVMPlatform)
-  .in(file("modules/http4s-borer"))
-  .settings(sharedSettings)
-  .settings(testSettings)
-  .settings(scalafixSettings)
-  .settings(
-    name := "fit4s-http4s-borer",
-    description := "Use borer codecs with http4s",
-    libraryDependencies ++=
-      Dependencies.borerJs.value ++
-        Dependencies.http4sCore.value ++
-        Dependencies.fs2Core.value
-  )
-lazy val http4sBorerJs = http4sBorer.js
-lazy val http4sBorerJvm = http4sBorer.jvm
-
 lazy val geocode = crossProject(JSPlatform, JVMPlatform)
   .crossType(CrossType.Full)
   .withoutSuffixFor(JVMPlatform)
@@ -181,9 +163,10 @@ lazy val geocode = crossProject(JSPlatform, JVMPlatform)
       Dependencies.http4sEmberClient.value ++
         Dependencies.fs2Core.value ++
         Dependencies.borerJs.value ++
-        Dependencies.scribeJs.value
+        Dependencies.scribeJs.value ++
+        Dependencies.borerCompatsHttp4s.value
   )
-  .dependsOn(core, common, http4sBorer)
+  .dependsOn(core, common)
 
 lazy val geocodeJvm = geocode.jvm
 lazy val geocodeJs = geocode.js
@@ -201,7 +184,8 @@ lazy val strava = crossProject(JSPlatform, JVMPlatform)
     libraryDependencies ++=
       Dependencies.http4sEmberClient.value ++
         Dependencies.borerJs.value ++
-        Dependencies.fs2.value
+        Dependencies.fs2.value ++
+        Dependencies.borerCompatsHttp4s.value
   )
   .jvmSettings(
     libraryDependencies ++=
@@ -210,7 +194,7 @@ lazy val strava = crossProject(JSPlatform, JVMPlatform)
         Dependencies.scalaCsv ++
         Dependencies.scribe
   )
-  .dependsOn(core, common, http4sBorer)
+  .dependsOn(core, common)
 
 lazy val stravaJvm = strava.jvm
 lazy val stravaJs = strava.js
@@ -226,7 +210,7 @@ lazy val activities = crossProject(JSPlatform, JVMPlatform)
     name := "fit4s-activities",
     description := "A small database backed activity log",
     libraryDependencies ++= Dependencies.catsParse.value ++
-      Dependencies.borerJs.value
+      Dependencies.borerJs.value ++ Dependencies.borerCompatsFs2.value
   )
   .dependsOn(
     core % "compile->compile;test->test",
@@ -371,8 +355,6 @@ lazy val root = project
     commonJs,
     tcxJvm,
     tcxJs,
-    http4sBorerJs,
-    http4sBorerJvm,
     geocodeJvm,
     geocodeJs,
     stravaJvm,
