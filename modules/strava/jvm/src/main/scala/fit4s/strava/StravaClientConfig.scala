@@ -1,7 +1,6 @@
 package fit4s.strava
 
 import com.github.eikek.borer.compats.http4s.Http4sCodec
-
 import io.bullet.borer.*
 import io.bullet.borer.derivation.MapBasedCodecs.*
 import org.http4s.Uri

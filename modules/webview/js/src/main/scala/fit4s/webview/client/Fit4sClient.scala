@@ -7,11 +7,11 @@ import cats.syntax.all.*
 import fs2.io.net.Network
 
 import fit4s.activities.data.*
-import com.github.eikek.borer.compats.http4s.BorerEntityJsonCodec.given
 import fit4s.webview.data.TagQueryParamEncoder.*
 import fit4s.webview.data.{Name, Notes, RequestFailure}
 import fit4s.webview.json.BasicJsonCodec.*
 
+import com.github.eikek.borer.compats.http4s.BorerEntityJsonCodec.given
 import org.http4s.*
 import org.http4s.client.{Client, UnexpectedStatus}
 import org.http4s.dom.FetchClientBuilder

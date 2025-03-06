@@ -9,11 +9,11 @@ import cats.effect.std.Random
 import cats.syntax.all.*
 import fs2.io.net.Network
 
-import com.github.eikek.borer.compats.http4s.BorerEntityJsonCodec.given
 import fit4s.strava.data.*
 import fit4s.strava.{StravaAppCredentials, StravaClientConfig}
 
 import com.comcast.ip4s.{Host, Port}
+import com.github.eikek.borer.compats.http4s.BorerEntityJsonCodec.given
 import org.http4s.Method.POST
 import org.http4s.client.Client
 import org.http4s.client.dsl.Http4sClientDsl

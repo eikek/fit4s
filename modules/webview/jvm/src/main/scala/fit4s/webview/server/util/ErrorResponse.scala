@@ -1,7 +1,6 @@
 package fit4s.webview.server.util
 
 import com.github.eikek.borer.compats.http4s.BorerEntityJsonCodec.given
-
 import io.bullet.borer.*
 import org.http4s.*
 import org.http4s.headers.`Content-Length`

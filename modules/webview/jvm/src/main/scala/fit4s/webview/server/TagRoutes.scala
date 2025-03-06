@@ -6,11 +6,11 @@ import cats.effect.*
 import cats.syntax.all.*
 
 import fit4s.activities.ActivityLog
-import com.github.eikek.borer.compats.http4s.BorerEntityJsonCodec.given
 import fit4s.webview.data.{TagAndQuery, TagRename}
 import fit4s.webview.json.BasicJsonCodec
 import fit4s.webview.server.util.*
 
+import com.github.eikek.borer.compats.http4s.BorerEntityJsonCodec.given
 import org.http4s.HttpRoutes
 import org.http4s.dsl.Http4sDsl
 
