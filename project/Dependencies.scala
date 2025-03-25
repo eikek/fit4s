@@ -25,7 +25,7 @@ object Dependencies {
     val scodec1 = "1.11.10"
     val scodec2 = "2.3.2"
     val catsCore = "2.9.0"
-    val fs2 = "3.11.0"
+    val fs2 = "3.12.0"
     val scalaCheck = "1.17.0"
     val scalaCsv = "2.0.0"
     val postgres = "42.7.5"
