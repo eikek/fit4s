@@ -32,8 +32,8 @@ object Dependencies {
     val scalaJsDom = "2.8.0"
     val scalaJsTime = "2.6.0"
     val scalaXML = "2.3.0"
-    val scribeSlf4j = "3.16.0"
-    val scribe = "3.16.0"
+    val scribeSlf4j = "3.16.1"
+    val scribe = "3.16.1"
   }
 
   val borerCompatsHttp4s = Def.setting(
