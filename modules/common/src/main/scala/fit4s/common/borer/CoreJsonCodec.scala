@@ -76,12 +76,14 @@ trait CoreJsonCodec:
     )
 
   implicit def nonEmptyListEncoder[A: Encoder]: Encoder[NonEmptyList[A]] =
-    Encoder[List[A]].contramap(_.toList)
+    Encoder.of[List[A]].contramap(_.toList)
 
   implicit def nonEmptyListDecoder[A: Decoder]: Decoder[NonEmptyList[A]] =
-    Decoder[List[A]].emap(l =>
-      NonEmptyList.fromList(l).toRight("Expected non-empty list, but list was empty")
-    )
+    Decoder
+      .of[List[A]]
+      .emap(l =>
+        NonEmptyList.fromList(l).toRight("Expected non-empty list, but list was empty")
+      )
 
   implicit def baseTypeEncoder[A <: TypedValue[?]]: Encoder[A] =
     Encoder.forString.contramap(_.typeName)

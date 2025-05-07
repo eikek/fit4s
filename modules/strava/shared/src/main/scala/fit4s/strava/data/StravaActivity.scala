@@ -46,13 +46,15 @@ object StravaActivity:
       Decoder.forDouble.map(Distance.meter)
 
     implicit val positionDecoder: Decoder[Option[Position]] =
-      Decoder[Option[List[Double]]].emap:
-        case Some(lat :: lng :: Nil) =>
-          Right(Position(Semicircle.degree(lat), Semicircle.degree(lng)).some)
+      Decoder
+        .of[Option[List[Double]]]
+        .emap:
+          case Some(lat :: lng :: Nil) =>
+            Right(Position(Semicircle.degree(lat), Semicircle.degree(lng)).some)
 
-        case Some(_) => Right(None)
+          case Some(_) => Right(None)
 
-        case None => Right(None)
+          case None => Right(None)
 
     val activityDecoder: Decoder[StravaActivity] =
       MapBasedCodecs.deriveDecoder

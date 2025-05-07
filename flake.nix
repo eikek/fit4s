@@ -1,7 +1,7 @@
 {
   description = "fit4s flake";
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-24.11";
+    nixpkgs.url = "nixpkgs/nixos-unstable";
     devshell-tools.url = "github:eikek/devshell-tools";
     sbt.url = "github:zaninime/sbt-derivation";
     sbt.inputs.nixpkgs.follows = "nixpkgs";
@@ -59,16 +59,18 @@
         ];
       };
       ciPkgs = with pkgs; [
-        sbt17 nodejs
+        sbt21 nodejs
       ];
     in {
       ci = pkgs.mkShellNoCC {
         buildInputs = ciPkgs;
-        SBT_OPTS = "-Xmx2G";
+        SBT_OPTS = "-Xmx3G";
       };
       default = pkgs.mkShellNoCC {
         buildInputs = ciPkgs ++ [
           pkgs.scala-cli
+          pkgs.metals
+          pkgs.tailwindcss
         ];
         nativeBuildInputs = [
         ];
