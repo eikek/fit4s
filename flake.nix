@@ -59,16 +59,17 @@
         ];
       };
       ciPkgs = with pkgs; [
-        sbt17 nodejs
+        sbt21 nodejs
       ];
     in {
       ci = pkgs.mkShellNoCC {
         buildInputs = ciPkgs;
-        SBT_OPTS = "-Xmx2G";
+        SBT_OPTS = "-Xmx3G";
       };
       default = pkgs.mkShellNoCC {
         buildInputs = ciPkgs ++ [
           pkgs.scala-cli
+          pkgs.metals
         ];
         nativeBuildInputs = [
         ];
