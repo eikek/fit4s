@@ -64,11 +64,12 @@
     in {
       ci = pkgs.mkShellNoCC {
         buildInputs = ciPkgs;
-        SBT_OPTS = "-Xmx2G";
+        SBT_OPTS = "-Xmx3G";
       };
       default = pkgs.mkShellNoCC {
         buildInputs = ciPkgs ++ [
           pkgs.scala-cli
+          pkgs.metals
           pkgs.tailwindcss
         ];
         nativeBuildInputs = [
