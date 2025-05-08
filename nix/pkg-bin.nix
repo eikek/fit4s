@@ -15,7 +15,7 @@ in
 
     src = fetchzip {
       url = "https://github.com/eikek/fit4s/releases/download/v${version}/fit4s-cli-${version}.zip";
-      sha256 = "sha256-OO96hTfMF2MVne5jf8h7TQ6nKLedwaS0Qj+B2x5tQh0=";
+      sha256 = "sha256-bWuWZbrgEOKK+VM/F8cglFTkO1JWb+CA4i/X4dn9H4I=";
     };
 
     buildPhase = "true";
