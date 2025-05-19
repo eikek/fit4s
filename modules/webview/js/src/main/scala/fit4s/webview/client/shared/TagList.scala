@@ -11,7 +11,7 @@ import calico.html.io.{*, given}
 
 object TagList:
   val skyTagStyle =
-    "border text-white bg-sky-400 dark:bg-sky-500 dark:text-sky-400 dark:bg-opacity-30 border-sky-300 dark:border-sky-400 dark:bg-opacity-50 flex flex-row items-center px-2 py-0.5 rounded"
+    "border text-white bg-sky-400 dark:bg-sky-500/50 dark:text-sky-400 border-sky-300 dark:border-sky-400 flex flex-row items-center px-2 py-0.5 rounded"
 
   def apply(
       tags: List[Tag],
