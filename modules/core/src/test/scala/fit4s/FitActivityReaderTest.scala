@@ -50,6 +50,32 @@ class FitActivityReaderTest extends CatsEffectSuite:
   //   } yield ()
   // }
 
+  // test("read cycling activity from edge 1040") {
+  //   for {
+  //     data <- FitTestData.edge1040CyclingActivity
+  //     fit = FitFile.decodeUnsafe(data).head
+  //     result = ActivityReader
+  //       .read(fit, zone)
+  //       .fold(err => sys.error(err.toString), identity)
+  //     recMsgs = fit.dataRecords.filter(_.isMessage(RecordMsg))
+  //     _ = assertEquals(recMsgs.size, 1225)
+  //     _ = assertEquals(result.activity.numSessions, 1)
+  //     _ = assertEquals(result.sessions.size, 1)
+  //     _ = assertEquals(result.unrelatedRecords.size, 0)
+  //     _ = assertEquals(result.laps.values.map(_.size).sum, 2)
+  //     _ = assertEquals(result.unrelatedLaps.size, 0)
+  //     _ = assertEquals(result.recordsFor(result.sessions.head).size, recMsgs.size)
+  //     _ = assertEquals(
+  //       result.activity.timestamp.asInstant,
+  //       Instant.parse("2025-07-12T18:17:22Z")
+  //     )
+  //     _ = assertEquals(
+  //       result.activity.totalTime,
+  //       Duration.ofSeconds(1217)
+  //     )
+  //   } yield ()
+  // }
+
   // test("read Garmin Swim fit file") {
   //   for {
   //     data <- FitTestData.garminSwimActivity

@@ -43,7 +43,7 @@ object FieldDefinition:
         .flatZip[FitBaseType] { raw =>
           FitBaseType.byOrdinal(raw.baseTypeNum) match
             case Some(ft) => provide(ft)
-            case None =>
+            case None     =>
               provide(
                 FitBaseType.Uint8
               ) // fail(Err(s"Failed to lookup fit base type for: $raw"))

@@ -15,6 +15,10 @@ object FitTestData:
     getClass.getResource("/fit/activity_poolswim_with_hr.fit")
   )
 
+  // val edge1040CyclingActivity = fromURL(
+  //   getClass.getResource("/fit/2025-07-12-20-17-22.fit")
+  // )
+
   // cb413f3475acbaa15e93725a1b2ae12db0e36cfbc9962913a3e4c87ec16ca8f5
   // val edge530CyclingActivity = fromURL(
   //   getClass.getResource("/fit/2023-03-16-06-25-37.fit")

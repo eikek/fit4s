@@ -102,7 +102,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
     name := "fit4s-core",
     description := "Library for reading and writing FIT format",
     libraryDependencies ++= Dependencies.scodecCore.value,
-    profileFile := (LocalRootProject / baseDirectory).value / "project" / "profile" / "profile_21.105.00.xlsx",
+    profileFile := (LocalRootProject / baseDirectory).value / "project" / "profile" / "profile_21.171.00.xlsx",
     Compile / sourceGenerators += generateProfile.taskValue
   )
 

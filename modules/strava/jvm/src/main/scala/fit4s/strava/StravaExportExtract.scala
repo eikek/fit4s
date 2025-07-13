@@ -52,7 +52,7 @@ object StravaExportExtract:
       .flatMap:
         case InputDirType.ZipFile(_)   => unzip[F](stravaExport)
         case InputDirType.Directory(_) => Resource.pure[F, Path](stravaExport)
-        case _ =>
+        case _                         =>
           Resource.eval(
             Async[F].raiseError(
               new Exception(s"The strava export is neither a directory nor a zip file")

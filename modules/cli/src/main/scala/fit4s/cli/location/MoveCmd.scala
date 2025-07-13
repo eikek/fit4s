@@ -32,7 +32,7 @@ object MoveCmd extends SharedOpts {
       for {
         result <- log.locationRepository.move(opts.idOrPath, opts.target, opts.withFs)
         _ <- result match {
-          case MoveResult.Success => IO.println(s"Moved to ${opts.target}")
+          case MoveResult.Success  => IO.println(s"Moved to ${opts.target}")
           case MoveResult.NotFound =>
             IO.println(s"Location not found, either in DB or filesystem")
           case MoveResult.FsFailure(ex) =>

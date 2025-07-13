@@ -93,7 +93,7 @@ object App
 
   private def printError(io: IO[ExitCode]): IO[ExitCode] =
     io.attempt.flatMap {
-      case Right(code) => IO.pure(code)
+      case Right(code)        => IO.pure(code)
       case Left(ex: CliError) =>
         IO.println(
           s"ERROR ${ex.getMessage}".in(Styles.error)

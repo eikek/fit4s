@@ -136,8 +136,8 @@ class Fit4sClient[F[_]: Async](client: Client[F], baseUrl: Uri):
             .map(a => FetchResult.Success(a.some))
         case failedResponse =>
           failedResponse.status match
-            case Status.NotFound => FetchResult.Success(Option.empty[A]).pure[F]
-            case Status.Gone     => FetchResult.Success(Option.empty[A]).pure[F]
+            case Status.NotFound   => FetchResult.Success(Option.empty[A]).pure[F]
+            case Status.Gone       => FetchResult.Success(Option.empty[A]).pure[F]
             case Status.BadRequest =>
               EntityDecoder[F, RequestFailure]
                 .decode(failedResponse, strict = false)
