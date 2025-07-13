@@ -98,7 +98,7 @@ object MessagesGenerator {
   )(sf: MessageSubFieldLine): List[String] =
     // referenced fields is a comma separated list
     sf.refFieldName.zip(sf.refFieldValue) match {
-      case Nil => Nil
+      case Nil  => Nil
       case list =>
         list.map { case (name, value) =>
           val baseTypeNames =

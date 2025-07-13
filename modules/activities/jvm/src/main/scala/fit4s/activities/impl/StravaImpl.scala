@@ -37,7 +37,7 @@ final class StravaImpl[F[_]: Async: Compression: Files](
   ): F[Option[RStravaToken]] =
     nonInteractiveOAuth(cfg).flatMap:
       case Some(t) => Option(t).pure[F]
-      case None =>
+      case None    =>
         stravaClient
           .initAuth(cfg, timeout)
           .flatMap(storeTokenResponse)

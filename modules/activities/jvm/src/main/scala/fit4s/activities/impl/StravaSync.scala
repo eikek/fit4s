@@ -116,7 +116,7 @@ final class StravaSync[F[_]: Async](
       .transact(xa)
       .flatMap:
         case Some(otherStravaId) => alreadyLinked(local, otherStravaId).pure[F]
-        case None =>
+        case None                =>
           RActivityStrava
             .insert(local, strava)
             .transact(xa)
@@ -147,7 +147,7 @@ final class StravaSync[F[_]: Async](
     sa.gear_id
       .flatTraverse(findGear)
       .flatMap:
-        case None => ().pure[F]
+        case None       => ().pure[F]
         case Some(gear) =>
           val tag = sa.fitSport match
             case Some(s) if s == Sport.Cycling => bikeTag(gear.name)
@@ -160,7 +160,7 @@ final class StravaSync[F[_]: Async](
             .map(NonEmptyList.fromList)
             .transact(xa)
             .flatMap:
-              case None => ().pure[F]
+              case None      => ().pure[F]
               case Some(nel) =>
                 (RActivityTag.remove(local, nel.map(_.id)) *>
                   RActivityTag.insert1(local, nel.map(_.id))).transact(xa).void

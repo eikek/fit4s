@@ -47,7 +47,7 @@ object FitFileImport:
       relativePath: String
   ): ConnectionIO[ImportResult[ActivityId]] =
     ActivityReader.read(fitFile, zoneId).map(ActivityReader.fixMissingValues) match
-      case Left(err) => Sync[ConnectionIO].pure(ImportResult.activityDecodeError(err))
+      case Left(err)     => Sync[ConnectionIO].pure(ImportResult.activityDecodeError(err))
       case Right(result) =>
         ActivityImport.addActivity(tags, locationId, relativePath, notes, zoneId, now)(
           result

@@ -31,8 +31,8 @@ object DeleteCmd extends SharedOpts {
       for {
         result <- log.locationRepository.delete(opts.idOrPath, opts.withFs)
         _ <- result match {
-          case MoveResult.Success  => IO.println(s"Deleted the location.")
-          case MoveResult.NotFound => IO.println("Location not found")
+          case MoveResult.Success       => IO.println(s"Deleted the location.")
+          case MoveResult.NotFound      => IO.println("Location not found")
           case MoveResult.FsFailure(ex) =>
             IO.println(s"Error deleting location: ${ex.getMessage}")
         }

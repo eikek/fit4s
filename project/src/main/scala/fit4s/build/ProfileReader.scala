@@ -37,11 +37,11 @@ object ProfileReader {
         result: List[MessageFieldLine]
     ): List[MessageFieldLine] =
       rest match {
-        case Nil => result
+        case Nil    => result
         case a :: m =>
           a.messageName match {
             case Some(mn_) => go(mn_, m, result)
-            case None =>
+            case None      =>
               a.fieldDefNum match {
                 case None =>
                   // sub field belonging to the previous field
@@ -124,7 +124,7 @@ object ProfileReader {
         result: List[TypeDesc]
     ): List[TypeDesc] =
       rest match {
-        case Nil => result
+        case Nil    => result
         case a :: m =>
           (a.getTypeName, a.getBaseType) match {
             case (Some(tn_), Some(bt_)) =>

@@ -37,7 +37,7 @@ object DataMessageDecoder:
         result: Vector[DataField]
     ): Vector[DataField] =
       fields match
-        case Nil => result.reverse
+        case Nil    => result.reverse
         case h :: t =>
           val field = dm.definition.profileMsg.flatMap(_.findField(h.fieldDefNum))
           val (raw, next) = bytes.splitAt(h.sizeBytes)
@@ -108,7 +108,7 @@ object DataMessageDecoder:
             result: Vector[DataField]
         ): Vector[DataField] =
           comp match
-            case Nil => result
+            case Nil              => result
             case (name, len) :: t =>
               profileMsg.getFieldByName(name) match
                 case Some(cfield) =>

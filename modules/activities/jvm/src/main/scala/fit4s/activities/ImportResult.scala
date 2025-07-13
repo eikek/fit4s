@@ -46,7 +46,7 @@ object ImportResult:
         case ActivityDecodeError(_: ActivityReader.Failure.NoFileIdFound) =>
           "No file_id message"
         case ActivityDecodeError(ActivityReader.Failure.GeneralError(msg)) => msg
-        case TcxError(err) =>
+        case TcxError(err)                                                 =>
           s"TCX file failed to read: ${err.getMessage}"
 
   def duplicate[A](

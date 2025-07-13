@@ -70,7 +70,7 @@ object ImportCmd extends SharedOpts {
           .map(NonEmptyList.fromList)
           .flatMap {
             case Some(nel) => IO.pure(nel)
-            case None =>
+            case None      =>
               IO.raiseError(
                 new CliError(
                   s"Text file doesn't contain lines of directories: ${options.fileOrDirectories.head}"

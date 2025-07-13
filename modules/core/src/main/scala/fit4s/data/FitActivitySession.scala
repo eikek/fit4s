@@ -55,9 +55,9 @@ object FitActivitySession:
       endTime: FieldValue[DateTime],
       elapsed: Option[FieldValue[LongBaseValue]]
   ): FieldValue[DateTime] = elapsed.flatMap(_.duration) match
-    case None    => endTime
+    case None                                       => endTime
     case Some(_) if endTime.value > startTime.value => endTime
-    case Some(v) =>
+    case Some(v)                                    =>
       val started = startTime.value.asInstant
       val span = java.time.Duration.between(DateTime.offset, started).plus(v)
       val secs = span.toSeconds()

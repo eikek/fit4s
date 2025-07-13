@@ -22,7 +22,7 @@ object ActivitySelection:
       currentTime: Instant
   ): Either[String, Option[QueryCondition]] =
     q match {
-      case ActivitySelection.NoQuery => None.asRight
+      case ActivitySelection.NoQuery       => None.asRight
       case ActivitySelection.ForWeek(None) =>
         Some(
           StartedAfter(DateUtil.findStartLastMonday(currentTime.atZone(zoneId)))

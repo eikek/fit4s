@@ -92,7 +92,7 @@ object ActivityDetailQuery:
       .map(NonEmptyList.fromList)
       .flatMap:
         case Some(nel) => nel.pure[ConnectionIO]
-        case None =>
+        case None      =>
           Sync[ConnectionIO].raiseError(new Exception(s"No sessions for activity: $id"))
 
   private def activityTags(id: ActivityId) =

@@ -77,7 +77,7 @@ object model {
 
     def fromString(str: String): Either[String, ArrayDef] =
       str.toUpperCase.trim match {
-        case "[N]" => Right(DynamicSize)
+        case "[N]"                                     => Right(DynamicSize)
         case s if s.startsWith("[") && s.endsWith("]") =>
           Try(s.drop(1).dropRight(1).toInt).toEither.left
             .map(_.getMessage)
