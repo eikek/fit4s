@@ -101,7 +101,7 @@ object LinkCmd extends SharedOpts {
           else ""
 
         val amb = ambiguous match {
-          case Nil => ""
+          case Nil      => ""
           case nonEmpty =>
             val lines =
               nonEmpty
@@ -113,7 +113,7 @@ object LinkCmd extends SharedOpts {
         }
 
         val al = alreadyLinked match {
-          case Nil => ""
+          case Nil      => ""
           case nonEmpty =>
             val ids =
               nonEmpty

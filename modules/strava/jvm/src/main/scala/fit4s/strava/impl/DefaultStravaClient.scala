@@ -82,7 +82,7 @@ final class DefaultStravaClient[F[_]: Async: Network: Files](
         Method.PUT(data, uri).putAuth(accessToken)
       )
       .flatMap:
-        case true => ().pure[F]
+        case true  => ().pure[F]
         case false =>
           Async[F].raiseError(
             new Exception(s"Activity $id update returned with a failure")

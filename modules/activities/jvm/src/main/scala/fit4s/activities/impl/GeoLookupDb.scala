@@ -28,12 +28,12 @@ class GeoLookupDb[F[_]: Sync](
       fromDB <- RGeoPlace.findByPosition(position).transact(xa)
       fromWs <- fromDB match
         case Some((p, dst)) if dst < distanceThresholdKm => p.some.pure[F]
-        case _ =>
+        case _                                           =>
           reverseLookup
             .lookup(position)
             .flatMap:
               case Some(p) => insertPlace(p)
-              case None =>
+              case None    =>
                 logger
                   .info(s"GeoLookup empty for position: $position")
                   .as(Option.empty[GeoPlace])
@@ -47,7 +47,7 @@ class GeoLookupDb[F[_]: Sync](
         .transact(xa)
         .flatMap:
           case Some(r) => r.some.pure[F]
-          case None =>
+          case None    =>
             RGeoPlace.fromPlace(GeoPlaceId(-1), p) match
               case Some(record) =>
                 RGeoPlace

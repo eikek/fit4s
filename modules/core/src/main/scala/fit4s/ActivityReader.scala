@@ -97,7 +97,7 @@ object ActivityReader:
       case (_, None)                              => result
       case (false, _)                             => result
       case (_, Some(localTs)) if localTs.isTooLow => result
-      case (true, Some(localTs)) =>
+      case (true, Some(localTs))                  =>
         val wrongSecs = result.activity.timestamp.rawValue
         val zoned = localTs.asLocalDateTime.atZone(zoneId)
         val correctSecs = Duration.between(DateTime.offset, zoned).toSeconds

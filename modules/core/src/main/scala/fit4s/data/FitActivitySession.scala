@@ -5,8 +5,10 @@ import java.time.Duration
 import scala.math.Ordering.Implicits.*
 
 import fit4s.FitMessage.DataMessage
+import fit4s.profile.FieldValue
 import fit4s.profile.messages.SessionMsg
 import fit4s.profile.types.*
+import fit4s.profile.types.BaseTypedValue.LongBaseValue
 
 final case class FitActivitySession(
     sport: Sport,
@@ -48,24 +50,42 @@ final case class FitActivitySession(
 
 object FitActivitySession:
 
+  private def figureEndTime(
+      startTime: FieldValue[DateTime],
+      endTime: FieldValue[DateTime],
+      elapsed: Option[FieldValue[LongBaseValue]]
+  ): FieldValue[DateTime] = elapsed.flatMap(_.duration) match
+    case None                                       => endTime
+    case Some(_) if endTime.value > startTime.value => endTime
+    case Some(v)                                    =>
+      val started = startTime.value.asInstant
+      val span = java.time.Duration.between(DateTime.offset, started).plus(v)
+      val secs = span.toSeconds()
+      endTime.copy(value = DateTime(secs))
+
   def from(sessionMsg: DataMessage): Either[String, FitActivitySession] =
     if (!sessionMsg.isMessage(SessionMsg)) Left(s"Not a session message: $sessionMsg")
     else
       for {
         sport <- sessionMsg.getField(SessionMsg.sport)
         subSport <- sessionMsg.getField(SessionMsg.subSport)
-        start <- sessionMsg.getRequiredField(SessionMsg.startTime)
-        end <- sessionMsg.getRequiredField(SessionMsg.timestamp)
+        startTime <- sessionMsg.getRequiredField(SessionMsg.startTime)
+        endTime1 <- sessionMsg.getRequiredField(SessionMsg.timestamp)
         movingTime1 <- sessionMsg.getField(SessionMsg.totalMovingTime)
         movingTime2 <- sessionMsg.getField(SessionMsg.totalTimerTime)
         movingTime = movingTime1
           .flatMap(_.duration)
           .orElse(movingTime2.flatMap(_.duration))
         elapsedTime <- sessionMsg.getField(SessionMsg.totalElapsedTime)
+        endTime = figureEndTime(startTime, endTime1, elapsedTime)
         kcal <- sessionMsg.getField(SessionMsg.totalCalories)
         distance <- sessionMsg.getField(SessionMsg.totalDistance)
-        maxSpeed <- sessionMsg.getField(SessionMsg.maxSpeed)
-        avgSpeed <- sessionMsg.getField(SessionMsg.avgSpeed)
+        maxSpeed1 <- sessionMsg.getField(SessionMsg.enhancedMaxSpeed)
+        maxSpeed2 <- sessionMsg.getField(SessionMsg.maxSpeed)
+        maxSpeed = maxSpeed1.orElse(maxSpeed2)
+        avgSpeed1 <- sessionMsg.getField(SessionMsg.enhancedAvgSpeed)
+        avgSpeed2 <- sessionMsg.getField(SessionMsg.avgSpeed)
+        avgSpeed = avgSpeed1.orElse(avgSpeed2)
         maxHr <- sessionMsg.getField(SessionMsg.maxHeartRate)
         minHr <- sessionMsg.getField(SessionMsg.minHeartRate)
         avgHr <- sessionMsg.getField(SessionMsg.avgHeartRate)
@@ -92,8 +112,8 @@ object FitActivitySession:
       } yield FitActivitySession(
         sport.map(_.value).getOrElse(Sport.Generic),
         subSport.map(_.value).getOrElse(SubSport.Generic),
-        start.value,
-        end.value,
+        startTime.value,
+        endTime.value,
         movingTime,
         elapsedTime.flatMap(_.duration),
         kcal.flatMap(_.calories).getOrElse(Calories.zero),

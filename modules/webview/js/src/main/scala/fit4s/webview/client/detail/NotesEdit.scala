@@ -121,7 +121,7 @@ object NotesEdit:
             onClick --> ClickAction(model.flatModify(update(cr, Msg.SaveEdit))),
             disabled <-- state.map(_ == Model.EditState.Updating),
             state.map {
-              case Model.EditState.Init => span("Save")
+              case Model.EditState.Init     => span("Save")
               case Model.EditState.Updating =>
                 span(i(cls := "fa fa-circle-notch animate-spin"))
               case Model.EditState.Failure =>

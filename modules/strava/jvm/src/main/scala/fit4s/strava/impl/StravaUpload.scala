@@ -75,7 +75,7 @@ final class StravaUpload[F[_]: Async: Files](
     ).compile.lastOrError
     id = result.activity_id match
       case Some(aid) => aid.asRight[StravaUploadError]
-      case None =>
+      case None      =>
         Left(StravaUploadError.Processing(result, file))
   } yield id
 

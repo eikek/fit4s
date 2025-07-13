@@ -134,7 +134,7 @@ trait SharedOpts {
   def resolveStravaAuth(cliConfig: CliConfig) =
     IO(cliConfig.stravaAuthConfig).flatMap {
       case Some(c) => IO.pure(c)
-      case None =>
+      case None    =>
         IO.raiseError(new Exception(s"No strava client_id and client_secret configured!"))
     }
 

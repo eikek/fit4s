@@ -23,7 +23,7 @@ object Cache:
                 .map(_.get(a))
                 .flatMap:
                   case Some(b) => b.pure[F]
-                  case None =>
+                  case None    =>
                     f(a).flatTap { r =>
                       state.update { b =>
                         if (b.size >= size) b.drop(b.size - size - 1).updated(a, r)

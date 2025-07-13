@@ -96,7 +96,7 @@ object FitMessage:
     ): Either[String, FieldValue[A]] =
       getField(ft).flatMap:
         case Some(v) => Right(v)
-        case None =>
+        case None    =>
           Left(s"Field '${ft.fieldName}' not found in msg '${definition.profileMsg}'.")
 
     def unsafeGetField[A <: TypedValue[?]](
@@ -139,7 +139,7 @@ object FitMessage:
         .pure(defMsg)
         .flatMap:
           case Some(v) => Decoder.pure(v)
-          case None =>
+          case None    =>
             fail(
               Err(
                 s"No definition message for $header. Looked in ${prev.size} previous records: $prev"
