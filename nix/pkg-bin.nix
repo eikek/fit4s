@@ -2,7 +2,7 @@
   lib,
   stdenv,
   fetchzip,
-  jdk17,
+  jdk21,
   unzip,
   bash,
 }: let
@@ -15,7 +15,7 @@ in
 
     src = fetchzip {
       url = "https://github.com/eikek/fit4s/releases/download/v${version}/fit4s-cli-${version}.zip";
-      sha256 = "sha256-BJK3sK8TPaKfjvHw4F6sg18NKRSc091DYeT+PAcFMkc=";
+      sha256 = "sha256-YnQxZmL9ZZlwAT2uKSGvDB90DeU0eNPLdA+VV6AnTso=";
     };
 
     buildPhase = "true";
@@ -25,7 +25,7 @@ in
       cp -R * $out/fit4s-${version}/
       cat > $out/bin/fit4s <<-EOF
       #!${bash}/bin/bash
-      $out/fit4s-${version}/bin/fit4s-cli -java-home ${jdk17} "\$@"
+      $out/fit4s-${version}/bin/fit4s-cli -java-home ${jdk21} "\$@"
       EOF
       chmod 755 $out/bin/fit4s
     '';
