@@ -152,6 +152,9 @@ trait DoobieMeta:
   given Read[Position] = Read.derived
   given Write[Position] = Write.derived
 
+  given Read[BoundingBox] = Read.derived
+  given Write[BoundingBox] = Write.derived
+
   given Read[GeoPlace] = Read.derived
   given Write[GeoPlace] = Write.derived
 
