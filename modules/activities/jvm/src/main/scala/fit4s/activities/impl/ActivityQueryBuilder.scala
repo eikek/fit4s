@@ -36,9 +36,7 @@ object ActivityQueryBuilder:
     val from = join
     val where = makeWhere(q.condition)
     val order = fr"ORDER BY act.start_time desc, act.id"
-
     val limit = q.page.asFragment
-
     select ++ from ++ where ++ order ++ limit
 
   def buildSummary(q: ActivityQuery): Query0[ActivitySessionSummary] =
@@ -79,6 +77,12 @@ object ActivityQueryBuilder:
   def activityIdFragment(q: Option[QueryCondition]) =
     val select = sql"SELECT DISTINCT pa.id"
     val where = makeWhere(q)
+    select ++ join ++ where
+
+  def activityRereadDataFragment(q: QueryCondition) =
+    val colList = List(fr"pa.id", fr"pa.file_id", fr"pa.path", fr"loc.location").commas
+    val select = fr"SELECT DISTINCT $colList"
+    val where = makeWhere(Some(q))
     select ++ join ++ where
 
   def tagsForActivity(id: ActivityId): ConnectionIO[Vector[Tag]] =

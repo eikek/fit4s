@@ -80,6 +80,10 @@ object RActivitySession:
     def apply(tags: Seq[ActivitySession]): ConnectionIO[Int] =
       Update[ActivitySession](sql).updateMany(tags)
 
+  /** This deletes this session and all laps + data. */
+  def deleteByActivity(id: ActivityId): ConnectionIO[Int] =
+    sql"DELETE FROM $table WHERE activity_id = $id".update.run
+
   def findById(id: ActivitySessionId): ConnectionIO[Option[ActivitySession]] =
     fr"SELECT $columnsWithId FROM $table WHERE id = $id"
       .query[ActivitySession]

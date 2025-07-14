@@ -13,6 +13,7 @@ import fit4s.activities.*
 import fit4s.activities.data.*
 import fit4s.activities.dump.ExportData
 import fit4s.activities.records.*
+import fit4s.activities.records.DoobieImplicits.given
 
 import doobie.syntax.all.*
 import doobie.{Query as _, *}
@@ -74,6 +75,37 @@ final class ActivityLogDb[F[_]: Async: Files: Compression](
 
     _ <- Stream.eval(placeAttach.applyResult(results))
   } yield results
+
+  def rereadActivities(
+      zoneId: ZoneId,
+      condition: QueryCondition
+  ): Stream[F, (ActivityRereadData, ImportResult[ActivityId])] =
+    for
+      now <- Stream.eval(Clock[F].realTimeInstant)
+      activity <- ActivityQueryBuilder
+        .activityRereadDataFragment(condition)
+        .query[ActivityRereadData]
+        .streamWithChunkSize(100)
+        .transact(xa)
+
+      actFile = ActivityFile(activity.file)
+      exists <- Stream.eval(Files[F].exists(activity.file))
+      r <-
+        if (!exists)
+          Stream.emit(ImportResult.fileNotExists(activity.fileId, activity.file))
+        else
+          actFile match
+            case Some(ActivityFile.Fit(path)) =>
+              FitFileImport
+                .replaceSingle(zoneId, now)(path)
+                .evalMap(_.transact(xa))
+
+            case Some(ActivityFile.Tcx(path)) =>
+              TcxFileImport.replaceSingle(now)(path).evalMap(_.transact(xa))
+
+            case None =>
+              Stream.emit(ImportResult.unsupportedFile(activity.file))
+    yield (activity, r)
 
   def syncNewFiles(
       zoneId: ZoneId,

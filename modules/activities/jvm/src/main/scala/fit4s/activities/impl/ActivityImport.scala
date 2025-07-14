@@ -73,6 +73,35 @@ object ActivityImport:
       .map(r => ImportResult.duplicate(r.id, result.fileId, path))
       .getOrElseF(insert)
 
+  def replace(
+      now: Instant,
+      result: ActivityReader.Result
+  ): ConnectionIO[ImportResult[ActivityId]] =
+    RActivity.findByFileId(result.fileId).flatMap {
+      case None    => ImportResult.notExists(result.fileId).pure[ConnectionIO]
+      case Some(a) =>
+        for {
+          _ <- RActivity.update(
+            a.copy(
+              activityFileId = result.fileId,
+              timestamp = result.activity.timestamp.asInstant,
+              totalTime = result.activity.totalTime,
+              importDate = now
+            )
+          )
+          _ <- result.sessions.traverse_(replaceSession(a.id, result))
+        } yield ImportResult.success(a.id)
+    }
+
+  private def replaceSession(activityId: ActivityId, result: ActivityReader.Result)(
+      session: FitActivitySession
+  ): ConnectionIO[
+    (ActivitySessionId, Vector[ActivityLapId], Vector[ActivitySessionDataId])
+  ] =
+    RActivitySession.deleteByActivity(activityId) >> addSession(activityId, result)(
+      session
+    )
+
   private def addSession(activityId: ActivityId, result: ActivityReader.Result)(
       session: FitActivitySession
   ): ConnectionIO[

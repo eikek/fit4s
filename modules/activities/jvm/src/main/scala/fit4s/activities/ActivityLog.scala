@@ -43,6 +43,11 @@ trait ActivityLog[F[_]]:
       concN: Int
   ): Stream[F, ImportResult[ActivityId]]
 
+  def rereadActivities(
+      zoneId: ZoneId,
+      condition: QueryCondition
+  ): Stream[F, (ActivityRereadData, ImportResult[ActivityId])]
+
   def activityList(query: ActivityQuery): Stream[F, ActivityListResult]
 
   def activitySummary(
@@ -96,7 +101,11 @@ object ActivityLog:
       ec <- ExecutionContexts.fixedThreadPool(10)
       ds <- Resource.make(Sync[F].delay(pool))(cp => Sync[F].delay(cp.dispose()))
       xa = Transactor.fromDataSource[F](ds, ec)
-      client <- EmberClientBuilder.default[F].withTimeout(httpTimeout).build
+      client <- EmberClientBuilder
+        .default[F]
+        .withTimeout(httpTimeout)
+        .withIdleConnectionTime(httpTimeout * 2)
+        .build
       revLookup <- Resource.eval(ReverseLookup.osm[F](client, nominatimCfg))
       strava <- Resource.eval(
         StravaSupport[F](stravaConfig, revLookup, xa, client)

@@ -156,6 +156,7 @@ object Fit4sClient:
     EmberClientBuilder
       .default[F]
       .withTimeout(httpTimeout)
+      .withIdleConnectionTime(httpTimeout * 2)
       .build
       .map(new Fit4sClient[F](_, baseUrl))
 
