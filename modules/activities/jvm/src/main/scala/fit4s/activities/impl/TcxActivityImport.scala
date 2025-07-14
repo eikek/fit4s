@@ -70,13 +70,36 @@ object TcxActivityImport:
             now
           )
         )
-
         _ <- addSession(actId, tcx)
       } yield ImportResult.success(actId)
-
     OptionT(RActivity.findByFileId(tcx.fileId))
       .map(r => ImportResult.duplicate(r.id, tcx.fileId, path))
       .getOrElseF(insert)
+
+  def replace(
+      now: Instant,
+      tcx: TcxActivity
+  ): ConnectionIO[ImportResult[ActivityId]] =
+    RActivity.findByFileId(tcx.fileId).flatMap {
+      case None    => ImportResult.notExists(tcx.fileId).pure[ConnectionIO]
+      case Some(a) =>
+        for {
+          _ <- RActivity.update(
+            a.copy(
+              activityFileId = tcx.fileId,
+              timestamp = tcx.id,
+              totalTime = tcx.totalTime,
+              importDate = now
+            )
+          )
+          _ <- replaceSession(a.id, tcx)
+        } yield ImportResult.success(a.id)
+    }
+
+  private def replaceSession(activityId: ActivityId, tcx: TcxActivity): ConnectionIO[
+    (ActivitySessionId, Seq[ActivityLapId], Seq[ActivitySessionDataId])
+  ] =
+    RActivitySession.deleteByActivity(activityId) >> addSession(activityId, tcx)
 
   private def addSession(activityId: ActivityId, act: TcxActivity): ConnectionIO[
     (ActivitySessionId, Seq[ActivityLapId], Seq[ActivitySessionDataId])

@@ -39,6 +39,17 @@ object TcxFileImport:
         case Left(err) =>
           Stream.emit(Sync[ConnectionIO].pure(ImportResult.tcxError(err)))
 
+  def replaceSingle[F[_]: Files: Sync: Compression](now: Instant)(
+      tcxFile: Path
+  ): Stream[F, ConnectionIO[ImportResult[ActivityId]]] =
+    Stream.eval(readTcxFile(tcxFile)).flatMap {
+      case Right(fits) =>
+        Stream.emits(fits.map(replaceTcxFile(now)))
+
+      case Left(err) =>
+        Stream.emit(Sync[ConnectionIO].pure(ImportResult.tcxError(err)))
+    }
+
   def addTcxActivity(
       tags: Set[TagId],
       notes: Option[String],
@@ -50,6 +61,11 @@ object TcxFileImport:
       relativePath: String
   ): ConnectionIO[ImportResult[ActivityId]] =
     TcxActivityImport.addActivity(tags, locationId, relativePath, notes, zoneId, now)(act)
+
+  def replaceTcxFile(now: Instant)(
+      activity: TcxActivity
+  ): ConnectionIO[ImportResult[ActivityId]] =
+    TcxActivityImport.replace(now, activity)
 
   def readTcxFile[F[_]: Sync: Files: Compression](
       file: Path

@@ -48,6 +48,9 @@ object App
   private val dumpOpts: Opts[DumpCmd.SubOpts] =
     Opts.subcommand("dump", "Dump and import all the data")(DumpCmd.opts)
 
+  private val rereadOpts: Opts[RereadCmd.Options] =
+    Opts.subcommand("reread", "Re-read activity files")(RereadCmd.opts)
+
   val subCommandOpts: Opts[SubCommandOpts] =
     inspectOpts
       .map(SubCommandOpts.Inspect.apply)
@@ -60,6 +63,7 @@ object App
       .orElse(versionOpts.map(SubCommandOpts.Version.apply))
       .orElse(serverOpts.map(SubCommandOpts.Server.apply))
       .orElse(dumpOpts.map(SubCommandOpts.Dump.apply))
+      .orElse(rereadOpts.map(SubCommandOpts.Reread.apply))
 
   def main: Opts[IO[ExitCode]] =
     subCommandOpts.map(run).map(printError)
@@ -77,6 +81,7 @@ object App
         case SubCommandOpts.Version(c)  => VersionCmd(c)
         case SubCommandOpts.Server(c)   => ServerCmd(cliCfg, c)
         case SubCommandOpts.Dump(c)     => DumpCmd(cliCfg, c)
+        case SubCommandOpts.Reread(c)   => RereadCmd(cliCfg, c)
     }
 
   enum SubCommandOpts:
@@ -90,6 +95,7 @@ object App
     case Version(opts: VersionCmd.Options)
     case Server(opts: ServerCmd.SubOpts)
     case Dump(opts: DumpCmd.SubOpts)
+    case Reread(opts: RereadCmd.Options)
 
   private def printError(io: IO[ExitCode]): IO[ExitCode] =
     io.attempt.flatMap {

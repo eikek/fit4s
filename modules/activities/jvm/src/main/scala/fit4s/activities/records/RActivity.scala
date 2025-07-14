@@ -54,6 +54,13 @@ object RActivity:
       sql"${r.notes}, ${r.importDate})").update
       .withUniqueGeneratedKeys[ActivityId]("id")
 
+  /** Update, don't set file_id and created_at */
+  def update(r: Activity): ConnectionIO[Int] =
+    (sql"UPDATE $table SET " ++
+      sql"location_id = ${r.locationId}, path = ${r.path}, device = ${r.device}, " ++
+      sql"serial_number = ${r.serialNumber}, name = ${r.name}, timestamp = ${r.timestamp}, total_time = ${r.totalTime}, " ++
+      sql"notes = ${r.notes}, import_time = ${r.importDate} WHERE id = ${r.id}").update.run
+
   def findById(id: ActivityId): ConnectionIO[Option[Activity]] =
     fr"SELECT $columnsWithId FROM $table WHERE id = $id"
       .query[Activity]

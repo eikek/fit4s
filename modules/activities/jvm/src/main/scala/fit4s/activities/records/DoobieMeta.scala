@@ -173,4 +173,6 @@ trait DoobieMeta:
   given Read[ActivitySessionSummary] = Read.derived
   given Write[ActivitySessionSummary] = Write.derived
 
+  given Read[ActivityRereadData] = Read.derived
+
 object DoobieMeta extends DoobieMeta

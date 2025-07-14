@@ -84,4 +84,9 @@ object NominatimOSM:
       cfg: NominatimConfig,
       httpTimeout: Duration
   ): Resource[F, ReverseLookup[F]] =
-    EmberClientBuilder.default[F].withTimeout(httpTimeout).build.evalMap(apply(_, cfg))
+    EmberClientBuilder
+      .default[F]
+      .withTimeout(httpTimeout)
+      .withIdleConnectionTime(httpTimeout * 2)
+      .build
+      .evalMap(apply(_, cfg))

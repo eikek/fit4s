@@ -36,6 +36,17 @@ object FitFileImport:
         case Attempt.Failure(err) =>
           Stream.emit(Sync[ConnectionIO].pure(ImportResult.readFitError(err)))
 
+  def replaceSingle[F[_]: Files: Sync: Compression](zoneId: ZoneId, now: Instant)(
+      fitFile: Path
+  ): Stream[F, ConnectionIO[ImportResult[ActivityId]]] =
+    Stream.eval(readFitFile(fitFile)).flatMap {
+      case Attempt.Successful(fits) =>
+        Stream.emits(fits.map(replaceFitFile(zoneId, now)))
+
+      case Attempt.Failure(err) =>
+        Stream.emit(Sync[ConnectionIO].pure(ImportResult.readFitError(err)))
+    }
+
   def addFitFile(
       tags: Set[TagId],
       notes: Option[String],
@@ -52,6 +63,13 @@ object FitFileImport:
         ActivityImport.addActivity(tags, locationId, relativePath, notes, zoneId, now)(
           result
         )
+
+  def replaceFitFile(zoneId: ZoneId, now: Instant)(
+      fitFile: FitFile
+  ): ConnectionIO[ImportResult[ActivityId]] =
+    ActivityReader.read(fitFile, zoneId).map(ActivityReader.fixMissingValues) match
+      case Left(err)     => Sync[ConnectionIO].pure(ImportResult.activityDecodeError(err))
+      case Right(result) => ActivityImport.replace(now, result)
 
   def readFitFile[F[_]: Sync: Files: Compression](file: Path): F[Attempt[List[FitFile]]] =
     readFileOrGz[F](file).compile
