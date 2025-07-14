@@ -8,7 +8,6 @@ import fit4s.activities.data.Location
 import fit4s.activities.records.{RActivity, RActivityLocation}
 
 import doobie.*
-import doobie.syntax.all.*
 
 case class SyncData(locations: Vector[Location], lastImport: Instant):
   def isEmpty: Boolean = locations.isEmpty

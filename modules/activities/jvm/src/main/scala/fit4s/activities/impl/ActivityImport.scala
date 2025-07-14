@@ -9,7 +9,6 @@ import cats.syntax.all.*
 import fit4s.ActivityReader
 import fit4s.activities.ImportResult
 import fit4s.activities.data.*
-import fit4s.activities.data.Activity
 import fit4s.activities.records.*
 import fit4s.data.*
 
