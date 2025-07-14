@@ -5,7 +5,6 @@ import cats.syntax.all.*
 
 import fit4s.activities.ImportResult
 import fit4s.activities.data.{ActivityId, ActivityRereadData}
-import fit4s.common.syntax.all.*
 
 import com.monovore.decline.Opts
 import io.bullet.borer.Encoder
