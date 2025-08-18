@@ -1,0 +1,60 @@
+package build.project
+
+import $packages._
+import $file.project.gen.reader.ProfileReader
+import $file.project.gen.types.TypesGenerator
+import $file.project.gen.messages.MessagesGenerator
+import mill.api.Logger
+import java.security.MessageDigest
+
+def generateProfileSources(
+  input: os.Path,
+  pkg: String,
+  target: os.Path,
+  logger: Logger
+): Seq[os.Path] = {
+  logger.info(s"Generating profile sources to $target")
+
+  val (typeDefs, messageDefs) = ProfileReader.readFile(input)(logger)
+  val typeSources = TypesGenerator.generate(pkg, typeDefs)
+  val msgSources = MessagesGenerator.generate(pkg, messageDefs, typeDefs)
+
+  logger.info(s"Generating ${typeSources.size + msgSources.size} files …")
+  (typeSources ++ msgSources).map { src =>
+    val file = target / src.filename
+    os.write(file, src.contents)
+    file
+  }
+}
+
+private def sameContent(file: os.Path, content: String): Boolean = {
+  val md = MessageDigest.getInstance("MD5")
+  val cntMd5 = md.digest(content.getBytes("UTF-8")).toSeq
+  md.reset()
+  val fileMd5 = md.digest(os.read.bytes(file)).toSeq
+  cntMd5 == fileMd5
+}
+
+def generateProfileSources2(
+  input: os.Path,
+  pkg: String,
+  target: os.Path,
+  logger: Logger,
+): Seq[os.Path] = {
+  logger.info(s"Generating profile sources to $target")
+
+  val (typeDefs, messageDefs) = ProfileReader.readFile(input)(logger)
+  val typeSources = TypesGenerator.generate2(pkg, typeDefs)
+  val msgSources = MessagesGenerator.generate2(pkg, messageDefs, typeDefs)
+
+  logger.info(s"Generating ${typeSources.size + msgSources.size} files …")
+  val files =
+    (typeSources ++ msgSources).map { src =>
+      val file = target / src.filename
+      if (!os.exists(file) || !sameContent(file, src.contents)) {
+        os.write.over(file, src.contents)
+      }
+      file
+    }
+  files
+}

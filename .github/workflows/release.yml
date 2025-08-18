@@ -21,8 +21,8 @@ jobs:
         id: version
         shell: bash
         run: |
-          nix develop .#ci --command sbt 'cli/writeVersion'
-          FIT4S_VERSION=$(cat target/version.txt)
+          nix develop .#ci --command mill writeVersion
+          FIT4S_VERSION=$(cat out/writeVersion.dest/version.txt)
           echo "FIT4S_VERSION=${FIT4S_VERSION}" >> $GITHUB_ENV
 
           if [ -z "${FIT4S_VERSION}" ]; then
@@ -30,8 +30,17 @@ jobs:
             exit 1
           fi
 
-      - name: Create zip package (${{ env.FIT4S_VERSION }})
-        run: nix develop .#ci --command ./make-cli.sh
+      - name: Create zip cli package (${{ env.FIT4S_VERSION }})
+        run: nix develop .#ci --command mill cli.universalPackageZip
+
+      - name: Publish library to Maven Central (${{ env.FIT4S_VERSION }})
+        if: startsWith(github.ref, 'refs/tags/')
+        run: nix develop .#ci --command mill __.publishSonatypeCentral
+        env:
+          MILL_PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+          MILL_PGP_SECRET_BASE64: ${{ secrets.PGP_SECRET }}
+          MILL_SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          MILL_SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
 
       - name: Publish Release (${{ env.FIT4S_VERSION }})
         uses: softprops/action-gh-release@v2
@@ -39,7 +48,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: modules/cli/target/universal/fit4s-cli-${{ env.FIT4S_VERSION }}.zip
+          files: out/cli/universalPackageZip.dest/fit4s-${{ env.FIT4S_VERSION }}.zip
       - name: Publish Pre-Release
         uses: ncipollo/release-action@v1
         if: ${{ github.ref }} == 'refs/heads/main'
@@ -55,4 +64,4 @@ jobs:
           name: "fit4s nightly"
           replacesArtifacts: true
           removeArtifacts: true
-          artifacts: modules/cli/target/universal/fit4s-cli-${{ env.FIT4S_VERSION }}.zip
+          artifacts: out/cli/universalPackageZip.dest/fit4s-${{ env.FIT4S_VERSION }}.zip

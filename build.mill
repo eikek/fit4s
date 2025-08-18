@@ -1,0 +1,106 @@
+//| mill-version: 0.12.14
+package build
+
+import $ivy.`com.goyeau::mill-git::0.2.7`
+import $ivy.`io.github.hoangmaihuy::mill-universal-packager::0.1.4`
+import $ivy.`com.lihaoyi::mill-contrib-buildinfo:$MILL_VERSION`
+import $ivy.`com.lihaoyi::mill-contrib-jmh:$MILL_VERSION`
+
+import $packages._
+import $file.project.deps.Deps
+import $file.project.module.{CiModule, Fit4sModule, Fit4sPublishModule, MdocModule}
+import $file.project.generator
+import io.github.hoangmaihuy.mill.packager.archetypes.JavaAppPackagingModule
+import org.eclipse.jgit.api.Git
+import com.goyeau.mill.git.GitVersionModule
+import mill.contrib.buildinfo.BuildInfo
+import mill._, scalalib._
+import contrib.jmh.JmhModule
+import scala.util.Try
+
+object `package` extends RootModule with CiModule { outer =>
+  def appVersion() = Task.Command {
+    GitVersionModule.version(hashLength = 8)()
+  }
+
+  def writeVersion() = Task.Command {
+    val file = Task.dest / "version.txt"
+    os.write(file, appVersion()())
+    Task.log.info(s"Version written to: $file")
+  }
+
+  def makeReadme() = Task.Command {
+    val readme = docs.mdoc()
+    val src = readme.path / "readme.md"
+    val trg = moduleDir / "README.md"
+    println(s"Copy $src -> $trg")
+    os.copy(src, trg, replaceExisting = true)
+  }
+
+  def headCommit = Task {
+    val git = Git.open(Task.workspace.toIO)
+    Try(git.describe().setTags(true).setMatch("v[0-9]*").setAlways(true).call())
+      .map(_.takeRight(7))
+      .getOrElse("no-commit")
+  }
+
+  object codec extends Fit4sModule with Fit4sPublishModule with BuildInfo {
+    def ivyDeps = super.ivyDeps() ++ Deps.scodec
+    def publishVersion = outer.appVersion()
+    def publishDescription = "Base datastructures and binary codecs"
+    def buildInfoPackageName = "fit4s.buildinfo"
+    def buildInfoMembers = Seq(
+      BuildInfo.Value("version", outer.appVersion()()),
+      BuildInfo.Value("scalaVersion", scalaVersion()),
+      BuildInfo.Value("headCommit", headCommit())
+    )
+  }
+
+  object profile extends Fit4sModule with Fit4sPublishModule {
+    def publishVersion = outer.appVersion()
+    def generatedSources: T[Seq[PathRef]] = Task(persistent = true) {
+      val input = Task.workspace / "project" / "profile" / "profile_21.171.00.xlsx"
+      val files =
+        generator
+          .generateProfileSources2(input, "fit4s.profile", Task.dest, Task.log)
+          .map(PathRef(_))
+      files ++ super.generatedSources()
+    }
+  }
+
+  object core extends Fit4sModule with Fit4sPublishModule {
+    def publishVersion = outer.appVersion()
+    def moduleDeps = Seq(codec, profile)
+
+    def extraTestModuleDeps = Seq(codec.test)
+  }
+
+  object bench extends Fit4sModule with JmhModule {
+    def moduleDeps = Seq(core, core.test)
+    def jmhCoreVersion = "1.37"
+  }
+
+  object borer extends Fit4sModule with Fit4sPublishModule {
+    def moduleDeps = Seq(core)
+    def publishVersion = outer.appVersion()
+    def ivyDeps = super.ivyDeps() ++ Deps.borer
+  }
+
+  object cli extends Fit4sModule with JavaAppPackagingModule {
+    def packageVersion = outer.appVersion()
+    def packageName = s"fit4s-${packageVersion()}"
+    def executableScriptName = "fit4s"
+    def moduleDeps = Seq(core, borer)
+    def ivyDeps = super.ivyDeps() ++
+      Deps.fs2 ++
+      Deps.decline ++
+      Deps.borer ++
+      Deps.scribe ++
+      Deps.scalatags
+  }
+
+  object docs extends MdocModule {
+    def mdocSources = Task.Source(super.moduleDir / "readme.md").map(Seq(_))
+    def moduleDeps = Seq(core, codec, profile, codec.test, cli)
+  }
+}
