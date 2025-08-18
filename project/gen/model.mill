@@ -83,7 +83,7 @@ object ArrayDef {
       case s if s.startsWith("[") && s.endsWith("]") =>
         Try(s.drop(1).dropRight(1).toInt).toEither.left
           .map(_.getMessage)
-          .map(Sized)
+          .map(Sized.apply)
 
       case "" => Right(NoArray)
       case s  => Left(s"Unexpected array definition: $s")

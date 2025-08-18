@@ -1,7 +1,5 @@
 package build.project.gen
 
-import $file.project.gen.model._
-
 object MessagesGenerator {
   private val longBaseValue = "BaseTypedValue.LongBaseValue"
   private val floatBaseValue = "BaseTypedValue.FloatBaseValue"

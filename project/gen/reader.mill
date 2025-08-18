@@ -1,9 +1,6 @@
 package build.project.gen
 
-import $ivy.`org.apache.poi:poi-ooxml:5.4.1`
-
 import org.apache.poi.xssf.usermodel.{XSSFSheet, XSSFWorkbook}
-import $file.project.gen.model._
 import scala.jdk.CollectionConverters._
 import org.apache.poi.ss.usermodel.{Cell, CellType, Row}
 import mill.api.Logger
@@ -102,7 +99,7 @@ object ProfileReader {
 
     go(initialMessageName, rows.tail.filterNot(_.isMessagesTitle), Nil).reverse
       .groupBy(_.messageName)
-      .map(MessageDef.tupled)
+      .map(MessageDef.apply)
       .toList
   }
 
@@ -179,7 +176,6 @@ object ProfileReader {
         case CellType.BOOLEAN => Option(c.getBooleanCellValue).map(_.toString)
         case CellType.ERROR   => Option(c.getErrorCellValue).map(_.toString)
         case CellType.FORMULA => Option(c.getCellFormula)
-        case _                => None
       }
     }
 

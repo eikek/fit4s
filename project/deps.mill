@@ -5,39 +5,39 @@ import mill._, scalalib._
 object Deps {
   val scalaVersion = "3.3.6"
 
-  val garminFit = Agg(
-    ivy"com.garmin:fit:21.171.0"
+  val garminFit = Seq(
+    mvn"com.garmin:fit:21.171.0"
   )
-  val scalatags = Agg(
-    ivy"com.lihaoyi::scalatags:0.13.1"
+  val scalatags = Seq(
+    mvn"com.lihaoyi::scalatags:0.13.1"
   )
-  val fs2 = Agg(
-    ivy"co.fs2::fs2-core:3.12.0",
-    ivy"co.fs2::fs2-io:3.12.0"
+  val fs2 = Seq(
+    mvn"co.fs2::fs2-core:3.12.0",
+    mvn"co.fs2::fs2-io:3.12.0"
   )
-  val fs2Scodec = Agg(
-    ivy"co.fs2::fs2-scodec:3.12.0"
+  val fs2Scodec = Seq(
+    mvn"co.fs2::fs2-scodec:3.12.0"
   )
-  val borer = Agg(
-    ivy"io.bullet::borer-compat-cats:1.16.1",
-    ivy"io.bullet::borer-core:1.16.1",
-    ivy"io.bullet::borer-derivation:1.16.1"
+  val borer = Seq(
+    mvn"io.bullet::borer-compat-cats:1.16.1",
+    mvn"io.bullet::borer-core:1.16.1",
+    mvn"io.bullet::borer-derivation:1.16.1"
   )
-  val scribe = Agg(
-    ivy"com.outr::scribe-cats:3.16.1",
-    ivy"com.outr::scribe:3.16.1",
-    ivy"com.outr::scribe-slf4j:3.16.1"
+  val scribe = Seq(
+    mvn"com.outr::scribe-cats:3.16.1",
+    mvn"com.outr::scribe:3.16.1",
+    mvn"com.outr::scribe-slf4j:3.16.1"
   )
-  val munit = Agg(
-    ivy"org.scalameta::munit-scalacheck:1.1.0",
-    ivy"org.scalameta::munit:1.1.1",
-    ivy"org.typelevel::munit-cats-effect:2.1.0"
+  val munit = Seq(
+    mvn"org.scalameta::munit-scalacheck:1.1.0",
+    mvn"org.scalameta::munit:1.1.1",
+    mvn"org.typelevel::munit-cats-effect:2.1.0"
   )
   val decline = Seq(
-    ivy"com.monovore::decline:2.5.0",
-    ivy"com.monovore::decline-effect:2.5.0"
+    mvn"com.monovore::decline:2.5.0",
+    mvn"com.monovore::decline-effect:2.5.0"
   )
   val scodec = Seq(
-    ivy"org.scodec::scodec-core:2.3.2"
+    mvn"org.scodec::scodec-core:2.3.2"
   )
 }

@@ -15,7 +15,7 @@
     flake-utils.lib.eachDefaultSystem (system: let
       pkgs = nixpkgs.legacyPackages.${system};
       ciPkgs = with pkgs; [
-        devshell-tools.packages.${system}.mill17
+        devshell-tools.packages.${system}.mill1_17
       ];
       devshellPkgs =
         ciPkgs

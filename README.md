@@ -26,7 +26,7 @@ file can be decoded:
 import fit4s.codec.*
 
 val testFile = TestData.Activities.moxyFr735
-// testFile: TestFile = fit4s.codec.TestData$TestFile@613b2454
+// testFile: TestFile = fit4s.codec.TestData$TestFile@27e17144
 val fr735 = FitFile.read(testFile.contents).require.head
 // fr735: FitFile = FitFile(
 //   header = FileHeader(
@@ -245,7 +245,7 @@ information.
 import fit4s.core.*
 
 val fenix539 = Fit.read(TestData.Activities.fenix539.contents).require.head
-// fenix539: Fit = fit4s.core.Fit@4f8b6189
+// fenix539: Fit = fit4s.core.Fit@1dd9515d
 val fileIdMsg = fenix539.getMessages(FileIdMsg).toVector.head
 // fileIdMsg: FitMessage = FitMessage(
 //   mesgNum = 0,

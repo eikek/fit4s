@@ -1,15 +1,16 @@
-//| mill-version: 0.12.14
+//| mill-version: 1.0.3
+//| mvnDeps:
+//| - com.goyeau::mill-git::0.3.1
+//| - io.github.hoangmaihuy::mill-universal-packager::0.2.0
+//| - com.lihaoyi::mill-contrib-buildinfo:$MILL_VERSION
+//| - com.lihaoyi::mill-contrib-jmh:$MILL_VERSION
+//| - com.goyeau::mill-scalafix::0.6.0
+//| - org.apache.poi:poi-ooxml:5.4.1
 package build
 
-import $ivy.`com.goyeau::mill-git::0.2.7`
-import $ivy.`io.github.hoangmaihuy::mill-universal-packager::0.1.4`
-import $ivy.`com.lihaoyi::mill-contrib-buildinfo:$MILL_VERSION`
-import $ivy.`com.lihaoyi::mill-contrib-jmh:$MILL_VERSION`
-
-import $packages._
-import $file.project.deps.Deps
-import $file.project.module.{CiModule, Fit4sModule, Fit4sPublishModule, MdocModule}
-import $file.project.generator
+import build.project.Deps
+import build.project.{CiModule, Fit4sModule, Fit4sPublishModule, MdocModule}
+import build.project.Generator
 import io.github.hoangmaihuy.mill.packager.archetypes.JavaAppPackagingModule
 import org.eclipse.jgit.api.Git
 import com.goyeau.mill.git.GitVersionModule
@@ -17,20 +18,22 @@ import mill.contrib.buildinfo.BuildInfo
 import mill._, scalalib._
 import contrib.jmh.JmhModule
 import scala.util.Try
+import mill.api.BuildCtx
 
-object `package` extends RootModule with CiModule { outer =>
-  def appVersion() = Task.Command {
+
+object `package` extends Module with CiModule { outer =>
+  def appVersion = Task {
     GitVersionModule.version(hashLength = 8)()
   }
 
   def writeVersion() = Task.Command {
     val file = Task.dest / "version.txt"
-    os.write(file, appVersion()())
+    os.write(file, appVersion())
     Task.log.info(s"Version written to: $file")
   }
 
   def makeReadme() = Task.Command {
-    val readme = docs.mdoc()
+    val readme = docs.mdoc()()
     val src = readme.path / "readme.md"
     val trg = moduleDir / "README.md"
     println(s"Copy $src -> $trg")
@@ -38,19 +41,19 @@ object `package` extends RootModule with CiModule { outer =>
   }
 
   def headCommit = Task {
-    val git = Git.open(Task.workspace.toIO)
+    val git = Git.open(BuildCtx.workspaceRoot.toIO)
     Try(git.describe().setTags(true).setMatch("v[0-9]*").setAlways(true).call())
       .map(_.takeRight(7))
       .getOrElse("no-commit")
   }
 
   object codec extends Fit4sModule with Fit4sPublishModule with BuildInfo {
-    def ivyDeps = super.ivyDeps() ++ Deps.scodec
+    def mvnDeps = super.mvnDeps() ++ Deps.scodec
     def publishVersion = outer.appVersion()
     def publishDescription = "Base datastructures and binary codecs"
     def buildInfoPackageName = "fit4s.buildinfo"
     def buildInfoMembers = Seq(
-      BuildInfo.Value("version", outer.appVersion()()),
+      BuildInfo.Value("version", outer.appVersion()),
       BuildInfo.Value("scalaVersion", scalaVersion()),
       BuildInfo.Value("headCommit", headCommit())
     )
@@ -59,9 +62,9 @@ object `package` extends RootModule with CiModule { outer =>
   object profile extends Fit4sModule with Fit4sPublishModule {
     def publishVersion = outer.appVersion()
     def generatedSources: T[Seq[PathRef]] = Task(persistent = true) {
-      val input = Task.workspace / "project" / "profile" / "profile_21.171.00.xlsx"
+      val input = BuildCtx.workspaceRoot / "project" / "profile" / "profile_21.171.00.xlsx"
       val files =
-        generator
+        Generator
           .generateProfileSources2(input, "fit4s.profile", Task.dest, Task.log)
           .map(PathRef(_))
       files ++ super.generatedSources()
@@ -83,7 +86,7 @@ object `package` extends RootModule with CiModule { outer =>
   object borer extends Fit4sModule with Fit4sPublishModule {
     def moduleDeps = Seq(core)
     def publishVersion = outer.appVersion()
-    def ivyDeps = super.ivyDeps() ++ Deps.borer
+    def mvnDeps = super.mvnDeps() ++ Deps.borer
   }
 
   object cli extends Fit4sModule with JavaAppPackagingModule {
@@ -91,7 +94,7 @@ object `package` extends RootModule with CiModule { outer =>
     def packageName = s"fit4s-${packageVersion()}"
     def executableScriptName = "fit4s"
     def moduleDeps = Seq(core, borer)
-    def ivyDeps = super.ivyDeps() ++
+    def mvnDeps = super.mvnDeps() ++
       Deps.fs2 ++
       Deps.decline ++
       Deps.borer ++
@@ -100,7 +103,7 @@ object `package` extends RootModule with CiModule { outer =>
   }
 
   object docs extends MdocModule {
-    def mdocSources = Task.Source(super.moduleDir / "readme.md").map(Seq(_))
+    def mdocSources = Task.Sources(super.moduleDir / "readme.md")
     def moduleDeps = Seq(core, codec, profile, codec.test, cli)
   }
 }

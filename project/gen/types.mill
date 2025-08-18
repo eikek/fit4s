@@ -1,7 +1,5 @@
 package build.project.gen
 
-import $file.project.gen.model._
-
 object TypesGenerator {
   def generate2(pkgname: String, typeDefs: List[TypeDesc]): List[SourceFile] = {
     val groups = typeDefs.groupBy(_.name).view
