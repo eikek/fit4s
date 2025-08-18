@@ -1,0 +1,225 @@
+package build.project.gen
+
+import $file.project.gen.model._
+
+object TypesGenerator {
+  def generate2(pkgname: String, typeDefs: List[TypeDesc]): List[SourceFile] = {
+    val groups = typeDefs.groupBy(_.name).view
+    makeAllTypes(pkgname, groups.withFilter(e => !isSingleton(e._2)).map(_._1).toList) ::
+      groups.map { case (name, defs) =>
+        if (isSingleton(defs)) makeSingleton2(pkgname, defs.head)
+        else makeTypes3(pkgname, name, defs)
+      }.toList
+  }
+
+
+  def generate(pkgname: String, typeDefs: List[TypeDesc]): List[SourceFile] = {
+    val groups = typeDefs.groupBy(_.name)
+    makeFiles(pkgname, groups)
+  }
+
+  def makeFiles2(pkg: String, groups: Map[String, List[TypeDesc]]): List[SourceFile] =
+    groups.view.withFilter(e => !isSingleton(e._2)).map { case (name, defs) =>
+       makeTypes2(pkg, name, defs)
+    }.toList
+
+  def makeFiles(pkg: String, groups: Map[String, List[TypeDesc]]): List[SourceFile] =
+    groups.view.map { case (name, defs) =>
+      if (isSingleton(defs)) makeSingleton(pkg, defs.head)
+      else if (name == "date_time") makeDateTime(pkg, defs.head)
+      else if (name == "local_date_time") makeDateTime(pkg, defs.head)
+      else makeTypes(pkg, name, defs)
+    }.toList
+
+  def isSingleton(dfs: List[TypeDesc]) =
+    dfs.tail.isEmpty && dfs.headOption.exists(_.valueName.isEmpty)
+
+  def makeDateTime(pkg: String, td: TypeDesc): SourceFile = {
+    val objName = snakeCamelType(td.name)
+    val contents =
+      s"""package $pkg.types
+         |/* This file has been generated. */
+         |
+         |/** ${td.comment.getOrElse("")} */
+         |final case class $objName(rawValue: Long) extends TypedValue[Long] {
+         |  val typeName: String = "${td.name}"
+         |  def asInstant: java.time.Instant =
+         |    $objName.offset.plusSeconds(rawValue)
+         |
+         |  def asLocalDateTime: java.time.LocalDateTime =
+         |    $objName.offset.plusSeconds(rawValue).atOffset(java.time.ZoneOffset.UTC).toLocalDateTime
+         |
+         |  def isSystemTime: Boolean =
+         |    rawValue < $objName.minTimeForOffset
+         |}
+         |object $objName extends ${objName}Companion {
+         |  val minTimeForOffset: Long = 0x10000000L
+         |  val offset: java.time.Instant = java.time.Instant.parse("1989-12-31T00:00:00Z")
+         |
+         |  val baseType: FitBaseType = FitBaseType.${snakeCamelType(td.baseType)}
+         |}
+       """.stripMargin
+    SourceFile(s"${snakeCamelType(td.name)}.scala", contents)
+  }
+
+
+  def makeSingleton(pkg: String, td: TypeDesc): SourceFile = {
+    if (td.baseType != "uint32") sys.error(s"Unexpected base type: $td")
+    val objName = snakeCamelType(td.name)
+    val contents =
+      s"""package $pkg.types
+         |/* This file has been generated. */
+         |
+         |import scodec.Codec
+         |import scodec.bits.ByteOrdering
+         |
+         |/** ${td.comment.getOrElse("")} */
+         |final case class $objName(rawValue: Long) extends TypedValue[Long] {
+         |  val typeName: String = "${td.name}"
+         |}
+         |object $objName extends TypedValueCompanion[$objName] {
+         |  override def codec(bo: ByteOrdering): Codec[$objName] =
+         |    fit4s.util.Codecs.ulongx(32, bo).xmap($objName.apply(_), _.rawValue)
+         |
+         |  val baseType: FitBaseType = FitBaseType.${snakeCamelType(td.baseType)}
+         |}
+       """.stripMargin
+    SourceFile(s"${snakeCamelType(td.name)}.scala", contents)
+  }
+
+  def makeSingleton2(pkg: String, td: TypeDesc): SourceFile = {
+    if (td.baseType != "uint32") sys.error(s"Unexpected base type: $td")
+    val objName = snakeCamelType(td.name)
+    val contents =
+      s"""package $pkg
+         |/* This file has been generated. */
+         |
+         |/** ${td.comment.getOrElse("")} */
+         |final case class ${objName}Type(value: Long)
+         |object ${objName}Type extends ProfileType {
+         |  val name = "${td.name}"
+         |  val baseType = "${td.baseType}"
+         |  val values = Map()
+         |}
+       """.stripMargin
+    SourceFile(s"${snakeCamelType(td.name)}Type.scala", contents)
+  }
+
+  def makeTypes(pkg: String, name: String, dfs: List[TypeDesc]): SourceFile = {
+    val objName = snakeCamelType(name)
+
+    def caseObject(td: TypeDesc) = {
+      val line =
+        s"""
+           |case object ${snakeCamelType(td.valueName)} extends $objName {
+           |  val rawValue = ${td.value}L
+           |  val typeName = "${td.valueName}"
+           |}
+           |""".stripMargin
+      td.comment match {
+        case Some(comment) =>
+          s"/** $comment */\n  $line"
+        case None => line
+      }
+    }
+
+    def values = dfs.map(caseObject).mkString("  ", "\n  ", "  ")
+    val fitBaseType = s"FitBaseType.${snakeCamelType(dfs.head.baseType)}"
+
+    val contents =
+      s"""package $pkg.types
+         |/* This file has been generated. */
+         |
+         |import scodec.Codec
+         |import scodec.bits.ByteOrdering
+         |
+         |sealed trait $objName extends TypedValue[Long]
+         |object $objName extends EnumValueCompanion[$objName] {
+         |  $values
+         |
+         |  val all: List[$objName] =
+         |    List(${dfs.map(_.valueName).map(snakeCamelType).mkString(", ")})
+         |
+         |  protected val allMap: Map[$objName, Long] =
+         |    all.map(e => e -> e.rawValue).toMap
+         |
+         |  val baseType: FitBaseType = $fitBaseType
+         |
+         |  override protected def baseTypeCodec(bo: ByteOrdering): Codec[Long] =
+         |    BaseTypeCodec.baseCodec($fitBaseType, bo)
+         |}
+       """.stripMargin
+    SourceFile(s"${snakeCamelType(name)}.scala", contents)
+  }
+
+  /** The enum variant. Compiles into a 6MB jar file. */
+  def makeTypes2(pkg: String, name: String, dfs: List[TypeDesc]): SourceFile = {
+    val objName = snakeCamelType(name)
+
+    def caseObject(td: TypeDesc) = {
+      val line =
+        s"""case ${snakeCamelType(td.valueName)} extends $objName(${td.value}, "${td.valueName}")"""
+      td.comment match {
+        case Some(comment) =>
+          s"/** $comment */\n  $line"
+        case None => line
+      }
+    }
+
+    def values = dfs.map(caseObject).mkString("  ", "\n  ", "  ")
+    val fitBaseType = s"FitBaseType.${snakeCamelType(dfs.head.baseType)}"
+
+    val contents =
+      s"""package $pkg.types
+         |/* This file has been generated. */
+         |
+         |enum $objName(val value: Int, val name: String):
+         |$values
+         |
+         |object $objName:
+         |  val all: Map[Int, $objName] =
+         |    $pkg.types.$objName.values.map(e => (e.value, e)).toMap
+         |  def byValue(n: Int): Option[$objName] =
+         |    all.get(n)
+       """.stripMargin
+    SourceFile(s"${snakeCamelType(name)}.scala", contents)
+  }
+
+  /** The map variant. Compiles into 1.4M jar file. */
+  def makeTypes3(pkg: String, name: String, tds: List[TypeDesc]): SourceFile = {
+    val elements = tds.map(td => s"${td.value} -> \"${td.valueName}\"").mkString("    ", ",\n    ", "")
+    val defs = tds.map(td => s"val ${snakeCamelIdent(td.valueName)} = ${td.value}").mkString("  ", "\n  ", "")
+    val content =
+      s"""package $pkg
+      |/* This is a generated file. */
+      |
+      |object ${snakeCamelType(name)}Type extends ProfileType {
+      |  val name = "${name}"
+      |  val baseType = "${tds.head.baseType}"
+      |  val values = Map(
+      |$elements
+      |  )
+      |
+      |$defs
+      |}
+        """
+
+    SourceFile(s"${snakeCamelType(name)}Type.scala", content)
+  }
+  def makeAllTypes(pkg: String, names: List[String]): SourceFile = {
+    val elements = names.map(name => s"\"${name}\" -> ${snakeCamelType(name)}Type").mkString("    ", ",\n    ", "")
+    val content = s"""package $pkg
+    |/* This is a generated file. */
+    |
+    |object FitTypes {
+    |  val types = Map[String, ProfileType](
+    |$elements
+    |  )
+    |
+    |  def apply(name: String, value: Int): Option[String] =
+    |    types.get(name).flatMap(_.apply(value))
+    |}
+    """.stripMargin
+    SourceFile("FitTypes.scala", content)
+  }
+}

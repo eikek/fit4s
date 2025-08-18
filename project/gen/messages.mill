@@ -1,0 +1,430 @@
+package build.project.gen
+
+import $file.project.gen.model._
+
+object MessagesGenerator {
+  private val longBaseValue = "BaseTypedValue.LongBaseValue"
+  private val floatBaseValue = "BaseTypedValue.FloatBaseValue"
+  private val stringBaseValue = "BaseTypedValue.StringBaseValue"
+
+  def generate(
+      pkgname: String,
+      msgDefs: List[MessageDef],
+      typeDefs: List[TypeDesc]
+  ): List[SourceFile] =
+    makeAllMsgsFile(pkgname, msgDefs.map(_.messageName)) ::
+      makeFiles(typeDefs)(pkgname, msgDefs)
+
+  def generate2(
+      pkgname: String,
+      msgDefs: List[MessageDef],
+      typeDefs: List[TypeDesc]
+  ): List[SourceFile] =
+    makeAllMsgsFile2(pkgname, msgDefs.map(_.messageName)) ::
+      makeFiles2(typeDefs)(pkgname, msgDefs)
+
+
+  def makeAllMsgsFile2(pkg: String, names: List[String]): SourceFile = {
+    val defs = names.sorted
+      .map(n => s"${snakeCamelType(n)}Msg.globalNum -> ${snakeCamelType(n)}Msg")
+      .mkString("    ", ",\n    ", "")
+    val contents =
+      s"""package ${pkg}
+         |/* This is a generate file. */
+         |
+         |object GlobalMessages {
+         |  val values: Map[Int, MsgSchema] = Map(
+         |$defs
+         |  )
+         |}
+         |""".stripMargin
+
+    SourceFile("GlobalMessages.scala", contents)
+  }
+
+  def makeFiles2(
+      typeDefs: List[TypeDesc]
+  )(pkg: String, groups: List[MessageDef]): List[SourceFile] =
+    groups.view.map {
+      makeFile2(typeDefs, pkg)
+    }.toList
+
+
+  def makeAllMsgsFile(pkg: String, names: List[String]): SourceFile = {
+    val name = "FitMessages.scala"
+    val defs = names.sorted
+      .map(n => s"val ${snakeCamelIdent(n)} = add(${snakeCamelType(n)}Msg)")
+      .mkString("  ", "\n  ", "  ")
+    val contents =
+      s"""package ${pkg}.messages
+         |/* This is a generated file. */
+         |
+         |object FitMessages extends Msgs {
+         |$defs
+         |}
+         |""".stripMargin
+
+    SourceFile(name, contents)
+  }
+
+  def makeFiles(
+      typeDefs: List[TypeDesc]
+  )(pkg: String, groups: List[MessageDef]): List[SourceFile] =
+    groups.view.map {
+      makeFile(typeDefs, pkg)
+    }.toList
+
+  def makeFile2(
+      typeDefs: List[TypeDesc],
+      pkg: String
+  )(msgDef: MessageDef): SourceFile = {
+    val objName = snakeCamelType(msgDef.messageName)
+
+    val fileName = s"${objName}Msg.scala"
+    val fieldDecl =
+      msgDef.fields.map(makeMessageField2(typeDefs, msgDef)).mkString("  ", "\n  ", "  ")
+
+    val allFields = msgDef.fields.map(fd => s"${fd.fieldDefNumber} -> ${snakeCamelIdent(fd.fieldName)}")
+      .mkString("    ", ",\n    ", "")
+
+    val contents =
+      s"""package ${pkg}
+         |/* This is a generated file. */
+         |
+         |object ${messageTypeName(msgDef)} extends MsgSchema {
+         |  val globalNum: Int = MesgNumType.${snakeCamelIdent(msgDef.messageName)}
+         |
+         |$fieldDecl
+         |
+         |  val allFields: Map[Int, MsgField] = Map(
+         |$allFields
+         |  )
+         |
+         |  override def toString(): String = "${messageTypeName(msgDef)}"
+         |}
+         |
+         |""".stripMargin
+
+    SourceFile(fileName, contents)
+  }
+
+
+  def messageTypeName(messageDef: MessageDef): String =
+    s"${snakeCamelType(messageDef.messageName)}Msg"
+
+  def makeFile(
+      typeDefs: List[TypeDesc],
+      pkg: String
+  )(msgDef: MessageDef): SourceFile = {
+    val objName = snakeCamelType(msgDef.messageName)
+
+    val fileName = s"${objName}Msg.scala"
+    val fieldDecl =
+      msgDef.fields.map(makeMessageField(typeDefs, msgDef)).mkString("  ", "\n  ", "  ")
+
+    val contents =
+      s"""package ${pkg}.messages
+         |
+         |import ${pkg}.types._
+         |
+         |object ${messageTypeName(msgDef)} extends Msg {
+         |  val globalMessageNumber: MesgNum = MesgNum.${objName}
+         |
+         |$fieldDecl
+         |
+         |  override def toString(): String = "${messageTypeName(msgDef)}"
+         |}
+         |
+         |""".stripMargin
+
+    SourceFile(fileName, contents)
+  }
+
+  def makeMessageField2(typeDefs: List[TypeDesc], message: MessageDef)(
+      fd: MessageFieldLine
+  ): String = {
+    val refFields = fd.subFields.flatMap(makeReferencedFields2(typeDefs, message, fd))
+    val subFields = fd.subFields.map(makeSubfieldDecl2(typeDefs, message, fd))
+    val field = makeFieldDecl2(typeDefs)(fd)
+    (refFields ::: subFields ::: List(field)).mkString("\n")
+  }
+
+
+  def makeMessageField(typeDefs: List[TypeDesc], message: MessageDef)(
+      fd: MessageFieldLine
+  ): String = {
+    val refFields = fd.subFields.flatMap(makeReferencedFields(typeDefs, message, fd))
+    val subFields = fd.subFields.map(makeSubfieldDecl(typeDefs, message, fd))
+    val field = makeFieldDecl(typeDefs)(fd)
+    (refFields ::: subFields ::: List(field)).mkString("\n")
+  }
+
+  def makeSubfieldValName(
+      messageDef: MessageFieldLine,
+      subfieldDef: MessageSubFieldLine
+  ): String =
+    snakeCamelIdent(s"${messageDef.fieldName}_${subfieldDef.fieldName}")
+
+  def makeReferencedFieldVarName(
+      sf: MessageSubFieldLine,
+      refFieldName: String,
+      refFieldValue: String
+  ): String =
+    snakeCamelIdent(sf.fieldName + "_when_" + refFieldName + "_" + refFieldValue)
+
+  def makeReferencedFields(
+      typeDefs: List[TypeDesc],
+      messageDef: MessageDef,
+      md: MessageFieldLine
+  )(sf: MessageSubFieldLine): List[String] =
+    // referenced fields is a comma separated list
+    sf.refFieldName.zip(sf.refFieldValue) match {
+      case Nil  => Nil
+      case list =>
+        list.map { case (name, value) =>
+          val baseTypeNames =
+            typeDefs.filter(_.name == "fit_base_type").map(_.valueName).toSet
+          val referencedField =
+            messageDef
+              .findField(name)
+              .getOrElse(
+                sys.error(
+                  s"Referenced field '$name' not found in msg '${messageDef.messageName}'"
+                )
+              )
+          val typeName = scalaTypeName(referencedField.fieldType, baseTypeNames)
+          val fieldRef = snakeCamelIdent(referencedField.fieldName)
+          val varName = makeReferencedFieldVarName(sf, name, value)
+          val typeValue = typeDefs
+            .find(td => td.valueName == value)
+            .map(td => snakeCamelType(td.valueName))
+            .getOrElse(
+              sys.error(
+                s"No type '${referencedField.fieldType}' found for referenced field '${name}'"
+              )
+            )
+
+          s"""
+             |  lazy val $varName =
+             |    Msg.ReferencedField[$typeName](
+             |      refField = ${messageTypeName(messageDef)}.$fieldRef,
+             |      refFieldValue = $typeName.$typeValue
+             |  )
+             |""".stripMargin
+        }
+    }
+
+  def makeReferencedFields2(
+      typeDefs: List[TypeDesc],
+      messageDef: MessageDef,
+      md: MessageFieldLine
+  )(sf: MessageSubFieldLine): List[String] =
+    // referenced fields is a comma separated list
+    sf.refFieldName.zip(sf.refFieldValue) match {
+      case Nil  => Nil
+      case list =>
+        list.map { case (name, value) =>
+          val baseTypeNames =
+            typeDefs.filter(_.name == "fit_base_type").map(_.valueName).toSet
+          val referencedField =
+            messageDef
+              .findField(name)
+              .getOrElse(
+                sys.error(
+                  s"Referenced field '$name' not found in msg '${messageDef.messageName}'"
+                )
+              )
+          val typeName = scalaTypeName(referencedField.fieldType, baseTypeNames)
+          val fieldRef = snakeCamelIdent(referencedField.fieldName)
+          val varName = makeReferencedFieldVarName(sf, name, value)
+          val typeValue = typeDefs
+            .find(td => td.valueName == value)
+            .map(td => snakeCamelIdent(td.valueName))
+            .getOrElse(
+              sys.error(
+                s"No type '${referencedField.fieldType}' found for referenced field '${name}'"
+              )
+            )
+
+          s"""
+             |  lazy val $varName =
+             |    ReferencedField(
+             |      refField = ${messageTypeName(messageDef)}.$fieldRef,
+             |      refFieldValue = ${typeName}Type.$typeValue
+             |  )
+             |""".stripMargin
+        }
+    }
+
+
+  def makeSubfieldDecl(
+      typeDefs: List[TypeDesc],
+      messageDef: MessageDef,
+      md: MessageFieldLine
+  )(fd: MessageSubFieldLine): String = {
+    val baseTypeNames = typeDefs.filter(_.name == "fit_base_type").map(_.valueName).toSet
+    val typeName = scalaTypeName(fd.fieldType, baseTypeNames)
+    val typeNameOrLong =
+      if (baseTypeNames.contains(fd.fieldType) || fd.fieldType == "bool") longBaseValue
+      else typeName
+    val baseType =
+      if (baseTypeNames.contains(fd.fieldType))
+        s"FitBaseType.${snakeCamelType(fd.fieldType)}"
+      else if (fd.fieldType == "bool") "FitBaseType.Enum"
+      else s"${typeName}.baseType"
+
+    val refFields = fd.refFieldName
+      .zip(fd.refFieldValue)
+      .map { case (name, value) =>
+        makeReferencedFieldVarName(fd, name, value)
+      }
+      .mkString(", ")
+
+    s"""
+       |/** ${fd.comment.getOrElse("")} */
+       |  lazy val ${makeSubfieldValName(md, fd)}: Msg.SubField[$typeNameOrLong] =
+       |    Msg.SubField(
+       |      fieldName = "${fd.fieldName}",
+       |      fieldTypeName = "${fd.fieldType}",
+       |      fieldBaseType = $baseType,
+       |      fieldCodec = ${scalaTypeCodec(fd.fieldType, baseType, baseTypeNames)},
+       |      isArray = Msg.ArrayDef.${fd.isArray},
+       |      components = ${fd.components.map(_.inQuotes)},
+       |      scale = ${fd.scale},
+       |      offset = ${fd.offset},
+       |      units = ${fd.units.map(_.inQuotes)},
+       |      bits = ${fd.bits},
+       |      references = List($refFields)
+       |    )
+       |""".stripMargin
+  }
+
+  def makeSubfieldDecl2(
+      typeDefs: List[TypeDesc],
+      messageDef: MessageDef,
+      md: MessageFieldLine
+  )(fd: MessageSubFieldLine): String = {
+    val baseTypeNames = typeDefs.filter(_.name == "fit_base_type").map(_.valueName).toSet
+    val baseType =
+      if (baseTypeNames.contains(fd.fieldType)) fd.fieldType.inQuotes
+      else if (fd.fieldType == "bool") "enum".inQuotes
+      else s"${snakeCamelType(fd.fieldType)}Type.baseType" //check in types.mill
+    val profileType =
+      if (baseTypeNames.contains(fd.fieldType)) "None"
+      else if (fd.fieldType == "bool") "None"
+      else s"Some(${snakeCamelType(fd.fieldType)}Type)" //check in types.mill
+    val refFields = fd.refFieldName
+      .zip(fd.refFieldValue)
+      .map { case (name, value) =>
+        makeReferencedFieldVarName(fd, name, value)
+      }
+      .mkString(", ")
+
+    s"""
+       |/** ${fd.comment.getOrElse("")} */
+       |  lazy val ${makeSubfieldValName(md, fd)}: SubField =
+       |    SubField(
+       |      references = List($refFields),
+       |      fieldName = "${fd.fieldName}",
+       |      profileType = $profileType,
+       |      baseTypeName = $baseType,
+       |      components = ${fd.components.map(_.inQuotes)},
+       |      scale = ${fd.scale},
+       |      offset = ${fd.offset.getOrElse(0d)},
+       |      units = ${fd.units.map(_.asUnit)},
+       |      bits = ${fd.bits}
+       |    )
+       |""".stripMargin
+  }
+
+
+  def makeFieldDecl(typeDefs: List[TypeDesc])(fd: MessageFieldLine): String = {
+    val baseTypeNames = typeDefs.filter(_.name == "fit_base_type").map(_.valueName).toSet
+    val typeName = scalaTypeName(fd.fieldType, baseTypeNames)
+    val typeNameOrLong =
+      if (fd.fieldType == "string") stringBaseValue
+      else if (Set("float32", "float64").contains(fd.fieldType)) floatBaseValue
+      else if (baseTypeNames.contains(fd.fieldType) || fd.fieldType == "bool")
+        longBaseValue
+      else typeName
+    val baseType =
+      if (baseTypeNames.contains(fd.fieldType))
+        s"FitBaseType.${snakeCamelType(fd.fieldType)}"
+      else if (fd.fieldType == "bool") "FitBaseType.Enum"
+      else s"${typeName}.baseType"
+
+    val subfields = fd.subFields.map(sd => makeSubfieldValName(fd, sd)).mkString(", ")
+
+    s"""
+       |/** ${fd.comment.getOrElse("")} */
+       |  val ${snakeCamelIdent(fd.fieldName)}: Msg.Field[$typeNameOrLong] =
+       |    add(
+       |      Msg.Field(
+       |        fieldDefinitionNumber = ${fd.fieldDefNumber},
+       |        fieldName = "${fd.fieldName}",
+       |        fieldTypeName = "${fd.fieldType}",
+       |        fieldBaseType = $baseType,
+       |        fieldCodec = ${scalaTypeCodec(fd.fieldType, baseType, baseTypeNames)},
+       |        isArray = Msg.ArrayDef.${fd.isArray},
+       |        components = ${fd.components.map(_.inQuotes)},
+       |        scale = ${fd.scale},
+       |        offset = ${fd.offset},
+       |        units = ${fd.units.map(_.inQuotes)},
+       |        bits = ${fd.bits},
+       |        subFields = () => List($subfields)
+       |      )
+       |    )
+       |""".stripMargin
+  }
+
+  def makeFieldDecl2(typeDefs: List[TypeDesc])(fd: MessageFieldLine): String = {
+    val baseTypeNames = typeDefs.filter(_.name == "fit_base_type").map(_.valueName).toSet
+    val baseType =
+      if (baseTypeNames.contains(fd.fieldType)) fd.fieldType.inQuotes
+      else if (fd.fieldType == "bool") "enum".inQuotes
+      else s"${snakeCamelType(fd.fieldType)}Type.baseType" //check in types.mill
+    val profileType =
+      if (baseTypeNames.contains(fd.fieldType)) "None"
+      else if (fd.fieldType == "bool") "None"
+      else s"Some(${snakeCamelType(fd.fieldType)}Type)" //check in types.mill
+
+    val subfields = fd.subFields.map(sd => makeSubfieldValName(fd, sd)).mkString(", ")
+
+    s"""
+       |/** ${fd.comment.getOrElse("")} */
+       |  lazy val ${snakeCamelIdent(fd.fieldName)}: MsgField =
+       |    MsgField(
+       |      fieldDefNum = ${fd.fieldDefNumber},
+       |      fieldName = "${fd.fieldName}",
+       |      profileType = $profileType,
+       |      baseTypeName = $baseType,
+       |      components = ${fd.components.map(_.inQuotes)},
+       |      scale = ${fd.scale},
+       |      offset = ${fd.offset.getOrElse(0d)},
+       |      units = ${fd.units.map(_.asUnit)},
+       |      bits = ${fd.bits},
+       |      subFields = List($subfields)
+       |    )
+       |""".stripMargin
+  }
+
+  def scalaTypeName(name: String, baseTypes: Set[String]): String =
+    if (baseTypes.contains(name) || name == "bool") s"FitBaseType"
+    else s"${snakeCamelType(name)}"
+
+  def scalaTypeCodec(name: String, baseType: String, baseTypes: Set[String]): String = {
+    val tn = snakeCamelType(name)
+    if (name == "string")
+      s"fieldDef => _ => $stringBaseValue.codec(fieldDef.sizeBytes)"
+    else if (name == "float32" || name == "float64")
+      s"_ => bo => $floatBaseValue.codec(bo, $baseType)"
+    else if (baseTypes.contains(name) || name == "bool")
+      s"_ => bo => $longBaseValue.codec(bo, $baseType)"
+    else s"_ => bo => $tn.codec(bo)"
+  }
+
+  implicit class StringOps(self: String) {
+    def inQuotes = s""""$self""""
+    def asUnit = s"MeasurementUnit.fromString($inQuotes)"
+  }
+}

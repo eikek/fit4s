@@ -1,0 +1,139 @@
+package build.project
+
+import $ivy.`com.goyeau::mill-scalafix::0.5.1`
+import com.goyeau.mill.scalafix.StyleModule
+import mill._, scalalib._, publish._
+import $file.project.deps.Deps
+import mill.resolve.Resolve
+import mill.define.SelectMode
+import mill.eval.Evaluator
+import mill.util.Jvm
+
+trait Fit4sModule extends ScalaModule with StyleModule { outer =>
+  def scalaVersion = Deps.scalaVersion
+  def scalacOptions = super.scalacOptions() ++ Seq(
+    "-feature",
+    "-deprecation",
+    "-unchecked",
+    "-encoding",
+    "UTF-8",
+    "-language:higherKinds",
+    "-Werror",
+    "-indent",
+    "-print-lines",
+    "-Wunused:all"
+  )
+  def consoleScalacOptions = scalacOptions().filterNot(_ == "-Werror")
+
+  def millSourcePath = {
+    val pre = super.millSourcePath
+    pre / os.up / "modules" / pre.last
+  }
+
+  def artifactName: T[String] = Task {
+    val n = super.artifactName()
+    s"fit4s-$n"
+  }
+
+  def extraTestModuleDeps: Seq[JavaModule] = Seq.empty
+
+  object test extends ScalaTests with TestModule.Munit with StyleModule {
+    def artifactName: T[String] = Task {
+      val n = super.artifactName()
+      s"fit4s-$n"
+    }
+
+    override def moduleDeps: Seq[JavaModule] =
+      super.moduleDeps ++ outer.extraTestModuleDeps
+    def ivyDeps = Deps.munit ++ Deps.fs2 ++ Deps.borer ++ Deps.garminFit
+  }
+}
+
+trait Fit4sPublishModule extends PublishModule with SonatypeCentralPublishModule {
+  def pomSettings = PomSettings(
+    description = "fit file parser for Scala 3",
+    organization = "com.github.eikek",
+    url = "https://github.com/eikek/fit4s",
+    licenses = Seq(License.`APSL-2.0`),
+    versionControl = VersionControl.github("eikek", "fit4s"),
+    developers = Seq(Developer("eikek", "eikek", "https://github.com/eikek"))
+  )
+}
+
+object Tasks {
+  def find(ev: Evaluator, cmd: String) =
+    Resolve.Tasks
+      .resolve(
+        ev.rootModule,
+        Seq(s"__.$cmd"),
+        SelectMode.Separated
+      )
+      .fold(sys.error, identity)
+}
+
+trait CiModule extends Module {
+  def ci(ev: Evaluator) = {
+    val checkStyles = Tasks.find(ev, "checkStyle")
+    val publish = Tasks.find(ev, "publishLocal")
+    val readme = Tasks.find(ev, "mdoc")
+    val tests = Tasks.find(ev, "test")
+    Task.Command(exclusive = true) {
+      Task.sequence(checkStyles ++ tests ++ readme ++ publish)()
+      ()
+    }
+  }
+}
+
+// https://github.com/hmf/mdocMill/blob/main/build.sc
+trait MdocModule extends ScalaModule {
+  def scalaVersion = Deps.scalaVersion
+  def scalaMdocVersion: T[String] = T("2.7.2")
+
+  def scalaMdocDep: T[Dep] = T(ivy"org.scalameta::mdoc:${scalaMdocVersion()}")
+
+  def mdocSources: Target[Seq[PathRef]]
+
+  // https://github.com/scalameta/mdoc/issues/702
+  // MDoc has its own dependencies on the Scala compiler and uses those
+  // To use a later version of Scala 3, we need to download that version of the compiler
+  def mdocDep = T.task {
+    Agg(
+      ivy"org.scalameta::mdoc:${scalaMdocVersion()}"
+        .exclude("org.scala-lang" -> "scala3-compiler_3")
+        .exclude("org.scala-lang" -> "scala3-library_3"),
+      ivy"org.scala-lang::scala3-compiler:${scalaVersion()}"
+    ).map(Lib.depToBoundDep(_, scalaVersion()))
+  }
+
+  // Only downloads source code
+  // resolveDeps(mdocDep, sources = true)
+  def mDocLibs = T(resolveDeps(mdocDep))
+
+  val separator = java.io.File.pathSeparatorChar
+  def toArgument(p: Agg[os.Path]) = p.iterator.mkString(s"$separator")
+  def toArg(p: Set[os.Path]) = p.mkString(s"$separator")
+  def toArgumentDebug(p: Agg[os.Path]) = p.iterator.mkString(s"\n")
+
+  def mdoc: T[PathRef] = T {
+    val cp = runClasspath().map(_.path)
+    //val cp = compileClasspath().map(_.path)
+    val rp = mDocLibs().map(_.path)
+    val dir = T.dest.toIO.getAbsolutePath
+    val dirParams = mdocSources()
+      .map(pr => Seq(s"--in", pr.path.toIO.getAbsolutePath, "--out", dir))
+      .iterator
+      .flatten
+    val docClasspath = toArgument(cp)
+    val params = Seq("--classpath", s"$docClasspath") ++ dirParams.toSeq
+
+    Jvm.callProcess(
+      mainClass = "mdoc.Main",
+      classPath = rp.toSeq,
+      jvmArgs = forkArgs(),
+      env = forkEnv(),
+      mainArgs = params,
+      cwd = forkWorkingDir()
+    )
+    PathRef(T.dest)
+  }
+}
