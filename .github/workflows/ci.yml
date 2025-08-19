@@ -14,7 +14,7 @@ jobs:
           fetch-depth: 100
       - uses: cachix/install-nix-action@v31
       - name: sbt ci ${{ github.ref }}
-        run: nix develop .#ci --command mill ci
+        run: nix develop .#ci --command mill --no-daemon  ci
   ci:
     runs-on: ubuntu-latest
     needs: [ci-matrix]
