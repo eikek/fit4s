@@ -26,4 +26,4 @@ class FileIdTest extends FunSuite with TestSyntax:
     val expected = "2UNiVbZvNyPMxuAqigB"
     assertEquals(fid, fileId)
     assertEquals(fid.asStringLegacy, expected)
-    assertEquals(FileId.fromString(expected).fold(sys.error, identity), fileId)
+    assertEquals(FileId.fromStringLegacy(expected).fold(sys.error, identity), fileId)

@@ -60,9 +60,8 @@ object StreamDecoder:
       Codecs.collectUntilErr[Vector, FitPart](decoder, next.bits) match
         case Attempt.Successful(DecodeResult(values, remain)) =>
           val keep = values.forall(cont.onPart)
-          if (keep) {
-            decode0(source.prepend(remain), cont, decoder)
-          }
+          if keep then decode0(source.prepend(remain), cont, decoder)
+          else cont.onDone()
 
         case Attempt.Failure(_: Err.InsufficientBits) =>
           decode0(source.prepend(next), cont, decoder)

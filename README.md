@@ -26,7 +26,7 @@ file can be decoded:
 import fit4s.codec.*
 
 val testFile = TestData.Activities.moxyFr735
-// testFile: TestFile = fit4s.codec.TestData$TestFile@27e17144
+// testFile: TestFile = fit4s.codec.TestData$TestFile@34f87ad9
 val fr735 = FitFile.read(testFile.contents).require.head
 // fr735: FitFile = FitFile(
 //   header = FileHeader(
@@ -158,6 +158,8 @@ FitFileStructure.checkIntegrity(TestData.Corrupted.badCrc.contents)
 // )
 ```
 
+While `FitFile.read` reads the entire file into memory, there is also
+a `StreamDecoder` which can be used to incrementally read fit files.
 
 ## profile
 
@@ -245,7 +247,7 @@ information.
 import fit4s.core.*
 
 val fenix539 = Fit.read(TestData.Activities.fenix539.contents).require.head
-// fenix539: Fit = fit4s.core.Fit@1dd9515d
+// fenix539: Fit = fit4s.core.Fit@2dd48d07
 val fileIdMsg = fenix539.getMessages(FileIdMsg).toVector.head
 // fileIdMsg: FitMessage = FitMessage(
 //   mesgNum = 0,

@@ -45,16 +45,13 @@ object FileId:
         MR.field(m.productName).as[String].option.tuple).as[FileId]
     }
 
-  def fromString(str: String): Either[String, FileId] =
+  def fromStringLegacy(str: String): Either[String, FileId] =
     ByteVector
       .fromBase58Descriptive(str, Bases.Alphabets.Base58)
       .flatMap(bv =>
         legacyIdCodec.complete.decode(bv.bits).toEither.left.map(_.messageWithContext)
       )
       .map(_.value)
-
-  def unsafeFromString(str: String): FileId =
-    fromString(str).fold(sys.error, identity)
 
   private val legacyIdCodec: Codec[FileId] = {
     // this does the same as the variant from previous versions to retain compatibility with old values.
@@ -83,5 +80,4 @@ object FileId:
     val number = optional(bool, ulongL(32).xmap(_.toInt, _.toLong))
     val name = optional(bool, cstring)
     (fileType :: manu :: product :: serial :: created :: number :: name).as[FileId]
-
   }

@@ -53,6 +53,8 @@ FitFileStructure.checkIntegrity(TestData.Activities.fenix539.contents)
 FitFileStructure.checkIntegrity(TestData.Corrupted.badCrc.contents)
 ```
 
+While `FitFile.read` reads the entire file into memory, there is also
+a `StreamDecoder` which can be used to incrementally read fit files.
 
 ## profile
 

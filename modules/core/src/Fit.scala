@@ -17,6 +17,7 @@ import scodec.bits.ByteVector
 
 final class Fit(val file: FitFile, val cfg: Config):
 
+  /** Gets the file-id message that is recommended to be in every fit file. */
   def fileId: Option[FileId] =
     getMessages(FileIdMsg).headOption.flatMap(_.as[FileId].toOption.flatten)
 
