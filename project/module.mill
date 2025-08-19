@@ -50,7 +50,7 @@ trait Fit4sPublishModule extends PublishModule with SonatypeCentralPublishModule
     description = "fit file parser for Scala 3",
     organization = "com.github.eikek",
     url = "https://github.com/eikek/fit4s",
-    licenses = Seq(License.`APSL-2.0`),
+    licenses = Seq(License.`Apache-2.0`),
     versionControl = VersionControl.github("eikek", "fit4s"),
     developers = Seq(Developer("eikek", "eikek", "https://github.com/eikek"))
   )
