@@ -1,30 +1,22 @@
 //| mill-version: 1.0.3
 //| mvnDeps:
-//| - com.goyeau::mill-git::0.3.1
 //| - io.github.hoangmaihuy::mill-universal-packager::0.2.0
 //| - com.lihaoyi::mill-contrib-buildinfo:$MILL_VERSION
 //| - com.lihaoyi::mill-contrib-jmh:$MILL_VERSION
 //| - com.goyeau::mill-scalafix::0.6.0
 //| - org.apache.poi:poi-ooxml:5.4.1
+//| - org.eclipse.jgit:org.eclipse.jgit:7.1.0.202411261347-r
 package build
 
-import build.project.Deps
-import build.project.{CiModule, Fit4sModule, Fit4sPublishModule, MdocModule}
-import build.project.Generator
+import build.project.{CiModule, Fit4sModule, Fit4sPublishModule, MdocModule, Deps, Version, Generator}
 import io.github.hoangmaihuy.mill.packager.archetypes.JavaAppPackagingModule
-import org.eclipse.jgit.api.Git
-import com.goyeau.mill.git.GitVersionModule
 import mill.contrib.buildinfo.BuildInfo
 import mill._, scalalib._
 import contrib.jmh.JmhModule
-import scala.util.Try
-import mill.api.BuildCtx
-
+import mill.api.{BuildCtx, Result}
 
 object `package` extends Module with CiModule { outer =>
-  def appVersion = Task {
-    GitVersionModule.version(hashLength = 8)()
-  }
+  def appVersion = Task.Input(Version.get)
 
   def writeVersion() = Task.Command {
     val file = Task.dest / "version.txt"
@@ -36,16 +28,11 @@ object `package` extends Module with CiModule { outer =>
     val readme = docs.mdoc()()
     val src = readme.path / "readme.md"
     val trg = moduleDir / "README.md"
-    println(s"Copy $src -> $trg")
+    Task.log.info(s"Copy $src -> $trg")
     os.copy(src, trg, replaceExisting = true)
   }
 
-  def headCommit = Task {
-    val git = Git.open(BuildCtx.workspaceRoot.toIO)
-    Try(git.describe().setTags(true).setMatch("v[0-9]*").setAlways(true).call())
-      .map(_.takeRight(7))
-      .getOrElse("no-commit")
-  }
+  def headCommit = Task.Input(Version.headCommit)
 
   object codec extends Fit4sModule with Fit4sPublishModule with BuildInfo {
     def mvnDeps = super.mvnDeps() ++ Deps.scodec
@@ -62,7 +49,8 @@ object `package` extends Module with CiModule { outer =>
   object profile extends Fit4sModule with Fit4sPublishModule {
     def publishVersion = outer.appVersion()
     def generatedSources: T[Seq[PathRef]] = Task(persistent = true) {
-      val input = BuildCtx.workspaceRoot / "project" / "profile" / "profile_21.171.00.xlsx"
+      val input =
+        BuildCtx.workspaceRoot / "project" / "profile" / "profile_21.171.00.xlsx"
       val files =
         Generator
           .generateProfileSources2(input, "fit4s.profile", Task.dest, Task.log)
