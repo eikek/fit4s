@@ -56,13 +56,13 @@ class PolylineTest extends FunSuite with TestSyntax:
     assertEquals(pp1 ++ pp2, Polyline(p1, p2, p3))
     assertEquals(pp2 ++ pp1, Polyline(p3, p1, p2))
 
-  // test("iterator"):
-  //   val ppl = Polyline(p1, p2, p3)
-  //   val it = ppl.iterator
-  //   assertEquals(it.next(), p1)
-  //   assertEquals(it.next(), p2)
-  //   assertEquals(it.next(), p3)
-  //   assert(it.hasNext == false)
+  test("iterator"):
+    val ppl = Polyline(p1, p2, p3)
+    val it = ppl.iterator()
+    assertEquals(it.next(), p1)
+    assertEquals(it.next(), p2)
+    assertEquals(it.next(), p3)
+    assert(it.hasNext == false)
 
   test("encode/decode roundtrip"):
     val ppl = Polyline(p1, p2, p3)
@@ -92,3 +92,9 @@ class PolylineTest extends FunSuite with TestSyntax:
     val pll = Polyline(plc*)
     assertEquals(pll.toLatLngs, plc)
     assertEquals(pll.decodeN(23), Some(plc.take(23) -> Polyline(plc.drop(23)*)))
+
+  test("round first element"):
+    val pl = Polyline(LargeSample.coordinates.take(10)*)
+    assertEquals(pl.firstPosition.get, LargeSample.correctDecoded5.head)
+    val (vec, remain) = pl.decodeN(3).get
+    assertEquals(vec, LargeSample.correctDecoded5.take(3))

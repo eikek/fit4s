@@ -19,6 +19,12 @@ object Distance:
     def +(dst: Distance): Distance = self + dst
     def -(dst: Distance): Distance = self - dst
     def rounded: Distance = self.round.toDouble
+    def roundTo(precision: Int): Distance =
+      if precision <= 0 then rounded
+      else
+        val f = math.pow(10, precision)
+        Math.round(self * f) / f
+
     def asString: String =
       if self > 1000 then f"$toKm%.2fkm"
       else f"$self%.2fm"

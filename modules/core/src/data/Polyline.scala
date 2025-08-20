@@ -3,6 +3,7 @@ package fit4s.core.data
 import java.nio.charset.StandardCharsets
 
 import fit4s.core.internal.PolylineCodec
+import fit4s.core.internal.PolylineUtils
 
 import scodec.bits.ByteVector
 
@@ -43,6 +44,14 @@ sealed trait Polyline:
     */
   def decodeN(n: Int): Option[(Vector[LatLng], Polyline)]
 
+  /** Creates an iterator that decodes `chunkSize` coordinates at once. */
+  final def iterator(chunkSize: Int = 100): Iterator[LatLng] =
+    PolylineUtils.latngIterator(this, chunkSize)
+
+  /** Calculates the distance of this polyline. */
+  final def distance: Distance =
+    PolylineUtils.distance(this, 100)
+
 object Polyline:
   private val c = PolylineCodec
 
@@ -70,6 +79,7 @@ object Polyline:
     def middlePrecision = withPrecision(Precision.middle)
     def highPrecision = withPrecision(Precision.high)
     def lowPrecision = withPrecision(Precision.low)
+    def round(pos: LatLng): LatLng = c.roundTo(pos, precision)
 
   object Config:
     given Config = Config()
@@ -81,10 +91,9 @@ object Polyline:
 
   def apply(pos: LatLng*)(using cfg: Config): Polyline =
     pos match
-      case Seq()           => empty
-      case a +: Seq()      => One(a, cfg)
-      case a +: b +: Seq() => Many.from(a, b)
-      case a +: b +: tail  => Many.from(a, b, tail*)
+      case Seq()          => empty
+      case a +: Seq()     => One(cfg.round(a), cfg)
+      case a +: b +: tail => Many.from(cfg.round(a), cfg.round(b), tail*)
 
   def decode(encoded: String)(using cfg: Config): Polyline =
     val str = encoded.trim()
@@ -114,11 +123,8 @@ object Polyline:
 
   sealed trait NonEmpty extends Polyline:
     val isEmpty = false
-  object NonEmpty:
-    def unapply(pl: Polyline): Option[(LatLng, LatLng, Int)] = pl match
-      case Empty(_)             => None
-      case One(p, _)            => Some((p, p, 1))
-      case Many(_, f, l, sz, _) => Some((f, l, sz))
+    def first: LatLng
+    def last: LatLng
 
   private case class One(pos: LatLng, cfg: Config) extends NonEmpty:
     val size = 1
@@ -134,6 +140,8 @@ object Polyline:
     val toLatLngs = Vector(pos)
     val firstPosition: Option[LatLng] = Some(pos)
     val lastPosition: Option[LatLng] = Some(pos)
+    val first = pos
+    val last = pos
     def decodeN(n: Int): Option[(Vector[LatLng], Polyline)] =
       if n <= 0 then None
       else Some(Vector(pos) -> Empty(cfg))
