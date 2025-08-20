@@ -106,6 +106,10 @@ object PolylineCodec:
         case n =>
           Some((buf.toVector, ""))
 
+  def roundTo(pos: LatLng, precision: Int): LatLng =
+    val factor = math.pow(10, precision)
+    LatLng(roundTo(pos.lat, factor), roundTo(pos.lng, factor))
+
   private inline def roundTo(num: Double, factor: Double): Double =
     Math.round(num * factor) / factor
 
