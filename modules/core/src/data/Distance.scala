@@ -7,6 +7,7 @@ opaque type Distance = Double
 
 object Distance:
   val zero: Distance = 0d
+  val max: Distance = Double.MaxValue
 
   def meter(meter: Double): Distance = meter
   def km(km: Double): Distance = km * 1000
