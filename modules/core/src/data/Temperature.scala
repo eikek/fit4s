@@ -15,6 +15,9 @@ object Temperature:
     def *(f: Double): Temperature = self * f
     def /(d: Double): Temperature = self / d
     def asString: String = f"$self%.2f°C"
+    private def ord: Ordered[Temperature] =
+      Ordered.orderingToOrdered(self)(using Ordering[Temperature])
+    export ord.*
 
   given Numeric[Temperature] = Numeric.DoubleIsFractional
   given FieldReader[Temperature] =

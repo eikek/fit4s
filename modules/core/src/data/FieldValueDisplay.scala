@@ -5,7 +5,7 @@ import fit4s.codec.FitBaseValue.syntax.*
 import fit4s.core.FieldValue
 import fit4s.profile.MeasurementUnit
 
-object CommonShow:
+object FieldValueDisplay:
   given Display[FieldValue] = Display.instance { fv =>
     fieldValueShow(fv).mkString(", ")
   }

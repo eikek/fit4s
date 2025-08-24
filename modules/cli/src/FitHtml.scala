@@ -2,7 +2,7 @@ package fit4s.cli
 
 import fs2.io.file.Path
 
-import fit4s.core.data.CommonShow.given
+import fit4s.core.data.FieldValueDisplay.given
 import fit4s.core.data.Polyline
 import fit4s.core.{Fit, FitMessage}
 import fit4s.profile.*

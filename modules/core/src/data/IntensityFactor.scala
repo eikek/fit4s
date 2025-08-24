@@ -11,6 +11,9 @@ object IntensityFactor:
   extension (self: IntensityFactor)
     def value: Double = self
     def asString = f"$self%.2fiff"
+    private def ord: Ordered[IntensityFactor] =
+      Ordered.orderingToOrdered(self)(using Ordering[IntensityFactor])
+    export ord.*
 
   given Numeric[IntensityFactor] = Numeric.DoubleIsFractional
 

@@ -7,8 +7,10 @@ opaque type HeartRate = Int
 
 object HeartRate:
   val zero: HeartRate = 0
+  val max: HeartRate = 300
 
-  def bpm(bpm: Int): HeartRate = bpm
+  def bpm(bpm: Int): HeartRate =
+    if bpm > max then max else bpm
 
   extension (self: HeartRate)
     def toBpm: Int = self
