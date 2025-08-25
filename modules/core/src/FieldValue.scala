@@ -34,6 +34,8 @@ object FieldValue:
   extension (self: Option[FieldValue])
     def as[A](using r: FieldReader[A]): Option[Either[String, A]] =
       self.map(r.read)
+    def to[A](using r: FieldReader[A]): Option[Either[String, A]] =
+      self.map(r.read)
 
     def asEnum: Option[ProfileEnum] =
       self.flatMap(_.asEnum)

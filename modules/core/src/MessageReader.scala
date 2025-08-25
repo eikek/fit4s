@@ -1,9 +1,19 @@
 package fit4s.core
 
+import java.time.Instant
+
 import scala.Tuple.Concat
 import scala.deriving.Mirror
 
+import fit4s.core.data.Timespan
+import fit4s.profile.LapMsg
+import fit4s.profile.LengthMsg
+import fit4s.profile.MesgNumType
+import fit4s.profile.MsgField
 import fit4s.profile.ProfileEnum
+import fit4s.profile.SegmentLapMsg
+import fit4s.profile.SessionMsg
+import fit4s.profile.SplitMsg
 
 trait MessageReader[A]:
   def read(fit: FitMessage): Either[String, Option[A]]
@@ -31,14 +41,24 @@ trait MessageReader[A]:
   def option: MessageReader[Option[A]] =
     transform(_.map(Some(_)))
 
-  def or(default: => A): MessageReader[A] =
+  def withDefault(default: => A): MessageReader[A] =
     transform(_.map(_.orElse(Some(default))))
+
+  def or(other: => MessageReader[A]): MessageReader[A] =
+    MessageReader.instance { fm =>
+      read(fm) match
+        case Right(None) => other.read(fm)
+        case v           => v
+    }
 
   def recover(f: String => A): MessageReader[A] =
     transform {
       case v @ Right(_) => v
       case Left(err)    => Right(Some(f(err)))
     }
+
+  def withDescription(message: String): MessageReader[A] =
+    transform(_.left.map(m => s"$message: $m"))
 
 object MessageReader:
 
@@ -48,6 +68,11 @@ object MessageReader:
     new MessageReader[A] {
       def read(fit: FitMessage): Either[String, Option[A]] = f(fit)
     }
+
+  def withDescription[A](message: String)(
+      f: FitMessage => Either[String, Option[A]]
+  ): MessageReader[A] =
+    instance(f).withDescription(message)
 
   def option[A](f: FitMessage => Option[A]): MessageReader[A] =
     instance(fit => Right(f(fit)))
@@ -81,6 +106,55 @@ object MessageReader:
 
   def field[N: GetFieldNumber](n: N): MessageReader[FieldValue] =
     option(_.field(n))
+
+  def timestamp: MessageReader[Instant] =
+    instance(m => Right(m.timestamp.map(_.asInstant)))
+
+    /** Summary messages represent a time span, defined by the start time and total
+      * elapsed time.
+      *
+      * https://developer.garmin.com/fit/cookbook/decoding-activity-files/#decodingfitactivityfiles
+      *
+      * Sometimes, this is not provided and instead the startTime and timestamp property
+      * denote the time span.
+      *
+      * This applies only to LengthMsg, LapMsg, SessionMsg, SegmentLapMsg and SplitMsg
+      */
+  def timespan: MessageReader[Timespan] =
+    withDescription("timespan") { fm =>
+      val startAndtotalElapsedTime: Either[String, (MsgField, MsgField)] =
+        fm.mesgNum match
+          case MesgNumType.length =>
+            Right(LengthMsg.startTime -> LengthMsg.totalElapsedTime)
+          case MesgNumType.lap     => Right(LapMsg.startTime -> LapMsg.totalElapsedTime)
+          case MesgNumType.session =>
+            Right(SessionMsg.startTime -> SessionMsg.totalElapsedTime)
+          case MesgNumType.segmentLap =>
+            Right(SegmentLapMsg.startTime -> SegmentLapMsg.totalElapsedTime)
+          case MesgNumType.split => Right(SplitMsg.startTime -> SplitMsg.totalElapsedTime)
+          case _                 =>
+            Left(s"Message ${fm.mesgNum} (${fm.messageName}) not supported for timespan")
+
+      startAndtotalElapsedTime.flatMap { case (sf, ef) =>
+        val startTime = fm.field(sf).as[Instant] match
+          case Some(e) => e.map(Option(_))
+          case None    => Right(None)
+        val elapsed = fm.field(ef).as[Double] match
+          case Some(e) => e.map(Option(_))
+          case None    => Right(None)
+
+        for
+          stOpt <- startTime
+          elapsedOpt <- elapsed
+          result = (stOpt, fm.timestamp.map(_.asInstant), elapsedOpt) match
+            case (Some(st), Some(et), None)                => Some(Timespan(st, et))
+            case (Some(st), Some(et), _) if et.isAfter(st) => Some(Timespan(st, et))
+            case (Some(st), _, Some(secs))                 =>
+              Some(Timespan(st, st.plusSeconds(secs.toLong)))
+            case _ => None
+        yield result
+      }
+    }
 
   def forMsg[M: GetMesgNum, A](m: M)(reader: M => MessageReader[A]): MessageReader[A] =
     when(m).flatMap(_ => reader(m))

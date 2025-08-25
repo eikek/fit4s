@@ -8,8 +8,9 @@ import cats.effect.*
 import cats.syntax.all.*
 import fs2.io.file.Path
 
+import fit4s.core.Activity
 import fit4s.core.Fit
-import fit4s.core.data.Polyline
+import fit4s.core.data.*
 
 import com.monovore.decline.Opts
 
@@ -44,8 +45,8 @@ object ViewCmd extends CmdCommons:
   def apply(cfg: Options): IO[ExitCode] =
     for {
       fits <- readFit(cfg.fitFile)
-      track <- makeTrack(fits, cfg)
-      html = FitHtml(fits, track, cfg.fitFile)
+      tracks <- reportError(IO.pure(makeFitTracks(fits, cfg)))
+      html = FitHtml(fits, tracks, cfg.fitFile)
 
       file <- IO.blocking {
         val out = cfg.out.file
@@ -71,10 +72,55 @@ object ViewCmd extends CmdCommons:
     html.writeBytesTo(os)
     os.close()
 
-  def makeTrack(fits: Vector[Fit], opts: Options): IO[Polyline] =
-    given Polyline.Config = Polyline.Config(precision = opts.precision)
-    val init: Either[String, Polyline] = Right(Polyline.empty)
-    val pl = fits.map(_.track).foldLeft(init) { (res, pl) =>
-      res.flatMap(p => pl.map(p ++ _))
+  def makeFitTracks(fits: Vector[Fit], opts: Options): Either[String, SessionTracks] =
+    val init: Either[String, SessionTracks] = Right(
+      SessionTracks(Vector.empty, opts, Vector.empty)
+    )
+    fits.foldLeft(init) { (tracks, fit) =>
+      tracks.flatMap(pls => makeFitTrack(fit, opts).map(next => pls ++ next))
     }
-    reportError(IO.pure(pl))
+
+  def makeFitTrack(fit: Fit, opts: Options): Either[String, SessionTracks] =
+    Activity.from(fit).flatMap {
+      case None =>
+        fit.getLatLngs.map(c => SessionTracks(Vector.empty, opts, c))
+
+      case Some(act) =>
+        Right(
+          SessionTracks(
+            act.sessionRecords.map { sr =>
+              SessionTrack(
+                sr.session.timespan,
+                sr.session.sport,
+                sr.records.flatMap(_.position.map(_.toLatLng))
+              )
+            },
+            opts,
+            act.unrelatedRecords.flatMap(_.position.map(_.toLatLng))
+          )
+        )
+    }
+
+  final case class SessionTrack(
+      time: Timespan,
+      name: String,
+      track: Vector[LatLng] = Vector.empty
+  ):
+    def addPos(p: LatLng) = copy(track = track.appended(p))
+    def line(using cfg: Polyline.Config): Polyline = Polyline(track*)
+
+  final case class SessionTracks(
+      sessions: Vector[SessionTrack],
+      opts: Options,
+      unrelated: Vector[LatLng] = Vector.empty
+  ):
+    given Polyline.Config = Polyline.Config(precision = opts.precision)
+
+    def isEmpty: Boolean = sessions.isEmpty && unrelated.isEmpty
+    def nonEmpty: Boolean = !isEmpty
+
+    def lines: Vector[Polyline] =
+      (sessions.map(_.line) :+ Polyline(unrelated*)).filter(_.nonEmpty)
+
+    def ++(other: SessionTracks): SessionTracks =
+      SessionTracks(sessions ++ other.sessions, opts, unrelated ++ other.unrelated)

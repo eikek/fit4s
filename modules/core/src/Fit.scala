@@ -21,6 +21,9 @@ final class Fit(val file: FitFile, val cfg: Config):
   def fileId: Option[FileId] =
     getMessages(FileIdMsg).headOption.flatMap(_.as[FileId].toOption.flatten)
 
+  def fileTypeIs(ft: Int | String): Boolean =
+    fileId.exists(_.fileType.isValue(ft))
+
   /** Constructs a polyline from the position data in all record messages. */
   def track(using Polyline.Config): Either[String, Polyline] =
     getLatLngs.map(Polyline.apply(_*))

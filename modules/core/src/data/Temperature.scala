@@ -23,6 +23,6 @@ object Temperature:
   given FieldReader[Temperature] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Celcius)
-      v <- FieldReader.firstAsDouble
+      v <- FieldReader.firstAsDouble.or(FieldReader.firstAsInt.map(_.toDouble))
     yield v
   given Display[Temperature] = Display.instance(_.asString)

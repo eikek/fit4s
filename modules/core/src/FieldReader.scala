@@ -25,6 +25,13 @@ trait FieldReader[T]:
       case err @ Left(_) => err.asInstanceOf[Either[String, B]]
   }
 
+  def or(fr: => FieldReader[T]): FieldReader[T] =
+    FieldReader.instance { v =>
+      read(v) match
+        case Left(_) => fr.read(v)
+        case r       => r
+    }
+
 object FieldReader:
   inline def apply[T](using r: FieldReader[T]): FieldReader[T] = r
 

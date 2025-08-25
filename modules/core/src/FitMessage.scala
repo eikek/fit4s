@@ -17,6 +17,7 @@ final case class FitMessage(
     timestamp: Option[DateTime],
     data: Map[Int, TypedDataField]
 ):
+  val messageName = MesgNumType(mesgNum)
   private val schemaByName: Map[String, MsgField] =
     schema.map { case (_, v) => (v.fieldName, v) }
 
@@ -236,3 +237,16 @@ object FitMessage:
         case _ =>
           msg
     }
+
+  extension (self: Option[FitMessage])
+    def as[A](using MessageReader[A]): Either[String, Option[A]] =
+      self match
+        case None     => Right(None)
+        case Some(fm) => fm.as[A]
+
+  extension (self: LazyList[FitMessage])
+    def as[A](using MessageReader[A]): Either[String, Vector[A]] =
+      val init: Either[String, Vector[A]] = Right(Vector.empty)
+      self.foldLeft(init) { (vec, el) =>
+        vec.flatMap(v => el.as[A].map(optA => v.appendedAll(optA)))
+      }
