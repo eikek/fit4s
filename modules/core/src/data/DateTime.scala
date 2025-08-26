@@ -19,7 +19,12 @@ final case class DateTime(value: Long):
   def asString = asInstant.toString
 
 object DateTime:
-  given FieldReader[DateTime] = FieldReader.firstAsLong.map(DateTime.apply)
+  given reader: FieldReader[Vector[DateTime]] =
+    for
+      _ <- FieldReader.profileType(DateTimeType)
+      v <- FieldReader.longs
+    yield v.map(DateTime.seconds)
+  given FieldReader[DateTime] = reader.singleValue
 
   val minTimeForOffset: Long = 0x10000000L
   val offset: Instant = Instant.parse("1989-12-31T00:00:00Z")

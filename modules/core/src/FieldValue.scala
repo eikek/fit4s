@@ -3,6 +3,7 @@ package fit4s.core
 import fit4s.codec.*
 import fit4s.codec.FitBaseValue$package.FitBaseValue.syntax.*
 import fit4s.core.data.Display
+import fit4s.core.data.FieldValueDisplay
 import fit4s.profile.*
 
 /** Combines profile information about a field with its decoded data. The data is already
@@ -31,6 +32,7 @@ final case class FieldValue(
     d.show(this)
 
 object FieldValue:
+  given Display[FieldValue] = FieldValueDisplay.display
   extension (self: Option[FieldValue])
     def as[A](using r: FieldReader[A]): Option[Either[String, A]] =
       self.map(r.read)

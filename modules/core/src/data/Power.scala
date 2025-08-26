@@ -20,9 +20,10 @@ object Power:
     export ord.*
 
   given Numeric[Power] = Numeric.IntIsIntegral
-  given FieldReader[Power] =
+  given reader: FieldReader[Vector[Power]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Watt)
-      v <- FieldReader.firstAsLong
-    yield v.toInt
+      v <- FieldReader.anyNumberInt
+    yield v
+  given FieldReader[Power] = reader.singleValue
   given Display[Power] = Display.instance(_.asString)

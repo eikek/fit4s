@@ -10,3 +10,6 @@ object Display:
     (a: A) => f(a)
 
   given Display[String] = instance(identity)
+
+  object syntax:
+    extension [A](self: A)(using d: Display[A]) def display: String = d.show(self)

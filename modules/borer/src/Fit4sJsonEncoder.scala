@@ -4,7 +4,6 @@ import fit4s.codec.*
 import fit4s.core.*
 import fit4s.core.data.DateTime
 import fit4s.core.data.Display
-import fit4s.core.data.FieldValueDisplay.given
 import fit4s.profile.*
 
 import io.bullet.borer.*

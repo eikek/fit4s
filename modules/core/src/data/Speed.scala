@@ -29,9 +29,10 @@ object Speed:
 
   given Numeric[Speed] = Numeric.DoubleIsFractional
   given Ordering[Speed] = Ordering[Double]
-  given FieldReader[Speed] =
+  given reader: FieldReader[Vector[Speed]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.MeterPerSecond)
-      v <- FieldReader.firstAsDouble
-    yield Speed.meterPerSecond(v)
+      v <- FieldReader.anyNumberDouble
+    yield v
+  given FieldReader[Speed] = reader.singleValue
   given Display[Speed] = Display.instance(_.asString)

@@ -43,6 +43,7 @@ object FitBaseValue:
       def asDouble = FitBaseValue.toDouble(self)
       def asString = FitBaseValue.toString(self)
       def asLongOrInt = self.asLong.orElse(self.asInt.map(_.toLong))
+      def asDoubleOrLong = self.asDouble.orElse(self.asLong.map(_.toDouble))
       def asUInt = self.asByte.map(_ & 0xff).orElse(self.asInt)
 
   // extension (n: Int) def widen: FitBaseValue = n

@@ -17,9 +17,10 @@ object IntensityFactor:
 
   given Numeric[IntensityFactor] = Numeric.DoubleIsFractional
 
-  given FieldReader[IntensityFactor] =
+  given reader: FieldReader[Vector[IntensityFactor]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.IntensityFactor)
-      v <- FieldReader.firstAsDouble
+      v <- FieldReader.anyNumberDouble
     yield v
+  given FieldReader[IntensityFactor] = reader.singleValue
   given Display[IntensityFactor] = Display.instance(_.asString)

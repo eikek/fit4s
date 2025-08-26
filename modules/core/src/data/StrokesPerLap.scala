@@ -20,9 +20,10 @@ object StrokesPerLap:
     export ord.*
 
   given Numeric[StrokesPerLap] = Numeric.DoubleIsFractional
-  given FieldReader[StrokesPerLap] =
+  given reader: FieldReader[Vector[StrokesPerLap]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.StrokesPerLap)
-      v <- FieldReader.firstAsDouble
+      v <- FieldReader.anyNumberDouble
     yield v
+  given FieldReader[StrokesPerLap] = reader.singleValue
   given Display[StrokesPerLap] = Display.instance(_.asString)

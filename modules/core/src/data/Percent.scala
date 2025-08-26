@@ -21,9 +21,10 @@ object Percent:
     export ord.*
 
   given Numeric[Percent] = Numeric.DoubleIsFractional
-  given FieldReader[Percent] =
+  given reader: FieldReader[Vector[Percent]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Percent)
-      v <- FieldReader.firstAsDouble
+      v <- FieldReader.anyNumberDouble
     yield v
+  given FieldReader[Percent] = reader.singleValue
   given Display[Percent] = Display.instance(_.asString)

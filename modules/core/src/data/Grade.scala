@@ -19,9 +19,11 @@ object Grade:
     export ord.*
 
   given Numeric[Grade] = Numeric.DoubleIsFractional
-  given FieldReader[Grade] =
+  given reader: FieldReader[Vector[Grade]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Percent)
-      v <- FieldReader.firstAsDouble
+      v <- FieldReader.anyNumberDouble
     yield v
+  given FieldReader[Grade] = reader.singleValue
+
   given Display[Grade] = Display.instance(_.asString)
