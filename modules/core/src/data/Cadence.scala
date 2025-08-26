@@ -23,10 +23,11 @@ object Cadence:
     export ord.*
 
   given Numeric[Cadence] = Numeric.IntIsIntegral
-  given FieldReader[Cadence] =
+  given reader: FieldReader[Vector[Cadence]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Rpm)
-      v <- FieldReader.firstAsInt
+      v <- FieldReader.anyNumberInt
     yield v
+  given FieldReader[Cadence] = reader.singleValue
 
   given Display[Cadence] = Display.instance(_.asString)

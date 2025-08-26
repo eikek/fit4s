@@ -24,9 +24,11 @@ object Calories:
     export ord.*
 
   given numeric: Numeric[Calories] = Numeric.DoubleIsFractional
-  given FieldReader[Calories] =
+  given reader: FieldReader[Vector[Calories]] =
     for
-      _ <- FieldReader.unit(MeasurementUnit.Kcal)
-      v <- FieldReader.firstAsDouble.map(kcal)
-    yield v
+      unit <- FieldReader.unit(MeasurementUnit.Kcal, MeasurementUnit.Calories)
+      v <- FieldReader.anyNumberDouble
+      r = if unit == MeasurementUnit.Kcal then v.map(kcal) else v.map(cal)
+    yield r
+  given FieldReader[Calories] = reader.singleValue
   given Display[Calories] = Display.instance(_.asString)

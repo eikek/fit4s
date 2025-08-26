@@ -14,15 +14,18 @@ object Temperature:
     def +(t: Temperature): Temperature = self + t
     def *(f: Double): Temperature = self * f
     def /(d: Double): Temperature = self / d
-    def asString: String = f"$self%.2f°C"
+    def asString: String =
+      if self == self.toInt then s"${self.toInt}°C"
+      else f"$self%.2f°C"
     private def ord: Ordered[Temperature] =
       Ordered.orderingToOrdered(self)(using Ordering[Temperature])
     export ord.*
 
   given Numeric[Temperature] = Numeric.DoubleIsFractional
-  given FieldReader[Temperature] =
+  given reader: FieldReader[Vector[Temperature]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Celcius)
-      v <- FieldReader.firstAsDouble.or(FieldReader.firstAsInt.map(_.toDouble))
+      v <- FieldReader.anyNumberDouble
     yield v
+  given FieldReader[Temperature] = reader.singleValue
   given Display[Temperature] = Display.instance(_.asString)

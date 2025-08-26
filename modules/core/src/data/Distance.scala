@@ -35,20 +35,21 @@ object Distance:
     export ord.*
 
   given Numeric[Distance] = Numeric.DoubleIsFractional
-  given FieldReader[Distance] =
+  given reader: FieldReader[Vector[Distance]] =
     for
       u <- FieldReader.unit(
         MeasurementUnit.Meter,
         MeasurementUnit.Km,
         MeasurementUnit.Millimeter
       )
-      v <- FieldReader.firstAsDouble
+      v <- FieldReader.anyNumberDouble
       r = u match
         case MeasurementUnit.Meter =>
-          Distance.meter(v)
+          v.map(Distance.meter)
         case MeasurementUnit.Km =>
-          Distance.km(v)
+          v.map(Distance.km)
         case _ =>
-          Distance.millimeter(v)
+          v.map(Distance.millimeter)
     yield r
+  given FieldReader[Distance] = reader.singleValue
   given Display[Distance] = Display.instance(_.asString)

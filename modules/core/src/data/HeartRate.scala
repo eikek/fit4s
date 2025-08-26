@@ -20,9 +20,10 @@ object HeartRate:
     def asString = s"${self}bpm"
 
   given Numeric[HeartRate] = Numeric.IntIsIntegral
-  given FieldReader[HeartRate] =
+  given reader: FieldReader[Vector[HeartRate]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Bpm)
-      v <- FieldReader.firstAsInt
+      v <- FieldReader.anyNumberInt
     yield v
+  given FieldReader[HeartRate] = reader.singleValue
   given Display[HeartRate] = Display.instance(_.asString)

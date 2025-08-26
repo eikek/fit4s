@@ -39,9 +39,10 @@ object Duration:
       else str
 
   given Numeric[Duration] = Numeric.DoubleIsFractional
-  given FieldReader[Duration] =
+  given reader: FieldReader[Vector[Duration]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Second)
-      v <- FieldReader.firstAsDouble
+      v <- FieldReader.anyNumberDouble
     yield v
+  given FieldReader[Duration] = reader.singleValue
   given Display[Duration] = Display.instance(_.asString)

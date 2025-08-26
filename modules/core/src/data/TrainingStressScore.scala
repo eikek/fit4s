@@ -19,9 +19,10 @@ object TrainingStressScore:
     export ord.*
 
   given Numeric[TrainingStressScore] = Numeric.DoubleIsFractional
-  given FieldReader[TrainingStressScore] =
+  given reader: FieldReader[Vector[TrainingStressScore]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.TrainingStressScore)
-      v <- FieldReader.firstAsDouble
+      v <- FieldReader.anyNumberDouble
     yield v
+  given FieldReader[TrainingStressScore] = reader.singleValue
   given Display[TrainingStressScore] = Display.instance(_.asString)

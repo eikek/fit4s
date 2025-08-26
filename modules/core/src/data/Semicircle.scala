@@ -34,9 +34,10 @@ object Semicircle:
 
   given Numeric[Semicircle] = Numeric.LongIsIntegral
 
-  given FieldReader[Semicircle] =
+  given reader: FieldReader[Vector[Semicircle]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Semicircles)
-      n <- FieldReader.firstAsLong
+      n <- FieldReader.longs
     yield n
+  given FieldReader[Semicircle] = reader.singleValue
   given Display[Semicircle] = Display.instance(_.asString)
