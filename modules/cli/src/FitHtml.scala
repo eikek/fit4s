@@ -2,6 +2,7 @@ package fit4s.cli
 
 import fs2.io.file.Path
 
+import fit4s.cli.ViewCmd.SessionTracks
 import fit4s.core.data.FieldValueDisplay.given
 import fit4s.core.data.Polyline
 import fit4s.core.{Fit, FitMessage}
@@ -11,8 +12,24 @@ import scalatags.Text.all.*
 
 object FitHtml:
   private val cls = `class`
+  private def trackColors: LazyList[String] =
+    LazyList
+      .continually(
+        List(
+          "#f78e43",
+          "#f7e843",
+          "#acf743",
+          "#43acf7",
+          "#8e43f7",
+          "#44fcf3",
+          "#964f26",
+          "#1a8750",
+          "#13a9bd"
+        )
+      )
+      .flatten
 
-  def apply(fits: Vector[Fit], track: Polyline, file: Path) =
+  def apply(fits: Vector[Fit], tracks: SessionTracks, file: Path) =
     doctype("html")(
       html(
         makeHead(file),
@@ -49,19 +66,19 @@ object FitHtml:
             div(
               cls := "flex flex-grow flex-col",
               style := "width: calc(100% - 20rem);",
-              Option.when(track.nonEmpty)(mapDiv(track)),
-              Option.when(track.isEmpty)(
+              Option.when(tracks.nonEmpty)(mapDiv),
+              Option.when(tracks.isEmpty)(
                 div(cls := "w-full", "The fit files has no coordinates.")
               ),
               fits.flatMap(fitDetails)
             )
           ),
-          Option.when(track.nonEmpty)(leafletScript(track))
+          Option.when(tracks.nonEmpty)(leafletScript(tracks))
         )
       )
     )
 
-  def mapDiv(track: Polyline) =
+  def mapDiv =
     val btnStyle =
       "px-3 py-2 rounded border absolute right-2 z-1000 bg-white pointer hover:bg-gray-100"
     div(
@@ -124,7 +141,18 @@ object FitHtml:
   def fileType(fits: Vector[Fit]) =
     fits.head.fileId.map(_.fileType.value.capitalize).getOrElse("")
 
-  def leafletScript(track: Polyline) =
+  def leafletScript(tracks: SessionTracks) =
+    val citer = trackColors.iterator
+    def nextColor = { citer.hasNext; citer.next }
+    val lines = tracks.sessions
+      .map { track =>
+        val color = nextColor
+        s"""addPolyline("${track.line.encoded.replace(
+            "\\",
+            "\\\\"
+          )}", ${tracks.opts.precision.toInt}, "$color", 250, "${track.name}");"""
+      }
+      .mkString("\n")
     script(
       `type` := "text/javascript",
       raw(s"""
@@ -151,16 +179,15 @@ object FitHtml:
             "Bicycle": bikeLayer,
             "Streets": streetsLayer,
         };
-        const precision = ${track.cfg.precision};
 
         L.control.layers(baseLayers).addTo(map);
 
-        const addPolyline = (line, color, arrowRepeat) => {
+        const addPolyline = (line, precision, color, arrowRepeat, label) => {
             const pl = L.PolylineUtil.decode(line, precision);
             const polyline = L.polyline(pl, {
                 weight: 4,
                 color: color
-            }).addTo(map);
+            }).bindTooltip(label).addTo(map);
             const decorator = L.polylineDecorator(polyline, {
                 patterns: [
                     // arrows on the polyline indicating the direction
@@ -176,42 +203,23 @@ object FitHtml:
             // start marker
             const startIcon = L.divIcon({
                 className: "start-icon",
-                html: '<i class="fa fa-flag fa-2x"></i>',
+                html: '<i class="fa fa-play"></i>',
                 iconSize: [10, 10],
             });
-            const start = L.marker(pl[0], { title: "Start", icon: startIcon });
+            const start = L.marker(pl[0], { title: "Start " + label, icon: startIcon });
             start.addTo(map);
 
 
             const finishIcon = L.divIcon({
                 className: "finish-icon",
-                html: '<i class="fa fa-flag-checkered fa-2x"></i>',
+                html: '<i class="fa fa-stop"></i>',
                 iconSize: [10, 10],
             });
-            const end = L.marker(pl[pl.length - 1], { title: "Finish", icon: finishIcon });
+            const end = L.marker(pl[pl.length - 1], { title: "Finish " + label, icon: finishIcon });
             end.addTo(map);
-
         };
 
-        const addNormalPolyline = (line, color) => {
-            const pl = L.polyline(line, { color: color, weight: 5, opacity: 0.5 }).addTo(map);
-            var decorator = L.polylineDecorator(pl, {
-                patterns: [
-                    // arrows on the polyline indicating the direction
-                    {
-                        offset: 10,
-                        repeat: 400,
-                        symbol: L.Symbol.arrowHead({ pathOptions: { fillOpacity: 0.7, weight: 1, color: color } })
-                    }
-                ]
-            }).addTo(map);
-
-            map.fitBounds(pl.getBounds());
-        };
-
-      const track = "${track.encoded.replace("\\", "\\\\")}";
-
-      addPolyline(track, "blue", 400);
+      $lines
 
       const mapEl = document.getElementById("map-container");
       const btnFs = document.getElementById("map-fullscreen-btn");
@@ -281,13 +289,13 @@ object FitHtml:
         .finish-icon {
             text-align: center;
             line-height: 10px;
-            color: darkred;
+            color: dimgray;
         }
 
         .start-icon {
             text-align: center;
             line-height: 10px;
-            color: goldenrod;
+            color: dimgray;
         }"""
       )
     )
