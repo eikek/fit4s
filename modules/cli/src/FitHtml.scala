@@ -304,13 +304,17 @@ object FitHtml:
       mesgName: String,
       messages: Vector[FitMessage]
   ):
-    private val all: List[MsgField] = messages.headOption.toList
-      .flatMap(_.schema.values.toList)
+    private val schema = messages.foldLeft(Map.empty[Int, MsgField]) { (res, el) =>
+      if el.data.keySet.diff(res.keySet).isEmpty then res
+      else
+        res ++ el.schema.view
+          .filterKeys(fnum => el.data.get(fnum).exists(_.isValid))
+          .toMap
+    }
+    val fields: List[MsgField] = schema.values.toList
       .filter(_.fieldDefNum != CommonMsg.timestamp.fieldDefNum)
       .toList
       .sortBy(_.fieldName)
-    val fields =
-      all.filter(f => messages.exists(m => m.field(f).isDefined))
 
     val hasData = messages.nonEmpty && fields.nonEmpty
 
