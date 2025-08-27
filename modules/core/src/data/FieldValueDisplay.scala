@@ -15,9 +15,11 @@ private[core] object FieldValueDisplay:
   private def enumShow(fv: FieldValue): Option[Vector[String]] =
     for
       pt <- fv.profileType
-      n = fv.data.flatMap(_.asUInt)
-      r = n.flatMap(pt.apply)
-    yield r
+      n = fv.data.map { bv =>
+        bv.asUInt.flatMap(pt.apply).getOrElse(bv.toString)
+      }
+      if n.nonEmpty
+    yield n
 
   private def withUnitDisplay(
       fv: FieldValue,
