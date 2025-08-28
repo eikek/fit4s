@@ -77,8 +77,9 @@ object `package` extends Module with CiModule { outer =>
     def mvnDeps = super.mvnDeps() ++ Deps.borer
   }
 
-  object cli extends Fit4sModule with JavaAppPackagingModule {
+  object cli extends Fit4sModule with JavaAppPackagingModule with Fit4sPublishModule {
     def packageVersion = outer.appVersion()
+    def publishVersion = outer.appVersion()
     def packageName = s"fit4s-${packageVersion()}"
     def executableScriptName = "fit4s"
     def moduleDeps = Seq(core, borer)
