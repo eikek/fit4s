@@ -126,3 +126,19 @@ Finally a small cli application exists for demoing. It can read fit
 files and convert it into JSON or create a HTML file to view the data.
 
 Try with `--help` to find out more.
+
+You can use [coursier](https://get-coursier.io/docs/cli-launch) to run
+the cli:
+
+```
+cs launch com.github.eikek::fit4s-cli:0.11.0 -- --help
+```
+
+The [release page](https://github.com/eikek/fit4s/releases/latest)
+provides a zip file containing the cli tool.
+
+Using [nix](https://nixos.org) you can run it from this repo:
+
+```
+nix run github:eikek/fit4s -- --help
+```

@@ -26,7 +26,7 @@ file can be decoded:
 import fit4s.codec.*
 
 val testFile = TestData.Activities.moxyFr735
-// testFile: TestFile = fit4s.codec.TestData$TestFile@34f87ad9
+// testFile: TestFile = fit4s.codec.TestData$TestFile@294274c8
 val fr735 = FitFile.read(testFile.contents).require.head
 // fr735: FitFile = FitFile(
 //   header = FileHeader(
@@ -247,7 +247,7 @@ information.
 import fit4s.core.*
 
 val fenix539 = Fit.read(TestData.Activities.fenix539.contents).require.head
-// fenix539: Fit = fit4s.core.Fit@2dd48d07
+// fenix539: Fit = fit4s.core.Fit@72b7c448
 val fileIdMsg = fenix539.getMessages(FileIdMsg).toVector.head
 // fileIdMsg: FitMessage = FitMessage(
 //   mesgNum = 0,
@@ -363,3 +363,19 @@ Finally a small cli application exists for demoing. It can read fit
 files and convert it into JSON or create a HTML file to view the data.
 
 Try with `--help` to find out more.
+
+You can use [coursier](https://get-coursier.io/docs/cli-launch) to run
+the cli:
+
+```
+cs launch com.github.eikek::fit4s-cli:0.11.0 -- --help
+```
+
+The [release page](https://github.com/eikek/fit4s/releases/latest)
+provides a zip file containing the cli tool.
+
+Using [nix](https://nixos.org) you can run it from this repo:
+
+```
+nix run github:eikek/fit4s -- --help
+```
