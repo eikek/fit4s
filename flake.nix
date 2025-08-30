@@ -29,6 +29,15 @@
         ]);
     in {
       formatter = pkgs.alejandra;
+      packages = let
+        pkgs = import nixpkgs {
+          inherit system;
+          overlays = [self.overlays.default];
+        };
+      in {
+        default = pkgs.fit4s;
+        fit4s = pkgs.fit4s;
+      };
       devShells = {
         ci = pkgs.mkShellNoCC {
           buildInputs = ciPkgs;
@@ -37,5 +46,12 @@
           buildInputs = ciPkgs ++ devshellPkgs;
         };
       };
+    })
+    // (let
+      cliPkgs = pkgs: rec {
+        fit4s = pkgs.callPackage (import ./nix/pkg.nix) {};
+      };
+    in {
+      overlays.default = final: prev: (cliPkgs final);
     });
 }
