@@ -8,7 +8,8 @@ import fit4s.profile.*
 
 import scodec.Codec
 import scodec.Err
-import scodec.bits.{Bases, ByteVector}
+import scodec.bits.Bases.Alphabets
+import scodec.bits.BitVector
 
 final case class FileId(
     fileType: ProfileEnum,
@@ -28,7 +29,14 @@ final case class FileId(
   def asStringLegacy: String =
     FileId.legacyIdCodec
       .encode(this)
-      .map(_.toBase58(Bases.Alphabets.Base58))
+      .map(FileId.bitsToString)
+      .toEither
+      .fold(err => sys.error(err.messageWithContext), identity)
+
+  def asString: String =
+    FileId.codec
+      .encode(this)
+      .map(FileId.bitsToString)
       .toEither
       .fold(err => sys.error(err.messageWithContext), identity)
 
@@ -45,13 +53,28 @@ object FileId:
         MR.field(m.productName).as[String].option.tuple).as[FileId]
     }
 
+  def fromString(str: String): Either[String, FileId] =
+    decode(codec, str)
+
   def fromStringLegacy(str: String): Either[String, FileId] =
-    ByteVector
-      .fromBase58Descriptive(str, Bases.Alphabets.Base58)
-      .flatMap(bv =>
-        legacyIdCodec.complete.decode(bv.bits).toEither.left.map(_.messageWithContext)
-      )
-      .map(_.value)
+    decode(legacyIdCodec, str)
+
+  private def stringToBits(s: String): Either[String, BitVector] =
+    BitVector.fromBase58Descriptive(s, Alphabets.Base58)
+
+  private def bitsToString(bits: BitVector): String =
+    bits.toBase58(Alphabets.Base58)
+
+  private def decode(c: Codec[FileId], str: String): Either[String, FileId] =
+    for
+      bits <- stringToBits(str)
+      result <- c.decode(bits).toEither.left.map(_.messageWithContext)
+      // bit to string conversion right-pads with zeros if last byte is not full
+      _ <-
+        if result.remainder.sizeGreaterThan(7) then
+          Left(s"Invalid fit file id ($str): Too many bits left for decoding")
+        else Right(())
+    yield result.value
 
   private val legacyIdCodec: Codec[FileId] = {
     // this does the same as the variant from previous versions to retain compatibility with old values.
@@ -80,4 +103,30 @@ object FileId:
     val number = optional(bool, ulongL(32).xmap(_.toInt, _.toLong))
     val name = optional(bool, cstring)
     (fileType :: manu :: product :: serial :: created :: number :: name).as[FileId]
+  }
+
+  private val codec: Codec[FileId] = {
+    import scodec.codecs.*
+
+    def c(inner: Codec[Int], p: ProfileType): Codec[ProfileEnum] =
+      inner.xmap(n => ProfileEnum.unsafe(n, p), _.ordinal)
+
+    val fileType = c(uint8, FileType)
+    val serial = optional(bool, ulongL(32))
+    val created = optional(
+      bool,
+      ulongL(32).xmap(s => DateTime(s).asInstant, i => DateTime.fromInstant(i).value)
+    )
+    val number = optional(bool, ulongL(32).xmap(_.toInt, _.toLong))
+    val name = optional(bool, cstring)
+    val manu = c(uint16L, ManufacturerType)
+
+    val fields = manu.flatPrepend { m =>
+      (if m.isValue(ManufacturerType.garmin)
+       then optional(bool, c(uint16L, GarminProductType))
+       else
+         optional(bool, c(uint16L, FaveroProductType))
+      ) :: serial :: created :: number :: name
+    }
+    (fileType :: fields).as[FileId]
   }
