@@ -5,7 +5,7 @@ import scala.util.{Failure, Success, Try}
 import mill.*, api.*
 
 object Version:
-  def get =
+  def get: Result[String] =
     val git = Git.open(BuildCtx.workspaceRoot.toIO)
     val hashLength = 8
     val status = git.status().call()

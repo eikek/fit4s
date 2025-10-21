@@ -16,7 +16,10 @@ import contrib.jmh.JmhModule
 import mill.api.{BuildCtx, Result}
 
 object `package` extends Module with CiModule { outer =>
-  def appVersion = Task.Input(Version.get)
+  def appVersion = Task.Input {
+    val forcedVersion = Task.env.get("FIT4S_DEV_VERSION")
+    forcedVersion.map(Result.Success.apply).getOrElse(Version.get)
+  }
 
   def writeVersion() = Task.Command {
     val file = Task.dest / "version.txt"
