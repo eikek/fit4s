@@ -12,3 +12,7 @@ final case class Timespan(startTime: Instant, endTime: Instant):
     val s = if startTime.isBefore(other.startTime) then startTime else other.startTime
     val e = if endTime.isAfter(other.endTime) then endTime else other.endTime
     Timespan(s, e)
+
+object Timespan:
+
+  val all: Timespan = Timespan(Instant.MIN, Instant.MAX)
