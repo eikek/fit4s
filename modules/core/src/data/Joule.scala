@@ -30,7 +30,7 @@ object Joule:
   given numeric: Numeric[Joule] = Numeric.DoubleIsFractional
   given reader: FieldReader[Vector[Joule]] =
     for
-      _ <- FieldReader.unit(MeasurementUnit.Kcal)
+      _ <- FieldReader.unit(MeasurementUnit.Joule)
       v <- FieldReader.anyNumberDouble
     yield v
   given FieldReader[Joule] = reader.singleValue
