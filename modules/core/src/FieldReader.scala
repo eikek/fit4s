@@ -45,7 +45,9 @@ object FieldReader:
 
   def unit(u: MeasurementUnit, more: MeasurementUnit*): FieldReader[MeasurementUnit] =
     val set = more.toSet + u
-    instance(v => v.unit.filter(set.contains).toRight(s"Expected unit $u, got ${v.unit}"))
+    instance(v =>
+      v.unit.filter(set.contains).toRight(s"Expected unit $set, got ${v.unit}")
+    )
 
   def profileType(pt: ProfileType, more: ProfileType*): FieldReader[ProfileType] =
     val set = more.toSet + pt

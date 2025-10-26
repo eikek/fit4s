@@ -5,6 +5,7 @@ import java.time.Instant
 
 import fit4s.codec.FitBaseType
 import fit4s.profile.DateTimeType
+import fit4s.profile.LocalDateTimeType
 
 /** if date_time is < 0x10000000 then it is system time (seconds from device power on) */
 final case class DateTime(value: Long):
@@ -21,7 +22,7 @@ final case class DateTime(value: Long):
 object DateTime:
   given reader: FieldReader[Vector[DateTime]] =
     for
-      _ <- FieldReader.profileType(DateTimeType)
+      _ <- FieldReader.profileType(DateTimeType, LocalDateTimeType)
       v <- FieldReader.longs
     yield v.map(DateTime.seconds)
   given FieldReader[DateTime] = reader.singleValue
