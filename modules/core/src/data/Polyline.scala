@@ -34,6 +34,9 @@ sealed trait Polyline:
   def lastPosition: Option[LatLng]
   def toLatLngs: Vector[LatLng]
 
+  def getBounds: Option[BBox] =
+    BBox.fromLatLngs(toLatLngs)
+
   /** Decodes the next `n` coordinates from this polyline. Returns the remaining polyline.
     * Note that this involves encoding the new head of the remaining list, so it is not
     * efficient if this is called many times with a low count. Rather get some larger
