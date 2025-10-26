@@ -3,11 +3,13 @@ package fit4s.core
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
+import java.time.Instant
 
 import fit4s.codec.FitFile
 import fit4s.core.data.LatLng
 import fit4s.core.data.Polyline
 import fit4s.core.data.Position
+import fit4s.core.data.Timespan
 import fit4s.profile.FileIdMsg
 import fit4s.profile.GlobalMessages
 import fit4s.profile.RecordMsg
@@ -24,17 +26,27 @@ final class Fit(val file: FitFile, val cfg: Config):
   def fileTypeIs(ft: Int | String): Boolean =
     fileId.exists(_.fileType.isValue(ft))
 
-  /** Constructs a polyline from the position data in all record messages. */
-  def track(using Polyline.Config): Either[String, Polyline] =
-    getLatLngs.map(Polyline.apply(_*))
+  /** Constructs a polyline from the position data in all record messages that occured
+    * within the given timespan.
+    */
+  def track(within: Timespan)(using Polyline.Config): Either[String, Polyline] =
+    getLatLngs(within).map(Polyline.apply(_*))
 
-  def getLatLngs =
-    val reader = Position.reader(RecordMsg.positionLat, RecordMsg.positionLong)
+  def getLatLngs(within: Timespan): Either[String, Vector[LatLng]] =
+    val reader = MessageReader.field(RecordMsg.timestamp).as[Instant] :: Position
+      .reader(RecordMsg.positionLat, RecordMsg.positionLong)
+      .tuple
     val init: Either[String, Vector[LatLng]] = Right(Vector.empty)
     getMessages(RecordMsg)
       .foldLeft(init) { (res, m) =>
         res.flatMap(vs =>
-          reader.read(m).map(_.map(v => vs.appended(v.toLatLng)).getOrElse(vs))
+          reader
+            .read(m)
+            .map(
+              _.filter(t => within.contains(t._1))
+                .map(v => vs.appended(v._2.toLatLng))
+                .getOrElse(vs)
+            )
         )
       }
 
