@@ -63,7 +63,8 @@ object Activity:
       avgSpeed: Option[Speed],
       avgHr: Option[HeartRate],
       totalDistance: Option[Distance],
-      startPosition: Option[Position]
+      startPosition: Option[Position],
+      bbox: Option[BBox]
   )
   object Session:
     given MR[Session] =
@@ -77,7 +78,8 @@ object Activity:
             .option ::
           MR.field(m.avgHeartRate).as[HeartRate].option ::
           MR.field(m.totalDistance).as[Distance].option ::
-          posRead.option.tuple).as[Session]
+          posRead.option ::
+          BBox.sessionReader.option.tuple).as[Session]
       }
 
   final case class Record(
