@@ -34,7 +34,7 @@ object Distance:
       Ordered.orderingToOrdered(self)(using Ordering[Distance])
     export ord.*
 
-  given Numeric[Distance] = Numeric.DoubleIsFractional
+  given Fractional[Distance] = Numeric.DoubleIsFractional
   given reader: FieldReader[Vector[Distance]] =
     for
       u <- FieldReader.unit(

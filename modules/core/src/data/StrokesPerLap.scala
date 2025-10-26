@@ -19,7 +19,7 @@ object StrokesPerLap:
       Ordered.orderingToOrdered(self)(using Ordering[StrokesPerLap])
     export ord.*
 
-  given Numeric[StrokesPerLap] = Numeric.DoubleIsFractional
+  given Fractional[StrokesPerLap] = Numeric.DoubleIsFractional
   given reader: FieldReader[Vector[StrokesPerLap]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.StrokesPerLap)

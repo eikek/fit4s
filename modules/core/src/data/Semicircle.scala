@@ -32,7 +32,7 @@ object Semicircle:
       Ordered.orderingToOrdered(self)(using Ordering[Semicircle])
     export ord.*
 
-  given Numeric[Semicircle] = Numeric.LongIsIntegral
+  given Integral[Semicircle] = Numeric.LongIsIntegral
 
   given reader: FieldReader[Vector[Semicircle]] =
     for

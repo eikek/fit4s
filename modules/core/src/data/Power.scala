@@ -19,7 +19,7 @@ object Power:
       Ordered.orderingToOrdered(self)(using Ordering[Power])
     export ord.*
 
-  given Numeric[Power] = Numeric.IntIsIntegral
+  given Integral[Power] = Numeric.IntIsIntegral
   given reader: FieldReader[Vector[Power]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Watt)

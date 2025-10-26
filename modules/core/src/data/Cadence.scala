@@ -22,7 +22,7 @@ object Cadence:
       Ordered.orderingToOrdered(self)(using Ordering[Cadence])
     export ord.*
 
-  given Numeric[Cadence] = Numeric.IntIsIntegral
+  given Integral[Cadence] = Numeric.IntIsIntegral
   given reader: FieldReader[Vector[Cadence]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Rpm)

@@ -38,7 +38,7 @@ object Duration:
       if sfrac > 0 then f"$str${fracFormat.format(sfrac)}"
       else str
 
-  given Numeric[Duration] = Numeric.DoubleIsFractional
+  given Fractional[Duration] = Numeric.DoubleIsFractional
   given reader: FieldReader[Vector[Duration]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Second)

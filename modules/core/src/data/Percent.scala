@@ -20,7 +20,7 @@ object Percent:
       Ordered.orderingToOrdered(self)(using Ordering[Percent])
     export ord.*
 
-  given Numeric[Percent] = Numeric.DoubleIsFractional
+  given Fractional[Percent] = Numeric.DoubleIsFractional
   given reader: FieldReader[Vector[Percent]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Percent)

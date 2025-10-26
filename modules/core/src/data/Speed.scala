@@ -27,7 +27,7 @@ object Speed:
       Ordered.orderingToOrdered(self)(using Ordering[Speed])
     export ord.*
 
-  given Numeric[Speed] = Numeric.DoubleIsFractional
+  given Fractional[Speed] = Numeric.DoubleIsFractional
   given Ordering[Speed] = Ordering[Double]
   given reader: FieldReader[Vector[Speed]] =
     for

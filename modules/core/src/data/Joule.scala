@@ -27,7 +27,7 @@ object Joule:
       Ordered.orderingToOrdered(self)(using Ordering[Joule])
     export ord.*
 
-  given numeric: Numeric[Joule] = Numeric.DoubleIsFractional
+  given numeric: Fractional[Joule] = Numeric.DoubleIsFractional
   given reader: FieldReader[Vector[Joule]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Joule)
