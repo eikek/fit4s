@@ -23,7 +23,7 @@ object Calories:
       Ordered.orderingToOrdered(self)(using Ordering[Calories])
     export ord.*
 
-  given numeric: Numeric[Calories] = Numeric.DoubleIsFractional
+  given numeric: Fractional[Calories] = Numeric.DoubleIsFractional
   given reader: FieldReader[Vector[Calories]] =
     for
       unit <- FieldReader.unit(MeasurementUnit.Kcal, MeasurementUnit.Calories)

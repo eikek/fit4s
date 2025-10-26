@@ -18,7 +18,7 @@ object TrainingStressScore:
       Ordered.orderingToOrdered(self)(using Ordering[TrainingStressScore])
     export ord.*
 
-  given Numeric[TrainingStressScore] = Numeric.DoubleIsFractional
+  given Fractional[TrainingStressScore] = Numeric.DoubleIsFractional
   given reader: FieldReader[Vector[TrainingStressScore]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.TrainingStressScore)

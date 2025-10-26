@@ -19,7 +19,7 @@ object HeartRate:
     def /(d: Double): HeartRate = (self / d).toInt
     def asString = s"${self}bpm"
 
-  given Numeric[HeartRate] = Numeric.IntIsIntegral
+  given Integral[HeartRate] = Numeric.IntIsIntegral
   given reader: FieldReader[Vector[HeartRate]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Bpm)

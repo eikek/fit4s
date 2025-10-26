@@ -18,7 +18,7 @@ object Grade:
       Ordered.orderingToOrdered(self)(using Ordering[Grade])
     export ord.*
 
-  given Numeric[Grade] = Numeric.DoubleIsFractional
+  given Fractional[Grade] = Numeric.DoubleIsFractional
   given reader: FieldReader[Vector[Grade]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Percent)

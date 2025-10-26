@@ -21,7 +21,7 @@ object Temperature:
       Ordered.orderingToOrdered(self)(using Ordering[Temperature])
     export ord.*
 
-  given Numeric[Temperature] = Numeric.DoubleIsFractional
+  given Fractional[Temperature] = Numeric.DoubleIsFractional
   given reader: FieldReader[Vector[Temperature]] =
     for
       _ <- FieldReader.unit(MeasurementUnit.Celcius)
