@@ -83,7 +83,7 @@ object ViewCmd extends CmdCommons:
   def makeFitTrack(fit: Fit, opts: Options): Either[String, SessionTracks] =
     Activity.from(fit).flatMap {
       case None =>
-        fit.getLatLngs.map(c => SessionTracks(Vector.empty, opts, c))
+        fit.getLatLngs(Timespan.all).map(c => SessionTracks(Vector.empty, opts, c))
 
       case Some(act) =>
         Right(
