@@ -7,16 +7,13 @@ import fit4s.profile.SessionMsg
 final case class BBox(northEast: Position, southWest: Position):
   private val ng = Numeric[Semicircle]
 
+  val northWest = Position(northEast.latitude, southWest.longitude)
+  val southEast = Position(southWest.latitude, northEast.longitude)
+
   def distance: Distance = northEast.distance(southWest)
 
   def rectangle(using Polyline.Config): Polyline =
-    Polyline.positions(
-      northEast,
-      Position(southWest.latitude, northEast.longitude),
-      southWest,
-      Position(northEast.latitude, southWest.longitude),
-      northEast
-    )
+    Polyline.positions(northEast, southEast, southWest, northWest, northEast)
 
   def contains(p: LatLng): Boolean = contains(p.toPosition)
   def contains(p: Position): Boolean =
@@ -46,6 +43,12 @@ final case class BBox(northEast: Position, southWest: Position):
   def include(p: LatLng): BBox = include(p.toPosition)
 
 object BBox:
+  /** Create a bounding box given north-east and south-west positions. */
+  def nesw(ne: Position, sw: Position): BBox = BBox(ne, sw)
+
+  /** Create a bounding box given north-west and south-east positions. */
+  def nwse(nw: Position, se: Position): BBox =
+    BBox(Position(nw.latitude, se.longitude), Position(se.latitude, nw.longitude))
 
   def fromPositions(positions: Iterable[Position]): Option[BBox] =
     positions.headOption.map { head =>
