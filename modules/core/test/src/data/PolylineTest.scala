@@ -21,43 +21,43 @@ class PolylineTest extends FunSuite with TestSyntax:
   )
 
   test("encode polyline"):
-    val ppl = Polyline(p1, p2, p3)
+    val ppl = Polyline(cfg)(p1, p2, p3)
     assertEquals(ppl.size, 3)
     assertEquals(ppl.firstPosition, Some(p1))
     assertEquals(ppl.lastPosition, Some(p3))
 
     assertEquals(ppl.encoded, "_p~iF~ps|U_ulLnnqC_mqNvxq`@")
-    val ppl2 = Polyline(p1, p2)
+    val ppl2 = Polyline(cfg)(p1, p2)
     assertEquals(ppl2.size, 2)
     assertEquals(ppl2.encoded, "_p~iF~ps|U_ulLnnqC")
     assertEquals(ppl2.firstPosition, Some(p1))
     assertEquals(ppl2.lastPosition, Some(p2))
 
   test("add to polyline"):
-    val ppl = Polyline(p1, p2)
-    val expect = Polyline(p1, p2, p3)
+    val ppl = Polyline(cfg)(p1, p2)
+    val expect = Polyline(cfg)(p1, p2, p3)
     val added = ppl.add(p3)
     assertEquals(added, expect)
-    assertEquals(Polyline.empty.add(p1).add(p2).add(p3), ppl.add(p3))
+    assertEquals(Polyline.empty(cfg).add(p1).add(p2).add(p3), ppl.add(p3))
     // not add same position
     assertEquals(ppl.add(p2), ppl)
 
   test("prepend to polyline"):
-    val ppl = Polyline(p2, p3)
-    val expect = Polyline(p1, p2, p3)
+    val ppl = Polyline(cfg)(p2, p3)
+    val expect = Polyline(cfg)(p1, p2, p3)
     val added = ppl.prepend(p1)
     assertEquals(added, expect)
     // not prepend same pos
     assertEquals(added.prepend(p1), added)
 
   test("concat polyline"):
-    val pp1 = Polyline(p1, p2)
-    val pp2 = Polyline(p3)
-    assertEquals(pp1 ++ pp2, Polyline(p1, p2, p3))
-    assertEquals(pp2 ++ pp1, Polyline(p3, p1, p2))
+    val pp1 = Polyline(cfg)(p1, p2)
+    val pp2 = Polyline(cfg)(p3)
+    assertEquals(pp1 ++ pp2, Polyline(cfg)(p1, p2, p3))
+    assertEquals(pp2 ++ pp1, Polyline(cfg)(p3, p1, p2))
 
   test("iterator"):
-    val ppl = Polyline(p1, p2, p3)
+    val ppl = Polyline(cfg)(p1, p2, p3)
     val it = ppl.iterator()
     assertEquals(it.next(), p1)
     assertEquals(it.next(), p2)
@@ -65,36 +65,36 @@ class PolylineTest extends FunSuite with TestSyntax:
     assert(it.hasNext == false)
 
   test("encode/decode roundtrip"):
-    val ppl = Polyline(p1, p2, p3)
-    val ppx = Polyline.decode(ppl.encoded)
+    val ppl = Polyline(cfg)(p1, p2, p3)
+    val ppx = Polyline.decode(cfg)(ppl.encoded)
     assertEquals(ppx, ppl)
 
-    val pll = Polyline(LargeSample.correctDecoded5*)
-    val plx = Polyline.decode(pll.encoded)
+    val pll = Polyline(cfg)(LargeSample.correctDecoded5*)
+    val plx = Polyline.decode(cfg)(pll.encoded)
     assertEquals(pll, plx)
 
   test("random stuff"):
-    assert(Polyline.decode("$~=öpüöäp").nonEmpty)
-    assert(Polyline.decode("😏🐶").isEmpty)
+    assert(Polyline.decode(cfg)("$~=öpüöäp").nonEmpty)
+    assert(Polyline.decode(cfg)("😏🐶").isEmpty)
 
   test("decodeN"):
-    assertEquals(Polyline.empty.decodeN(3), None)
-    assertEquals(Polyline(p1).decodeN(2), Some(Vector(p1) -> Polyline.empty))
-    assertEquals(Polyline(p1).decodeN(0), None)
-    val pl = Polyline(p1, p2, p3)
+    assertEquals(Polyline.empty(cfg).decodeN(3), None)
+    assertEquals(Polyline(cfg)(p1).decodeN(2), Some(Vector(p1) -> Polyline.empty(cfg)))
+    assertEquals(Polyline(cfg)(p1).decodeN(0), None)
+    val pl = Polyline(cfg)(p1, p2, p3)
     assertEquals(pl.decodeN(0), None)
-    assertEquals(pl.decodeN(1), Some(Vector(p1) -> Polyline(p2, p3)))
-    assertEquals(pl.decodeN(2), Some(Vector(p1, p2) -> Polyline(p3)))
-    assertEquals(pl.decodeN(3), Some(Vector(p1, p2, p3) -> Polyline.empty))
-    assertEquals(pl.decodeN(5), Some(Vector(p1, p2, p3) -> Polyline.empty))
+    assertEquals(pl.decodeN(1), Some(Vector(p1) -> Polyline(cfg)(p2, p3)))
+    assertEquals(pl.decodeN(2), Some(Vector(p1, p2) -> Polyline(cfg)(p3)))
+    assertEquals(pl.decodeN(3), Some(Vector(p1, p2, p3) -> Polyline.empty(cfg)))
+    assertEquals(pl.decodeN(5), Some(Vector(p1, p2, p3) -> Polyline.empty(cfg)))
 
     val plc = LargeSample.correctDecoded5
-    val pll = Polyline(plc*)
+    val pll = Polyline(cfg)(plc*)
     assertEquals(pll.toLatLngs, plc)
-    assertEquals(pll.decodeN(23), Some(plc.take(23) -> Polyline(plc.drop(23)*)))
+    assertEquals(pll.decodeN(23), Some(plc.take(23) -> Polyline(cfg)(plc.drop(23)*)))
 
   test("round first element"):
-    val pl = Polyline(LargeSample.coordinates.take(10)*)
+    val pl = Polyline(cfg)(LargeSample.coordinates.take(10)*)
     assertEquals(pl.firstPosition.get, LargeSample.correctDecoded5.head)
     val (vec, remain) = pl.decodeN(3).get
     assertEquals(vec, LargeSample.correctDecoded5.take(3))

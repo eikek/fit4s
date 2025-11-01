@@ -10,6 +10,7 @@ import fit4s.profile.*
 import munit.FunSuite
 
 class ExperimentTest extends FunSuite with TestSyntax:
+  val cfg = Polyline.Config()
 
   test("find stuff".ignore):
     for
@@ -26,7 +27,7 @@ class ExperimentTest extends FunSuite with TestSyntax:
     given cfg: Polyline.Config = Polyline.Config(precision = Precision.high)
 
     val (track, positions) =
-      fit.getMessages(RecordMsg).foldLeft((Polyline.empty, Vector.empty[LatLng])) {
+      fit.getMessages(RecordMsg).foldLeft((Polyline.empty(cfg), Vector.empty[LatLng])) {
         case ((line, vec), rec) =>
           val p = Position
             .reader(

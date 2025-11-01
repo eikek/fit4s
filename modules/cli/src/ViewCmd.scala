@@ -107,20 +107,20 @@ object ViewCmd extends CmdCommons:
       track: Vector[LatLng] = Vector.empty
   ):
     def addPos(p: LatLng) = copy(track = track.appended(p))
-    def line(using cfg: Polyline.Config): Polyline = Polyline(track*)
+    def line(cfg: Polyline.Config): Polyline = Polyline(cfg)(track*)
 
   final case class SessionTracks(
       sessions: Vector[SessionTrack],
       opts: Options,
       unrelated: Vector[LatLng] = Vector.empty
   ):
-    given Polyline.Config = Polyline.Config(precision = opts.precision)
+    val cfg: Polyline.Config = Polyline.Config(precision = opts.precision)
 
     def isEmpty: Boolean = sessions.isEmpty && unrelated.isEmpty
     def nonEmpty: Boolean = !isEmpty
 
     def lines: Vector[Polyline] =
-      (sessions.map(_.line) :+ Polyline(unrelated*)).filter(_.nonEmpty)
+      (sessions.map(_.line(cfg)) :+ Polyline(cfg)(unrelated*)).filter(_.nonEmpty)
 
     def ++(other: SessionTracks): SessionTracks =
       SessionTracks(sessions ++ other.sessions, opts, unrelated ++ other.unrelated)

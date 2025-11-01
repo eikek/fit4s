@@ -29,8 +29,8 @@ final class Fit(val file: FitFile, val cfg: Config):
   /** Constructs a polyline from the position data in all record messages that occured
     * within the given timespan.
     */
-  def track(within: Timespan)(using Polyline.Config): Either[String, Polyline] =
-    getLatLngs(within).map(Polyline.apply(_*))
+  def track(cfg: Polyline.Config, within: Timespan): Either[String, Polyline] =
+    getLatLngs(within).map(Polyline.apply(cfg)(_*))
 
   def getLatLngs(within: Timespan): Either[String, Vector[LatLng]] =
     val reader = MessageReader.field(RecordMsg.timestamp).as[Instant] :: Position

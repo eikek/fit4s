@@ -10,6 +10,7 @@ import fit4s.profile.*
 import scalatags.Text.all.*
 
 object FitHtml:
+  private val cfg = Polyline.Config()
   private val cls = `class`
   private def trackColors: LazyList[String] =
     LazyList
@@ -146,10 +147,13 @@ object FitHtml:
     val lines = tracks.sessions
       .map { track =>
         val color = nextColor
-        s"""addPolyline("${track.line.encoded.replace(
-            "\\",
-            "\\\\"
-          )}", ${tracks.opts.precision.toInt}, "$color", 250, "${track.name}");"""
+        s"""addPolyline("${track
+            .line(cfg)
+            .encoded
+            .replace(
+              "\\",
+              "\\\\"
+            )}", ${tracks.opts.precision.toInt}, "$color", 250, "${track.name}");"""
       }
       .mkString("\n")
     script(
