@@ -12,7 +12,7 @@ import org.openjdk.jmh.annotations.*
 @Warmup(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
 class PolylineBench:
-
+  val cfg = Polyline.Config()
   var coordinates600: Vector[LatLng] = Vector.empty
   var encoded: String = ""
 
@@ -28,7 +28,7 @@ class PolylineBench:
 
   @Benchmark
   def decodePolyline =
-    Polyline.decode(encoded)
+    Polyline.decode(cfg)(encoded)
 
   @Benchmark
   def decodeLatLngs =

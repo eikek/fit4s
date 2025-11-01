@@ -12,8 +12,8 @@ final case class BBox(northEast: Position, southWest: Position):
 
   def distance: Distance = northEast.distance(southWest)
 
-  def rectangle(using Polyline.Config): Polyline =
-    Polyline.positions(northEast, southEast, southWest, northWest, northEast)
+  def rectangle: List[Position] =
+    List(northEast, southEast, southWest, northWest, northEast)
 
   def contains(p: LatLng): Boolean = contains(p.toPosition)
   def contains(p: Position): Boolean =

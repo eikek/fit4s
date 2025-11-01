@@ -84,24 +84,21 @@ object Polyline:
     def lowPrecision = withPrecision(Precision.low)
     def round(pos: LatLng): LatLng = c.roundTo(pos, precision)
 
-  object Config:
-    given Config = Config()
+  def empty(cfg: Config): Polyline = Empty(cfg)
 
-  def empty(using cfg: Config): Polyline = Empty(cfg)
+  def positions(cfg: Config)(pos: Position*): Polyline =
+    apply(cfg)(pos.map(_.toLatLng)*)
 
-  def positions(pos: Position*)(using Config): Polyline =
-    apply(pos.map(_.toLatLng)*)
-
-  def apply(pos: LatLng*)(using cfg: Config): Polyline =
+  def apply(cfg: Config)(pos: LatLng*): Polyline =
     pos match
-      case Seq()          => empty
+      case Seq()          => empty(cfg)
       case a +: Seq()     => One(cfg.round(a), cfg)
-      case a +: b +: tail => Many.from(cfg.round(a), cfg.round(b), tail*)
+      case a +: b +: tail => Many.from(cfg)(cfg.round(a), cfg.round(b), tail*)
 
-  def decode(encoded: String)(using cfg: Config): Polyline =
+  def decode(cfg: Config)(encoded: String): Polyline =
     val str = encoded.trim()
     if (str.isEmpty()) Empty(cfg)
-    else apply(toLatLng(encoded, cfg.precision)*)
+    else apply(cfg)(toLatLng(encoded, cfg.precision)*)
 
   def toLatLng(encoded: String, precision: Precision = 5): Vector[LatLng] =
     PolylineCodec.decode(encoded, precision)
@@ -133,10 +130,10 @@ object Polyline:
     val size = 1
     def add(next: LatLng): Polyline =
       if cfg.skipNext(next, pos) then this
-      else Many.from(pos, next)(using cfg)
+      else Many.from(cfg)(pos, next)
     def prepend(prev: LatLng): Polyline =
       if cfg.skipNext(pos, prev) then this
-      else Many.from(prev, pos)(using cfg)
+      else Many.from(cfg)(prev, pos)
     def ++(next: Polyline): Polyline = next.prepend(pos)
     lazy val asBytes = ByteVector.view(encoded.getBytes(StandardCharsets.UTF_8))
     lazy val encoded: String = c.encode(List(pos), cfg.precision.toInt)
@@ -216,9 +213,7 @@ object Polyline:
         }
 
   private object Many:
-    def from(p1: LatLng, p2: LatLng, more: LatLng*)(using
-        cfg: Config
-    ): Many =
+    def from(cfg: Config)(p1: LatLng, p2: LatLng, more: LatLng*): Many =
       if more.isEmpty then
         Many(c.encode(List(p2), cfg.precision.toInt, zero = p1), p1, p2, 2, cfg)
       else

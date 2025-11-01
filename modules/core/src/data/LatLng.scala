@@ -1,5 +1,7 @@
 package fit4s.core.data
 
+import fit4s.core.internal.PolylineCodec
+
 final case class LatLng(lat: Double, lng: Double):
   infix def -(p: LatLng): LatLng =
     LatLng(lat - p.lat, lng - p.lng)
@@ -13,6 +15,9 @@ final case class LatLng(lat: Double, lng: Double):
 
   def distance(other: LatLng): Distance =
     Distance.km(LatLng.calculateDistanceInKilometer(this.toRadian, other.toRadian))
+
+  def withPrecision(n: Int): LatLng =
+    PolylineCodec.roundTo(this, n)
 
   def isWithin(other: LatLng, delta: Distance): Boolean =
     distance(other) <= delta

@@ -5,7 +5,8 @@ import fit4s.core.LargeSample
 import munit.FunSuite
 
 class BBoxTest extends FunSuite:
-  given Polyline.Config = Polyline.Config()
+  val cfg = Polyline.Config()
+
   def p(lat: Double, lng: Double): Position =
     Position.degree(lat, lng)
 
@@ -35,14 +36,14 @@ class BBoxTest extends FunSuite:
 
   test("rectangle"):
     val b1 = BBox(p(47.44071, 8.77994), p(47.44011, 8.77801))
-    val line = Vector(
+    val line = List(
       LatLng(47.44071, 8.77994),
       LatLng(47.44011, 8.77994),
       LatLng(47.44011, 8.77801),
       LatLng(47.44071, 8.77801),
       LatLng(47.44071, 8.77994)
     )
-    assertEquals(b1.rectangle.toLatLngs, line)
+    assertEquals(b1.rectangle.map(_.toLatLng.withPrecision(5)), line)
 
   test("from"):
     val bb = BBox.fromPositions(LargeSample.coordinates.map(_.toPosition)).get

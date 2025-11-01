@@ -15,7 +15,8 @@ import org.openjdk.jmh.annotations.*
 @Measurement(iterations = 3, time = 1, timeUnit = TimeUnit.SECONDS)
 class PolylineDecodeN:
 
-  var polyline: Polyline = Polyline.empty
+  val cfg = Polyline.Config()
+  var polyline: Polyline = Polyline.empty(cfg)
 
   @Param(Array("1", "10", "100", "1000"))
   var chunkSize: Int = -1
@@ -24,7 +25,7 @@ class PolylineDecodeN:
   def setup(): Unit =
     val c300 = LargeSample.coordinates ++ LargeSample.coordinates.reverse
     val coordinates600 = c300 ++ c300
-    polyline = Polyline(coordinates600*)
+    polyline = Polyline(cfg)(coordinates600*)
 
   @Benchmark
   def decodeLatLngInChunks: Vector[LatLng] =
@@ -36,5 +37,5 @@ class PolylineDecodeN:
           buf.addAll(v)
           remain = n
         case None =>
-          remain = Polyline.empty
+          remain = Polyline.empty(cfg)
     buf.toVector

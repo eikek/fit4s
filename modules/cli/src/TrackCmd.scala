@@ -24,9 +24,9 @@ object TrackCmd extends CmdCommons:
     } yield ExitCode.Success
 
   def makeTrack(fits: Vector[Fit], opts: Options): IO[Polyline] =
-    given Polyline.Config = Polyline.Config(precision = opts.precision)
-    val init: Either[String, Polyline] = Right(Polyline.empty)
-    val pl = fits.map(_.track(Timespan.all)).foldLeft(init) { (res, pl) =>
+    val cfg: Polyline.Config = Polyline.Config(precision = opts.precision)
+    val init: Either[String, Polyline] = Right(Polyline.empty(cfg))
+    val pl = fits.map(_.track(cfg, Timespan.all)).foldLeft(init) { (res, pl) =>
       res.flatMap(p => pl.map(p ++ _))
     }
     reportError(IO.pure(pl))
