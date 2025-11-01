@@ -16,7 +16,7 @@ object Cadence:
     def /(div: Double): Cadence = (self.toDouble / div).toInt
     def +(c: Cadence): Cadence = self + c
     def -(c: Cadence): Cadence = self - c
-    def asString = s"${self}rpm"
+    def asString = self.toString
 
     private def ord: Ordered[Cadence] =
       Ordered.orderingToOrdered(self)(using Ordering[Cadence])
@@ -25,7 +25,7 @@ object Cadence:
   given Integral[Cadence] = Numeric.IntIsIntegral
   given reader: FieldReader[Vector[Cadence]] =
     for
-      _ <- FieldReader.unit(MeasurementUnit.Rpm)
+      _ <- FieldReader.unit(MeasurementUnit.Rpm, MeasurementUnit.StridesPerMinute)
       v <- FieldReader.anyNumberInt
     yield v
   given FieldReader[Cadence] = reader.singleValue
