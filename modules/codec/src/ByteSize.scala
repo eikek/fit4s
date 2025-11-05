@@ -9,8 +9,23 @@ object ByteSize:
   def bytes(n: Long): ByteSize = n
   def kibi(n: Double): ByteSize = (n * 1024).toLong
   def mb(n: Double): ByteSize = (n * 1024 * 1024).toLong
+  def gb(n: Double): ByteSize = mb(n) * 1024
 
   given Numeric[ByteSize] = Numeric.LongIsIntegral
+
+  def fromString(s: String): Either[String, ByteSize] =
+    if (s.isBlank) Left(s"Empty string for ByteSize")
+    else
+      val (num, ctor) = s.trim.takeRight(1).toLowerCase match
+        case "m" =>
+          (s.dropRight(1), mb)
+        case "k" =>
+          (s.dropRight(1), kibi)
+        case "g" =>
+          (s.dropRight(1), gb)
+        case _ =>
+          (s, ((n: Double) => bytes(n.toLong)))
+      num.toDoubleOption.map(ctor).toRight(s"Invalid byte-size: $s")
 
   extension (self: ByteSize)
     def toBytes: Long = self
