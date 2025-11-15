@@ -15,6 +15,10 @@ object StrokesPerLap:
   extension (self: StrokesPerLap)
     def value: Double = self
     def asString: String = s"$self strokes/lap"
+    infix def +(o: StrokesPerLap): StrokesPerLap = self + o
+    infix def -(o: StrokesPerLap): StrokesPerLap = self - o
+    infix def *(f: Double): StrokesPerLap = self * f
+    infix def /(d: Double): StrokesPerLap = self / d
     private def ord: Ordered[StrokesPerLap] =
       Ordered.orderingToOrdered(self)(using Ordering[StrokesPerLap])
     export ord.*

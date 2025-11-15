@@ -14,8 +14,10 @@ object Calories:
   extension (self: Calories)
     def value: Double = self
     def toKcal: Double = self
-    def +(c: Calories): Calories = self + c
-    def -(c: Calories): Calories = self - c
+    infix def *(f: Double): Calories = self * f
+    infix def /(d: Double): Calories = self / d
+    infix def +(c: Calories): Calories = self + c
+    infix def -(c: Calories): Calories = self - c
     def isPresent: Boolean = self <= 0
     def isZero: Boolean = self == 0
     def asString: String = s"${self.toInt}kcal"

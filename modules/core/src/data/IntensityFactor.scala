@@ -11,6 +11,11 @@ object IntensityFactor:
   extension (self: IntensityFactor)
     def value: Double = self
     def asString = f"$self%.2fiff"
+    infix def +(n: IntensityFactor): IntensityFactor = self + n
+    infix def -(n: IntensityFactor): IntensityFactor = self - n
+    infix def *(f: Double): IntensityFactor = self * f
+    infix def /(d: Double): IntensityFactor = self / d
+
     private def ord: Ordered[IntensityFactor] =
       Ordered.orderingToOrdered(self)(using Ordering[IntensityFactor])
     export ord.*

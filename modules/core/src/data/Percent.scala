@@ -14,7 +14,12 @@ object Percent:
 
   extension (self: Percent)
     def value: Double = self
-    def /(d: Double): Percent = self / d
+
+    infix def *(f: Double): Percent = self * f
+    infix def /(d: Double): Percent = self / d
+    infix def +(g: Percent): Percent = self + g
+    infix def -(g: Percent): Percent = self - g
+
     def asString: String = f"$self%.2f%%"
     private def ord: Ordered[Percent] =
       Ordered.orderingToOrdered(self)(using Ordering[Percent])

@@ -13,6 +13,10 @@ object Grade:
 
   extension (self: Grade)
     def toPercent: Double = self
+    infix def *(f: Double): Grade = self * f
+    infix def /(d: Double): Grade = self / d
+    infix def +(g: Grade): Grade = self + g
+    infix def -(g: Grade): Grade = self - g
     def asString = f"$self%.2f%%"
     private def ord: Ordered[Grade] =
       Ordered.orderingToOrdered(self)(using Ordering[Grade])

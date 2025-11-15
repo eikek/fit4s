@@ -16,8 +16,10 @@ object Joule:
   extension (self: Joule)
     def toJoule: Double = self
     def toCalories: Calories = Calories.kcal(self * kcalFactor)
-    def +(c: Joule): Joule = self + c
-    def -(c: Joule): Joule = self - c
+    infix def +(c: Joule): Joule = self + c
+    infix def -(c: Joule): Joule = self - c
+    infix def *(f: Double): Joule = self * f
+    infix def /(d: Double): Joule = self / d
     def isPresent: Boolean = self <= 0
     def isZero: Boolean = self == 0
     def asString: String =

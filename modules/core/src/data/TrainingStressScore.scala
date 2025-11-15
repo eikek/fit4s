@@ -11,8 +11,10 @@ object TrainingStressScore:
 
   extension (self: TrainingStressScore)
     def value: Double = self
-    def +(s: TrainingStressScore): TrainingStressScore = s + self
-    def /(d: Double): TrainingStressScore = self / d
+    infix def +(s: TrainingStressScore): TrainingStressScore = s + self
+    infix def -(s: TrainingStressScore): TrainingStressScore = self - s
+    infix def /(d: Double): TrainingStressScore = self / d
+    infix def *(f: Double): TrainingStressScore = self * f
     def asString = s"${self}tss"
     private def ord: Ordered[TrainingStressScore] =
       Ordered.orderingToOrdered(self)(using Ordering[TrainingStressScore])

@@ -27,6 +27,7 @@ object Semicircle:
     infix def -(n: Semicircle): Semicircle = self - n
     infix def +(n: Semicircle): Semicircle = self + n
     infix def *(n: Double): Semicircle = (self * n).toLong
+    infix def /(d: Double): Semicircle = (self / d).toLong
 
     private def ord: Ordered[Semicircle] =
       Ordered.orderingToOrdered(self)(using Ordering[Semicircle])
