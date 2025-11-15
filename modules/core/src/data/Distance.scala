@@ -16,9 +16,10 @@ object Distance:
   extension (self: Distance)
     def toMeter: Double = self
     def toKm: Double = self / 1000.0
-    def *(factor: Double): Distance = self * factor
-    def +(dst: Distance): Distance = self + dst
-    def -(dst: Distance): Distance = self - dst
+    infix def *(factor: Double): Distance = self * factor
+    infix def /(div: Double): Distance = self / div
+    infix def +(dst: Distance): Distance = self + dst
+    infix def -(dst: Distance): Distance = self - dst
     def rounded: Distance = self.round.toDouble
     def roundTo(precision: Int): Distance =
       if precision <= 0 then rounded

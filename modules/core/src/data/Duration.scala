@@ -20,9 +20,10 @@ object Duration:
     def asJava: java.time.Duration =
       java.time.Duration.ofSeconds(self.toLong)
 
-    def +(t: Duration): Duration = self + t
-    def *(f: Double): Duration = self * f
-    def /(d: Double): Duration = self / d
+    infix def +(t: Duration): Duration = self + t
+    infix def -(t: Duration): Duration = self - t
+    infix def *(f: Double): Duration = self * f
+    infix def /(d: Double): Duration = self / d
     def asString: String =
       def split(n: Double, f: Int) =
         val k = (n / f).toInt

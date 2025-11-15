@@ -15,8 +15,10 @@ object HeartRate:
   extension (self: HeartRate)
     def toBpm: Int = self
     def toString = s"${self}bpm"
-    def +(hr: HeartRate): HeartRate = hr + self
-    def /(d: Double): HeartRate = (self / d).toInt
+    infix def +(hr: HeartRate): HeartRate = hr + self
+    infix def -(hr: HeartRate): HeartRate = self - hr
+    infix def /(d: Double): HeartRate = (self / d).toInt
+    infix def *(f: Double): HeartRate = (self * f).toInt
     def asString = s"${self}bpm"
 
   given Integral[HeartRate] = Numeric.IntIsIntegral

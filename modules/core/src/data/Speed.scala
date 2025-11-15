@@ -19,9 +19,10 @@ object Speed:
       if (self <= 0) 0 else (100d / self) / 60d
     def toMinutesPer1km: Double =
       if (self <= 0) 0 else (1000d / self) / 60d
-    def *(factor: Double): Speed = self * factor
-    def /(div: Double): Speed = self / div
-    def +(other: Speed): Speed = self + other
+    infix def *(factor: Double): Speed = self * factor
+    infix def /(div: Double): Speed = self / div
+    infix def +(other: Speed): Speed = self + other
+    infix def -(other: Speed): Speed = self - other
     def asString: String = f"${toKmh}%.2fkmh"
     private def ord: Ordered[Speed] =
       Ordered.orderingToOrdered(self)(using Ordering[Speed])

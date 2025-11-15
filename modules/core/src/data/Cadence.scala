@@ -13,9 +13,10 @@ object Cadence:
 
   extension (self: Cadence)
     def value: Int = self
-    def /(div: Double): Cadence = (self.toDouble / div).toInt
-    def +(c: Cadence): Cadence = self + c
-    def -(c: Cadence): Cadence = self - c
+    infix def *(f: Double): Cadence = (self * f).toInt
+    infix def /(div: Double): Cadence = (self.toDouble / div).toInt
+    infix def +(c: Cadence): Cadence = self + c
+    infix def -(c: Cadence): Cadence = self - c
     def asString = self.toString
 
     private def ord: Ordered[Cadence] =

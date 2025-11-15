@@ -11,9 +11,10 @@ object Temperature:
 
   extension (self: Temperature)
     def toCelcius: Double = self
-    def +(t: Temperature): Temperature = self + t
-    def *(f: Double): Temperature = self * f
-    def /(d: Double): Temperature = self / d
+    infix def +(t: Temperature): Temperature = self + t
+    infix def *(f: Double): Temperature = self * f
+    infix def /(d: Double): Temperature = self / d
+    infix def -(t: Temperature): Temperature = self - t
     def asString: String =
       if self == self.toInt then s"${self.toInt}°C"
       else f"$self%.2f°C"

@@ -12,8 +12,10 @@ object Power:
 
   extension (self: Power)
     def toWatts: Int = self
-    def +(other: Power): Power = self + other
-    def /(d: Double): Power = (self / d).toInt
+    infix def +(other: Power): Power = self + other
+    infix def -(other: Power): Power = self - other
+    infix def /(d: Double): Power = (self / d).toInt
+    infix def *(f: Double): Power = (self * f).toInt
     def asString: String = s"${self}W"
     private def ord: Ordered[Power] =
       Ordered.orderingToOrdered(self)(using Ordering[Power])
