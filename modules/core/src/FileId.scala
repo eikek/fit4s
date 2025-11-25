@@ -6,6 +6,7 @@ import fit4s.core.MessageReader as MR
 import fit4s.core.data.DateTime
 import fit4s.profile.*
 
+import scodec.Attempt
 import scodec.Codec
 import scodec.Err
 import scodec.bits.Bases.Alphabets
@@ -108,8 +109,15 @@ object FileId:
   private val codec: Codec[FileId] = {
     import scodec.codecs.*
 
-    def c(inner: Codec[Int], p: ProfileType): Codec[ProfileEnum] =
-      inner.xmap(n => ProfileEnum.unsafe(n, p), _.ordinal)
+    def c(inner: Codec[Int], p: ProfileType, pt: ProfileType*): Codec[ProfileEnum] =
+      inner.exmap(
+        n =>
+          Attempt.fromOption(
+            ProfileEnum.first(n, p, pt*),
+            Err(s"Invalid profile enum '$n' for type ${p.name}")
+          ),
+        en => Attempt.successful(en.ordinal)
+      )
 
     val fileType = c(uint8, FileType)
     val serial = optional(bool, ulongL(32))
@@ -124,9 +132,11 @@ object FileId:
     val fields = manu.flatPrepend { m =>
       (if m.isValue(ManufacturerType.garmin)
        then optional(bool, c(uint16L, GarminProductType))
-       else
-         optional(bool, c(uint16L, FaveroProductType))
-      ) :: serial :: created :: number :: name
+       else if m.isValue(ManufacturerType.faveroElectronics)
+       then optional(bool, c(uint16L, FaveroProductType))
+       // fallback to something if it is provided
+       else optional(bool, c(uint16L, GarminProductType, FaveroProductType)))
+      :: serial :: created :: number :: name
     }
     (fileType :: fields).as[FileId]
   }

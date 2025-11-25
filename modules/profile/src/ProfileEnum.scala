@@ -16,7 +16,9 @@ object ProfileEnum:
     (pt +: more).collectFirst(Function.unlift(apply(_, value)))
 
   def unsafe(value: Int, pt: ProfileType, more: ProfileType*): ProfileEnum =
-    first(value, pt, more*).getOrElse(sys.error(s"No enum $value found in ${pt +: more}"))
+    first(value, pt, more*).getOrElse(
+      sys.error(s"No enum $value found in ${pt.name +: more.map(_.name)}")
+    )
 
   def apply(pt: ProfileType, value: Int): Option[ProfileEnum] =
     pt.values.get(value).map(name => new ProfileEnum(pt, name))
