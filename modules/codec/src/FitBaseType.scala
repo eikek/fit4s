@@ -81,7 +81,7 @@ object FitBaseType:
       extends AbstractBase(number, fieldByte, invalid)
 
   case object Enum extends IntBased(0, 0x00, hex"ff", false)
-  case object Sint8 extends IntBased(1, 0x01, hex"7f", false)
+  case object Sint8 extends IntBased(1, 0x01, hex"7f", true)
   case object Uint8 extends IntBased(2, 0x02, hex"ff", false)
   case object Sint16 extends IntBased(3, 0x83.toByte, hex"7fff", true)
   case object Uint16 extends IntBased(4, 0x84.toByte, hex"ffff", false)
