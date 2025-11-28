@@ -11,7 +11,7 @@ package build
 import build.project.{CiModule, Fit4sModule, Fit4sPublishModule, MdocModule, Deps, Version, Generator}
 import io.github.hoangmaihuy.mill.packager.archetypes.JavaAppPackagingModule
 import mill.contrib.buildinfo.BuildInfo
-import mill._, scalalib._
+import mill.*, scalalib.*
 import contrib.jmh.JmhModule
 import mill.api.{BuildCtx, Result}
 
@@ -25,6 +25,11 @@ object `package` extends Module with CiModule { outer =>
     val file = Task.dest / "version.txt"
     os.write(file, appVersion())
     Task.log.info(s"Version written to: $file")
+  }
+
+  def showDepUpdates(ev: api.Evaluator) = Task.Command(exclusive=true) {
+    ev.evaluate(Seq("mill.scalalib.Dependency/showUpdates"))
+    ()
   }
 
   def makeReadme() = Task.Command {
