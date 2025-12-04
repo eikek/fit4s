@@ -36,3 +36,6 @@ private[core] object PolylineUtils:
           (sum + prev.distance(el), el)
         }
       result
+
+  def approximity(pl1: Polyline, pl2: Polyline) =
+    ???

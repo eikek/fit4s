@@ -1,5 +1,6 @@
 package fit4s.codec
 
+import fit4s.codec.FitBaseValue.syntax.*
 import fit4s.codec.internal.RecordCodec
 
 import scodec.bits.ByteVector
@@ -70,7 +71,7 @@ final case class DataRecord(
     val fromField =
       fields.collectFirst {
         case df: TypedDataField if df.fieldDef.fieldDefNumber == 253 =>
-          df.value().headOption.flatMap(FitBaseValue.toLong)
+          df.value().headOption.flatMap(_.asLong)
       }.flatten
     fromField.orElse {
       (header, lastTimestamp) match
@@ -79,3 +80,17 @@ final case class DataRecord(
         case _ =>
           None
     }
+
+  /** The message_index field is common to all messages. */
+  lazy val messageIndex: Option[Long] =
+    fields.collectFirst {
+      case df: TypedDataField if df.fieldDef.fieldDefNumber == 254 =>
+        df.value().headOption.flatMap(_.asLongOrInt)
+    }.flatten
+
+  private[codec] def sortValue: Option[(Long, Long)] =
+    (timestamp, messageIndex) match
+      case (Some(ts), Some(idx)) => Some((ts, idx))
+      case (Some(ts), None)      => Some((ts, 0))
+      case (None, Some(idx))     => Some((0, idx))
+      case (None, None)          => None

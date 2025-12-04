@@ -119,6 +119,10 @@ object ViewCmd extends CmdCommons:
     def isEmpty: Boolean = sessions.isEmpty && unrelated.isEmpty
     def nonEmpty: Boolean = !isEmpty
 
+    def trackLines: Vector[SessionTrack] =
+      (sessions :+ SessionTrack(Timespan.all, "Track", unrelated))
+        .filter(_.track.nonEmpty)
+
     def lines: Vector[Polyline] =
       (sessions.map(_.line(cfg)) :+ Polyline(cfg)(unrelated*)).filter(_.nonEmpty)
 

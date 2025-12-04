@@ -3,16 +3,14 @@ package fit4s.core
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
-import java.time.Instant
 
 import fit4s.codec.FitFile
 import fit4s.core.data.LatLng
 import fit4s.core.data.Polyline
-import fit4s.core.data.Position
 import fit4s.core.data.Timespan
+import fit4s.core.internal.GpsTrack
 import fit4s.profile.FileIdMsg
 import fit4s.profile.GlobalMessages
-import fit4s.profile.RecordMsg
 
 import scodec.Attempt
 import scodec.bits.ByteVector
@@ -33,22 +31,7 @@ final class Fit(val file: FitFile, val cfg: Config):
     getLatLngs(within).map(Polyline.apply(cfg)(_*))
 
   def getLatLngs(within: Timespan): Either[String, Vector[LatLng]] =
-    val reader = MessageReader.field(RecordMsg.timestamp).as[Instant] :: Position
-      .reader(RecordMsg.positionLat, RecordMsg.positionLong)
-      .tuple
-    val init: Either[String, Vector[LatLng]] = Right(Vector.empty)
-    getMessages(RecordMsg)
-      .foldLeft(init) { (res, m) =>
-        res.flatMap(vs =>
-          reader
-            .read(m)
-            .map(
-              _.filter(t => within.contains(t._1))
-                .map(v => vs.appended(v._2.toLatLng))
-                .getOrElse(vs)
-            )
-        )
-      }
+    GpsTrack.fromFitByType(this, within)
 
   def getMessages[N](n: N)(using g: GetMesgNum[N]): LazyList[FitMessage] =
     val num = g.get(n)
