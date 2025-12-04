@@ -144,7 +144,7 @@ object FitHtml:
   def leafletScript(tracks: SessionTracks) =
     val citer = trackColors.iterator
     def nextColor = { citer.hasNext; citer.next }
-    val lines = tracks.sessions
+    val lines = tracks.trackLines
       .map { track =>
         val color = nextColor
         s"""addPolyline("${track

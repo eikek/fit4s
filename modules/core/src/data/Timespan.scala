@@ -19,6 +19,8 @@ final case class Timespan(startTime: Instant, endTime: Instant):
   def duration: Duration =
     Duration.from(javaDuration)
 
+  def isAll: Boolean = this == Timespan.all
+
 object Timespan:
 
   val all: Timespan = Timespan(Instant.MIN, Instant.MAX)

@@ -25,12 +25,12 @@ final case class FitFile(
     enc.encode(this).map(_.bytes)
 
   /** Return all data records groupd by its global message type and sorted by their
-    * timestamp.
+    * timestamp or message-index.
     */
   lazy val groupByMsg: Map[Int, Vector[DataRecord]] =
     records
       .flatMap(_.toEither.toOption)
-      .sortBy(_.timestamp.getOrElse(Long.MinValue))
+      .sortBy(r => r.sortValue)
       .groupBy(_.globalMessage)
 
   def findMessages(global: Int): Vector[DataRecord] =
