@@ -59,7 +59,7 @@ object Activity:
 
   final case class Session(
       timespan: Timespan,
-      sport: String,
+      sport: Option[String],
       avgSpeed: Option[Speed],
       avgHr: Option[HeartRate],
       totalDistance: Option[Distance],

@@ -2,13 +2,12 @@ package fit4s.core
 
 import java.time.Instant
 
+import fit4s.codec.FitBaseType
 import fit4s.core.MessageReader as MR
 import fit4s.core.data.DateTime
 import fit4s.profile.*
 
-import scodec.Attempt
 import scodec.Codec
-import scodec.Err
 import scodec.bits.Bases.Alphabets
 import scodec.bits.BitVector
 
@@ -26,13 +25,6 @@ final case class FileId(
 
   def isCourse: Boolean =
     fileType.ordinal == FileType.course
-
-  def asStringLegacy: String =
-    FileId.legacyIdCodec
-      .encode(this)
-      .map(FileId.bitsToString)
-      .toEither
-      .fold(err => sys.error(err.messageWithContext), identity)
 
   def asString: String =
     FileId.codec
@@ -57,9 +49,6 @@ object FileId:
   def fromString(str: String): Either[String, FileId] =
     decode(codec, str)
 
-  def fromStringLegacy(str: String): Either[String, FileId] =
-    decode(legacyIdCodec, str)
-
   private def stringToBits(s: String): Either[String, BitVector] =
     BitVector.fromBase58Descriptive(s, Alphabets.Base58)
 
@@ -77,47 +66,15 @@ object FileId:
         else Right(())
     yield result.value
 
-  private val legacyIdCodec: Codec[FileId] = {
-    // this does the same as the variant from previous versions to retain compatibility with old values.
-    import scodec.codecs.*
-    def c(inner: Codec[Int], p: ProfileType, pn: ProfileType*): Codec[ProfileEnum] =
-      inner.xmap(n => ProfileEnum.unsafe(n.toInt, p, pn*), _.ordinal)
-
-    val fileType = c(uint8, FileType)
-    val manu = c(uint16L, ManufacturerType)
-    val product = uint4L.consume {
-      case 0 => provide(Option.empty[ProfileEnum])
-      case 1 => c(uint16L, GarminProductType).xmap(Some(_), _.get)
-      case 2 => c(uint16L, FaveroProductType).xmap(Some(_), _.get)
-      case v => fail(Err(s"Unknown product type: $v"))
-    } {
-      case None     => 0
-      case Some(pt) =>
-        if (pt.profile == GarminProductType) ManufacturerType.garmin
-        else ManufacturerType.faveroElectronics
-    }
-    val serial = optional(bool, ulongL(32))
-    val created = optional(
-      bool,
-      ulongL(32).xmap(s => DateTime(s).asInstant, i => DateTime.fromInstant(i).value)
-    )
-    val number = optional(bool, ulongL(32).xmap(_.toInt, _.toLong))
-    val name = optional(bool, cstring)
-    (fileType :: manu :: product :: serial :: created :: number :: name).as[FileId]
-  }
-
   private val codec: Codec[FileId] = {
     import scodec.codecs.*
 
-    def c(inner: Codec[Int], p: ProfileType, pt: ProfileType*): Codec[ProfileEnum] =
-      inner.exmap(
-        n =>
-          Attempt.fromOption(
-            ProfileEnum.first(n, p, pt*),
-            Err(s"Invalid profile enum '$n' for type ${p.name}")
-          ),
-        en => Attempt.successful(en.ordinal)
-      )
+    def c(inner: Codec[Int], p: ProfileType): Codec[ProfileEnum] =
+      inner.xmap(n => ProfileEnum(p, n), en => en.ordinal)
+
+    def isValue(ptv: ProfileEnum | Int, value: Int): Boolean = ptv match
+      case n: Int          => value == n
+      case pt: ProfileEnum => pt.isValue(value)
 
     val fileType = c(uint8, FileType)
     val serial = optional(bool, ulongL(32))
@@ -130,13 +87,19 @@ object FileId:
     val manu = c(uint16L, ManufacturerType)
 
     val fields = manu.flatPrepend { m =>
-      (if m.isValue(ManufacturerType.garmin)
-       then optional(bool, c(uint16L, GarminProductType))
-       else if m.isValue(ManufacturerType.faveroElectronics)
-       then optional(bool, c(uint16L, FaveroProductType))
-       // fallback to something if it is provided
-       else optional(bool, c(uint16L, GarminProductType, FaveroProductType)))
-      :: serial :: created :: number :: name
+      val product =
+        if isValue(m, ManufacturerType.garmin)
+        then optional(bool, c(uint16L, GarminProductType))
+        else if isValue(m, ManufacturerType.faveroElectronics)
+        then optional(bool, c(uint16L, FaveroProductType))
+        // fallback to something if it is provided
+        else
+          optional(
+            bool,
+            c(uint16L, ProfileType.unknown("unknown", FitBaseType.Uint16.name))
+          )
+
+      product :: serial :: created :: number :: name
     }
     (fileType :: fields).as[FileId]
   }

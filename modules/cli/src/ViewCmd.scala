@@ -91,7 +91,7 @@ object ViewCmd extends CmdCommons:
             act.sessionRecords.map { sr =>
               SessionTrack(
                 sr.session.timespan,
-                sr.session.sport,
+                sr.session.sport.getOrElse("generic"),
                 sr.records.flatMap(_.position.map(_.toLatLng))
               )
             },

@@ -234,6 +234,9 @@ object MessageReader:
     def asEnum: MessageReader[ProfileEnum] =
       self.subflatMap(_.asEnum)
 
+    def asEnumStrict: MessageReader[ProfileEnum] =
+      self.subflatMap(_.asEnumStrict)
+
   extension [X <: Product](self: MessageReader[X])
     def as[A](using
         mirror: Mirror.ProductOf[A] {
