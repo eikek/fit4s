@@ -1,6 +1,7 @@
 package fit4s.core.data
 
 import fit4s.core.FieldReader
+import fit4s.core.FieldValueEncoder
 import fit4s.profile.MeasurementUnit
 
 opaque type Cadence = Int
@@ -32,3 +33,6 @@ object Cadence:
   given FieldReader[Cadence] = reader.singleValue
 
   given Display[Cadence] = Display.instance(_.asString)
+
+  given FieldValueEncoder[Cadence] =
+    FieldValueEncoder.forInt.contramap(_.value)

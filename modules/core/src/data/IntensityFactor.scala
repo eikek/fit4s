@@ -29,3 +29,6 @@ object IntensityFactor:
     yield v
   given FieldReader[IntensityFactor] = reader.singleValue
   given Display[IntensityFactor] = Display.instance(_.asString)
+
+  given FieldValueEncoder[IntensityFactor] =
+    FieldValueEncoder.forDouble.contramap(_.value)

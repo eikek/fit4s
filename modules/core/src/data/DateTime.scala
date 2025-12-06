@@ -35,3 +35,6 @@ object DateTime:
     DateTime(i.getEpochSecond - offset.getEpochSecond)
 
   given Display[DateTime] = Display.instance(_.asString)
+
+  given FieldValueEncoder[DateTime] =
+    FieldValueEncoder[Long].contramap(_.value)

@@ -1,7 +1,11 @@
 package fit4s.core.data
 
 import fit4s.core.GetFieldNumber
+import fit4s.core.MessageEncoder
+import fit4s.core.MessageEncoder.EncodedField
 import fit4s.core.MessageReader
+import fit4s.profile.MsgField
+import fit4s.profile.MsgSchema
 
 final case class Position(latitude: Semicircle, longitude: Semicircle):
   infix def -(p: Position): Position =
@@ -53,3 +57,11 @@ object Position:
 
   given (using s: Display[Semicircle]): Display[Position] =
     Display.instance(p => s"Position(${s.show(p.latitude)}, ${s.show(p.longitude)})")
+
+  def messageEncode[M <: MsgSchema](
+      msg: M
+  )(latField: M => MsgField, lngField: M => MsgField): MessageEncoder[Position] =
+    import MessageEncoder.syntax.*
+    MessageEncoder.forMsg(msg).fields { (msg, p) =>
+      (latField(msg) -> p.latitude) :: (lngField(msg) -> p.longitude) :: Nil
+    }

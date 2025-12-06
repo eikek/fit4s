@@ -47,3 +47,12 @@ object Duration:
     yield v
   given FieldReader[Duration] = reader.singleValue
   given Display[Duration] = Display.instance(_.asString)
+
+  given (using ed: FieldValueEncoder[Double]): FieldValueEncoder[Duration] =
+    FieldValueEncoder.instance { (field, dur) =>
+      field.units.headOption match
+        case Some(MeasurementUnit.Minute) => ed.fitValue(field, dur.toSeconds / 60)
+        case Some(MeasurementUnit.Hour)   => ed.fitValue(field, dur.toSeconds / 60 / 60)
+        case Some(MeasurementUnit.Millisecond) => ed.fitValue(field, dur.toSeconds * 1000)
+        case _                                 => ed.fitValue(field, dur.toSeconds)
+    }

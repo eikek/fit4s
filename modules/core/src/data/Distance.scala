@@ -1,6 +1,7 @@
 package fit4s.core.data
 
 import fit4s.core.FieldReader
+import fit4s.core.FieldValueEncoder
 import fit4s.profile.MeasurementUnit
 
 opaque type Distance = Double
@@ -54,3 +55,11 @@ object Distance:
     yield r
   given FieldReader[Distance] = reader.singleValue
   given Display[Distance] = Display.instance(_.asString)
+
+  given (using ed: FieldValueEncoder[Double]): FieldValueEncoder[Distance] =
+    FieldValueEncoder.instance { (field, dst) =>
+      field.units.headOption match
+        case Some(MeasurementUnit.Km)         => ed.fitValue(field, dst.toKm)
+        case Some(MeasurementUnit.Millimeter) => ed.fitValue(field, dst.toMeter * 1000)
+        case _                                => ed.fitValue(field, dst.toMeter)
+    }

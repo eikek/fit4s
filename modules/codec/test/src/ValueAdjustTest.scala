@@ -13,3 +13,5 @@ class ValueAdjustTest extends FunSuite:
       s"Not all values are doubles: ${result}"
     )
     assertEquals(result, Vector(1.5d, 1.0d, 0d, 0d, 0d))
+    val reversed1 = ValueAdjust.reverseAll(FitBaseType.Uint16, one, result)
+    assertEquals(reversed1, data)

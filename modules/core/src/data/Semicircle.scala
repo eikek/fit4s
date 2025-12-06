@@ -1,6 +1,7 @@
 package fit4s.core.data
 
 import fit4s.core.FieldReader
+import fit4s.core.FieldValueEncoder
 import fit4s.profile.MeasurementUnit
 
 opaque type Semicircle = Long
@@ -42,3 +43,11 @@ object Semicircle:
     yield n
   given FieldReader[Semicircle] = reader.singleValue
   given Display[Semicircle] = Display.instance(_.asString)
+
+  given encoder: FieldValueEncoder[Semicircle] =
+    FieldValueEncoder.instance { (field, sc) =>
+      field.units.headOption match
+        case Some(MeasurementUnit.Degree) =>
+          FieldValueEncoder.forDouble.fitValue(field, sc.toDegree)
+        case _ => FieldValueEncoder.forLong.fitValue(field, sc.toSemicircle)
+    }

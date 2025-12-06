@@ -1,6 +1,7 @@
 package fit4s.core.data
 
 import fit4s.core.FieldReader
+import fit4s.core.FieldValueEncoder
 import fit4s.profile.MeasurementUnit
 
 opaque type Grade = Double
@@ -31,3 +32,6 @@ object Grade:
   given FieldReader[Grade] = reader.singleValue
 
   given Display[Grade] = Display.instance(_.asString)
+
+  given FieldValueEncoder[Grade] =
+    FieldValueEncoder.forDouble.contramap(_.toPercent)

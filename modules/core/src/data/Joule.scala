@@ -1,6 +1,7 @@
 package fit4s.core.data
 
 import fit4s.core.FieldReader
+import fit4s.core.FieldValueEncoder
 import fit4s.profile.MeasurementUnit
 
 opaque type Joule = Double
@@ -37,3 +38,6 @@ object Joule:
     yield v
   given FieldReader[Joule] = reader.singleValue
   given Display[Joule] = Display.instance(_.asString)
+
+  given FieldValueEncoder[Joule] =
+    FieldValueEncoder.forDouble.contramap(_.toJoule)

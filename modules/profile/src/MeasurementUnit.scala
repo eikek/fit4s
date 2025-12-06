@@ -42,7 +42,7 @@ enum MeasurementUnit(val name: String, val alternativeNames: String*):
   case Counts extends MeasurementUnit("counts")
   case GramPerDeciliter extends MeasurementUnit("g/dL")
   case Degree extends MeasurementUnit("degrees")
-  case OxygenToxicityMeasurementUnit$ extends MeasurementUnit("OTUs")
+  case OxygenToxicityMeasurementUnit extends MeasurementUnit("OTUs")
   case BreathsPerMinute extends MeasurementUnit("breaths/min")
   case Grit extends MeasurementUnit("grit")
   case KGrit extends MeasurementUnit("kGrit")
@@ -101,7 +101,7 @@ object MeasurementUnit:
       Counts,
       GramPerDeciliter,
       Degree,
-      OxygenToxicityMeasurementUnit$,
+      OxygenToxicityMeasurementUnit,
       BreathsPerMinute,
       Grit,
       KGrit,
