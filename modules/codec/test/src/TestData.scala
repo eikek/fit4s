@@ -34,6 +34,11 @@ object TestData:
     val workout = r("/files/workout.fit")
   }
 
+  object Segment extends TestFiles {
+    val segment1 = r("/files/segment.fit")
+    val segment2 = r("/files/segment2.fit")
+  }
+
   object Activities extends TestFiles {
 
     val fenix539 = r("/files/fenix5_indoor_539.fit")
@@ -110,7 +115,6 @@ object TestData:
     val zwiftBadTraining = r("/runalyze/Zwift-bad-training-effect.fit")
     val withPower = r("/runalyze/with-power.fit")
     val withNewDynamics = r("/runalyze/with-new-dynamics.fit")
-
   }
 
   def allFiles = Activities.all ++ Workouts.all

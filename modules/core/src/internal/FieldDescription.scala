@@ -46,9 +46,11 @@ object FieldDescription:
         MR.field(m.fieldDefinitionNumber).as[Short] ::
         MR.field(m.fieldName).as[String].option ::
         MR.field(m.fitBaseTypeId)
-          .asEnum
+          .asEnumStrict
           .emap(pt =>
-            FitBaseType.byName(pt.value).toRight(s"No fit base type found for $pt")
+            pt.value
+              .flatMap(FitBaseType.byName)
+              .toRight(s"No fit base type found for $pt")
           ) ::
         MR.field(m.offset).as[Double].option ::
         MR.field(m.scale).as[Vector[Double]].option ::

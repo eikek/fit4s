@@ -18,11 +18,21 @@ final case class FieldValue(
     data: Vector[FitBaseValue]
 ):
   /** Looks up the value in the profile enumeration of the field type. */
+  def asEnumStrict: Option[ProfileEnum] =
+    for
+      key <- data.headOption.flatMap(_.asUInt)
+      pt <- profileType
+      v <- ProfileEnum.ofType(pt, key)
+    yield v
+
+  /** Looks up the value in the profile enumeration of the field type or returns the plain
+    * number if it is not in the enumeration.
+    */
   def asEnum: Option[ProfileEnum] =
     for
       key <- data.headOption.flatMap(_.asUInt)
       pt <- profileType
-      v <- ProfileEnum(pt, key)
+      v = ProfileEnum(pt, key)
     yield v
 
   def as[A](using r: FieldReader[A]): Either[String, A] =

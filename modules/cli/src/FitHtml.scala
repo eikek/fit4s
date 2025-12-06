@@ -139,7 +139,7 @@ object FitHtml:
         .map(str => div(str))
 
   def fileType(fits: Vector[Fit]) =
-    fits.head.fileId.map(_.fileType.value.capitalize).getOrElse("")
+    fits.head.fileId.flatMap(_.fileType.value.map(_.capitalize)).getOrElse("")
 
   def leafletScript(tracks: SessionTracks) =
     val citer = trackColors.iterator
