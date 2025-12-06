@@ -1,6 +1,7 @@
 package fit4s.core.data
 
 import fit4s.core.FieldReader
+import fit4s.core.FieldValueEncoder
 import fit4s.profile.MeasurementUnit
 
 opaque type HeartRate = Int
@@ -29,3 +30,6 @@ object HeartRate:
     yield v
   given FieldReader[HeartRate] = reader.singleValue
   given Display[HeartRate] = Display.instance(_.asString)
+
+  given FieldValueEncoder[HeartRate] =
+    FieldValueEncoder.forInt.contramap(_.toBpm)

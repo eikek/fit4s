@@ -13,7 +13,7 @@ import scodec.bits.BitVector
 
 final case class FileId(
     fileType: ProfileEnum,
-    manufacturer: ProfileEnum,
+    manufacturer: Option[ProfileEnum],
     product: Option[ProfileEnum],
     serialNumber: Option[Long],
     createdAt: Option[Instant],
@@ -25,6 +25,15 @@ final case class FileId(
 
   def isCourse: Boolean =
     fileType.ordinal == FileType.course
+
+  def withSerialNumber(sn: Long): FileId =
+    copy(serialNumber = Some(sn))
+
+  def withCreated(i: Instant): FileId =
+    copy(createdAt = Some(i))
+
+  def withProductName(name: String): FileId =
+    copy(productName = Some(name).filter(_.nonEmpty))
 
   def asString: String =
     FileId.codec
@@ -38,12 +47,25 @@ object FileId:
   given MR[FileId] =
     MR.forMsg(FileIdMsg) { m =>
       (MR.field(m.`type`).asEnum ::
-        MR.field(m.manufacturer).asEnum ::
+        MR.field(m.manufacturer).asEnum.option ::
         MR.field(m.product).asEnum.option ::
         MR.field(m.serialNumber).as[Long].option ::
         MR.field(m.timeCreated).as[Instant].option ::
         MR.field(m.number).as[Int].option ::
         MR.field(m.productName).as[String].option.tuple).as[FileId]
+    }
+
+  given MessageEncoder[FileId] =
+    MessageEncoder.forMsg(FileIdMsg).fields { (msg, fid) =>
+      import MessageEncoder.syntax.*
+      fid.fileType -> msg.`type`
+        :: fid.manufacturer -> msg.manufacturer
+        :: fid.product -> msg.product
+        :: fid.serialNumber -> msg.serialNumber
+        :: fid.createdAt -> msg.timeCreated
+        :: fid.number -> msg.number
+        :: fid.productName -> msg.productName
+        :: Nil
     }
 
   def fromString(str: String): Either[String, FileId] =
@@ -84,15 +106,14 @@ object FileId:
     )
     val number = optional(bool, ulongL(32).xmap(_.toInt, _.toLong))
     val name = optional(bool, cstring)
-    val manu = c(uint16L, ManufacturerType)
+    val manu = optional(bool, c(uint16L, ManufacturerType))
 
     val fields = manu.flatPrepend { m =>
       val product =
-        if isValue(m, ManufacturerType.garmin)
+        if m.exists(isValue(_, ManufacturerType.garmin))
         then optional(bool, c(uint16L, GarminProductType))
-        else if isValue(m, ManufacturerType.faveroElectronics)
+        else if m.exists(isValue(_, ManufacturerType.faveroElectronics))
         then optional(bool, c(uint16L, FaveroProductType))
-        // fallback to something if it is provided
         else
           optional(
             bool,

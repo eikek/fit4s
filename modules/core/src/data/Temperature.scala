@@ -30,3 +30,6 @@ object Temperature:
     yield v
   given FieldReader[Temperature] = reader.singleValue
   given Display[Temperature] = Display.instance(_.asString)
+
+  given FieldValueEncoder[Temperature] =
+    FieldValueEncoder.forDouble.contramap(_.toCelcius)

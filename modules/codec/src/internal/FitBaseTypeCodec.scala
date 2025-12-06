@@ -66,7 +66,7 @@ private[codec] object FitBaseTypeCodec:
       case b: Byte   => scodec.codecs.byte.encode(b)
       case d: Double => floatCodec(bo, ft.size).encode(d)
       case s: String => Codecs.stringUtf8.encode(s)
-    }
+    }.contramap[FitBaseValue](v => coerce(ft, v))
 
   private def intCodec(bo: ByteOrdering, size: ByteSize, signed: Boolean): Codec[Int] =
     (bo, signed) match
@@ -79,7 +79,7 @@ private[codec] object FitBaseTypeCodec:
       case (LittleEndian, false) =>
         scodec.codecs.uintL(size.toBits.toInt)
 
-  private def longCodec(bo: ByteOrdering, size: ByteSize, signed: Boolean) =
+  private def longCodec(bo: ByteOrdering, size: ByteSize, signed: Boolean): Codec[Long] =
     (bo, signed) match
       case (BigEndian, true) =>
         scodec.codecs.long(size.toBits.toInt)
@@ -102,3 +102,34 @@ private[codec] object FitBaseTypeCodec:
         scodec.codecs.doubleL
       case _ =>
         sys.error(s"Programming error: no codec for arch/size: $bo/$size")
+
+  private def coerce(target: FitBaseType, fv: FitBaseValue): FitBaseValue =
+    (target, fv) match
+      case (_: FitBaseType.IntBased, n: Byte)   => n.toInt
+      case (_: FitBaseType.IntBased, n: Int)    => n
+      case (_: FitBaseType.IntBased, n: Long)   => n.toInt
+      case (_: FitBaseType.IntBased, n: Double) => n.toInt
+      case (_: FitBaseType.IntBased, n: String) => n.toIntOption.getOrElse(n)
+
+      case (_: FitBaseType.LongBased, n: Byte)   => n.toLong
+      case (_: FitBaseType.LongBased, n: Int)    => n.toLong
+      case (_: FitBaseType.LongBased, n: Long)   => n
+      case (_: FitBaseType.LongBased, n: Double) => n.toLong
+      case (_: FitBaseType.LongBased, n: String) => n.toLongOption.getOrElse(n)
+
+      case (_: FitBaseType.FloatBased, n: Byte)   => n.toDouble
+      case (_: FitBaseType.FloatBased, n: Int)    => n.toDouble
+      case (_: FitBaseType.FloatBased, n: Long)   => n.toDouble
+      case (_: FitBaseType.FloatBased, n: Double) => n
+      case (_: FitBaseType.FloatBased, n: String) => n.toDoubleOption.getOrElse(n)
+
+      case (FitBaseType.string, n: Byte)   => n.toString()
+      case (FitBaseType.string, n: Int)    => n.toString()
+      case (FitBaseType.string, n: Long)   => n.toString()
+      case (FitBaseType.string, n: Double) => n.toString()
+      case (FitBaseType.string, n: String) => n
+      case (FitBaseType.FByte, n: Byte)    => n
+      case (FitBaseType.FByte, n: Int)     => n.toByte
+      case (FitBaseType.FByte, n: Long)    => n.toByte
+      case (FitBaseType.FByte, n: Double)  => n.toByte
+      case (FitBaseType.FByte, n: String)  => n.toByteOption.getOrElse(n)

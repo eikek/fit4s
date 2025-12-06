@@ -1,6 +1,7 @@
 package fit4s.core.data
 
 import fit4s.core.FieldReader
+import fit4s.core.FieldValueEncoder
 import fit4s.profile.MeasurementUnit
 
 opaque type Speed = Double
@@ -37,3 +38,6 @@ object Speed:
     yield v
   given FieldReader[Speed] = reader.singleValue
   given Display[Speed] = Display.instance(_.asString)
+
+  given FieldValueEncoder[Speed] =
+    FieldValueEncoder.forDouble.contramap(_.toMeterPerSecond)

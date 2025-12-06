@@ -16,7 +16,7 @@ class FileIdTest extends FunSuite with TestSyntax:
 
     val fileId = FileId(
       fileType = ProfileEnum.unsafe(4, FileType),
-      manufacturer = ProfileEnum.unsafe(1, ManufacturerType),
+      manufacturer = Some(ProfileEnum.unsafe(1, ManufacturerType)),
       product = Some(ProfileEnum.unsafe(3121, GarminProductType)),
       serialNumber = Some(3419639228L),
       createdAt = Some(Instant.parse("2022-11-26T12:36:02Z")),
@@ -24,7 +24,7 @@ class FileIdTest extends FunSuite with TestSyntax:
       productName = None
     )
     assertEquals(fid, fileId)
-    val expected = "2UNj4h4B4ftWHRLj6xw"
+    val expected = "2ezfYTiKvZfjT3QNV7D"
     assertEquals(fid.asString, expected)
     assertEquals(FileId.fromString(expected).fold(sys.error, identity), fileId)
 
@@ -34,14 +34,14 @@ class FileIdTest extends FunSuite with TestSyntax:
     val fid = fit.fileId.get
     val expect = FileId(
       fileType = ProfileEnum(FileType, FileType.segment),
-      manufacturer = ProfileEnum(ManufacturerType, 8888),
+      manufacturer = Some(ProfileEnum(ManufacturerType, 8888)),
       product = None,
       serialNumber = Some(1743444),
       createdAt = Some(Instant.parse("2025-12-05T14:22:54Z")),
       number = None,
       productName = Some("mkfit.sc")
     )
-    val expectStr = "38pwqnCW1oHReh2KDu7ZAH1jfoHz7"
+    val expectStr = "39Kyt5Ty9zvTKaMK3ohtRq8VYMN4F"
     assertEquals(fid, expect)
     assertEquals(fid.asString, expectStr)
     assertEquals(FileId.fromString(expectStr), Right(fid))

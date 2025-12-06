@@ -15,6 +15,19 @@ sealed trait ValueAdjust:
             case f: Double => (f / scale) - offset
             case s: String => s
 
+  def reverse(bt: FitBaseType)(v: FitBaseValue): FitBaseValue =
+    if bt == FitBaseType.Enum then v
+    else
+      this match
+        case ValueAdjust.None                  => v
+        case ValueAdjust.Adjust(scale, offset) =>
+          v match
+            case n: Byte   => (n + offset) * scale
+            case n: Int    => (n + offset) * scale
+            case n: Long   => (n + offset) * scale
+            case f: Double => (f + offset) * scale
+            case s: String => s
+
 object ValueAdjust:
   private case object None extends ValueAdjust {
     val toOption: Option[(Double, Double)] = Option.empty
@@ -46,3 +59,11 @@ object ValueAdjust:
   ): Vector[FitBaseValue] =
     val adjusts = LazyList.from(adjust).concat(LazyList.continually(None))
     data.zip(adjusts).map { case (v, ad) => ad(ft)(v) }
+
+  def reverseAll(
+      ft: FitBaseType,
+      adjust: Iterable[ValueAdjust],
+      data: Vector[FitBaseValue]
+  ): Vector[FitBaseValue] =
+    val adjusts = LazyList.from(adjust).concat(LazyList.continually(None))
+    data.zip(adjusts).map { case (v, ad) => ad.reverse(ft)(v) }

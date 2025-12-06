@@ -1,6 +1,7 @@
 package fit4s.core.data
 
 import fit4s.core.FieldReader
+import fit4s.core.FieldValueEncoder
 import fit4s.profile.MeasurementUnit
 
 opaque type Calories = Double
@@ -14,6 +15,7 @@ object Calories:
   extension (self: Calories)
     def value: Double = self
     def toKcal: Double = self
+    def toCalories: Double = self * 1000
     infix def *(f: Double): Calories = self * f
     infix def /(d: Double): Calories = self / d
     infix def +(c: Calories): Calories = self + c
@@ -34,3 +36,10 @@ object Calories:
     yield r
   given FieldReader[Calories] = reader.singleValue
   given Display[Calories] = Display.instance(_.asString)
+
+  given FieldValueEncoder[Calories] =
+    FieldValueEncoder.forDouble.contramap2[Calories] { (field, cal) =>
+      field.units.headOption match
+        case Some(MeasurementUnit.Calories) => cal.toCalories
+        case _                              => cal.toKcal
+    }

@@ -28,3 +28,6 @@ object TrainingStressScore:
     yield v
   given FieldReader[TrainingStressScore] = reader.singleValue
   given Display[TrainingStressScore] = Display.instance(_.asString)
+
+  given FieldValueEncoder[TrainingStressScore] =
+    FieldValueEncoder.forDouble.contramap(_.value)

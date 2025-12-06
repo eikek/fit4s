@@ -31,3 +31,6 @@ object StrokesPerLap:
     yield v
   given FieldReader[StrokesPerLap] = reader.singleValue
   given Display[StrokesPerLap] = Display.instance(_.asString)
+
+  given FieldValueEncoder[StrokesPerLap] =
+    FieldValueEncoder.forDouble.contramap(_.value)

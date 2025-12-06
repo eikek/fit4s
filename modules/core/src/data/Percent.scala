@@ -1,6 +1,7 @@
 package fit4s.core.data
 
 import fit4s.core.FieldReader
+import fit4s.core.FieldValueEncoder
 import fit4s.profile.MeasurementUnit
 
 opaque type Percent = Double
@@ -33,3 +34,5 @@ object Percent:
     yield v
   given FieldReader[Percent] = reader.singleValue
   given Display[Percent] = Display.instance(_.asString)
+  given FieldValueEncoder[Percent] =
+    FieldValueEncoder.forDouble.contramap(_.value)

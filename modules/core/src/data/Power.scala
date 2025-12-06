@@ -1,6 +1,7 @@
 package fit4s.core.data
 
 import fit4s.core.FieldReader
+import fit4s.core.FieldValueEncoder
 import fit4s.profile.MeasurementUnit
 
 opaque type Power = Int
@@ -29,3 +30,6 @@ object Power:
     yield v
   given FieldReader[Power] = reader.singleValue
   given Display[Power] = Display.instance(_.asString)
+
+  given FieldValueEncoder[Power] =
+    FieldValueEncoder.forInt.contramap(_.toWatts)
