@@ -58,7 +58,7 @@ object FitBuilder:
         FieldValueEncoder[V]
     ): RecordBuilder[M] = value.map(field(fn, _)).getOrElse(this)
     def set[A](value: A)(using MessageEncoder[A]): RecordBuilder[M]
-    def build(header: NormalRecordHeader): (DefinitionRecord, DataRecord)
+    def build: (DefinitionMessage, Vector[DataField])
 
   final private case class RecordBuilderImpl[M <: MsgSchema](
       msg: M,
@@ -78,7 +78,7 @@ object FitBuilder:
     def set[A](value: A)(using me: MessageEncoder[A]): RecordBuilder[M] =
       copy(fields = fields ++ me.encode(value).fields.toVector)
 
-    def build(header: NormalRecordHeader): (DefinitionRecord, DataRecord) = {
+    def build: (DefinitionMessage, Vector[DataField]) = {
       val meta: DefinitionMessage.Meta =
         DefinitionMessage.Meta(ByteOrdering.BigEndian, msg.globalNum)
 
@@ -112,35 +112,38 @@ object FitBuilder:
       val defMessage: DefinitionMessage =
         DefinitionMessage(meta, defFields.result().toList, Nil)
 
-      val dataRecord =
-        DataRecord(header, defMessage, None, dataFields.result(), Vector.empty)
-
-      (DefinitionRecord(header, defMessage), dataRecord)
+      (defMessage, dataFields.result())
     }
 
   final private case class Builder(
       fileId: FileId,
-      messageData: Vector[NormalRecordHeader => (DefinitionRecord, DataRecord)] =
-        Vector.empty
+      messageData: Vector[(DefinitionMessage, Vector[DataField])] = Vector.empty
   ) extends FitBuilder:
     self =>
 
     def build: FitFile =
       val (firstDef, firstData) =
-        RecordBuilderImpl(FileIdMsg).set(fileId).build(NormalRecordHeader(false, 0))
+        RecordBuilderImpl(FileIdMsg).set(fileId).build
+      val first = Vector(
+        DefinitionRecord(NormalRecordHeader(false, 0), firstDef),
+        DataRecord(NormalRecordHeader(false, 0), firstDef, None, firstData, Vector.empty)
+      )
       val records =
-        messageData.zipWithIndex
-          .map { case (makeRecords, idx) =>
-            makeRecords(NormalRecordHeader(false, idx + 1))
-          }
-          .groupMap(_._1)(_._2)
-          .flatMap { case (defRecord, dataRecords) =>
-            defRecord +: dataRecords
+        messageData
+          .groupBy(_._1)
+          .zipWithIndex
+          .flatMap { case ((defMsg, vs), idx) =>
+            val rheader = NormalRecordHeader(false, idx + 1)
+            val defr = DefinitionRecord(rheader, defMsg)
+            val datr =
+              vs.map(_._2).map(fs => DataRecord(rheader, defMsg, None, fs, Vector.empty))
+            defr +: datr
           }
           .toVector
+
       FitFile(
         FileHeader(0, 0, ByteSize.zero, 0),
-        firstDef +: firstData +: records,
+        first ++ records,
         0
       )
 
