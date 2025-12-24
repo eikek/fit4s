@@ -2,6 +2,7 @@ package fit4s.core
 package data
 
 import java.text.DecimalFormat
+import java.time.temporal.Temporal
 
 import fit4s.profile.MeasurementUnit
 
@@ -14,6 +15,8 @@ object Duration:
   def minutes(n: Double): Duration = secs(n * 60)
   def secs(s: Double): Duration = s
   def from(jd: java.time.Duration): Duration = jd.toSeconds().toDouble
+  def between(start: Temporal, stop: Temporal): Duration =
+    from(java.time.Duration.between(start, stop))
 
   extension (self: Duration)
     def toSeconds: Double = self
@@ -24,6 +27,11 @@ object Duration:
     infix def -(t: Duration): Duration = self - t
     infix def *(f: Double): Duration = self * f
     infix def /(d: Double): Duration = self / d
+
+    private def ord: Ordered[Duration] =
+      Ordered.orderingToOrdered(self)(using Ordering[Duration])
+    export ord.*
+
     def asString: String =
       def split(n: Double, f: Int) =
         val k = (n / f).toInt
