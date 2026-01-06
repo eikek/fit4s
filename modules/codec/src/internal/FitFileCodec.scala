@@ -33,7 +33,7 @@ private[codec] object FitFileCodec:
         else
           decoder(ctx).decode(bits) match
             case Attempt.Successful(DecodeResult((r, ctxN), remain)) =>
-              decode0(remain, ctxN, r +: result)
+              decode0(remain, ctxN, result :+ r)
             case f @ Attempt.Failure(_) => f
     }
 

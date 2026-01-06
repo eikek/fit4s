@@ -55,9 +55,8 @@ private[codec] object RecordCodec:
     )(HeaderType.fromHeader)
 
   val dataRecordEncoder: Encoder[DataRecord] =
-    (dataRecordHeader :: DataFieldCodec.fieldsEncoder.encodeOnly).contramap[DataRecord](
-      r => (r.header, r.fields)
-    )
+    (dataRecordHeader :: DataFieldCodec.fieldsEncoder.encodeOnly :: DevFieldCodec.fieldsEncoder.encodeOnly)
+      .contramap[DataRecord](r => (r.header, r.fields, r.devFields))
 
   def dataRecordDecoder(ctx: DecodingContext): Decoder[DataRecord] =
     dataRecordHeader.flatPrepend(h => dataRecordParts(h, ctx)).as[DataRecord]
