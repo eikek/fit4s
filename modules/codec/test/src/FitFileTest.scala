@@ -123,6 +123,27 @@ class FitFileTest extends FunSuite:
       s"Not all files succeeded decoding. Faile: $failed out of $counter"
     )
 
+  test("decode encoded file"):
+    val codc = FitFileCodec.fitFilesDecoder(checkCrc = true).complete
+
+    TestData.allFiles.foreach { file =>
+      val decoded = codc.decode(file.contents.bits).require.value
+      if decoded.nonEmpty then
+        val encoded = decoded.head.encoded().require
+        val decoded2 = codc.decode(encoded.bits)
+        if (decoded2.isFailure) {
+          fail(s"Decoding encoded file '${file.name}' failed: $decoded2")
+        } else {
+          val fm2 = decoded2.require.value.head
+          val fm1 = decoded.head
+          assertEquals(
+            fm2.records.size,
+            fm1.records.size,
+            s"decoded not equal for: ${file.name}"
+          )
+        }
+    }
+
   test("diagnose file".ignore):
     val file = TestData.Activities.fr70Intervals
     DiagnoseDecode.decode(file.contents).require

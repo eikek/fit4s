@@ -3,10 +3,7 @@ package fit4s.codec
 import fit4s.codec.internal.Codecs.{fold, padTo}
 import fit4s.codec.internal.{Codecs, FitBaseTypeCodec}
 
-import scodec.Attempt
 import scodec.Codec
-import scodec.Encoder
-import scodec.Err
 import scodec.bits.BitVector
 import scodec.bits.ByteOrdering
 import scodec.bits.{ByteVector, hex}
@@ -27,7 +24,7 @@ sealed trait FitBaseType extends Product:
   def invalidValue(bo: ByteOrdering): ByteVector
 
   /** Codec for a value using this base type. */
-  def codec(bo: ByteOrdering, fieldSize: ByteSize): Codec[Vector[FitBaseValue]] =
+  final def codec(bo: ByteOrdering, fieldSize: ByteSize): Codec[Vector[FitBaseValue]] =
     FitBaseTypeCodec.codec(this, bo, fieldSize)
 
   /** The size of a single value of this type. This is either 1, 2, 4 or 8 bytes. */
@@ -87,26 +84,13 @@ object FitBaseType:
   case object Uint16 extends IntBased(4, 0x84.toByte, hex"ffff", false)
   case object Sint32 extends LongBased(5, 0x85.toByte, hex"7fffffff", true)
   case object Uint32 extends LongBased(6, 0x86.toByte, hex"ffffffff", false)
-  case object string extends AbstractBase(7, 0x07, hex"00") {
-    val codec: Codec[String] = Codecs.stringUtf8.withContext(name)
-    val encoder: Encoder[FitBaseValue] = Encoder {
-      case n: String => codec.encode(n)
-      case v         => Attempt.failure(Err(s"Invalid value for string encoding: $v"))
-    }
-  }
+  case object string extends AbstractBase(7, 0x07, hex"00")
   case object Float32 extends FloatBased(8, 0x88.toByte, hex"ffffffff")
   case object Float64 extends FloatBased(9, 0x89.toByte, hex"ffffffffffffffff")
   case object Uint8Z extends IntBased(10, 0x0a.toByte, hex"00", false)
   case object Uint16Z extends IntBased(11, 0x8b.toByte, hex"0000", false)
   case object Uint32Z extends LongBased(12, 0x8c.toByte, hex"00000000", false)
-  case object FByte extends AbstractBase(13, 0x0d, hex"ff") {
-    val codec: Codec[Byte] = scodec.codecs.byte.withContext(name)
-    val encoder: Encoder[FitBaseValue] =
-      Encoder {
-        case n: Byte => codec.encode(n)
-        case v       => Attempt.failure(Err(s"Invalid value for byte encoding: $v"))
-      }
-  }
+  case object FByte extends AbstractBase(13, 0x0d.toByte, hex"ff")
   case object Sint64 extends LongBased(14, 0x8e.toByte, hex"7fffffffffffffff", true)
   case object Uint64 extends LongBased(15, 0x8f.toByte, hex"ffffffffffffffff", false)
   case object Uint64Z extends LongBased(16, 0x90.toByte, hex"0000000000000000", false)
