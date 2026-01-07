@@ -30,4 +30,12 @@ object DevFieldId:
       val fieldDefNum = key & 0x00ff
       (devIndex.toShort, fieldDefNum.toShort)
 
+    def devIndex: Short =
+      val (devIdx, _) = extracted
+      devIdx
+
+    def fieldDefNum: Short =
+      val (_, fd) = extracted
+      fd
+
     def toInt: Int = key

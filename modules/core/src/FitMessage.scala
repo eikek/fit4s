@@ -58,6 +58,13 @@ final case class FitMessage(
   def allDevValues: Vector[FieldValue] =
     allValues.filter(fv => DevFieldId.isDevFieldId(fv.fieldNumber))
 
+  def devField(devIdx: Short, name: String): Option[FieldValue] =
+    allValues.find(fv =>
+      DevFieldId
+        .fromInt(fv.fieldNumber)
+        .exists(devId => devId.devIndex == devIdx && fv.fieldName.equalsIgnoreCase(name))
+    )
+
   def as[R](using r: MessageReader[R]): Either[String, Option[R]] =
     r.read(this)
 
