@@ -1,7 +1,10 @@
 package fit4s.core
 
+import java.util.UUID
+
 import fit4s.codec.TestData
 import fit4s.core.data.*
+import fit4s.profile.DeveloperDataIdMsg
 import fit4s.profile.FileIdMsg
 import fit4s.profile.GarminProductType
 import fit4s.profile.RecordMsg
@@ -9,6 +12,15 @@ import fit4s.profile.RecordMsg
 import munit.FunSuite
 
 class FitMessageTest extends FunSuite with TestSyntax:
+  test("dev application id"):
+    val data = TestData.Activities.edge1536
+    val fit = Fit.read(data.contents).require.head
+    val devIdMsg = fit.getMessages(DeveloperDataIdMsg).head
+    val appId = devIdMsg.field(DeveloperDataIdMsg.applicationId).as[UUID]
+    assertEquals(
+      appId,
+      Some(Right(UUID.fromString("c5d949c3-9acb-4e00-bb2d-c3b871e9e733")))
+    )
 
   test("component expansion creating new fields"):
     // this file has speed & altitude fields that have components enhanced_altitude and enhanced_speed

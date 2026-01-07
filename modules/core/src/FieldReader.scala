@@ -1,6 +1,8 @@
 package fit4s.core
 
+import java.nio.ByteBuffer
 import java.time.Instant
+import java.util.UUID
 
 import fit4s.codec.FitBaseValue
 import fit4s.core.data.DateTime
@@ -77,6 +79,16 @@ object FieldReader:
 
   given byteVector: FieldReader[ByteVector] =
     bytes.map(ByteVector.apply)
+
+  given uuid: FieldReader[UUID] =
+    bytes.emap(vb =>
+      if vb.size != 16 then Left(s"Invalid bytevector for converting to UUID: $vb")
+      else
+        val buf = ByteBuffer.wrap(vb.toArray)
+        val high = buf.getLong()
+        val low = buf.getLong()
+        Right(new UUID(high, low))
+    )
 
   given ints: FieldReader[Vector[Int]] =
     instance(fv => foldConv("int", fv.data, FitBaseValue.toInt))

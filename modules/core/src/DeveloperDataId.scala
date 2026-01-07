@@ -1,5 +1,7 @@
 package fit4s.core
 
+import java.util.UUID
+
 import fit4s.core.MessageReader as MR
 import fit4s.profile.DeveloperDataIdMsg
 import fit4s.profile.ProfileEnum
@@ -12,7 +14,9 @@ final case class DeveloperDataId(
     appVersion: Long,
     developerId: Option[ByteVector],
     manufacturer: Option[ProfileEnum]
-)
+):
+  def applicationUUID: Option[UUID] =
+    Option.when(applicationId.size == 16)(applicationId.toUUID)
 
 object DeveloperDataId:
 
