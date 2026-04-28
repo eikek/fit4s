@@ -160,14 +160,24 @@ object FitHtml:
       `type` := "text/javascript",
       raw(s"""
         // street
-        const streetsLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-            maxZoom: 24
-        });
+        const attrib = (
+          'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+          '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.cyclosm.org">Cyclosm</a>'
+        )
+        const streetsLayer = L.tileLayer(
+          'https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: attrib,
+            maxZoom: 24,
+            referrerPolicy: 'strict-origin-when-cross-origin'
+          }
+        );
 
-        const bikeLayer = L.tileLayer('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
-            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.cyclosm.org">Cyclosm</a>'
-        });
+        const bikeLayer = L.tileLayer(
+          'https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', {
+            attribution: attrib,
+            referrerPolicy: 'strict-origin-when-cross-origin'
+          }
+        );
 
         const map = L.map('map', {
             center: [0, 0],
@@ -216,28 +226,28 @@ object FitHtml:
                 iconSize: [10, 10],
             });
             const end = L.marker(pl[pl.length - 1], { title: "Finish " + label, icon: finishIcon });
+
+            const mapEl = document.getElementById("map-container");
+
+            const btnFs = document.getElementById("map-fullscreen-btn");
+            const btnCenter = document.getElementById("map-center-btn");
+            if (btnFs && mapEl) {
+              btnFs.addEventListener("click", function(ev) {
+                console.log("clicked fullscreen");
+                mapEl.requestFullscreen();
+              });
+            }
+            if (btnCenter && mapEl) {
+              btnCenter.addEventListener("click", function(ev) {
+                console.log("clicked center");
+                map.fitBounds(polyline.getBounds());
+              });
+            }
             end.addTo(map);
         };
 
       $lines
 
-      const mapEl = document.getElementById("map-container");
-      const btnFs = document.getElementById("map-fullscreen-btn");
-      const btnCenter = document.getElementById("map-center-btn");
-      if (btnFs && mapEl) {
-        btnFs.addEventListener("click", function(ev) {
-          console.log("clicked fullscreen");
-          mapEl.requestFullscreen();
-        });
-      }
-      if (btnCenter && mapEl) {
-        const pl = L.PolylineUtil.decode(track, precision);
-        const polyline = L.polyline(pl);
-        btnCenter.addEventListener("click", function(ev) {
-          console.log("clicked center");
-          map.fitBounds(polyline.getBounds());
-        });
-      }
     </script> """)
     )
   def makeHead(file: Path) =
