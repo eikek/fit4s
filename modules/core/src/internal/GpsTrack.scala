@@ -5,7 +5,6 @@ import java.time.Instant
 import fit4s.core.data.*
 import fit4s.core.{MessageReader as MR, *}
 import fit4s.profile.CommonMsg
-import fit4s.profile.CoursePointMsg
 import fit4s.profile.FileType
 import fit4s.profile.RecordMsg
 import fit4s.profile.SegmentPointMsg
@@ -15,14 +14,13 @@ object GpsTrack:
     fit.fileId.map(_.fileType.ordinal) match
       case Some(FileType.activity) => fromRecordMsg(fit, within)
       case Some(FileType.segment)  => fromSegmentPointMsg(fit, within)
-      case Some(FileType.course)   => fromCoursePointMsg(fit, within)
+      case Some(FileType.course)   => fromRecordMsg(fit, within)
       case _                       => fromAll(fit, within)
 
   def fromAll(fit: Fit, within: Timespan): Either[String, Vector[LatLng]] =
     for
       frec <- fromRecordMsg(fit, within)
-      fcp <- if frec.isEmpty then fromCoursePointMsg(fit, within) else Right(frec)
-      fsp <- if fcp.isEmpty then fromSegmentPointMsg(fit, within) else Right(fcp)
+      fsp <- if frec.isEmpty then fromSegmentPointMsg(fit, within) else Right(frec)
     yield fsp
 
   def fromRecordMsg(fit: Fit, within: Timespan): Either[String, Vector[LatLng]] =
@@ -31,13 +29,6 @@ object GpsTrack:
         .reader(RecordMsg.positionLat, RecordMsg.positionLong)
         .tuple
     collect(reader, within, _.toLatLng)(fit.getMessages(RecordMsg))
-
-  def fromCoursePointMsg(fit: Fit, timespan: Timespan): Either[String, Vector[LatLng]] =
-    val reader = MR.field(CoursePointMsg.timestamp).as[Instant].option ::
-      Position
-        .reader(CoursePointMsg.positionLat, CoursePointMsg.positionLong)
-        .tuple
-    collect(reader, timespan, _.toLatLng)(fit.getMessages(CoursePointMsg))
 
   def fromSegmentPointMsg(fit: Fit, timespan: Timespan): Either[String, Vector[LatLng]] =
     val reader = MR.field(CommonMsg.timestamp).as[Instant].option ::
