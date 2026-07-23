@@ -1,5 +1,7 @@
 package fit4s.codec
 
+import fit4s.codec.internal.FitBaseTypeCodec
+
 import scodec.Err
 import scodec.bits.BitVector
 
@@ -14,9 +16,8 @@ sealed trait DevField:
 final case class TypedDevField(
     meta: DefinitionMessage.Meta,
     fieldDef: DevFieldDef,
-    fieldDescription: TypedDevField.FieldDescription,
+    fieldDescription: FieldDescription,
     data: Vector[FitBaseValue],
-    rawData: BitVector,
     invalid: Boolean
 ) extends DevField:
   val isTyped: Boolean = true
@@ -25,11 +26,14 @@ final case class TypedDevField(
   def isArray: Boolean =
     fieldDef.sizeBytes > baseType.size.toBytes
 
+  def rawValue: BitVector =
+    FitBaseTypeCodec.encoder(meta.byteOrder, baseType).encode(data).require
+
   def baseType = fieldDescription.baseType
   def fieldName: Option[String] = fieldDescription.fieldName
 
   /** Combines devIndex and fieldDefNumber in a single value. */
-  val key: DevFieldId = fieldDescription.key
+  val key: DevFieldId = fieldDescription.devFieldId
   def isInvalid: Boolean = invalid
   def isValid: Boolean = !invalid
 
@@ -38,20 +42,6 @@ final case class TypedDevField(
       if adjust.isEmpty then fieldDescription.valueAdjust(data.size)
       else adjust
     ValueAdjust.applyAll(baseType, va, data)
-
-object TypedDevField:
-  final case class FieldDescription(
-      devIndex: Short,
-      fieldDefNum: Short,
-      fieldName: Option[String],
-      baseType: FitBaseType,
-      scale: List[Double],
-      offset: Double,
-      record: DataRecord
-  ):
-    val key: DevFieldId = DevFieldId(this)
-    def valueAdjust(targetSize: Int) =
-      ValueAdjust.from(scale, List(offset), targetSize)
 
 final case class UntypedDevField(
     meta: DefinitionMessage.Meta,

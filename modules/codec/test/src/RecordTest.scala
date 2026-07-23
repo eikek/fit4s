@@ -1,6 +1,5 @@
 package fit4s.codec
 
-import fit4s.codec.TypedDevField.FieldDescription
 import fit4s.codec.internal.{DecodingContext, RecordCodec}
 
 import munit.FunSuite

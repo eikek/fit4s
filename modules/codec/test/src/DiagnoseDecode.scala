@@ -2,7 +2,6 @@ package fit4s.codec
 
 import scala.collection.mutable.HashMap
 
-import fit4s.codec.TypedDevField.FieldDescription
 import fit4s.codec.internal.Codecs
 import fit4s.codec.internal.DecodingContext
 import fit4s.codec.internal.FileHeaderCodec

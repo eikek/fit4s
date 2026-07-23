@@ -1,5 +1,6 @@
 package fit4s.codec
 
+/** Identifies a developer field by compining the developer index and the field number. */
 opaque type DevFieldId = Int
 
 object DevFieldId:
@@ -9,11 +10,8 @@ object DevFieldId:
     val n = marker | (devDataIdx << 8)
     n | fieldDefNum
 
-  def apply(f: TypedDevField.FieldDescription): DevFieldId =
-    apply(f.devIndex, f.fieldDefNum)
-
-  def apply(f: TypedDevField): DevFieldId =
-    apply(f.fieldDescription)
+  def apply(fdd: FieldDescription): DevFieldId =
+    apply(fdd.devDataIdx, fdd.fieldDefNum)
 
   def apply(fd: DevFieldDef): DevFieldId =
     apply(fd.devIndex, fd.fieldDefNumber)

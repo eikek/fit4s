@@ -28,6 +28,11 @@ final case class DefinitionRecord(
 
   override def toString(): String = s"DefinitionRecord($header, $message)"
 
+object DefinitionRecord:
+  def apply(localMessageType: Int, defm: DefinitionMessage): DefinitionRecord =
+    val rh = NormalRecordHeader(defm.devFields.nonEmpty, localMessageType)
+    DefinitionRecord(rh, defm)
+
 final case class DataRecord(
     header: RecordHeader,
     definition: DefinitionMessage,
