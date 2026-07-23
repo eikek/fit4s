@@ -2,14 +2,14 @@ package fit4s.core
 
 import fit4s.codec.*
 import fit4s.core.data.DateTime
-import fit4s.core.internal.{ComponentField, FieldDescription}
+import fit4s.core.internal.ComponentField
 import fit4s.profile.*
 
 import scodec.Attempt
 import scodec.bits.BitVector
 
 /** Combines the data fields from a fit data record with a message schema from the fit
-  * profile.
+  * profile to allow more convenient decoding.
   */
 final case class FitMessage(
     mesgNum: Int,
@@ -219,30 +219,20 @@ object FitMessage:
     */
   private def addDeveloperFields(m: FitMessage, dr: DataRecord) =
     dr.typedDevFields.foldLeft(m) { (msg, devField) =>
-      FitMessage(
-        devField.fieldDescription.record,
-        FieldDescriptionMsg,
-        false,
-        false,
-        false
-      ).as[FieldDescription] match
-        case Right(Some(fd)) =>
-          val fieldDef =
-            FieldDef(
-              devField.key.toInt,
-              devField.fieldDef.sizeBytes,
-              FieldBaseType.from(devField.baseType)
-            )
-          val data = TypedDataField(
-            devField.meta,
-            fieldDef,
-            devField.baseType,
-            devField.data,
-            devField.invalid
-          )
-          msg.addData(data).addSchema(fd.toMsgField)
-        case _ =>
-          msg
+      val fieldDef = FieldDef(
+        devField.key.toInt,
+        devField.fieldDef.sizeBytes,
+        FieldBaseType.from(devField.baseType)
+      )
+      val data = TypedDataField(
+        devField.meta,
+        fieldDef,
+        devField.baseType,
+        devField.data,
+        devField.invalid
+      )
+
+      msg.addData(data).addSchema(devField.fieldDescription.toMsgField)
     }
 
   extension (self: Option[FitMessage])
@@ -257,3 +247,18 @@ object FitMessage:
       self.foldLeft(init) { (vec, el) =>
         vec.flatMap(v => el.as[A].map(optA => v.appendedAll(optA)))
       }
+
+  extension (self: FieldDescription)
+    def toMsgField: MsgField = MsgField(
+      fieldDefNum = self.devFieldId.toInt,
+      fieldName =
+        self.fieldName.getOrElse(s"dev field ${self.devDataIdx}/${self.fieldDefNum}"),
+      profileType = None,
+      baseTypeName = self.baseType.name,
+      components = Nil,
+      scale = self.scale,
+      offset = self.offset,
+      units = self.units.map(MeasurementUnit.fromString),
+      bits = self.bits,
+      subFields = Nil
+    )

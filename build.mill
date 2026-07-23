@@ -1,4 +1,4 @@
-//| mill-version: 1.0.3
+//| mill-version: 1.0.6
 //| mvnDeps:
 //| - io.github.hoangmaihuy::mill-universal-packager::0.2.0
 //| - com.lihaoyi::mill-contrib-buildinfo:$MILL_VERSION

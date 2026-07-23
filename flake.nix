@@ -16,6 +16,7 @@
       pkgs = nixpkgs.legacyPackages.${system};
       ciPkgs = with pkgs; [
         devshell-tools.packages.${system}.mill1_17
+        pkgs.jdk17
       ];
       devshellPkgs =
         ciPkgs
@@ -41,9 +42,11 @@
       devShells = {
         ci = pkgs.mkShellNoCC {
           buildInputs = ciPkgs;
+          JAVA_HOME = "${pkgs.jdk17}";
         };
         default = pkgs.mkShellNoCC {
           buildInputs = ciPkgs ++ devshellPkgs;
+          JAVA_HOME = "${pkgs.jdk17}";
         };
       };
     })

@@ -7,7 +7,7 @@ trait LMTLookup:
 
 trait DevFieldLookup:
   /** Lookup a field description given a developer field definition. */
-  def getDevFieldDescription(fd: DevFieldDef): Option[TypedDevField.FieldDescription]
+  def getDevFieldDescription(fd: DevFieldDef): Option[FieldDescription]
 
 trait TimestampLookup:
   /** Lookup the most recent decoded timestamp value. */

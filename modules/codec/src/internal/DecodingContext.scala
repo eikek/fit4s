@@ -1,8 +1,6 @@
 package fit4s.codec
 package internal
 
-import fit4s.codec.TypedDevField.FieldDescription
-
 trait DecodingContext extends LMTLookup with DevFieldLookup with TimestampLookup
 
 object DecodingContext:
@@ -30,10 +28,10 @@ object DecodingContext:
 
     def updateData(r: DataRecord): Ctx =
       val nextTs = r.timestamp.orElse(lastTimestamp)
-      DeveloperProfile.fieldDescription(r) match
+      FieldDescription.read(r) match
         case None     => copy(lastTimestamp = nextTs)
         case Some(fd) =>
-          copy(fieldDescr = fieldDescr.updated(fd.key, fd), lastTimestamp = nextTs)
+          copy(fieldDescr = fieldDescr.updated(fd.devFieldId, fd), lastTimestamp = nextTs)
 
     def update(r: Record): Ctx =
       r.fold(updateDefinition, updateData)

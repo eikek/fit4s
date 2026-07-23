@@ -30,7 +30,9 @@ sealed trait FitBaseType extends Product:
   /** The size of a single value of this type. This is either 1, 2, 4 or 8 bytes. */
   def size: ByteSize
 
-  final def name: String = productPrefix.toLowerCase
+  final def name: String =
+    if this == FitBaseType.FByte then "byte"
+    else productPrefix.toLowerCase
 
   def toFieldBaseType: FieldBaseType =
     FieldBaseType(size.toBytes > 1, number)

@@ -1,6 +1,7 @@
 package fit4s.core
 
 import java.time.Instant
+import java.util.UUID
 
 import fit4s.codec.FitBaseType
 import fit4s.codec.FitBaseValue
@@ -8,6 +9,8 @@ import fit4s.codec.ValueAdjust
 import fit4s.core.data.DateTime
 import fit4s.profile.MsgField
 import fit4s.profile.ProfileEnum
+
+import scodec.bits.ByteVector
 
 trait FieldValueEncoder[A]:
   def fitValue(field: MsgField, a: A): Vector[FitBaseValue]
@@ -42,11 +45,26 @@ object FieldValueEncoder:
   given forInt: FieldValueEncoder[Int] =
     single(forFitBaseValue)
 
+  given forShort: FieldValueEncoder[Short] =
+    forInt.contramap(_.toInt)
+
   given forLong: FieldValueEncoder[Long] =
     single(forFitBaseValue)
 
   given forDouble: FieldValueEncoder[Double] =
     single(forFitBaseValue)
+
+  given forList[T](using e: FieldValueEncoder[T]): FieldValueEncoder[List[T]] =
+    instance((field, list) => list.flatMap(e.fitValue(field, _)).toVector)
+
+  given forVector[T](using e: FieldValueEncoder[T]): FieldValueEncoder[Vector[T]] =
+    instance((field, list) => list.flatMap(e.fitValue(field, _)))
+
+  given forByteVector: FieldValueEncoder[ByteVector] =
+    instance((field, bv) => bv.toIndexedSeq.toVector)
+
+  given forUUID: FieldValueEncoder[UUID] =
+    forByteVector.contramap(ByteVector.fromUUID)
 
   private def forFitBaseValue(field: MsgField, fv: FitBaseValue): FitBaseValue =
     FitBaseType.byName(field.baseTypeName) match

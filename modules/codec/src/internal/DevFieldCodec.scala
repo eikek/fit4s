@@ -3,6 +3,7 @@ package internal
 
 import scodec.*
 import scodec.bits.BitVector
+import scodec.bits.ByteVector
 
 private[codec] object DevFieldCodec:
 
@@ -27,7 +28,7 @@ private[codec] object DevFieldCodec:
               .complete
               .decodeValue(fieldData) match
               case Attempt.Successful(bv) =>
-                TypedDevField(definition.meta, fd, fdd, bv, fieldData, invalid)
+                TypedDevField(definition.meta, fd, fdd, bv, invalid)
 
               case Attempt.Failure(err) =>
                 val reason = UntypedDevField.Reason.Decode(bt, err)
@@ -53,9 +54,24 @@ private[codec] object DevFieldCodec:
 
   def fieldEncoder: Encoder[DevField] =
     Encoder {
-      case UntypedDevField(_, _, _, data)          => Attempt.successful(data)
-      case TypedDevField(meta, _, fdd, _, bits, _) => Attempt.successful(bits)
+      case UntypedDevField(_, _, _, data)              => Attempt.successful(data)
+      case TypedDevField(meta, fieldDef, fdd, data, _) =>
+        FitBaseTypeCodec.encoder(meta.byteOrder, fdd.baseType).encode(data).map { result =>
+          if result.size < fieldDef.size.toBits then
+            appendInvalid(
+              result,
+              fieldDef.size.toBits,
+              fdd.baseType.invalidValue(meta.byteOrder)
+            )
+          else result
+        }
     }
+
+  @annotation.tailrec
+  private def appendInvalid(bv: BitVector, targetSize: Long, iv: ByteVector): BitVector =
+    if bv.length > targetSize then bv.take(targetSize)
+    else if bv.length == targetSize then bv
+    else appendInvalid(bv ++ iv.bits, targetSize, iv)
 
   def fieldsEncoder: Encoder[Vector[DevField]] =
     Encoder(fieldEncoder.encodeAll)
