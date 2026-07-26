@@ -6,7 +6,7 @@
   unzip,
   bash,
 }: let
-  version = "0.13.0";
+  version = "0.14.0";
 in
   stdenv.mkDerivation {
     inherit version;
@@ -14,7 +14,7 @@ in
 
     src = fetchurl {
       url = "https://github.com/eikek/fit4s/releases/download/v${version}/fit4s-${version}.zip";
-      sha256 = "sha256-KWxUrQEog8sVbU0egBa4EFrxhkLlpHvX2xFunkTjgKQ=";
+      sha256 = "sha256-J2zHDhI9Q9GcFz5KDEJSKQvtUMNP8ML/Yb6LBdwZ8Iw=";
     };
 
     buildPhase = "true";
